@@ -1,0 +1,7 @@
+{
+  "key_exists": true,
+  "key_prefix": "bfl_hYL6u4",
+  "key_len": 36,
+  "base_url": "https://api.bfl.ai",
+  "model": "flux-kontext-pro"
+}

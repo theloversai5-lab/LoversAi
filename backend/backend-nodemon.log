@@ -1,0 +1,338 @@
+
+> loversai-backend@1.0.0 dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.11[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.2.3] injecting env (1) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+🔁 No MONGO_URI in .env; loading .env.production fallback
+[dotenv@17.2.3] injecting env (19) from .env.production -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+🤖 Loading AI Tools Routes...
+✅ Retexturing routes loaded at /api/ai
+   GET     /api/ai/health
+   GET     /api/ai/themes
+   POST    /api/ai/check-credits
+   POST    /api/ai/generate
+   POST    /api/ai/feedback
+   POST    /api/ai/download-image
+✅ Angle change routes loaded at /api/ai
+   POST    /api/ai/change-angle
+   GET     /api/ai/available-angles
+✅ Image to video routes loaded at /api/ai
+   POST    /api/ai/generate-video
+   GET     /api/ai/video-styles
+✅ Couple moodboard routes loaded at /api/ai
+   GET     /api/ai/couple-moodboard/health
+   POST    /api/ai/couple-moodboard/generate
+   POST    /api/ai/couple-moodboard/download-image
+🤖 AI Tools loading complete!
+
+✅ NewUser routes loaded at /api/newusers
+
+✨ ===========================================
+✨  WEDDING AI SERVER STARTED SUCCESSFULLY
+✨ ===========================================
+✅ Server URL: http://localhost:5000
+⏰ Started at: 4/30/2026, 1:50:50 AM
+📊 Environment: production
+🤖 AI Status: Ready ✅
+💳 Payment System: Enabled ✅
+🗄️  Database: Connected ✅
+      
+
+🤖 AI Endpoints:
+   GET    /api/ai/health             - Check AI service status
+   GET    /api/ai/themes             - Get wedding themes
+   GET    /api/ai/available-angles   - Get available angle options
+   POST   /api/ai/generate           - Generate venue transformation
+   POST   /api/ai/change-angle       - Change image perspective
+   POST   /api/ai/feedback           - Submit feedback
+
+👤 User & Auth Endpoints:
+   POST   /api/auth/firebase-login   - Firebase authentication
+   GET    /api/users/check-profile   - Check user profile
+   POST   /api/users/save-form       - Save user form
+   GET    /api/users/profile         - Get user profile
+   GET    /api/profile/check-profile - Check profile status
+   POST   /api/profile/save-form     - Save profile form
+
+💳 Payment Endpoints:
+   POST   /api/payment/create-checkout - Create payment checkout
+   GET    /api/payment/payment-status  - Check payment status
+   GET    /api/payment/subscription    - Get subscription info
+   GET    /api/payment/credits         - Get user credits
+   GET    /api/payment/plans           - Get available plans
+   POST   /api/lemon/webhook          - Lemon webhook endpoint
+
+🔧 Utility Endpoints:
+   GET    /                           - Server status
+   GET    /api/test                   - API test
+
+⚠️  Important Notes:
+
+✅ Server is ready! Access at:
+   🌐 https://theloversai.co.in
+   📡 API proxied via nginx /api → backend:5000
+
+
+✅ MongoDB Connected
+📥 GET /api/test - 2026-04-29T20:21:12.579Z
+📥 POST /api/auth/register - 2026-04-29T20:21:12.665Z
+✅ New user registered: codex-signup-1147682076@example.com (couple) — 30 welcome credits
+📥 GET /api/test - 2026-04-29T20:22:19.901Z
+📥 POST /api/auth/register - 2026-04-29T20:22:37.537Z
+✅ New user registered: codex-final-789304747@example.com (couple) — 30 welcome credits
+📥 POST /api/auth/register - 2026-04-29T20:24:55.914Z
+📥 POST /api/auth/register - 2026-04-29T20:24:56.591Z
+📥 POST /api/auth/register - 2026-04-29T20:24:56.808Z
+📥 POST /api/auth/login - 2026-04-29T20:25:28.293Z
+📥 POST /api/auth/login - 2026-04-29T20:25:33.385Z
+📥 POST /api/auth/login - 2026-04-29T20:25:56.257Z
+📥 POST /api/auth/register - 2026-04-29T20:26:48.250Z
+📥 POST /api/auth/register - 2026-04-29T20:27:15.838Z
+✅ New user registered: anshr05555@gmail.com (couple) — 30 welcome credits
+📥 GET /api/cart - 2026-04-29T20:27:16.744Z
+📥 POST /api/users/save-form - 2026-04-29T20:28:25.091Z
+📥 GET /api/cart - 2026-04-29T20:28:28.237Z
+📥 GET /api/cart - 2026-04-29T20:28:28.332Z
+📥 GET /api/cart - 2026-04-29T20:28:38.252Z
+📥 GET /api/cart - 2026-04-29T20:28:48.252Z
+📥 GET /api/cart - 2026-04-29T20:28:58.243Z
+📥 GET /api/cart - 2026-04-29T20:29:08.249Z
+📥 GET /api/cart - 2026-04-29T20:29:18.237Z
+📥 GET /api/cart - 2026-04-29T20:29:28.239Z
+📥 POST /api/ai/couple-moodboard/generate - 2026-04-29T20:29:37.554Z
+🎨 [Moodboard] ═══ PIPELINE START ═══
+🎨 [Moodboard] Request: {
+  style: 'Modern',
+  functionType: 'Wedding Ceremony',
+  atmosphere: 'Bohemian & Free-spirited',
+  timing: 'Sunset (Golden Hour)',
+  userId: new ObjectId('69f269a31e7a87f4c3e3cd08')
+}
+⏱️  [Moodboard] creditCheck: 2ms
+⏱️  [Moodboard] aspectRatioDetection: 3ms
+ℹ️ [Moodboard] No images — using text-to-image moodboard
+⏱️  [Moodboard] fallbackPrompt: 5ms
+⏱️  [Moodboard] promptHarden: 6ms
+🎨 [Moodboard] Firing 4 parallel Flux (flux-2-max) calls...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+📥 GET /api/cart - 2026-04-29T20:29:38.248Z
+⏱️  [Moodboard] fluxGeneration: 1678ms
+⏱️  [Moodboard] error: 1680ms
+📥 GET /api/cart - 2026-04-29T20:29:48.249Z
+📥 GET /api/cart - 2026-04-29T20:29:58.243Z
+📥 GET /api/cart - 2026-04-29T20:30:08.239Z
+📥 GET /api/cart - 2026-04-29T20:30:18.246Z
+📥 GET /api/cart - 2026-04-29T20:30:28.239Z
+📥 GET /api/cart - 2026-04-29T20:30:38.471Z
+📥 GET /api/cart - 2026-04-29T20:30:48.394Z
+📥 GET /api/cart - 2026-04-29T20:30:58.382Z
+📥 GET /api/cart - 2026-04-29T20:31:08.395Z
+📥 GET /api/cart - 2026-04-29T20:31:18.921Z
+📥 GET /api/cart - 2026-04-29T20:31:28.436Z
+📥 GET /api/cart - 2026-04-29T20:31:38.411Z
+📥 GET /api/cart - 2026-04-29T20:31:48.417Z
+📥 GET /api/cart - 2026-04-29T20:31:59.104Z
+📥 GET /api/cart - 2026-04-29T20:32:08.567Z
+📥 GET /api/cart - 2026-04-29T20:33:16.123Z
+📥 GET /api/cart - 2026-04-29T20:34:01.597Z
+📥 GET /api/cart - 2026-04-29T20:35:02.433Z
+📥 GET /api/cart - 2026-04-29T20:36:01.796Z
+📥 GET /api/cart - 2026-04-29T20:37:01.405Z
+📥 GET /api/cart - 2026-04-29T20:38:01.401Z
+📥 GET /api/cart - 2026-04-29T20:39:01.679Z
+📥 GET /api/cart - 2026-04-29T20:40:04.530Z
+📥 GET /api/cart - 2026-04-29T20:41:01.504Z
+📥 GET /api/cart - 2026-04-29T20:42:01.463Z
+📥 GET /api/cart - 2026-04-29T20:43:01.459Z
+📥 GET /api/cart - 2026-04-29T20:44:02.263Z
+📥 GET /api/cart - 2026-04-29T20:45:30.062Z
+📥 GET /api/cart - 2026-04-29T20:45:38.580Z
+📥 GET /api/cart - 2026-04-29T20:45:48.480Z
+📥 GET /api/cart - 2026-04-29T20:45:59.671Z
+📥 GET /api/cart - 2026-04-29T20:46:08.395Z
+📥 GET /api/cart - 2026-04-29T20:46:22.621Z
+📥 GET /api/test - 2026-04-29T20:47:07.019Z
+📥 GET /api/cart - 2026-04-29T20:47:20.259Z
+📥 GET /api/cart - 2026-04-29T20:48:01.551Z
+📥 POST /api/auth/login - 2026-04-29T20:48:53.156Z
+📥 GET /api/cart - 2026-04-29T20:48:53.826Z
+📥 GET /api/cart - 2026-04-29T20:48:53.947Z
+📥 GET /api/cart - 2026-04-29T20:49:00.470Z
+📥 GET /api/cart - 2026-04-29T20:49:00.558Z
+📥 GET /api/cart - 2026-04-29T20:49:01.554Z
+📥 POST /api/users/save-form - 2026-04-29T20:49:58.044Z
+📥 GET /api/cart - 2026-04-29T20:50:01.474Z
+📥 GET /api/cart - 2026-04-29T20:50:01.582Z
+📥 GET /api/cart - 2026-04-29T20:50:01.668Z
+📥 POST /api/ai/couple-moodboard/generate - 2026-04-29T20:50:08.338Z
+🎨 [Moodboard] ═══ PIPELINE START ═══
+🎨 [Moodboard] Request: {
+  style: 'Modern',
+  functionType: 'Wedding Ceremony',
+  atmosphere: 'Bohemian & Free-spirited',
+  timing: 'Sunset (Golden Hour)',
+  userId: new ObjectId('69f269a31e7a87f4c3e3cd08')
+}
+⏱️  [Moodboard] creditCheck: 2ms
+⏱️  [Moodboard] aspectRatioDetection: 3ms
+ℹ️ [Moodboard] No images — using text-to-image moodboard
+⏱️  [Moodboard] fallbackPrompt: 3ms
+⏱️  [Moodboard] promptHarden: 4ms
+🎨 [Moodboard] Firing 4 parallel Flux (flux-2-max) calls...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+⏱️  [Moodboard] fluxGeneration: 1978ms
+⏱️  [Moodboard] error: 1979ms
+📥 GET /api/cart - 2026-04-29T20:50:11.575Z
+📥 GET /api/cart - 2026-04-29T20:50:21.396Z
+📥 GET /api/cart - 2026-04-29T20:50:21.474Z
+📥 GET /api/cart - 2026-04-29T20:50:23.240Z
+📥 GET /api/cart - 2026-04-29T20:50:24.283Z
+📥 GET /api/cart - 2026-04-29T20:50:24.435Z
+📥 GET /api/cart - 2026-04-29T20:50:25.459Z
+📥 GET /api/cart - 2026-04-29T20:50:31.329Z
+📥 GET /api/cart - 2026-04-29T20:50:31.403Z
+📥 GET /api/cart - 2026-04-29T20:50:41.390Z
+📥 GET /api/cart - 2026-04-29T20:50:51.381Z
+📥 GET /api/cart - 2026-04-29T20:51:01.405Z
+📥 GET /api/cart - 2026-04-29T20:51:01.478Z
+📥 GET /api/cart - 2026-04-29T20:51:11.384Z
+📥 GET /api/cart - 2026-04-29T20:51:21.396Z
+📥 GET /api/cart - 2026-04-29T20:51:31.392Z
+📥 GET /api/cart - 2026-04-29T20:51:41.484Z
+📥 GET /api/cart - 2026-04-29T20:51:51.428Z
+📥 GET /api/cart - 2026-04-29T20:52:01.460Z
+📥 GET /api/cart - 2026-04-29T20:52:01.558Z
+📥 GET /api/cart - 2026-04-29T20:52:15.248Z
+📥 GET /api/cart - 2026-04-29T20:52:21.397Z
+📥 GET /api/cart - 2026-04-29T20:52:34.317Z
+📥 GET /api/cart - 2026-04-29T20:52:44.154Z
+📥 GET /api/cart - 2026-04-29T20:52:51.411Z
+📥 GET /api/cart - 2026-04-29T20:53:01.457Z
+📥 GET /api/cart - 2026-04-29T20:53:11.395Z
+📥 GET /api/cart - 2026-04-29T20:53:21.396Z
+📥 GET /api/cart - 2026-04-29T20:53:31.406Z
+📥 GET /api/cart - 2026-04-29T20:53:41.393Z
+📥 GET /api/cart - 2026-04-29T20:53:51.392Z
+📥 GET /api/cart - 2026-04-29T20:54:00.094Z
+📥 GET /api/cart - 2026-04-29T20:54:00.190Z
+📥 GET /api/cart - 2026-04-29T20:54:10.130Z
+📥 GET /api/cart - 2026-04-29T20:54:11.876Z
+📥 GET /api/cart - 2026-04-29T20:54:11.956Z
+📥 GET /api/cart - 2026-04-29T20:54:13.526Z
+📥 GET /api/cart - 2026-04-29T20:54:13.807Z
+📥 POST /api/users/save-form - 2026-04-29T20:54:51.110Z
+📥 GET /api/cart - 2026-04-29T20:54:51.338Z
+📥 GET /api/cart - 2026-04-29T20:54:51.594Z
+📥 GET /api/cart - 2026-04-29T20:55:01.340Z
+📥 GET /api/cart - 2026-04-29T20:55:11.347Z
+📥 POST /api/ai/couple-moodboard/generate - 2026-04-29T20:55:11.763Z
+🎨 [Moodboard] ═══ PIPELINE START ═══
+🎨 [Moodboard] Request: {
+  style: 'Modern',
+  functionType: 'Wedding Ceremony',
+  atmosphere: 'Bohemian & Free-spirited',
+  timing: 'Sunset (Golden Hour)',
+  userId: new ObjectId('69f269a31e7a87f4c3e3cd08')
+}
+⏱️  [Moodboard] creditCheck: 4ms
+⏱️  [Moodboard] aspectRatioDetection: 4ms
+ℹ️ [Moodboard] No images — using text-to-image moodboard
+⏱️  [Moodboard] fallbackPrompt: 6ms
+⏱️  [Moodboard] promptHarden: 7ms
+🎨 [Moodboard] Firing 4 parallel Flux (flux-2-max) calls...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
+⏱️  [Moodboard] fluxGeneration: 1975ms
+⏱️  [Moodboard] error: 1977ms
+📥 GET /api/cart - 2026-04-29T20:55:21.343Z
+📥 GET /api/cart - 2026-04-29T20:55:31.392Z
+📥 GET /api/cart - 2026-04-29T20:55:41.379Z
+📥 GET /api/cart - 2026-04-29T20:55:51.340Z
+📥 GET /api/cart - 2026-04-29T20:56:01.338Z
+📥 GET /api/cart - 2026-04-29T20:56:11.343Z
+📥 GET /api/cart - 2026-04-29T20:56:21.338Z
+📥 GET /api/cart - 2026-04-29T20:56:31.337Z
+📥 GET /api/cart - 2026-04-29T20:56:41.340Z
+📥 GET /api/cart - 2026-04-29T20:56:51.343Z
+📥 GET /api/cart - 2026-04-29T20:57:01.342Z
+📥 GET /api/cart - 2026-04-29T20:57:11.341Z
+📥 GET /api/cart - 2026-04-29T20:57:21.343Z
+📥 GET /api/cart - 2026-04-29T20:57:31.339Z
+📥 GET /api/cart - 2026-04-29T20:57:41.339Z
+📥 GET /api/cart - 2026-04-29T20:57:51.343Z
+📥 GET /api/cart - 2026-04-29T20:58:01.339Z
+📥 GET /api/cart - 2026-04-29T20:58:11.341Z
+📥 GET /api/cart - 2026-04-29T20:58:21.342Z
+📥 GET /api/cart - 2026-04-29T20:58:31.341Z
+📥 GET /api/cart - 2026-04-29T20:58:41.340Z
+📥 GET /api/cart - 2026-04-29T20:58:51.340Z
+📥 GET /api/cart - 2026-04-29T20:59:01.693Z
+📥 GET /api/cart - 2026-04-29T20:59:11.389Z
+📥 GET /api/cart - 2026-04-29T20:59:21.417Z
+📥 GET /api/cart - 2026-04-29T20:59:31.388Z
+📥 GET /api/cart - 2026-04-29T20:59:41.487Z
+📥 GET /api/cart - 2026-04-29T20:59:51.729Z
+📥 GET /api/cart - 2026-04-29T21:00:01.346Z
+📥 GET /api/cart - 2026-04-29T21:00:11.344Z
+📥 GET /api/cart - 2026-04-29T21:00:21.344Z
+📥 GET /api/cart - 2026-04-29T21:00:31.338Z
+📥 GET /api/cart - 2026-04-29T21:00:41.339Z
+📥 GET /api/cart - 2026-04-29T21:00:51.339Z
+📥 GET /api/cart - 2026-04-29T21:01:01.341Z
+📥 GET /api/cart - 2026-04-29T21:01:11.343Z
+📥 GET /api/cart - 2026-04-29T21:01:21.340Z
+📥 GET /api/cart - 2026-04-29T21:01:31.342Z
+📥 GET /api/cart - 2026-04-29T21:01:41.343Z
+📥 GET /api/cart - 2026-04-29T21:01:51.337Z
+📥 GET /api/cart - 2026-04-29T21:02:01.445Z
+📥 GET /api/cart - 2026-04-29T21:02:11.438Z
+📥 GET /api/cart - 2026-04-29T21:02:21.432Z
+📥 GET /api/cart - 2026-04-29T21:02:31.478Z
+📥 GET /api/cart - 2026-04-29T21:02:41.408Z
+📥 GET /api/cart - 2026-04-29T21:02:51.400Z
+📥 GET /api/cart - 2026-04-29T21:03:01.527Z
+📥 GET /api/cart - 2026-04-29T21:04:01.536Z
+📥 GET /api/cart - 2026-04-29T21:05:01.431Z
+📥 GET /api/cart - 2026-04-29T21:06:01.644Z
+📥 GET /api/cart - 2026-04-29T21:07:01.564Z
+📥 GET /api/cart - 2026-04-29T21:08:03.043Z
+📥 GET /api/cart - 2026-04-29T21:09:01.615Z
+📥 GET /api/cart - 2026-04-29T21:10:01.459Z
+📥 GET /api/cart - 2026-04-29T21:11:01.434Z
+📥 GET /api/cart - 2026-04-29T21:12:01.518Z
+📥 GET /api/cart - 2026-04-29T21:13:01.460Z
+📥 GET /api/cart - 2026-04-29T21:14:01.753Z
+📥 GET /api/cart - 2026-04-29T21:15:01.670Z
+📥 GET /api/cart - 2026-04-29T21:16:01.448Z
+📥 GET /api/cart - 2026-04-29T21:17:01.483Z
+📥 GET /api/cart - 2026-04-29T21:18:01.487Z
+📥 GET /api/cart - 2026-04-29T21:19:01.421Z
+📥 GET /api/cart - 2026-04-29T21:20:01.730Z
+📥 GET /api/cart - 2026-04-29T21:21:01.395Z
+📥 GET /api/cart - 2026-04-29T21:22:01.403Z
+📥 GET /api/cart - 2026-04-29T21:23:01.604Z
+📥 GET /api/cart - 2026-04-29T21:24:01.854Z
+📥 GET /api/cart - 2026-04-29T21:25:01.481Z
+📥 GET /api/cart - 2026-04-29T21:26:01.487Z
+📥 GET /api/cart - 2026-04-29T21:27:01.444Z
+📥 GET /api/cart - 2026-04-29T21:28:01.462Z
+📥 GET /api/cart - 2026-04-29T21:29:01.449Z
+📥 GET /api/cart - 2026-04-29T21:30:01.435Z
+📥 GET /api/cart - 2026-04-29T21:31:01.445Z
+📥 GET /api/cart - 2026-04-29T21:32:01.420Z

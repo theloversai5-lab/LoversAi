@@ -1,0 +1,67 @@
+⚠️ Razorpay keys missing in .env. Payments will not work.
+Registration error: ValidationError: User validation failed: email: Please provide a valid email
+    at Document.invalidate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3377:32)
+    at validatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3152:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async Promise.all (index 0)
+    at async model.$__validate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3093:3)
+    at async model.validate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:2670:5)
+    at async model.validateBeforeSave (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\plugins\validateBeforeSave.js:34:7)
+    at async Kareem.execPre (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\kareem\index.js:65:24)
+    at async model.$__save (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\model.js:369:5)
+    at async model.save (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\model.js:609:5) {
+  errors: {
+    email: ValidatorError: Please provide a valid email
+        at SchemaString.doValidate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1425:13)
+        at validatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3144:24)
+        at model.$__validate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3090:21)
+        at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at async model.validate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:2670:5)
+        at async model.validateBeforeSave (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\plugins\validateBeforeSave.js:34:7)
+        at async Kareem.execPre (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\kareem\index.js:65:24)
+        at async model.$__save (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\model.js:369:5)
+        at async model.save (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\model.js:609:5)
+        at async C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\model.js:2722:9 {
+      properties: [Object],
+      kind: 'regexp',
+      path: 'email',
+      value: 'anshr05555@gmailcom',
+      reason: undefined,
+      Symbol(mongoose#validatorError): true
+    }
+  },
+  _message: 'User validation failed'
+}
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
