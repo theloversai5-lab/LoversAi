@@ -1,7 +1,9 @@
 ⚠️ Razorpay keys missing in .env. Payments will not work.
-Registration error: ValidationError: User validation failed: email: Please provide a valid email
-    at Document.invalidate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3377:32)
-    at validatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3152:13)
+Registration error: ValidationError: User validat⚠️ Razorpay keys missing in .env. Payments will not work.
+Port 5000 is already in use. Using 5002 instead.
+sing in .env. Payments will not work.
+Port 5000 is already in use. Using 5001 instead.
+ validatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3152:13)
     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
     at async Promise.all (index 0)
     at async model.$__validate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3093:3)
@@ -60,6 +62,307 @@ Registration error: ValidationError: User validation failed: email: Please provi
 ❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
 ❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
 ❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+Save wedding profile error: CastError: Cast to date failed for value "Invalid Date" (type Date) at path "weddingDate"
+    at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:379:11)
+    at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+    at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+    at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+    at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+    at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+    at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37)
+    at castUpdate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:144:7) {
+  stringValue: '"Invalid Date"',
+  messageFormat: undefined,
+  kind: 'date',
+  value: Invalid Date,
+  path: 'weddingDate',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(value.valueOf()))
+  
+      at castDate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\cast\date.js:13:12)
+      at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:377:12)
+      at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+      at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+      at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+      at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+      at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+      at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  },
+  valueType: 'Date'
+}
+Save wedding profile error: CastError: Cast to date failed for value "Invalid Date" (type Date) at path "weddingDate"
+    at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:379:11)
+    at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+    at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+    at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+    at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+    at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+    at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37)
+    at castUpdate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:144:7) {
+  stringValue: '"Invalid Date"',
+  messageFormat: undefined,
+  kind: 'date',
+  value: Invalid Date,
+  path: 'weddingDate',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(value.valueOf()))
+  
+      at castDate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\cast\date.js:13:12)
+      at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:377:12)
+      at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+      at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+      at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+      at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+      at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+      at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  },
+  valueType: 'Date'
+}
+Save wedding profile error: CastError: Cast to date failed for value "Invalid Date" (type Date) at path "weddingDate"
+    at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:379:11)
+    at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+    at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+    at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+    at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+    at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+    at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37)
+    at castUpdate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:144:7) {
+  stringValue: '"Invalid Date"',
+  messageFormat: undefined,
+  kind: 'date',
+  value: Invalid Date,
+  path: 'weddingDate',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(value.valueOf()))
+  
+      at castDate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\cast\date.js:13:12)
+      at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:377:12)
+      at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+      at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+      at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+      at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+      at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+      at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  },
+  valueType: 'Date'
+}
+Save wedding profile error: CastError: Cast to date failed for value "Invalid Date" (type Date) at path "weddingDate"
+    at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:379:11)
+    at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+    at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+    at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+    at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+    at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+    at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37)
+    at castUpdate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:144:7) {
+  stringValue: '"Invalid Date"',
+  messageFormat: undefined,
+  kind: 'date',
+  value: Invalid Date,
+  path: 'weddingDate',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(value.valueOf()))
+  
+      at castDate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\cast\date.js:13:12)
+      at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:377:12)
+      at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+      at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+      at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+      at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+      at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+      at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  },
+  valueType: 'Date'
+}
+Save wedding profile error: CastError: Cast to date failed for value "Invalid Date" (type Date) at path "weddingDate"
+    at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:379:11)
+    at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+    at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+    at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+    at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+    at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+    at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37)
+    at castUpdate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:144:7) {
+  stringValue: '"Invalid Date"',
+  messageFormat: undefined,
+  kind: 'date',
+  value: Invalid Date,
+  path: 'weddingDate',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(value.valueOf()))
+  
+      at castDate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\cast\date.js:13:12)
+      at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:377:12)
+      at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+      at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+      at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+      at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+      at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+      at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  },
+  valueType: 'Date'
+}
+Save wedding profile error: CastError: Cast to date failed for value "Invalid Date" (type Date) at path "weddingDate"
+    at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:379:11)
+    at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+    at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+    at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+    at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+    at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+    at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+    at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37)
+    at castUpdate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:144:7) {
+  stringValue: '"Invalid Date"',
+  messageFormat: undefined,
+  kind: 'date',
+  value: Invalid Date,
+  path: 'weddingDate',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(value.valueOf()))
+  
+      at castDate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\cast\date.js:13:12)
+      at SchemaDate.cast (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\date.js:377:12)
+      at SchemaType.applySetters (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schemaType.js:1280:12)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1460:22)
+      at SingleNested.$set (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:1154:16)
+      at SingleNested.Document (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:178:12)
+      at SingleNested.Subdocument (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\types\subdocument.js:43:12)
+      at new SingleNested (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:80:21)
+      at SchemaSubdocument.castForQuery (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\schema\subdocument.js:264:11)
+      at walkUpdatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\helpers\query\castUpdate.js:311:37) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  },
+  valueType: 'Date'
+}
+⚠️ Razorpay keys missing in .env. Payments will not work.
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
+    at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Couple Portrait" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Celebration" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
+❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
+❌ [Moodboard] Variation "Sacred Details" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
 ❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env
 ❌ [Moodboard] Variation "Grand Ceremony" failed: BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env
 ❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.

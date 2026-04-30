@@ -212,7 +212,7 @@ const CoupleProfile = () => {
                     <button onClick={() => navigate('/couples')} className="px-5 py-2.5 rounded-xl border border-[#e6c6b2]/40 text-[#e6c6b2] text-sm hover:bg-[#e6c6b2]/10 transition flex items-center gap-2">
                        👤 Dashboard
                     </button>
-                    <button onClick={() => navigate('/love-story')} className="px-5 py-2.5 rounded-xl border border-[#e6c6b2]/40 text-[#e6c6b2] text-sm hover:bg-[#e6c6b2]/10 transition flex items-center gap-2">
+                    <button onClick={() => navigate('/couple/moodboard')} className="px-5 py-2.5 rounded-xl border border-[#e6c6b2]/40 text-[#e6c6b2] text-sm hover:bg-[#e6c6b2]/10 transition flex items-center gap-2">
                        🎨 Mood Board →
                     </button>
                     <button onClick={() => navigate('/couple/cart')} className="px-5 py-2.5 rounded-xl border border-[#e6c6b2]/40 text-[#e6c6b2] text-sm hover:bg-[#e6c6b2]/10 transition flex items-center gap-2">

@@ -34,6 +34,13 @@ const Login = () => {
     location.state?.from || sessionStorage.getItem("redirectAfterLogin") || "/";
   const togglePassword = () => setShowPassword((v) => !v);
 
+  const getCoupleNextPath = (user) => {
+    const weddingProfile = user?.weddingProfile || {};
+    return user?.profileCompleted || weddingProfile.completed
+      ? "/couple/moodboard"
+      : "/couple/onboarding";
+  };
+
   const handleRedirectByRole = (user) => {
     const rawRole = user?.role || localStorage.getItem("userRole") || "";
     const role = rawRole.toLowerCase();
@@ -44,7 +51,7 @@ const Login = () => {
     } else if (role === "vendor") {
       navigate("/vendor/dashboard"); // Vendor goes to dashboard (no main page yet)
     } else if (role === "couple") {
-      navigate("/couples");
+      navigate(getCoupleNextPath(user));
     } else {
       navigate(from, { replace: true });
     }

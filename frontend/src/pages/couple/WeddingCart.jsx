@@ -184,7 +184,7 @@ const WeddingCart = () => {
               Generate AI wedding visions and add them to your cart
             </p>
             <button
-              onClick={() => navigate('/love-story')}
+              onClick={() => navigate('/couple/moodboard')}
               className="loverai-btn-primary !rounded-xl !px-8"
             >
               Create Wedding Vision
@@ -214,7 +214,7 @@ const WeddingCart = () => {
                           Delete
                         </button>
                         <button
-                          onClick={() => navigate('/love-story')}
+                          onClick={() => navigate('/couple/moodboard')}
                           className="w-24 bg-white/20 backdrop-blur-md text-white border border-white/40 text-xs px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors"
                         >
                           Edit

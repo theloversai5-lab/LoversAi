@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import { coupleMoodboardAPI } from "../../api/api";
 
 const FUNCTION_OPTIONS = [
@@ -30,7 +29,6 @@ const TIMING_OPTIONS = [
 ];
 
 export default function CoupleMoodboard() {
-  const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   // Uploads

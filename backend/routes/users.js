@@ -108,10 +108,16 @@ router.post("/save-wedding-profile", protect, authorize("couple"), async (req, r
       });
     }
 
+    const parsedWeddingDate = weddingDate ? new Date(weddingDate) : undefined;
+    const safeWeddingDate =
+      parsedWeddingDate && !Number.isNaN(parsedWeddingDate.getTime())
+        ? parsedWeddingDate
+        : undefined;
+
     const weddingProfile = {
       partnerName1: partnerName1?.trim() || req.user.fullName,
       partnerName2: partnerName2?.trim() || "",
-      weddingDate: weddingDate ? new Date(weddingDate) : undefined,
+      weddingDate: safeWeddingDate,
       budget: budget || "",
       guestCount: guestCount ? parseInt(guestCount) : undefined,
       city: city?.trim() || "",

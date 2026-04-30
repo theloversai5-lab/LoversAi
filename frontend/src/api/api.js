@@ -1,7 +1,8 @@
 // src/api/api.js — JWT-based API layer (Production-ready)
 import axios from 'axios';
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const configuredApiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const apiBaseUrl = configuredApiBaseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
 
 const api = axios.create({
   baseURL: `${apiBaseUrl}/api`,

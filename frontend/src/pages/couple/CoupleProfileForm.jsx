@@ -127,10 +127,22 @@ export default function CoupleProfileForm() {
     const numericValue = value.replace(/\D/g, "").slice(0, 2);
     const nextDate = { ...dateInput, [part]: numericValue };
     const hasCompleteDate = nextDate.dd && nextDate.mm && nextDate.yy;
+    const day = Number(nextDate.dd);
+    const month = Number(nextDate.mm);
+    const year = Number(`20${nextDate.yy}`);
+    const candidateDate = hasCompleteDate
+      ? new Date(year, month - 1, day)
+      : null;
+    const isValidDate =
+      !!candidateDate &&
+      candidateDate.getFullYear() === year &&
+      candidateDate.getMonth() === month - 1 &&
+      candidateDate.getDate() === day;
+
     setDateInput(nextDate);
     setFormData((prev) => ({
       ...prev,
-      weddingDate: hasCompleteDate
+      weddingDate: isValidDate
         ? `20${nextDate.yy}-${nextDate.mm}-${nextDate.dd}`
         : null,
       dateNotDecided: false,
@@ -163,27 +175,22 @@ export default function CoupleProfileForm() {
     setServerMessage("");
     setIsSaving(true);
     try {
-      // Map couple form fields into the unified profile API
-      await userAPI.saveProfile({
-        fullName: formData.brideName,
-        partnerName: formData.groomName,
-        brideAge: formData.brideAge,
-        groomAge: formData.groomAge,
+      await userAPI.saveWeddingProfile({
+        partnerName1: formData.brideName,
+        partnerName2: formData.groomName,
         budget: formData.budget,
-        religion: formData.religion,
+        tradition: formData.religion,
         weddingDate: formData.weddingDate,
-        dateNotDecided: formData.dateNotDecided,
         guestCount: formData.guestCount,
         city: formData.city,
+        venue: formData.dreamVenue,
         dreamVenue: formData.dreamVenue,
-        position: "Couple",
-        interest: "Wedding Planning",
       });
       localStorage.removeItem(PROFILE_STORAGE_KEY);
       localStorage.removeItem(PROFILE_STEP_KEY);
       localStorage.removeItem("isNewUser");
       setServerMessage("Your wedding profile has been saved successfully! ✨");
-      navigate("/love-story");
+      navigate("/couple/moodboard");
     } catch (error) {
       setServerError(
         error?.message || "We couldn't save your profile. Please try again.",
@@ -233,7 +240,7 @@ export default function CoupleProfileForm() {
               {serverMessage}
               <button
                 style={{ display: "block", marginTop: 16, ...primaryBtn }}
-                onClick={() => navigate("/love-story")}
+                onClick={() => navigate("/couple/moodboard")}
               >
                 Go to My Journey →
               </button>
