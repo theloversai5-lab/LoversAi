@@ -152,211 +152,211 @@
    📡 API proxied via nginx /api → backend:5002
 
 
-✅ MongoDB ✅ MongoDB Connected
-rt - 2026-04-29T20:37:01.405Z
-📥 GET /api/cart - 2026-04-29T20:38:01.401Z
-📥 GET /api/cart - 2026-04-29T20:39:01.679Z
-📥 GET /api/cart - 2026-04-29T20:40:04.530Z
-📥 GET /api/cart - 2026-04-29T20:41:01.504Z
-📥 GET /api/cart - 2026-04-29T20:42:01.463Z
-📥 GET /api/cart - 2026-04-29T20:43:01.459Z
-📥 GET /api/cart - 2026-04-29T20:44:02.263Z
-📥 GET /api/cart - 2026-04-29T20:45:30.062Z
-📥 GET /api/cart - 2026-04-29T20:45:38.580Z
-📥 GET /api/cart - 2026-04-29T20:45:48.480Z
-📥 GET /api/cart - 2026-04-29T20:45:59.671Z
-📥 GET /api/cart - 2026-04-29T20:46:08.395Z
-📥 GET /api/cart - 2026-04-29T20:46:22.621Z
-📥 GET /api/test - 2026-04-29T20:47:07.019Z
-📥 GET /api/cart - 2026-04-29T20:47:20.259Z
-📥 GET /api/cart - 2026-04-29T20:48:01.551Z
-📥 POST /api/auth/login - 2026-04-29T20:48:53.156Z
-📥 GET /api/cart - 2026-04-29T20:48:53.826Z
-📥 GET /api/cart - 2026-04-29T20:48:53.947Z
-📥 GET /api/cart - 2026-04-29T20:49:00.470Z
-📥 GET /api/cart - 2026-04-29T20:49:00.558Z
-📥 GET /api/cart - 2026-04-29T20:49:01.554Z
-📥 POST /api/users/save-form - 2026-04-29T20:49:58.044Z
-📥 GET /api/cart - 2026-04-29T20:50:01.474Z
-📥 GET /api/cart - 2026-04-29T20:50:01.582Z
-📥 GET /api/cart - 2026-04-29T20:50:01.668Z
-📥 POST /api/ai/couple-moodboard/generate - 2026-04-29T20:50:08.338Z
-🎨 [Moodboard] ═══ PIPELINE START ═══
-🎨 [Moodboard] Request: {
-  style: 'Modern',
-  functionType: 'Wedding Ceremony',
-  atmosphere: 'Bohemian & Free-spirited',
-  timing: 'Sunset (Golden Hour)',
-  userId: new ObjectId('69f269a31e7a87f4c3e3cd08')
-}
-⏱️  [Moodboard] creditCheck: 2ms
-⏱️  [Moodboard] aspectRatioDetection: 3ms
-ℹ️ [Moodboard] No images — using text-to-image moodboard
-⏱️  [Moodboard] fallbackPrompt: 3ms
-⏱️  [Moodboard] promptHarden: 4ms
-🎨 [Moodboard] Firing 4 parallel Flux (flux-2-max) calls...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-⏱️  [Moodboard] fluxGeneration: 1978ms
-⏱️  [Moodboard] error: 1979ms
-📥 GET /api/cart - 2026-04-29T20:50:11.575Z
-📥 GET /api/cart - 2026-04-29T20:50:21.396Z
-📥 GET /api/cart - 2026-04-29T20:50:21.474Z
-📥 GET /api/cart - 2026-04-29T20:50:23.240Z
-📥 GET /api/cart - 2026-04-29T20:50:24.283Z
-📥 GET /api/cart - 2026-04-29T20:50:24.435Z
-📥 GET /api/cart - 2026-04-29T20:50:25.459Z
-📥 GET /api/cart - 2026-04-29T20:50:31.329Z
-📥 GET /api/cart - 2026-04-29T20:50:31.403Z
-📥 GET /api/cart - 2026-04-29T20:50:41.390Z
-📥 GET /api/cart - 2026-04-29T20:50:51.381Z
-📥 GET /api/cart - 2026-04-29T20:51:01.405Z
-📥 GET /api/cart - 2026-04-29T20:51:01.478Z
-📥 GET /api/cart - 2026-04-29T20:51:11.384Z
-📥 GET /api/cart - 2026-04-29T20:51:21.396Z
-📥 GET /api/cart - 2026-04-29T20:51:31.392Z
-📥 GET /api/cart - 2026-04-29T20:51:41.484Z
-📥 GET /api/cart - 2026-04-29T20:51:51.428Z
-📥 GET /api/cart - 2026-04-29T20:52:01.460Z
-📥 GET /api/cart - 2026-04-29T20:52:01.558Z
-📥 GET /api/cart - 2026-04-29T20:52:15.248Z
-📥 GET /api/cart - 2026-04-29T20:52:21.397Z
-📥 GET /api/cart - 2026-04-29T20:52:34.317Z
-📥 GET /api/cart - 2026-04-29T20:52:44.154Z
-📥 GET /api/cart - 2026-04-29T20:52:51.411Z
-📥 GET /api/cart - 2026-04-29T20:53:01.457Z
-📥 GET /api/cart - 2026-04-29T20:53:11.395Z
-📥 GET /api/cart - 2026-04-29T20:53:21.396Z
-📥 GET /api/cart - 2026-04-29T20:53:31.406Z
-📥 GET /api/cart - 2026-04-29T20:53:41.393Z
-📥 GET /api/cart - 2026-04-29T20:53:51.392Z
-📥 GET /api/cart - 2026-04-29T20:54:00.094Z
-📥 GET /api/cart - 2026-04-29T20:54:00.190Z
-📥 GET /api/cart - 2026-04-29T20:54:10.130Z
-📥 GET /api/cart - 2026-04-29T20:54:11.876Z
-📥 GET /api/cart - 2026-04-29T20:54:11.956Z
-📥 GET /api/cart - 2026-04-29T20:54:13.526Z
-📥 GET /api/cart - 2026-04-29T20:54:13.807Z
-📥 POST /api/users/save-form - 2026-04-29T20:54:51.110Z
-📥 GET /api/cart - 2026-04-29T20:54:51.338Z
-📥 GET /api/cart - 2026-04-29T20:54:51.594Z
-📥 GET /api/cart - 2026-04-29T20:55:01.340Z
-📥 GET /api/cart - 2026-04-29T20:55:11.347Z
-📥 POST /api/ai/couple-moodboard/generate - 2026-04-29T20:55:11.763Z
-🎨 [Moodboard] ═══ PIPELINE START ═══
-🎨 [Moodboard] Request: {
-  style: 'Modern',
-  functionType: 'Wedding Ceremony',
-  atmosphere: 'Bohemian & Free-spirited',
-  timing: 'Sunset (Golden Hour)',
-  userId: new ObjectId('69f269a31e7a87f4c3e3cd08')
-}
-⏱️  [Moodboard] creditCheck: 4ms
-⏱️  [Moodboard] aspectRatioDetection: 4ms
-ℹ️ [Moodboard] No images — using text-to-image moodboard
-⏱️  [Moodboard] fallbackPrompt: 6ms
-⏱️  [Moodboard] promptHarden: 7ms
-🎨 [Moodboard] Firing 4 parallel Flux (flux-2-max) calls...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-🎨 [Moodboard] Calling Flux (flux-2-max) at 1024x768 [txt2img]...
-⏱️  [Moodboard] fluxGeneration: 1975ms
-⏱️  [Moodboard] error: 1977ms
-📥 GET /api/cart - 2026-04-29T20:55:21.343Z
-📥 GET /api/cart - 2026-04-29T20:55:31.392Z
-📥 GET /api/cart - 2026-04-29T20:55:41.379Z
-📥 GET /api/cart - 2026-04-29T20:55:51.340Z
-📥 GET /api/cart - 2026-04-29T20:56:01.338Z
-📥 GET /api/cart - 2026-04-29T20:56:11.343Z
-📥 GET /api/cart - 2026-04-29T20:56:21.338Z
-📥 GET /api/cart - 2026-04-29T20:56:31.337Z
-📥 GET /api/cart - 2026-04-29T20:56:41.340Z
-📥 GET /api/cart - 2026-04-29T20:56:51.343Z
-📥 GET /api/cart - 2026-04-29T20:57:01.342Z
-📥 GET /api/cart - 2026-04-29T20:57:11.341Z
-📥 GET /api/cart - 2026-04-29T20:57:21.343Z
-📥 GET /api/cart - 2026-04-29T20:57:31.339Z
-📥 GET /api/cart - 2026-04-29T20:57:41.339Z
-📥 GET /api/cart - 2026-04-29T20:57:51.343Z
-📥 GET /api/cart - 2026-04-29T20:58:01.339Z
-📥 GET /api/cart - 2026-04-29T20:58:11.341Z
-📥 GET /api/cart - 2026-04-29T20:58:21.342Z
-📥 GET /api/cart - 2026-04-29T20:58:31.341Z
-📥 GET /api/cart - 2026-04-29T20:58:41.340Z
-📥 GET /api/cart - 2026-04-29T20:58:51.340Z
-📥 GET /api/cart - 2026-04-29T20:59:01.693Z
-📥 GET /api/cart - 2026-04-29T20:59:11.389Z
-📥 GET /api/cart - 2026-04-29T20:59:21.417Z
-📥 GET /api/cart - 2026-04-29T20:59:31.388Z
-📥 GET /api/cart - 2026-04-29T20:59:41.487Z
-📥 GET /api/cart - 2026-04-29T20:59:51.729Z
-📥 GET /api/cart - 2026-04-29T21:00:01.346Z
-📥 GET /api/cart - 2026-04-29T21:00:11.344Z
-📥 GET /api/cart - 2026-04-29T21:00:21.344Z
-📥 GET /api/cart - 2026-04-29T21:00:31.338Z
-📥 GET /api/cart - 2026-04-29T21:00:41.339Z
-📥 GET /api/cart - 2026-04-29T21:00:51.339Z
-📥 GET /api/cart - 2026-04-29T21:01:01.341Z
-📥 GET /api/cart - 2026-04-29T21:01:11.343Z
-📥 GET /api/cart - 2026-04-29T21:01:21.340Z
-📥 GET /api/cart - 2026-04-29T21:01:31.342Z
-📥 GET /api/cart - 2026-04-29T21:01:41.343Z
-📥 GET /api/cart - 2026-04-29T21:01:51.337Z
-📥 GET /api/cart - 2026-04-29T21:02:01.445Z
-📥 GET /api/cart - 2026-04-29T21:02:11.438Z
-📥 GET /api/cart - 2026-04-29T21:02:21.432Z
-📥 GET /api/cart - 2026-04-29T21:02:31.478Z
-📥 GET /api/cart - 2026-04-29T21:02:41.408Z
-📥 GET /api/cart - 2026-04-29T21:02:51.400Z
-📥 GET /api/cart - 2026-04-29T21:03:01.527Z
-📥 GET /api/cart - 2026-04-29T21:04:01.536Z
-📥 GET /api/cart - 2026-04-29T21:05:01.431Z
-📥 GET /api/cart - 2026-04-29T21:06:01.644Z
-📥 GET /api/cart - 2026-04-29T21:07:01.564Z
-📥 GET /api/cart - 2026-04-29T21:08:03.043Z
-📥 GET /api/cart - 2026-04-29T21:09:01.615Z
-📥 GET /api/cart - 2026-04-29T21:10:01.459Z
-📥 GET /api/cart - 2026-04-29T21:11:01.434Z
-📥 GET /api/cart - 2026-04-29T21:12:01.518Z
-📥 GET /api/cart - 2026-04-29T21:13:01.460Z
-📥 GET /api/cart - 2026-04-29T21:14:01.753Z
-📥 GET /api/cart - 2026-04-29T21:15:01.670Z
-📥 GET /api/cart - 2026-04-29T21:16:01.448Z
-📥 GET /api/cart - 2026-04-29T21:17:01.483Z
-📥 GET /api/cart - 2026-04-29T21:18:01.487Z
-📥 GET /api/cart - 2026-04-29T21:19:01.421Z
-📥 GET /api/cart - 2026-04-29T21:20:01.730Z
-📥 GET /api/cart - 2026-04-29T21:21:01.395Z
-📥 GET /api/cart - 2026-04-29T21:22:01.403Z
-📥 GET /api/cart - 2026-04-29T21:23:01.604Z
-📥 GET /api/cart - 2026-04-29T21:24:01.854Z
-📥 GET /api/cart - 2026-04-29T21:25:01.481Z
-📥 GET /api/cart - 2026-04-29T21:26:01.487Z
-📥 GET /api/cart - 2026-04-29T21:27:01.444Z
-📥 GET /api/cart - 2026-04-29T21:28:01.462Z
-📥 GET /api/cart - 2026-04-29T21:29:01.449Z
-📥 GET /api/cart - 2026-04-29T21:30:01.435Z
-📥 GET /api/cart - 2026-04-29T21:31:01.445Z
-📥 GET /api/cart - 2026-04-29T21:32:01.420Z
-📥 GET /api/cart - 2026-04-30T06:40:47.741Z
-📥 GET /api/cart - 2026-04-30T06:40:57.212Z
-📥 GET /api/cart - 2026-04-30T06:41:07.242Z
-📥 GET /api/cart - 2026-04-30T06:41:17.211Z
-📥 GET /api/cart - 2026-04-30T06:41:18.343Z
-📥 GET /api/users/profile - 2026-04-30T06:41:18.346Z
-📥 GET /api/quotes/my - 2026-04-30T06:41:18.352Z
-📥 GET /api/payment/payment-status - 2026-04-30T06:41:18.356Z
-📥 GET /api/chat/rooms - 2026-04-30T06:41:18.363Z
-📥 GET /api/payment/payment-status - 2026-04-30T06:41:19.034Z
-📥 GET /api/chat/rooms - 2026-04-30T06:41:19.087Z
-📥 GET /api/users/profile - 2026-04-30T06:41:19.433Z
-📥 GET /api/quotes/my - 2026-04-30T06:41:19.436Z
-📥 GET /api/payment/payment-status - 2026-04-30T06:41:19.439Z
-📥 GET /api/payment/payment-status - 2026-04-30T06:41:19.636Z
-📥 GET /api/cart - 2026-04-30T06:41:28.319Z
+✅ MongoDB ✅ MongoD[32m[nodemo[32m[nodemon] restarting due to chan[32m[nodemo[32m[nodemon] starting `node serv[dotenv@17.2.3] injecting env (1) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+🔁 No MONGO_URI in .env; loading .env.production f[dotenv@[dotenv@17.2.3] injecting env (19) from .env.production -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+�
+🤖 Loading AI Tools Routes.✅ Retexturing routes loaded at /api/ai
+   GET     /api/ai/health
+   GET     /api/ai/themes
+   POST    /api/ai/check-credits
+   POST    /api/ai/generate
+   POST    /api/ai/feedback
+   POST    /api/ai/download-image
+✅✅ Angle change routes loaded at /api/ai
+   POST    /api/ai/change-angle
+   GET     /api/ai/available-angl✅✅ Image to video routes loaded at /api/      POST    /api/ai/generate-vid   GET     /api/ai/video-styles
+✅ Couple moodboard routes loaded at /api/ai
+      GET     /api/ai/couple-moodboard/heal      POST    /api/ai/couple-moodboard/genera   POST    /api/ai/couple-moodboard/download-image
+�🤖 AI Tools loading complete✅ NewUser routes loaded at /api/newusers
+
+✨ ===========================================
+✨  WEDDING AI SERVER STARTED SUCCESSFULLY
+✨ ===========================================
+✅ Server URL: http://localhost:5001
+⏰ Started at: 5/1/2026, 7:55:26 PM
+📊 Environment: production
+🤖 AI Status: Ready ✅
+💳 Payment System: Enabled ✅
+🗄️  Database: Connected ✅
+      
+
+�
+🤖 AI Endpoint      GET    /api/ai/health             - Check AI service stat   GET    /api/ai/themes             - Get wedding themes
+      GET    /api/ai/available-angles   - Get available angle optio   POST   /api/ai/generate           - Generate venue transformation
+   POST   /api/ai/change-angle       - Change image perspective
+      POST   /api/ai/feedback           - Submit feedba
+�
+👤 User & Auth Endpoint      POST   /api/auth/firebase-login   - Firebase authenticati      GET    /api/users/check-profile   - Check user profi      POST   /api/users/save-form       - Save user fo      GET    /api/users/profile         - Get user profile
+   GET    /api/profile/check-profile - Check profile status
+   POST   /api/profile/save-form     - Save profile form
+
+💳 Payment Endpoints:
+   POST   /api/payment/create-checkout - Create payment checkout
+   GET    /api/payment/payment-status  - Check payment status
+   GET    /api/payment/subscription    - Get subscription info
+   GET    /api/payment/credits         - Get user credits
+   GET    /api/payment/plans           - Get available plans
+   POST   /api/lemon/webhook          - Lemon webhook endpoint
+
+🔧 Utility Endpoints:
+   GET    /                           - Server status
+   GET    /api/test                   - API test
+
+⚠️  Important Notes:
+
+✅ Server is ready! Access at:
+   🌐 https://theloversai.co.in
+   📡 API proxied via nginx /api → backend:5000✅ MongoDB Connected
+[3[32m[nodemon] restarting due to changes...[3[3[32m[nodemon] starting `node server.js`[3[do[dotenv@17.2.3] injecting env (1) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+🔁 No MONGO_URI in .env; loading .env.production fallback
+[dotenv@17.2.3] injecting env (19) from .env.production -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+🤖 Loading AI Tools Routes...
+✅ Retexturing routes loaded at /api/ai
+   GET     /api/ai/health
+   GET     /api/ai/themes
+   POST    /api/ai/check-credits
+   POST    /api/ai/generate
+   POST    /api/ai/feedback
+   POST    /api/ai/download-image
+✅ Angle change routes loaded at /api/ai
+   POST    /api/ai/change-angle
+   GET     /api/ai/available-angles
+✅ Image to video routes loaded at /api/ai
+   POST    /api/ai/generate-video
+   GET     /api/ai/video-styles
+✅ Couple moodboard routes loaded at /api/ai
+   GET     /api/ai/couple-moodboard/health
+   POST    /api/ai/couple-moodboard/generate
+   POST    /api/ai/couple-moodboard/download-image
+🤖 AI Tools loading complete!
+
+✅ NewUser routes loaded at /api/newusers
+
+✨ ===========================================
+✨  WEDDING AI SERVER STARTED SUCCESSFULLY
+✨ ===========================================
+✅ Server URL: http://localhost:5003
+⏰ Started at: 5/1/2026, 7:55:39 PM
+📊 Environment: production
+🤖 AI Status: Ready ✅
+💳 Payment System: Enabled ✅
+🗄️  Database: Connected ✅
+      
+
+🤖 AI Endpoints:
+   GET    /api/ai/health             - Check AI service status
+   GET    /api/ai/themes             - Get wedding themes
+   GET    /api/ai/available-angles   - Get available angle options
+   POST   /api/ai/generate           - Generate venue transformation
+   POST   /api/ai/change-angle       - Change image perspective
+   POST   /api/ai/feedback           - Submit feedback
+
+👤 User & Auth Endpoints:
+   POST   /api/auth/firebase-login   - Firebase authentication
+   GET    /api/users/check-profile   - Check user profile
+   POST   /api/users/save-form       - Save user form
+   GET    /api/users/profile         - Get user profile
+   GET    /api/profile/check-profile - Check profile status
+   POST   /api/profile/save-form     - Save profile form
+
+💳 Payment Endpoints:
+   POST   /api/payment/create-checkout - Create payment checkout
+   GET    /api/payment/payment-status  - Check payment status
+   GET    /api/payment/subscription    - Get subscription info
+   GET    /api/payment/credits         - Get user credits
+   GET    /api/payment/plans           - Get available plans
+   POST   /api/lemon/webhook          - Lemon webhook endpoint
+
+🔧 Utility Endpoints:
+   GET    /                           - Server status
+   GET    /api/test                   - API test
+
+⚠️  Important Notes:
+
+✅ Server is ready! Access at:
+   🌐 https://theloversai.co.in
+   📡 API proxied via nginx /api → backend:5003
+
+
+✅ MongoDB Connected
+[32m[[32m[nodemon] restarting due to changes...[32m[[32m[nodemon] starting `node server.js`[dotenv@17.2.3] injecting env (1) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+🔁 No🔁 No MONGO_URI in .env; loading .env.production fa[dotenv[dotenv@17.2.3] injecting env (19) from .env.production -- tip: 🗂️ backup and recover secrets: https://dotenvx.
+🤖 Lo
+🤖 Loading AI Tools Ro✅ Retexturing routes loaded at /api/ai
+   GET     /api/ai/health
+   GET     /api/ai/themes
+   POST    /api/ai/check-credits
+   POST    /api/ai/generate
+   POST    /api/ai/feedback
+   POST    /api/ai/download-image
+✅ Angle change routes loaded at /api/ai
+   POST    /api/ai/change-angle
+   GET     /api/ai/available-angles
+✅ Image to video routes loaded at /api/ai
+   POST    /api/ai/generate-video
+   GET     /api/ai/video-styles
+✅ Couple moodboard routes loaded at /api/ai
+   GET     /api/ai/couple-moodboard/health
+   POST    /api/ai/couple-moodboard/generate
+   POST    /api/ai/couple-moodboard/download-image
+🤖 AI Tools loading complete!
+
+✅ NewUser routes loaded at /api/newusers
+
+✨ ===
+✨ ===========================================
+✨  WEDDING AI SERVER STARTED SUCCESSFULLY
+✨ ===========================================
+✅ Server URL: http://localhost:5001
+⏰ Started at: 5/1/2026, 8:15:55 PM
+📊 Environment: production
+🤖 AI Status: Ready ✅
+💳 Payment System: Enabled ✅
+🗄️  Database: Connected ✅
+      
+
+🤖 AI Endpoints:
+   GET    /api/ai/health             - Check AI service status
+   GET    /api/ai/themes             - Get wedding themes
+   GET    /api/ai/available-angles   - Get available angle options
+   POST   /api/ai/generate           - Generate venue transformation
+   POST   /api/ai/change-angle       - Change image perspective
+   POST   /api/ai/feedback           - Submit feedback
+
+👤 User & Auth Endpoints:
+   POST   /api/auth/firebase-login   - Firebase authentication
+   GET    /api/users/check-profile   - Check user profile
+   POST   /api/users/save-form       - Save user form
+   GET    /api/users/profile         - Get user profile
+   GET    /api/profile/check-profile - Check profile status
+   POST   /api/profile/save-form     - Save profile form
+
+💳 Payment Endpoints:
+   POST   /api/payment/create-checkout - Create payment checkout
+   GET    /api/payment/payment-status  - Check payment status
+   GET    /api/payment/subscription    - Get subscription info
+   GET    /api/payment/credits         - Get user credits
+   GET    /api/payment/plans           - Get available plans
+   POST   /api/lemon/webhook          - Lemon webhook endpoint
+
+🔧 Utility Endpoints:
+   GET    /                           - Server status
+   GET    /api/test                   - API test
+
+⚠️  Important Notes:
+
+✅ Server is ready! Access at:
+   🌐 https://theloversai.co.in
+   📡 API proxied via nginx /api → backend✅ Mong✅ MongoDB Connected
+ - 2026-04-30T06:41:28.319Z
 📥 GET /api/cart - 2026-04-30T06:41:36.968Z
 📥 GET /api/auth/me - 2026-04-30T06:41:55.980Z
 📥 GET /api/auth/me - 2026-04-30T06:41:56.097Z
@@ -703,3 +703,427 @@ rt - 2026-04-29T20:37:01.405Z
 📥 GET /api/cart - 2026-04-30T16:51:10.362Z
 📥 GET /api/cart - 2026-04-30T16:51:20.828Z
 📥 GET /api/cart - 2026-04-30T16:51:30.812Z
+📥 GET /api/auth/me - 2026-05-01T10:24:34.647Z
+📥 GET /api/auth/me - 2026-05-01T10:24:34.725Z
+📥 GET /api/cart - 2026-05-01T10:24:37.387Z
+📥 GET /api/cart - 2026-05-01T12:42:23.335Z
+📥 GET /api/cart - 2026-05-01T12:42:26.031Z
+📥 GET /api/cart - 2026-05-01T12:42:27.388Z
+📥 GET /api/cart - 2026-05-01T12:42:28.170Z
+📥 GET /api/cart - 2026-05-01T12:42:38.182Z
+📥 GET /api/cart - 2026-05-01T12:42:48.159Z
+📥 GET /api/cart - 2026-05-01T12:42:58.170Z
+📥 POST /api/auth/login - 2026-05-01T12:43:04.990Z
+📥 GET /api/cart - 2026-05-01T12:43:08.156Z
+📥 POST /api/auth/login - 2026-05-01T12:43:09.364Z
+📥 POST /api/auth/login - 2026-05-01T12:43:14.413Z
+📥 GET /api/cart - 2026-05-01T12:43:15.989Z
+📥 GET /api/cart - 2026-05-01T12:43:16.441Z
+📥 GET /api/cart - 2026-05-01T12:43:18.177Z
+📥 GET /api/cart - 2026-05-01T12:43:26.087Z
+📥 GET /api/cart - 2026-05-01T12:43:36.082Z
+📥 GET /api/cart - 2026-05-01T12:43:45.816Z
+📥 GET /api/cart - 2026-05-01T12:43:46.176Z
+📥 GET /api/cart - 2026-05-01T12:43:49.396Z
+📥 GET /api/cart - 2026-05-01T12:43:50.219Z
+📥 GET /api/cart - 2026-05-01T12:43:50.613Z
+📥 GET /api/cart - 2026-05-01T12:43:51.542Z
+📥 GET /api/cart - 2026-05-01T12:43:51.895Z
+📥 GET /api/cart - 2026-05-01T12:43:52.346Z
+📥 GET /api/cart - 2026-05-01T12:43:52.758Z
+📥 GET /api/cart - 2026-05-01T12:43:53.160Z
+📥 GET /api/cart - 2026-05-01T12:43:56.166Z
+📥 GET /api/cart - 2026-05-01T12:44:06.170Z
+📥 GET /api/cart - 2026-05-01T12:44:16.083Z
+📥 GET /api/cart - 2026-05-01T12:44:26.159Z
+📥 GET /api/auth/me - 2026-05-01T12:44:26.252Z
+📥 GET /api/auth/me - 2026-05-01T12:44:28.389Z
+📥 GET /api/cart - 2026-05-01T12:44:28.421Z
+📥 GET /api/cart - 2026-05-01T12:44:28.902Z
+📥 GET /api/cart - 2026-05-01T12:44:29.312Z
+📥 GET /api/cart - 2026-05-01T12:44:36.165Z
+📥 GET /api/cart - 2026-05-01T12:44:38.714Z
+📥 GET /api/cart - 2026-05-01T12:44:46.167Z
+📥 GET /api/cart - 2026-05-01T12:44:56.155Z
+📥 GET /api/cart - 2026-05-01T12:45:06.174Z
+📥 GET /api/cart - 2026-05-01T12:45:16.162Z
+📥 POST /api/users/save-wedding-profile - 2026-05-01T12:45:40.021Z
+💍 Wedding profile saved for theloversai5@gmail.com
+📥 GET /api/cart - 2026-05-01T12:45:40.589Z
+📥 GET /api/cart - 2026-05-01T12:45:40.949Z
+📥 GET /api/cart - 2026-05-01T12:45:48.011Z
+📥 GET /api/cart - 2026-05-01T12:45:56.170Z
+📥 GET /api/cart - 2026-05-01T12:46:06.167Z
+📥 GET /api/cart - 2026-05-01T12:46:16.168Z
+📥 GET /api/cart - 2026-05-01T12:46:26.160Z
+📥 GET /api/cart - 2026-05-01T12:46:36.164Z
+📥 GET /api/cart - 2026-05-01T12:46:46.172Z
+📥 GET /api/cart - 2026-05-01T12:47:51.195Z
+📥 GET /api/cart - 2026-05-01T12:48:51.187Z
+📥 GET /api/cart - 2026-05-01T12:49:51.259Z
+📥 GET /api/cart - 2026-05-01T12:50:51.189Z
+📥 GET /api/cart - 2026-05-01T12:51:51.201Z
+📥 GET /api/cart - 2026-05-01T12:52:51.188Z
+📥 GET /api/cart - 2026-05-01T12:53:51.177Z
+📥 GET /api/cart - 2026-05-01T12:53:56.154Z
+📥 GET /api/cart - 2026-05-01T12:54:06.157Z
+📥 GET /api/cart - 2026-05-01T12:54:16.174Z
+📥 GET /api/cart - 2026-05-01T12:54:26.088Z
+📥 GET /api/cart - 2026-05-01T12:54:36.168Z
+📥 GET /api/cart - 2026-05-01T12:54:46.195Z
+📥 GET /api/cart - 2026-05-01T12:54:56.163Z
+📥 GET /api/cart - 2026-05-01T12:55:06.160Z
+📥 GET /api/cart - 2026-05-01T12:55:16.161Z
+📥 GET /api/cart - 2026-05-01T12:55:26.168Z
+📥 GET /api/cart - 2026-05-01T12:55:51.176Z
+📥 GET /api/cart - 2026-05-01T12:56:51.190Z
+📥 POST /api/users/save-wedding-profile - 2026-05-01T12:57:02.609Z
+💍 Wedding profile saved for theloversai5@gmail.com
+📥 GET /api/cart - 2026-05-01T12:57:03.475Z
+📥 GET /api/cart - 2026-05-01T12:57:03.934Z
+📥 GET /api/cart - 2026-05-01T12:57:13.477Z
+📥 GET /api/cart - 2026-05-01T12:57:23.475Z
+📥 GET /api/cart - 2026-05-01T12:57:33.479Z
+📥 GET /api/cart - 2026-05-01T12:57:43.491Z
+📥 GET /api/cart - 2026-05-01T12:57:51.181Z
+📥 GET /api/cart - 2026-05-01T12:57:53.484Z
+📥 GET /api/cart - 2026-05-01T12:58:03.556Z
+📥 GET /api/cart - 2026-05-01T12:58:13.488Z
+📥 GET /api/cart - 2026-05-01T12:58:23.480Z
+📥 GET /api/cart - 2026-05-01T12:58:33.475Z
+📥 GET /api/cart - 2026-05-01T12:58:44.165Z
+📥 GET /api/cart - 2026-05-01T12:58:51.179Z
+📥 GET /api/cart - 2026-05-01T12:58:54.157Z
+📥 GET /api/cart - 2026-05-01T12:59:04.167Z
+📥 GET /api/cart - 2026-05-01T12:59:14.161Z
+📥 GET /api/cart - 2026-05-01T12:59:24.164Z
+📥 GET /api/cart - 2026-05-01T12:59:34.169Z
+📥 GET /api/cart - 2026-05-01T12:59:44.185Z
+📥 GET /api/cart - 2026-05-01T12:59:51.174Z
+📥 GET /api/cart - 2026-05-01T12:59:54.169Z
+📥 GET /api/cart - 2026-05-01T13:00:04.174Z
+📥 GET /api/cart - 2026-05-01T13:00:14.164Z
+📥 GET /api/cart - 2026-05-01T13:00:51.190Z
+📥 GET /api/cart - 2026-05-01T13:00:51.408Z
+📥 GET /api/cart - 2026-05-01T13:01:51.157Z
+📥 GET /api/cart - 2026-05-01T13:01:51.786Z
+📥 GET /api/cart - 2026-05-01T13:02:51.174Z
+📥 GET /api/cart - 2026-05-01T13:02:51.485Z
+📥 GET /api/cart - 2026-05-01T13:03:51.190Z
+📥 GET /api/cart - 2026-05-01T13:03:51.831Z
+📥 GET /api/cart - 2026-05-01T13:23:41.909Z
+📥 GET /api/cart - 2026-05-01T13:23:43.452Z
+📥 GET /api/cart - 2026-05-01T13:23:43.934Z
+📥 GET /api/cart - 2026-05-01T13:23:46.127Z
+📥 GET /api/cart - 2026-05-01T13:23:49.166Z
+📥 GET /api/cart - 2026-05-01T13:23:49.690Z
+📥 GET /api/cart - 2026-05-01T13:23:56.136Z
+📥 GET /api/cart - 2026-05-01T13:24:00.173Z
+📥 GET /api/cart - 2026-05-01T13:24:06.043Z
+📥 GET /api/cart - 2026-05-01T13:24:09.738Z
+📥 GET /api/cart - 2026-05-01T13:24:10.449Z
+📥 GET /api/cart - 2026-05-01T13:24:12.161Z
+📥 GET /api/cart - 2026-05-01T13:24:20.126Z
+📥 GET /api/cart - 2026-05-01T13:24:21.766Z
+📥 POST /api/auth/login - 2026-05-01T13:39:54.829Z
+📥 GET /api/cart - 2026-05-01T13:39:57.007Z
+📥 GET /api/cart - 2026-05-01T13:39:57.345Z
+📥 GET /api/cart - 2026-05-01T13:40:02.012Z
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.2.3] injecting env (1) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+🔁 No MONGO_URI in .env; loading .env.production fallback
+[dotenv@17.2.3] injecting env (19) from .env.production -- tip: ⚙️  suppress all logs with { quiet: true }
+
+🤖 Loading AI Tools Routes...
+✅ Retexturing routes loaded at /api/ai
+   GET     /api/ai/health
+   GET     /api/ai/themes
+   POST    /api/ai/check-credits
+   POST    /api/ai/generate
+   POST    /api/ai/feedback
+   POST    /api/ai/download-image
+✅ Angle change routes loaded at /api/ai
+   POST    /api/ai/change-angle
+   GET     /api/ai/available-angles
+✅ Image to video routes loaded at /api/ai
+   POST    /api/ai/generate-video
+   GET     /api/ai/video-styles
+✅ Couple moodboard routes loaded at /api/ai
+   GET     /api/ai/couple-moodboard/health
+   POST    /api/ai/couple-moodboard/generate
+   POST    /api/ai/couple-moodboard/download-image
+🤖 AI Tools loading complete!
+
+✅ NewUser routes loaded at /api/newusers
+
+✨ ===========================================
+✨  WEDDING AI SERVER STARTED SUCCESSFULLY
+✨ ===========================================
+✅ Server URL: http://localhost:5004
+⏰ Started at: 5/1/2026, 7:55:26 PM
+📊 Environment: production
+🤖 AI Status: Ready ✅
+💳 Payment System: Enabled ✅
+🗄️  Database: Connected ✅
+      
+
+🤖 AI Endpoints:
+   GET    /api/ai/health             - Check AI service status
+   GET    /api/ai/themes             - Get wedding themes
+   GET    /api/ai/available-angles   - Get available angle options
+   POST   /api/ai/generate           - Generate venue transformation
+   POST   /api/ai/change-angle       - Change image perspective
+   POST   /api/ai/feedback           - Submit feedback
+
+👤 User & Auth Endpoints:
+   POST   /api/auth/firebase-login   - Firebase authentication
+   GET    /api/users/check-profile   - Check user profile
+   POST   /api/users/save-form       - Save user form
+   GET    /api/users/profile         - Get user profile
+   GET    /api/profile/check-profile - Check profile status
+   POST   /api/profile/save-form     - Save profile form
+
+💳 Payment Endpoints:
+   POST   /api/payment/create-checkout - Create payment checkout
+   GET    /api/payment/payment-status  - Check payment status
+   GET    /api/payment/subscription    - Get subscription info
+   GET    /api/payment/credits         - Get user credits
+   GET    /api/payment/plans           - Get available plans
+   POST   /api/lemon/webhook          - Lemon webhook endpoint
+
+🔧 Utility Endpoints:
+   GET    /                           - Server status
+   GET    /api/test                   - API test
+
+⚠️  Important Notes:
+
+✅ Server is ready! Access at:
+   🌐 https://theloversai.co.in
+   📡 API proxied via nginx /api → backend:5004
+
+
+✅ MongoDB Connected
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.2.3] injecting env (1) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+🔁 No MONGO_URI in .env; loading .env.production fallback
+[dotenv@17.2.3] injecting env (19) from .env.production -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+🤖 Loading AI Tools Routes...
+✅ Retexturing routes loaded at /api/ai
+   GET     /api/ai/health
+   GET     /api/ai/themes
+   POST    /api/ai/check-credits
+   POST    /api/ai/generate
+   POST    /api/ai/feedback
+   POST    /api/ai/download-image
+✅ Angle change routes loaded at /api/ai
+   POST    /api/ai/change-angle
+   GET     /api/ai/available-angles
+✅ Image to video routes loaded at /api/ai
+   POST    /api/ai/generate-video
+   GET     /api/ai/video-styles
+✅ Couple moodboard routes loaded at /api/ai
+   GET     /api/ai/couple-moodboard/health
+   POST    /api/ai/couple-moodboard/generate
+   POST    /api/ai/couple-moodboard/download-image
+🤖 AI Tools loading complete!
+
+✅ NewUser routes loaded at /api/newusers
+
+✨ ===========================================
+✨  WEDDING AI SERVER STARTED SUCCESSFULLY
+✨ ===========================================
+✅ Server URL: http://localhost:5001
+⏰ Started at: 5/1/2026, 7:55:39 PM
+📊 Environment: production
+🤖 AI Status: Ready ✅
+💳 Payment System: Enabled ✅
+🗄️  Database: Connected ✅
+      
+
+🤖 AI Endpoints:
+   GET    /api/ai/health             - Check AI service status
+   GET    /api/ai/themes             - Get wedding themes
+   GET    /api/ai/available-angles   - Get available angle options
+   POST   /api/ai/generate           - Generate venue transformation
+   POST   /api/ai/change-angle       - Change image perspective
+   POST   /api/ai/feedback           - Submit feedback
+
+👤 User & Auth Endpoints:
+   POST   /api/auth/firebase-login   - Firebase authentication
+   GET    /api/users/check-profile   - Check user profile
+   POST   /api/users/save-form       - Save user form
+   GET    /api/users/profile         - Get user profile
+   GET    /api/profile/check-profile - Check profile status
+   POST   /api/profile/save-form     - Save profile form
+
+💳 Payment Endpoints:
+   POST   /api/payment/create-checkout - Create payment checkout
+   GET    /api/payment/payment-status  - Check payment status
+   GET    /api/payment/subscription    - Get subscription info
+   GET    /api/payment/credits         - Get user credits
+   GET    /api/payment/plans           - Get available plans
+   POST   /api/lemon/webhook          - Lemon webhook endpoint
+
+🔧 Utility Endpoints:
+   GET    /                           - Server status
+   GET    /api/test                   - API test
+
+⚠️  Important Notes:
+
+✅ Server is ready! Access at:
+   🌐 https://theloversai.co.in
+   📡 API proxied via nginx /api → backend:5001
+
+
+✅ MongoDB Connected
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.2.3] injecting env (1) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+🔁 No MONGO_URI in .env; loading .env.production fallback
+[dotenv@17.2.3] injecting env (19) from .env.production -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+🤖 Loading AI Tools Routes...
+✅ Retexturing routes loaded at /api/ai
+   GET     /api/ai/health
+   GET     /api/ai/themes
+   POST    /api/ai/check-credits
+   POST    /api/ai/generate
+   POST    /api/ai/feedback
+   POST    /api/ai/download-image
+✅ Angle change routes loaded at /api/ai
+   POST    /api/ai/change-angle
+   GET     /api/ai/available-angles
+✅ Image to video routes loaded at /api/ai
+   POST    /api/ai/generate-video
+   GET     /api/ai/video-styles
+✅ Couple moodboard routes loaded at /api/ai
+   GET     /api/ai/couple-moodboard/health
+   POST    /api/ai/couple-moodboard/generate
+   POST    /api/ai/couple-moodboard/download-image
+🤖 AI Tools loading complete!
+
+✅ NewUser routes loaded at /api/newusers
+
+✨ ===========================================
+✨  WEDDING AI SERVER STARTED SUCCESSFULLY
+✨ ===========================================
+✅ Server URL: http://localhost:5000
+⏰ Started at: 5/1/2026, 8:15:55 PM
+📊 Environment: production
+🤖 AI Status: Ready ✅
+💳 Payment System: Enabled ✅
+🗄️  Database: Connected ✅
+      
+
+🤖 AI Endpoints:
+   GET    /api/ai/health             - Check AI service status
+   GET    /api/ai/themes             - Get wedding themes
+   GET    /api/ai/available-angles   - Get available angle options
+   POST   /api/ai/generate           - Generate venue transformation
+   POST   /api/ai/change-angle       - Change image perspective
+   POST   /api/ai/feedback           - Submit feedback
+
+👤 User & Auth Endpoints:
+   POST   /api/auth/firebase-login   - Firebase authentication
+   GET    /api/users/check-profile   - Check user profile
+   POST   /api/users/save-form       - Save user form
+   GET    /api/users/profile         - Get user profile
+   GET    /api/profile/check-profile - Check profile status
+   POST   /api/profile/save-form     - Save profile form
+
+💳 Payment Endpoints:
+   POST   /api/payment/create-checkout - Create payment checkout
+   GET    /api/payment/payment-status  - Check payment status
+   GET    /api/payment/subscription    - Get subscription info
+   GET    /api/payment/credits         - Get user credits
+   GET    /api/payment/plans           - Get available plans
+   POST   /api/lemon/webhook          - Lemon webhook endpoint
+
+🔧 Utility Endpoints:
+   GET    /                           - Server status
+   GET    /api/test                   - API test
+
+⚠️  Important Notes:
+
+✅ Server is ready! Access at:
+   🌐 https://theloversai.co.in
+   📡 API proxied via nginx /api → backend:5000
+
+
+✅ MongoDB Connected
+📥 POST /api/auth/firebase-login - 2026-05-01T14:51:52.516Z
+📥 GET /api/cart - 2026-05-01T14:51:54.219Z
+📥 GET /api/cart - 2026-05-01T14:51:54.763Z
+📥 GET /api/cart - 2026-05-01T14:52:05.105Z
+📥 GET /api/cart - 2026-05-01T14:52:15.082Z
+📥 GET /api/cart - 2026-05-01T14:52:25.093Z
+📥 GET /api/cart - 2026-05-01T14:52:34.363Z
+📥 GET /api/cart - 2026-05-01T14:52:39.056Z
+📥 GET /api/cart - 2026-05-01T14:52:42.525Z
+📥 GET /api/cart - 2026-05-01T14:52:43.040Z
+📥 GET /api/auth/me - 2026-05-01T14:55:22.480Z
+📥 GET /api/auth/me - 2026-05-01T14:55:22.846Z
+📥 GET /api/auth/me - 2026-05-01T14:57:35.667Z
+📥 GET /api/auth/me - 2026-05-01T14:57:36.052Z
+📥 GET /api/cart - 2026-05-01T14:57:36.060Z
+📥 GET /api/cart - 2026-05-01T14:57:36.620Z
+📥 POST /api/auth/firebase-login - 2026-05-01T14:58:34.765Z
+📥 GET /api/cart - 2026-05-01T14:58:35.074Z
+📥 POST /api/users/save-wedding-profile - 2026-05-01T14:59:21.145Z
+💍 Wedding profile saved for anshr05555@gmail.com
+📥 GET /api/cart - 2026-05-01T14:59:21.572Z
+📥 GET /api/cart - 2026-05-01T14:59:22.131Z
+📥 GET /api/cart - 2026-05-01T14:59:31.581Z
+📥 GET /api/cart - 2026-05-01T14:59:42.195Z
+📥 GET /api/cart - 2026-05-01T14:59:42.695Z
+📥 GET /api/cart - 2026-05-01T14:59:43.116Z
+📥 GET /api/cart - 2026-05-01T14:59:53.111Z
+📥 GET /api/cart - 2026-05-01T15:00:03.111Z
+📥 GET /api/cart - 2026-05-01T15:00:13.113Z
+📥 GET /api/cart - 2026-05-01T15:00:23.110Z
+📥 GET /api/cart - 2026-05-01T15:00:31.721Z
+📥 GET /api/cart - 2026-05-01T15:00:32.374Z
+📥 GET /api/cart - 2026-05-01T15:00:41.810Z
+📥 GET /api/cart - 2026-05-01T15:00:51.810Z
+📥 GET /api/cart - 2026-05-01T15:01:01.809Z
+📥 GET /api/cart - 2026-05-01T15:01:11.808Z
+📥 GET /api/cart - 2026-05-01T15:01:21.808Z
+📥 GET /api/cart - 2026-05-01T15:01:31.807Z
+📥 GET /api/cart - 2026-05-01T15:01:41.808Z
+📥 GET /api/cart - 2026-05-01T15:01:51.808Z
+📥 GET /api/cart - 2026-05-01T15:02:01.810Z
+📥 GET /api/cart - 2026-05-01T15:02:11.808Z
+📥 GET /api/cart - 2026-05-01T15:02:21.807Z
+📥 GET /api/cart - 2026-05-01T15:02:31.806Z
+📥 GET /api/cart - 2026-05-01T15:02:41.809Z
+📥 GET /api/cart - 2026-05-01T15:02:51.806Z
+📥 GET /api/cart - 2026-05-01T15:03:01.818Z
+📥 GET /api/cart - 2026-05-01T15:03:11.806Z
+📥 GET /api/cart - 2026-05-01T15:03:21.815Z
+📥 GET /api/cart - 2026-05-01T15:03:31.819Z
+📥 GET /api/cart - 2026-05-01T15:03:41.814Z
+📥 GET /api/cart - 2026-05-01T15:03:51.811Z
+📥 GET /api/cart - 2026-05-01T15:04:01.808Z
+📥 GET /api/cart - 2026-05-01T15:04:11.817Z
+📥 GET /api/cart - 2026-05-01T15:04:21.809Z
+📥 GET /api/cart - 2026-05-01T15:04:31.806Z
+📥 GET /api/cart - 2026-05-01T15:04:41.811Z
+📥 GET /api/cart - 2026-05-01T15:04:51.815Z
+📥 GET /api/cart - 2026-05-01T15:05:01.809Z
+📥 GET /api/cart - 2026-05-01T15:05:11.810Z
+📥 GET /api/cart - 2026-05-01T15:05:21.811Z
+📥 GET /api/cart - 2026-05-01T15:05:31.804Z
+📥 GET /api/cart - 2026-05-01T15:05:41.813Z
+📥 GET /api/cart - 2026-05-01T15:05:51.804Z
+📥 GET /api/cart - 2026-05-01T15:06:01.806Z
+📥 GET /api/cart - 2026-05-01T15:06:11.812Z
+📥 GET /api/cart - 2026-05-01T15:06:21.816Z

@@ -84,6 +84,21 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
+  // Firebase Google OAuth
+  const firebaseLogin = useCallback(async (token, role) => {
+    const data = await authAPI.firebaseLogin({ token, role });
+    if (data.success) {
+      setToken(data.token);
+      setCurrentUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userRole', data.user.role);
+      if (data.isNewUser) {
+        localStorage.setItem('isNewUser', 'true');
+      }
+    }
+    return data;
+  }, []);
+
   // Logout
   const logout = useCallback(() => {
     removeToken();
@@ -115,6 +130,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     googleLogin,
+    firebaseLogin,
     logout,
     refreshUser,
   };

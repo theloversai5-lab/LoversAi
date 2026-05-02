@@ -314,29 +314,55 @@ router.post("/firebase-login", async (req, res) => {
       });
     }
 
-    const fbToken = req.headers.authorization?.split(" ")[1];
+    const { role } = req.body || {};
+    const fbToken = req.headers.authorization?.split(" ")[1] || req.body?.token;
     if (!fbToken) {
       return res.status(401).json({ success: false, error: "No token provided" });
     }
 
     const decoded = await admin.auth().verifyIdToken(fbToken);
+    const validRoles = ["couple", "planner", "vendor"];
+    const userRole = validRoles.includes(role) ? role : "couple";
 
     // Find or create user with backwards compatibility
     let user = await User.findOne({
       $or: [{ firebaseUid: decoded.uid }, { email: decoded.email?.toLowerCase() }],
     });
 
+    let isNewUser = false;
+
     if (!user) {
+      isNewUser = true;
       user = await User.create({
         firebaseUid: decoded.uid,
         email: decoded.email?.toLowerCase(),
         fullName: decoded.name || "",
+        avatar: decoded.picture,
         authProvider: "google",
+        role: userRole,
         credits: 30,
+        lastLoginAt: new Date(),
+        loginCount: 1,
       });
-    } else if (!user.firebaseUid) {
-      user.firebaseUid = decoded.uid;
+    } else {
+      if (!user.firebaseUid) user.firebaseUid = decoded.uid;
+      if (!user.googleId && decoded.firebase?.sign_in_provider === "google.com") {
+        user.googleId = decoded.uid;
+      }
+      if (!user.avatar && decoded.picture) user.avatar = decoded.picture;
+      if (!user.fullName && decoded.name) user.fullName = decoded.name;
+      if (!user.role) user.role = userRole;
+      user.lastLoginAt = new Date();
+      user.loginCount = (user.loginCount || 0) + 1;
       await user.save();
+    }
+
+    if (user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        error: "Your account has been suspended",
+        reason: user.blockedReason,
+      });
     }
 
     // Issue a proper JWT token
@@ -345,6 +371,7 @@ router.post("/firebase-login", async (req, res) => {
     res.json({
       success: true,
       token,
+      isNewUser,
       user: sanitizeUser(user),
     });
   } catch (err) {

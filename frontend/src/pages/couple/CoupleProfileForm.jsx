@@ -32,6 +32,9 @@ const budgetOptions = [
 
 const religionOptions = ["Hindu", "Muslim", "Christian", "Sikh", "Jain"];
 const guestOptions = ["0-100", "200-500", "500-1000", "1000+"];
+const sharedWeddingBackground = {
+  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+};
 
 const stepVariants = {
   initial: (direction) => ({
@@ -677,38 +680,13 @@ export default function CoupleProfileForm() {
   };
 
   return (
-    <main style={shell}>
-      {/* Background video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          zIndex: 0,
-          opacity: 0.22,
-        }}
-      >
-        <source src="/images/couple/couple_video.mp4" type="video/mp4" />
-      </video>
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          background:
-            "linear-gradient(160deg, #0a0604 0%, #1a0f08 60%, #0d0804 100%)",
-          zIndex: 1,
-        }}
-      />
+    <main className="loverai-wedding-shell" style={shell}>
+      <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
+      <div className="loverai-wedding-overlay" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-left" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-right" />
 
-      {/* Card */}
-      <section style={card}>
-        {/* Header */}
+      <section className="loverai-auth-panel" style={card}>
         <header style={cardHeader}>
           <div>
             <img
@@ -789,10 +767,6 @@ const card = {
   zIndex: 10,
   width: "100%",
   maxWidth: 580,
-  background: "rgba(255,255,255,0.04)",
-  backdropFilter: "blur(28px)",
-  WebkitBackdropFilter: "blur(28px)",
-  border: "1px solid rgba(225,195,135,0.14)",
   borderRadius: 28,
   padding: "36px 40px 44px",
   boxShadow: "0 40px 120px rgba(0,0,0,0.55)",

@@ -33,9 +33,10 @@ const Navbar = () => {
   // Get the expected role based on current page
   const getRoleFromPath = () => {
     const path = location.pathname;
-    if (path.startsWith('/couple') || path.startsWith('/couples')) return 'couple';
-    if (path.startsWith('/planner')) return 'planner';
-    if (path.startsWith('/vendor')) return 'vendor';
+    if (path.startsWith("/couple") || path.startsWith("/couples"))
+      return "couple";
+    if (path.startsWith("/planner")) return "planner";
+    if (path.startsWith("/vendor")) return "vendor";
     return null;
   };
 
@@ -46,7 +47,7 @@ const Navbar = () => {
     if (role) {
       navigate(`/login?role=${role}`, { state: { from: location.pathname } });
     } else {
-      navigate('/login');
+      navigate("/login");
     }
     setDropdownOpen(false);
     setMobileMenuOpen(false);
@@ -55,21 +56,21 @@ const Navbar = () => {
   // Fetch cart count for couples
   useEffect(() => {
     const fetchCartCount = async () => {
-      if (currentUser && localStorage.getItem('userRole') === 'couple') {
+      if (currentUser && localStorage.getItem("userRole") === "couple") {
         try {
-          const { apiFetch } = await import('../api/api');
-          const res = await apiFetch('/cart');
+          const { apiFetch } = await import("../api/api");
+          const res = await apiFetch("/cart");
           if (res.success && res.cart) {
             setCartCount(res.cart.items?.length || 0);
           }
         } catch (err) {
-          console.error('Failed to fetch cart count:', err);
+          console.error("Failed to fetch cart count:", err);
         }
       }
     };
 
     fetchCartCount();
-    
+
     // Refresh cart count when navigating
     const interval = setInterval(fetchCartCount, 10000); // Check every 10 seconds
     return () => clearInterval(interval);
@@ -140,11 +141,12 @@ const Navbar = () => {
     const baseLinks = [{ to: "/", label: "Home" }];
 
     // Add role-specific links
-    if (userRole === "couple" || userRole === "planner" || userRole === "vendor") {
-      return [
-        ...baseLinks,
-        { to: "/pricing", label: "Pricing" },
-      ];
+    if (
+      userRole === "couple" ||
+      userRole === "planner" ||
+      userRole === "vendor"
+    ) {
+      return [...baseLinks, { to: "/pricing", label: "Pricing" }];
     }
 
     // Not logged in, show all public links
@@ -165,7 +167,7 @@ const Navbar = () => {
         {/* Logo - Desktop */}
         <Link
           to="/"
-          className="absolute left-3 md:left-[60px] top-1 md:top-[-12px] pointer-events-auto hidden md:block z-50"
+          className="absolute left-3 md:left-[-22px] top-1 md:top-[-12px] pointer-events-auto hidden md:block z-50"
         >
           <img
             src="/images/logo copy.png"
@@ -238,12 +240,21 @@ const Navbar = () => {
                 ref={dropdownRef}
               >
                 {localStorage.getItem("userRole") === "couple" && (
-                  <button 
-                    onClick={() => navigate('/couple/cart')}
+                  <button
+                    onClick={() => navigate("/couple/cart")}
                     className="relative p-2 text-white/80 hover:text-loverai-gold transition-colors"
                     aria-label="Cart"
                   >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M9 20a1 1 0 1 0 0 2 1 1 0 1 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 1 0 0-2zM3 3h2l3.6 7.59-1.35 2.44A2 2 0 0 0 8.5 16H21v-2H8.5l1.1-2h7.45a2 2 0 0 0 1.9-1.4l2.5-9v-.1H5.21L4.27 2H1v2h2z" />
                     </svg>
                     {cartCount > 0 && (
@@ -434,7 +445,16 @@ const Navbar = () => {
                     className="px-4 py-3 text-white/70 hover:bg-white/10 hover:text-loverai-gold rounded-xl transition-colors text-left mt-2 flex items-center gap-2"
                   >
                     <div className="relative">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <path d="M9 20a1 1 0 1 0 0 2 1 1 0 1 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 1 0 0-2zM3 3h2l3.6 7.59-1.35 2.44A2 2 0 0 0 8.5 16H21v-2H8.5l1.1-2h7.45a2 2 0 0 0 1.9-1.4l2.5-9v-.1H5.21L4.27 2H1v2h2z" />
                       </svg>
                       {cartCount > 0 && (

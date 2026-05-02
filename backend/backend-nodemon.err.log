@@ -1,12 +1,12 @@
 ⚠️ Razorpay keys missing in .env. Payments will not work.
 Registration error: ValidationError: User validat⚠️ Razorpay keys missing in .env. Payments will not work.
 Port 5000 is already in use. Using 5002 instead.
-sing in .env. Payments will not work.
+⚠️ Razorpay keys missing in .env. Payments will not work.
 Port 5000 is already in use. Using 5001 instead.
- validatePath (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3152:13)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-    at async Promise.all (index 0)
-    at async model.$__validate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3093:3)
+⚠️ Razorpay keys missing in .env. Payments will not work.
+Port 5000 is already in use. Using 500Port 5000 i⚠️ Razorpay keys missing in .env. Payments will not work.
+Port 5000 is already in use. Using 500Port 5000 is already in use. Using 5002 instead.
+Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:3093:3)
     at async model.validate (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\document.js:2670:5)
     at async model.validateBeforeSave (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\mongoose\lib\plugins\validateBeforeSave.js:34:7)
     at async Kareem.execPre (C:\Users\Ansh Rastogi\OneDrive\Desktop\Loversai-main-v2-main\backend\node_modules\kareem\index.js:65:24)
@@ -368,3 +368,9 @@ Save wedding profile error: CastError: Cast to date failed for value "Invalid Da
 ❌ [Moodboard] Generation error: Error: All 4 image generations failed. Please try again.
     at file:///C:/Users/Ansh%20Rastogi/OneDrive/Desktop/Loversai-main-v2-main/backend/planner/ai_tools/couple_moodboard.js:1001:15
     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+⚠️ Razorpay keys missing in .env. Payments will not work.
+Port 5000 is already in use. Using 5004 instead.
+⚠️ Razorpay keys missing in .env. Payments will not work.
+Port 5000 is already in use. Using 5001 instead.
+⚠️ Razorpay keys missing in .env. Payments will not work.
+Firebase service account not found. Using projectId-only initialization for token verification.

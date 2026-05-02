@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const sharedWeddingBackground = {
+  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+};
+
 export default function Signup() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -155,22 +159,14 @@ export default function Signup() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{
-          backgroundImage: `url("/images/signup.png")`,
-          filter: "brightness(0.3)",
-        }}
-      />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-loverai-deep/60 via-loverai-dark/40 to-loverai-deep/70"></div>
-
-      {/* Ambient glow */}
-      <div className="absolute top-1/3 right-1/4 w-[350px] h-[350px] bg-loverai-gold/[0.04] rounded-full blur-[120px] z-[1]"></div>
+    <div className="loverai-wedding-shell min-h-screen flex items-center justify-center">
+      <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
+      <div className="loverai-wedding-overlay" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-left" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-right" />
 
       <div className="relative z-20 w-full max-w-[460px] px-4 py-10 animate-fadeInUp">
-        <div className="glass-card-strong rounded-3xl p-8">
+        <div className="glass-card-strong loverai-auth-panel rounded-3xl p-8">
           {/* Logo */}
           <div className="flex justify-center mb-5">
             <img

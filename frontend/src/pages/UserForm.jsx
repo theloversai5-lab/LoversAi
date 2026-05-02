@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { userAPI } from "../api/api";
 
+const sharedWeddingBackground = {
+  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+};
+
 export default function UserForm() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -172,15 +176,11 @@ export default function UserForm() {
 
   if (loading) {
     return (
-      <div className="relative w-full min-h-screen flex items-center justify-center text-gray-900 overflow-hidden bg-black">
-        <div
-          className="absolute inset-0 bg-cover bg-center z-0"
-          style={{
-            backgroundImage: `url("./images/bridal.png")`,
-            filter: "brightness(0.55)",
-          }}
-        />
-        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/40 to-black/50"></div>
+      <div className="loverai-wedding-shell w-full min-h-screen flex items-center justify-center text-gray-900">
+        <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
+        <div className="loverai-wedding-overlay" />
+        <div className="loverai-wedding-glow loverai-wedding-glow-left" />
+        <div className="loverai-wedding-glow loverai-wedding-glow-right" />
         <div className="relative z-20 text-center">
           <div className="text-white text-xl">Loading profile...</div>
           <div className="mt-4 w-12 h-12 border-4 border-rose-200 border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -190,7 +190,7 @@ export default function UserForm() {
   }
 
   return (
-    <div className="relative w-full min-h-screen flex items-center justify-center text-gray-900 overflow-hidden bg-black">
+    <div className="loverai-wedding-shell w-full min-h-screen flex items-center justify-center text-gray-900">
       <style>{`
         select {
           color-scheme: dark;
@@ -208,20 +208,13 @@ export default function UserForm() {
           color: #000000;
         }
       `}</style>
-      {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{
-          backgroundImage: `url("./images/bridal.png")`,
-          filter: "brightness(0.55)",
-        }}
-      />
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/40 to-black/50"></div>
+      <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
+      <div className="loverai-wedding-overlay" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-left" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-right" />
 
-      {/* Form Card */}
       <div className="relative z-20 w-full max-w-4xl px-4 py-8">
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 md:p-8 lg:p-10 shadow-2xl">
-          {/* Header */}
+        <div className="loverai-auth-panel rounded-3xl p-6 md:p-8 lg:p-10 shadow-2xl">
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-bold heading-font bg-gradient-to-r from-rose-200 to-pink-200 bg-clip-text text-transparent">
               {forceComplete ? "Complete Your Profile" : "Update Your Profile"}

@@ -1,9 +1,13 @@
-// pages/Login.jsx — Custom JWT Login with Google OAuth
+// pages/Login.jsx - Custom JWT Login with Google OAuth
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
+import { auth } from "../firebase/firebase";
 
-const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
+const sharedWeddingBackground = {
+  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+};
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,9 +18,8 @@ const Login = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, googleLogin, currentUser, logout } = useAuth();
+  const { login, firebaseLogin, currentUser, logout } = useAuth();
 
-  // Check if user is already logged in
   useEffect(() => {
     if (currentUser) {
       setIsLoggedIn(true);
@@ -44,12 +47,11 @@ const Login = () => {
   const handleRedirectByRole = (user) => {
     const rawRole = user?.role || localStorage.getItem("userRole") || "";
     const role = rawRole.toLowerCase();
-    
-    // Route users to their role-specific main page, not directly to dashboard
+
     if (role === "planner") {
       navigate("/planner/dashboard");
     } else if (role === "vendor") {
-      navigate("/vendor/dashboard"); // Vendor goes to dashboard (no main page yet)
+      navigate("/vendor/dashboard");
     } else if (role === "couple") {
       navigate(getCoupleNextPath(user));
     } else {
@@ -78,32 +80,28 @@ const Login = () => {
       if (data.success) {
         sessionStorage.removeItem("redirectAfterLogin");
 
-        // Check if user's role matches the target role from URL or referrer
         const actualRole = (data.user?.role || localStorage.getItem("userRole") || "").toLowerCase();
         const expectedRole = targetRole ? targetRole.toLowerCase() : "";
-        
-        console.log('🔐 Login Role Check:', {
+
+        console.log("Login Role Check:", {
           targetRole,
           actualRole,
           expectedRole,
           mismatch,
           hasTargetRole: !!targetRole,
           rolesMatch: !expectedRole || actualRole === expectedRole,
-          shouldBlock: !!expectedRole && actualRole !== expectedRole
+          shouldBlock: !!expectedRole && actualRole !== expectedRole,
         });
-        
-        // If coming from a role-specific page, enforce role matching
+
         if (expectedRole && actualRole !== expectedRole) {
-          console.error('❌ Role mismatch detected! Blocking login.');
+          console.error("Role mismatch detected. Blocking login.");
           setError(
             `Invalid credentials for this section. Please log in with a ${expectedRole} account. Your account is registered as ${actualRole}.`,
           );
-          // Log them out since they're on the wrong role
           await logout();
           return;
         }
 
-        console.log('✅ Role check passed, redirecting...');
         handleRedirectByRole(data.user);
       }
     } catch (err) {
@@ -117,92 +115,60 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    if (!GOOGLE_CLIENT_ID) {
-      setError(
-        "Google Sign-In is not configured yet. Please use email/password.",
-      );
-      return;
-    }
-
     try {
       setLoading(true);
       setError("");
 
-      const google = window.google;
-      if (!google?.accounts?.id) {
-        setError("Google Sign-In SDK not loaded. Please try again.");
-        setLoading(false);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      const data = await firebaseLogin(idToken, targetRole || "couple");
+
+      if (!data.success) {
         return;
       }
 
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: async (response) => {
-          try {
-            const data = await googleLogin(response.credential);
+      sessionStorage.removeItem("redirectAfterLogin");
 
-            if (data.success) {
-              sessionStorage.removeItem("redirectAfterLogin");
+      const actualRole = (data.user?.role || localStorage.getItem("userRole") || "").toLowerCase();
+      const expectedRole = targetRole.toLowerCase();
 
-              const actualRole = (data.user?.role || localStorage.getItem("userRole") || "").toLowerCase();
-              const expectedRole = targetRole.toLowerCase();
-              
-              console.log('🔐 Google Login Role Check:', {
-                targetRole,
-                actualRole,
-                expectedRole,
-                mismatch,
-                shouldEnforce: !!targetRole && actualRole !== expectedRole
-              });
-              
-              // If coming from a role-specific page, enforce role matching
-              if (targetRole && actualRole !== expectedRole) {
-                setError(
-                  `Invalid credentials for this section. Please log in with a ${expectedRole} account. This Google account is registered as ${actualRole}.`,
-                );
-                await logout();
-                return;
-              }
-
-              handleRedirectByRole(data.user);
-            }
-          } catch (err) {
-            console.error("Google auth error:", err);
-            setError(err.response?.data?.error || "Google sign-in failed.");
-          } finally {
-            setLoading(false);
-          }
-        },
+      console.log("Google Login Role Check:", {
+        targetRole,
+        actualRole,
+        expectedRole,
+        mismatch,
+        shouldEnforce: !!targetRole && actualRole !== expectedRole,
       });
 
-      google.accounts.id.prompt();
+      if (targetRole && actualRole !== expectedRole) {
+        setError(
+          `Invalid credentials for this section. Please log in with a ${expectedRole} account. This Google account is registered as ${actualRole}.`,
+        );
+        await logout();
+        return;
+      }
+
+      handleRedirectByRole(data.user);
     } catch (err) {
-      console.error("Google sign-in error:", err);
-      setError("Failed to initialize Google Sign-In.");
+      console.error("Google auth error:", err);
+      setError(err.response?.data?.error || "Google sign-in failed.");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{
-          backgroundImage: `url("./images/bridal.png")`,
-          filter: "brightness(0.35)",
-        }}
-      />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-loverai-deep/60 via-loverai-dark/40 to-loverai-deep/70"></div>
+    <div className="loverai-wedding-shell w-full min-h-screen flex items-center justify-center">
+      <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
+      <div className="loverai-wedding-overlay" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-left" />
+      <div className="loverai-wedding-glow loverai-wedding-glow-right" />
 
-      {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-loverai-gold/[0.04] rounded-full blur-[120px] z-[1]"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-amber-700/[0.05] rounded-full blur-[100px] z-[1]"></div>
-
-      {/* Login Card */}
       <div className="relative z-20 w-full max-w-md px-6 py-10 animate-fadeInUp">
-        <div className="glass-card-strong rounded-3xl p-8">
-          {/* Logo */}
+        <div className="glass-card-strong loverai-auth-panel rounded-3xl p-8">
           <div className="flex justify-center mb-6">
             <img
               src="/images/LogoLoversai.png"

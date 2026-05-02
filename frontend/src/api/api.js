@@ -62,6 +62,9 @@ export const authAPI = {
   googleLogin: (data) =>
     apiFetch('/auth/google', { method: 'POST', data }),
 
+  firebaseLogin: (data) =>
+    apiFetch('/auth/firebase-login', { method: 'POST', data }),
+
   getMe: () => apiFetch('/auth/me'),
 };
 
