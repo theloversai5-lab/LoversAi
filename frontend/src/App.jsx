@@ -13,6 +13,7 @@ import Feature1 from "./pages/Feature1";
 import CoupleHome from "./pages/couple/CoupleHome";
 import CoupleWeddingVision from "./pages/couple/CoupleWeddingVision";
 import CoupleMoodboard from "./pages/couple/CoupleMoodboard";
+import CoupleThemeMoodboard from "./pages/couple/CoupleThemeMoodboard";
 import CoupleProfileForm from "./pages/couple/CoupleProfileForm";
 import CoupleProfile from "./pages/couple/CoupleProfile";
 
@@ -237,6 +238,22 @@ function AppContent() {
         />
         <Route
           path="/couple/moodboard"
+          element={
+            <ProtectedRoute requiredRole="couple">
+              <CoupleThemeMoodboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/couple/moodboard/:theme"
+          element={
+            <ProtectedRoute requiredRole="couple">
+              <CoupleThemeMoodboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/couple/moodboard/create"
           element={
             <ProtectedRoute requiredRole="couple">
               <CoupleMoodboard />

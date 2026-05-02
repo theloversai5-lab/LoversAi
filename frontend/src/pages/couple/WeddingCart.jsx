@@ -1,132 +1,135 @@
-// pages/couple/WeddingCart.jsx — localStorage cart → submit as RFQ
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { quoteAPI, apiFetch } from '../../api/api';
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { apiFetch, quoteAPI } from "../../api/api";
 
-const WeddingCart = () => {
+const normalizeTheme = (value = "") => {
+  const text = String(value).toLowerCase();
+  if (text.includes("haldi")) return "Haldi";
+  if (text.includes("mehendi") || text.includes("mehandi")) return "Mahendi";
+  if (text.includes("sangeet")) return "Sangeet";
+  return "Wedding";
+};
+
+const emptySections = ["Haldi", "Mahendi", "Sangeet", "Wedding"];
+
+export default function WeddingCart() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-
-  // Event detail overrides
   const [eventDetails, setEventDetails] = useState({
-    budget: '',
-    guestCount: '',
-    city: '',
-    venue: '',
-    tradition: '',
-    notes: '',
+    budget: "",
+    guestCount: "",
+    city: "",
+    venue: "",
+    tradition: "",
+    notes: "",
+    bidDays: "7 Days",
   });
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const res = await apiFetch('/cart');
+        const res = await apiFetch("/cart");
         if (res.success) {
           setCartItems(res.cart?.items || []);
         }
       } catch (err) {
-        console.error('Failed to fetch cart:', err);
-        // Fallback to localStorage for legacy support
+        console.error("Failed to fetch cart:", err);
         const cartKey = `weddingCart_${currentUser?.uid}`;
-        const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+        const cart = JSON.parse(localStorage.getItem(cartKey) || "[]");
         setCartItems(cart);
       }
     };
-    
+
     if (currentUser) fetchCart();
 
-    // Pre-fill from wedding profile
     if (currentUser?.weddingProfile) {
       const wp = currentUser.weddingProfile;
       setEventDetails((prev) => ({
         ...prev,
-        budget: wp.budget || '',
-        guestCount: wp.guestCount || '',
-        city: wp.city || '',
-        venue: wp.venue || '',
-        tradition: wp.tradition || '',
+        budget: wp.budget || "",
+        guestCount: wp.guestCount || "",
+        city: wp.city || "",
+        venue: wp.venue || "",
+        tradition: wp.tradition || "",
       }));
     }
   }, [currentUser]);
 
+  const groupedItems = useMemo(() => {
+    const groups = emptySections.reduce((acc, section) => {
+      acc[section] = [];
+      return acc;
+    }, {});
+
+    cartItems.forEach((item) => {
+      const label = item?.details?.functionType || item?.label || "";
+      const key = normalizeTheme(label);
+      groups[key] = [...(groups[key] || []), item];
+    });
+
+    return groups;
+  }, [cartItems]);
+
   const removeItem = async (itemId) => {
     try {
-      await apiFetch(`/cart/${itemId}`, { method: 'DELETE' });
-      const res = await apiFetch('/cart');
+      await apiFetch(`/cart/${itemId}`, { method: "DELETE" });
+      const res = await apiFetch("/cart");
       if (res.success) setCartItems(res.cart?.items || []);
     } catch (err) {
-      console.error('Failed to remove item:', err);
-      // Optimistic update fallback
-      const updated = cartItems.filter((item) => item._id !== itemId);
-      setCartItems(updated);
+      console.error("Failed to remove item:", err);
+      setCartItems((prev) => prev.filter((item) => item._id !== itemId));
     }
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-    const cartKey = `weddingCart_${currentUser?.uid}`;
-    localStorage.removeItem(cartKey);
   };
 
   const handleSubmit = async () => {
     if (cartItems.length === 0) {
-      setError('Your cart is empty. Add AI visions first!');
+      setError("Your cart is empty. Add AI visions first.");
       return;
     }
 
     setSubmitting(true);
-    setError('');
+    setError("");
 
     try {
-      // Map cart items to the Quote model structure
-      const images = cartItems.map(item => ({
+      const images = cartItems.map((item) => ({
         url: item.url,
-        label: item.label || '',
-        prompt: item.prompt || ''
+        label: item.label || "",
+        prompt: item.prompt || "",
       }));
 
       const quoteData = {
-        images: images,
+        images,
         eventDetails: {
           weddingDate: currentUser?.weddingProfile?.weddingDate || null,
-          budget: eventDetails.budget || '',
-          guestCount: parseInt(eventDetails.guestCount) || 0,
-          city: eventDetails.city || '',
-          venue: eventDetails.venue || '',
-          tradition: eventDetails.tradition || '',
-          notes: eventDetails.notes || ''
-        }
+          budget: eventDetails.budget || "",
+          guestCount: parseInt(eventDetails.guestCount, 10) || 0,
+          city: eventDetails.city || "",
+          venue: eventDetails.venue || "",
+          tradition: eventDetails.tradition || "",
+          notes: eventDetails.notes || "",
+          bidDays: eventDetails.bidDays,
+        },
       };
 
-      console.log('📤 Submitting quote:', quoteData);
-
       const data = await quoteAPI.submit(quoteData);
-
-      console.log('✅ Quote submitted successfully:', data);
-
       if (data.success) {
-        // Clear backend cart
         try {
-          await apiFetch('/cart', { method: 'DELETE' });
-          console.log('🗑️ Cart cleared');
+          await apiFetch("/cart", { method: "DELETE" });
         } catch (clearErr) {
-          console.error('Failed to clear cart:', clearErr);
-          // Don't fail the whole operation if cart clear fails
+          console.error("Failed to clear cart:", clearErr);
         }
-        
         setSuccess(true);
-        setTimeout(() => navigate('/couple/bid-placed'), 1500);
+        setTimeout(() => navigate("/couple/bid-placed"), 1500);
       }
     } catch (err) {
-      console.error('Submit quote error:', err);
-      const errorMsg = err.response?.data?.error || err.message || 'Failed to submit. Please try again.';
+      const errorMsg = err.response?.data?.error || err.message || "Failed to submit. Please try again.";
+      console.error("Submit quote error:", err);
       setError(errorMsg);
-      alert(`❌ Error: ${errorMsg}`);
     } finally {
       setSubmitting(false);
     }
@@ -134,174 +137,160 @@ const WeddingCart = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen loverai-page-bg flex items-center justify-center">
-        <div className="text-center animate-fadeInUp">
-          <div className="text-6xl mb-6">🎉</div>
-          <h2 className="text-2xl font-heading loverai-gradient-text mb-3">Quote Submitted!</h2>
-          <p className="text-white/50 text-sm">Planners will review your vision and send quotes soon.</p>
-          <p className="text-white/30 text-xs mt-2">Redirecting to dashboard...</p>
+      <main className="min-h-screen bg-[#171311] px-4 py-10 text-white">
+        <div className="mx-auto flex min-h-[70vh] max-w-xl items-center justify-center rounded-[10px] border border-[#5d4421] bg-[#1b1512] p-8 text-center">
+          <div>
+            <h2 className="font-['Cormorant_Garamond'] text-[38px] font-semibold text-[#f7e7c7]">
+              Bid Submitted
+            </h2>
+            <p className="mt-3 text-sm text-white/55">
+              Planners will review your vision board and send quotes soon.
+            </p>
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen loverai-page-bg">
-      {/* Header */}
-      <div className="max-w-5xl mx-auto px-6 pt-12 pb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <button
-              onClick={() => navigate(-1)}
-              className="text-white/40 hover:text-white/70 text-sm mb-3 flex items-center gap-1 transition-colors"
-            >
-              ← Back
-            </button>
-            <h1 className="text-3xl font-heading loverai-gradient-text">
-              Wedding Cart 🛒
-            </h1>
-            <p className="text-white/50 text-sm mt-1">
-              Review your AI visions and submit a request for planner quotes
-            </p>
-          </div>
-          {cartItems.length > 0 && (
-            <button
-              onClick={clearCart}
-              className="text-red-400/60 hover:text-red-400 text-xs transition-colors"
-            >
-              Clear All
-            </button>
-          )}
+    <main className="min-h-screen bg-[#171311] px-4 py-6 text-white md:px-6">
+      <div className="mx-auto max-w-[1220px]">
+        <div className="mb-4 flex items-center justify-between text-sm text-white/75">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="rounded border border-white/10 px-3 py-1.5 transition hover:bg-white/5"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/love-story")}
+            className="rounded border border-white/10 px-3 py-1.5 transition hover:bg-white/5"
+          >
+            Add More
+          </button>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-6 pb-16">
-        {cartItems.length === 0 ? (
-          <div className="glass-card rounded-2xl p-12 text-center">
-            <p className="text-5xl mb-4">🎨</p>
-            <p className="text-white/50 mb-2">Your cart is empty</p>
-            <p className="text-white/30 text-sm mb-6">
-              Generate AI wedding visions and add them to your cart
-            </p>
-            <button
-              onClick={() => navigate('/couple/moodboard')}
-              className="loverai-btn-primary !rounded-xl !px-8"
-            >
-              Create Wedding Vision
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Cart Images */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="glass-card rounded-2xl p-5">
-                <h3 className="text-white/70 text-sm font-medium mb-4">
-                  Selected Visions ({cartItems.length})
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {cartItems.map((item, idx) => (
-                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-white/10">
-                      <img
-                        src={item.url}
-                        alt={item.label || `Vision ${idx + 1}`}
-                        className="w-full aspect-square object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                        <button
-                          onClick={() => removeItem(idx)}
-                          className="w-24 bg-red-500/80 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-red-500 transition-colors"
-                        >
-                          Delete
-                        </button>
-                        <button
-                          onClick={() => navigate('/couple/moodboard')}
-                          className="w-24 bg-white/20 backdrop-blur-md text-white border border-white/40 text-xs px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={handleSubmit}
-                          className="w-24 bg-loverai-gold text-loverai-dark font-bold text-xs px-3 py-1.5 rounded-lg hover:brightness-110 transition-all"
-                        >
-                          Place Bid
-                        </button>
+        <section className="rounded-[10px] border border-[#5d4421] bg-[#1b1512] p-3 shadow-[0_0_0_1px_rgba(199,155,45,0.06)]">
+          <div className="border border-[#4e3920] bg-[#181310] px-4 py-4">
+            <div className="mb-4 text-center">
+              <h1 className="font-['Cormorant_Garamond'] text-[34px] font-semibold text-[#f7e7c7]">
+                My Wedding Cart
+              </h1>
+              <div className="mx-auto mt-3 flex max-w-[720px] flex-wrap items-center justify-center gap-2 rounded-[6px] border border-[#7b6140] bg-[#211914] px-4 py-3 text-[11px] text-white/75">
+                <span>{currentUser?.weddingProfile?.partner1 || "Kiara"} &amp; {currentUser?.weddingProfile?.partner2 || "Aarav"}</span>
+                <span>|</span>
+                <span>{currentUser?.weddingProfile?.weddingDate || "02 December 2025"}</span>
+                <span>|</span>
+                <span>{currentUser?.weddingProfile?.city || "Delhi"}</span>
+                <span>|</span>
+                <span>{currentUser?.weddingProfile?.tradition || "Hindu"}</span>
+                <span>|</span>
+                <span>Budget: {eventDetails.budget || "50 L"}</span>
+                <span>|</span>
+                <span>Guest: {eventDetails.guestCount || "500"}</span>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mb-4 rounded-[6px] border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                {error}
+              </div>
+            )}
+
+            <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
+              <div className="space-y-3">
+                {emptySections.map((section) => {
+                  const items = groupedItems[section] || [];
+                  return (
+                    <div key={section} className="rounded-[8px] border border-[#7b6140] bg-[#6e6e6e] p-3">
+                      <div className="mb-2 flex items-center justify-between">
+                        <h2 className="font-['Cormorant_Garamond'] text-[28px] font-semibold text-white">
+                          {section}
+                        </h2>
+                        {items.length > 0 && (
+                          <span className="rounded-full bg-white/25 px-2 py-1 text-[10px] font-semibold text-white">
+                            {items.length}
+                          </span>
+                        )}
                       </div>
-                      {item.label && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1">
-                          <p className="text-white/70 text-[10px] truncate">{item.label}</p>
+
+                      {items.length === 0 ? (
+                        <div className="min-h-[150px] rounded-[6px] border border-white/20 bg-[#8f8f8f]/45" />
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {items.map((item, index) => (
+                            <div key={item._id || `${section}-${index}`} className="rounded-[6px] bg-[#8f8f8f] p-2">
+                              <div className="mb-2 flex items-center justify-between text-[10px] text-white">
+                                <span>{item.details?.planningType || "Decoration"}</span>
+                                <button type="button" onClick={() => removeItem(item._id)} className="text-white/85">
+                                  ×
+                                </button>
+                              </div>
+                              <div className="relative overflow-hidden rounded-[4px] border border-white/20 bg-[#d8d8d8]">
+                                <img
+                                  src={item.url}
+                                  alt={item.label || `${section} vision`}
+                                  className="aspect-[4/3] w-full object-cover"
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            </div>
 
-            {/* Event Details Sidebar */}
-            <div className="space-y-4">
-              <div className="glass-card rounded-2xl p-5">
-                <h3 className="text-white/70 text-sm font-medium mb-4">
-                  Event Details
-                </h3>
-                <div className="space-y-3">
-                  {[
-                    { key: 'budget', label: 'Budget (₹)', placeholder: 'e.g. 15,00,000' },
-                    { key: 'guestCount', label: 'Guest Count', placeholder: 'e.g. 300', type: 'number' },
-                    { key: 'city', label: 'City', placeholder: 'e.g. Mumbai' },
-                    { key: 'venue', label: 'Venue', placeholder: 'e.g. Marriott' },
-                    { key: 'tradition', label: 'Tradition', placeholder: 'e.g. Hindu' },
-                  ].map((field) => (
-                    <div key={field.key}>
-                      <label className="text-white/40 text-xs mb-1 block">{field.label}</label>
-                      <input
-                        type={field.type || 'text'}
-                        value={eventDetails[field.key]}
-                        onChange={(e) =>
-                          setEventDetails((prev) => ({ ...prev, [field.key]: e.target.value }))
-                        }
-                        placeholder={field.placeholder}
-                        className="w-full glass-input rounded-lg px-3 py-2 text-sm"
-                      />
-                    </div>
-                  ))}
+              <aside className="rounded-[8px] border border-[#7b6140] bg-[#211914] p-3">
+                <div className="grid gap-3">
                   <div>
-                    <label className="text-white/40 text-xs mb-1 block">Notes for Planner</label>
-                    <textarea
-                      value={eventDetails.notes}
-                      onChange={(e) =>
-                        setEventDetails((prev) => ({ ...prev, notes: e.target.value }))
-                      }
-                      placeholder="Any special requests..."
-                      rows={3}
-                      className="w-full glass-input rounded-lg px-3 py-2 text-sm resize-none"
+                    <label className="mb-1 block text-[11px] text-white/60">Budget Range</label>
+                    <input
+                      value={eventDetails.budget}
+                      onChange={(e) => setEventDetails((prev) => ({ ...prev, budget: e.target.value }))}
+                      className="w-full rounded-[6px] border border-white/10 bg-[#f4f0ea] px-3 py-2 text-sm text-[#1d1714] outline-none"
+                      placeholder="4-5 Lakh"
                     />
                   </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] text-white/60">End Bid in</label>
+                    <select
+                      value={eventDetails.bidDays}
+                      onChange={(e) => setEventDetails((prev) => ({ ...prev, bidDays: e.target.value }))}
+                      className="w-full rounded-[6px] border border-white/10 bg-[#f4f0ea] px-3 py-2 text-sm text-[#1d1714] outline-none"
+                    >
+                      <option>3 Days</option>
+                      <option>5 Days</option>
+                      <option>7 Days</option>
+                      <option>10 Days</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[11px] text-white/60">Description</label>
+                    <textarea
+                      value={eventDetails.notes}
+                      onChange={(e) => setEventDetails((prev) => ({ ...prev, notes: e.target.value }))}
+                      className="min-h-[130px] w-full rounded-[6px] border border-white/10 bg-[#f4f0ea] px-3 py-2 text-sm text-[#1d1714] outline-none"
+                      placeholder="I want my wedding similar to the generated vision."
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className="mx-auto mt-2 rounded-[6px] bg-[#f4f0ea] px-8 py-2.5 text-sm font-semibold text-[#1d1714] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {submitting ? "Placing Bid..." : "Place Bid"}
+                  </button>
                 </div>
-              </div>
-
-              {error && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <button
-                onClick={handleSubmit}
-                disabled={submitting || cartItems.length === 0}
-                className="w-full loverai-btn-primary !rounded-xl !py-3.5 text-[15px] disabled:opacity-50"
-              >
-                {submitting ? 'Placing Bid...' : `Place Bid (${cartItems.length} visions)`}
-              </button>
-
-              <p className="text-white/20 text-[11px] text-center">
-                Planners will receive your visions and respond with quotes
-              </p>
+              </aside>
             </div>
           </div>
-        )}
+        </section>
       </div>
-    </div>
+    </main>
   );
-};
-
-export default WeddingCart;
+}

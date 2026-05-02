@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiFetch, coupleMoodboardAPI } from "../../api/api";
+import { coupleMoodboardAPI } from "../../api/api";
+import { saveThemeMoodboard } from "./CoupleThemeMoodboard";
 
 const FUNCTION_OPTIONS = [
-  "Pre-wedding (Haldi/Mehendi)",
+  "Haldi",
+  "Mehendi",
+  "Sangeet",
   "Wedding Ceremony",
   "Reception",
-  "Sangeet",
   "Engagement",
   "Nikah",
 ];
@@ -28,14 +30,48 @@ const TIMING_OPTIONS = [
   "Night (Under Stars)",
 ];
 
+const PLANNING_OPTIONS = ["Decoration", "Functions", "Haldi", "Venue", "Theme", "Timing"];
+const VENUE_OPTIONS = ["Farm House", "Banquet", "Resort", "Beachside", "Temple Lawn"];
+const THEME_OPTIONS = ["Carnival", "Royal", "Pastel", "Garden", "Minimal Luxe"];
+
 const TITLE_MAP = {
-  "Pre-wedding (Haldi/Mehendi)": "Golden Dreams of Haldi",
+  Haldi: "Golden Dreams of Haldi",
+  Mehendi: "Henna Garden Reverie",
   "Wedding Ceremony": "Eternal Sacred Vows",
   Reception: "A Night to Remember",
   Sangeet: "Rhythms of Celebration",
   Engagement: "Promise of Forever",
   Nikah: "Blessings of Nikkah",
 };
+
+const getThemeFromFunction = (value = "") => {
+  const text = value.toLowerCase();
+  if (text.includes("haldi")) return "haldi";
+  if (text.includes("mehendi") || text.includes("mehandi")) return "mehendi";
+  if (text.includes("sangeet")) return "sangeet";
+  return "wedding";
+};
+
+const formatBudgetLabel = (budget) => {
+  if (budget >= 100) return "1 Cr";
+  return `${budget} L`;
+};
+
+const PhotoIcon = () => (
+  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <circle cx="8.5" cy="10" r="1.5" />
+    <path d="m21 15-5-5L5 21" />
+  </svg>
+);
+
+const SparkIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z" />
+    <path d="M19 16v5" />
+    <path d="M21.5 18.5h-5" />
+  </svg>
+);
 
 export default function CoupleWeddingVision() {
   const navigate = useNavigate();
@@ -44,13 +80,17 @@ export default function CoupleWeddingVision() {
   const [venuePreview, setVenuePreview] = useState(null);
   const [decorImage, setDecorImage] = useState(null);
   const [decorPreview, setDecorPreview] = useState(null);
-  const [showUploads, setShowUploads] = useState(false);
 
   const [style, setStyle] = useState("Modern");
-  const [functionType, setFunctionType] = useState("Wedding Ceremony");
-  const [atmosphere, setAtmosphere] = useState("Bohemian & Free-spirited");
-  const [timing, setTiming] = useState("Sunset (Golden Hour)");
+  const [functionType, setFunctionType] = useState("Haldi");
+  const [atmosphere, setAtmosphere] = useState("Warm & Festive");
+  const [timing, setTiming] = useState("Morning (Day light)");
   const [userPrompt, setUserPrompt] = useState("");
+  const [budget, setBudget] = useState(11);
+  const [guestCount, setGuestCount] = useState(0);
+  const [planningType, setPlanningType] = useState("Decoration");
+  const [venueType, setVenueType] = useState("Farm House");
+  const [theme, setTheme] = useState("Carnival");
 
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState("");
@@ -58,7 +98,9 @@ export default function CoupleWeddingVision() {
   const [moodboardTitle, setMoodboardTitle] = useState("");
   const [generationMeta, setGenerationMeta] = useState(null);
   const [error, setError] = useState(null);
-  const [addedToCart, setAddedToCart] = useState(false);
+  const [savedTheme, setSavedTheme] = useState("");
+  const [savedToMoodboard, setSavedToMoodboard] = useState(false);
+  const [showMoodboardModal, setShowMoodboardModal] = useState(false);
 
   const venueInputRef = useRef(null);
   const decorInputRef = useRef(null);
@@ -66,7 +108,7 @@ export default function CoupleWeddingVision() {
   useEffect(() => {
     const link = document.createElement("link");
     link.href =
-      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap";
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap";
     link.rel = "stylesheet";
     document.head.appendChild(link);
     return () => document.head.removeChild(link);
@@ -95,13 +137,30 @@ export default function CoupleWeddingVision() {
     };
     reader.readAsDataURL(file);
     setError(null);
-    setGeneratedImages([]);
-    setGenerationMeta(null);
+  };
+
+  const buildVisionPrompt = () => {
+    const chips = [
+      `${style} styling`,
+      functionType,
+      atmosphere,
+      timing,
+      `${venueType} venue`,
+      `${theme} theme`,
+      `${planningType.toLowerCase()} focus`,
+      `budget around ${formatBudgetLabel(budget)}`,
+      guestCount > 0 ? `${guestCount} guests` : null,
+    ].filter(Boolean);
+
+    const base = userPrompt.trim() || "Create a cinematic wedding scene with layered decor details.";
+    return `${base}. ${chips.join(", ")}. Keep the result premium, photoreal, editorial, and celebration-ready.`;
   };
 
   const handleGenerate = async () => {
     setGenerating(true);
     setError(null);
+    setSavedToMoodboard(false);
+    setSavedTheme("");
     setGeneratedImages([]);
     setGenerationMeta(null);
     setMoodboardTitle("");
@@ -115,25 +174,18 @@ export default function CoupleWeddingVision() {
       formData.append("functionType", functionType);
       formData.append("atmosphere", atmosphere);
       formData.append("timing", timing);
-      formData.append("userPrompt", userPrompt);
+      formData.append("userPrompt", buildVisionPrompt());
 
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      setProgress("Crafting your personalized wedding prompt...");
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      setProgress("Generating editorial wedding scenes...");
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setProgress("Analyzing your wedding direction...");
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setProgress("Generating wedding scenes with Gemini AI...");
 
-      const patientTimer = setTimeout(
-        () => setProgress("Almost there. Composing your moodboard..."),
-        90000,
-      );
       const result = await coupleMoodboardAPI.generate(formData);
-      clearTimeout(patientTimer);
 
       if (result.success && result.generatedImages?.length > 0) {
         setGeneratedImages(result.generatedImages);
-        setMoodboardTitle(
-          result.moodboardTitle || TITLE_MAP[functionType] || "Wedding Vision",
-        );
+        setMoodboardTitle(result.moodboardTitle || TITLE_MAP[functionType] || "Wedding Vision");
         setGenerationMeta(result);
       } else if (result.success && result.generatedImageUrl) {
         setGeneratedImages([
@@ -149,135 +201,85 @@ export default function CoupleWeddingVision() {
         throw new Error(result.error || "Generation failed");
       }
     } catch (err) {
+      const apiMessage = err.response?.data?.error;
+      const apiDetails = err.response?.data?.details;
+      const message = [apiMessage || err.message || "Generation failed. Please try again.", apiDetails]
+        .filter(Boolean)
+        .join(" ");
       console.error("Moodboard generation error:", err);
-      setError(
-        err.response?.data?.error ||
-          err.message ||
-          "Generation failed. Please try again.",
-      );
+      setError(message);
     } finally {
       setProgress("");
       setGenerating(false);
     }
   };
 
-  const handleAddToCart = async () => {
+  const handleAddToMoodboard = () => {
     if (generatedImages.length === 0) return;
-    setAddedToCart(true);
 
-    try {
-      await apiFetch("/cart/add", {
-        method: "POST",
-        data: {
-          type: "vision",
-          url: generatedImages[0].url,
-          moodboard: generatedImages.map((img) => img.url),
-          label: `${moodboardTitle} - ${style} ${functionType} Moodboard`,
-          prompt: generationMeta?.finalPrompt || userPrompt,
-          details: {
-            style,
-            functionType,
-            atmosphere,
-            timing,
-            mode: generationMeta?.mode,
-            imageCount: generatedImages.length,
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Failed to add to cart:", err);
-      setError("Failed to add moodboard to cart. Please try again.");
-    } finally {
-      window.setTimeout(() => setAddedToCart(false), 2200);
-    }
+    const boardTheme = saveThemeMoodboard({
+      title: moodboardTitle || TITLE_MAP[functionType] || "Wedding Vision",
+      images: generatedImages,
+      style,
+      functionType,
+      atmosphere,
+      timing,
+      prompt: generationMeta?.finalPrompt || buildVisionPrompt(),
+      details: {
+        budget,
+        guestCount,
+        planningType,
+        venueType,
+        theme,
+      },
+    });
+
+    setSavedTheme(boardTheme);
+    setSavedToMoodboard(true);
+    setShowMoodboardModal(true);
   };
 
-  const handleDownload = async () => {
-    for (const img of generatedImages) {
-      try {
-        const response = await fetch(img.url);
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `wedding_vision_${Date.now()}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } catch {
-        window.open(img.url, "_blank");
-      }
-    }
+  const openThemeBoard = () => {
+    const boardTheme = savedTheme || getThemeFromFunction(functionType);
+    navigate(`/couple/moodboard/${boardTheme}`);
   };
 
-  const resetToSetup = () => {
+  const planAnotherFunction = () => {
+    setShowMoodboardModal(false);
     setGeneratedImages([]);
     setGenerationMeta(null);
     setMoodboardTitle("");
-    setError(null);
+    setSavedToMoodboard(false);
   };
 
-  const PageHeader = () => (
-    <div className="relative z-10 mx-auto flex w-full max-w-[430px] items-center justify-between rounded-b-[28px] border border-white/10 bg-[#120d0a]/95 px-5 py-4 shadow-[0_18px_42px_rgba(0,0,0,0.45)]">
-      <button
-        type="button"
-        onClick={generatedImages.length > 0 ? resetToSetup : () => navigate(-1)}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/75 transition hover:bg-white/5 hover:text-white"
-        aria-label="Go back"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </button>
-
-      <div className="text-center">
-        <p className="font-heading text-base font-bold uppercase tracking-[0.12em] text-white">
-          THE LOVERS AI
-        </p>
-        <div className="mx-auto mt-2 h-3 w-8 rounded-full border-t border-loverai-gold/40 opacity-60" />
-      </div>
-
-      <button
-        type="button"
-        onClick={() => navigate("/couple/cart")}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white/75 transition hover:bg-white/5 hover:text-white"
-        aria-label="View cart"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 6h15l-1.5 8.5H8L6 6Z" />
-          <path d="M6 6 5 3H2" />
-          <circle cx="9" cy="20" r="1.5" />
-          <circle cx="18" cy="20" r="1.5" />
-        </svg>
-      </button>
-    </div>
-  );
-
-  const Dropdown = ({ label, options, value, onChange }) => (
-    <div className="mb-4">
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
-        {label}
+  const FilterSection = ({ title, children }) => (
+    <div className="rounded-[8px] border border-white/10 bg-[#2a241f] p-2.5">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/70">
+        {title}
       </p>
-      <select
-        className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-sm text-white/80 outline-none transition focus:border-loverai-gold/50"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((option) => (
-          <option key={option} value={option} className="bg-[#211914]">
-            {option}
-          </option>
-        ))}
-      </select>
+      {children}
     </div>
   );
 
-  const UploadPreview = ({ label, preview, inputRef, onSelect }) => (
+  const SelectField = ({ value, onChange, options }) => (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full rounded-[6px] border border-white/10 bg-[#201913] px-2 py-1.5 text-[11px] text-white outline-none transition focus:border-[#c79b2d]"
+    >
+      {options.map((option) => (
+        <option key={option} value={option} className="bg-[#201913]">
+          {option}
+        </option>
+      ))}
+    </select>
+  );
+
+  const UploadBox = ({ label, preview, inputRef, onSelect }) => (
     <button
       type="button"
       onClick={() => inputRef.current?.click()}
-      className="w-full overflow-hidden rounded-xl border border-dashed border-white/15 bg-white/[0.03] text-left transition hover:border-loverai-gold/45 hover:bg-white/[0.05]"
+      className="overflow-hidden rounded-[8px] border border-dashed border-white/15 bg-[#201913] text-left transition hover:border-[#c79b2d]"
     >
       <input
         ref={inputRef}
@@ -287,263 +289,307 @@ export default function CoupleWeddingVision() {
         onChange={(e) => onSelect(e.target.files[0])}
       />
       {preview ? (
-        <div className="relative h-28">
+        <div className="relative h-20">
           <img src={preview} alt={label} className="h-full w-full object-cover" />
-          <span className="absolute bottom-2 left-2 rounded-full bg-black/65 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/80">
+          <span className="absolute bottom-1.5 left-1.5 rounded bg-black/70 px-2 py-0.5 text-[9px] uppercase tracking-[0.12em] text-white">
             {label}
           </span>
         </div>
       ) : (
-        <div className="flex min-h-20 items-center justify-between px-4 py-3">
-          <span className="text-xs font-semibold text-white/60">{label}</span>
-          <span className="text-[10px] uppercase tracking-[0.14em] text-white/35">
-            Upload
-          </span>
-        </div>
+        <div className="px-3 py-4 text-[11px] text-white/60">{label}</div>
       )}
     </button>
   );
 
-  const SetupScreen = () => (
-    <div className="relative z-10 mx-auto w-full max-w-[430px] px-4 pb-8">
-      <PageHeader />
-
-      <section className="px-3 pb-8 pt-7 text-center">
-        <h1 className="font-heading text-[32px] font-bold leading-[1.05] text-[#f0c9d5]">
-          Create Your Wedding Vision
-        </h1>
-        <p className="mx-auto mt-4 max-w-[310px] text-sm font-semibold leading-6 text-white/55">
-          Select your wedding style and let AI craft a stunning editorial
-          moodboard of your dream celebration
-        </p>
-      </section>
-
-      <section className="rounded-2xl border border-white/12 bg-[#211914]/88 p-5 shadow-[0_28px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl">
-        <h2 className="font-heading text-lg font-bold text-white">
-          Configure Your Vision
-        </h2>
-        <div className="my-4 h-px bg-white/8" />
-
-        {error && (
-          <div className="mb-4 rounded-xl border border-red-400/25 bg-red-500/10 px-3 py-2 text-center text-xs font-semibold text-red-200">
-            {error}
-          </div>
-        )}
-
-        <div className="mb-4">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
-            Primary Style
+  const renderCanvas = () => {
+    if (generating) {
+      return (
+        <div className="flex h-full min-h-[520px] flex-col items-center justify-center text-center text-white/75">
+          <div className="h-12 w-12 animate-spin rounded-full border-2 border-[#c79b2d]/30 border-t-[#c79b2d]" />
+          <p className="mt-5 font-['Cormorant_Garamond'] text-[30px] font-semibold text-[#f4e3c1]">
+            Creating Your Wedding Vision
           </p>
-          <div className="grid grid-cols-2 rounded-xl bg-white/[0.04] p-1">
-            {["Modern", "Traditional"].map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setStyle(option)}
-                className={`rounded-lg py-2 text-xs font-semibold transition ${
-                  style === option
-                    ? "bg-[#e4c3ad] text-[#2b1a24]"
-                    : "text-white/55 hover:text-white"
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <Dropdown label="Function Type" options={FUNCTION_OPTIONS} value={functionType} onChange={setFunctionType} />
-        <Dropdown label="Atmosphere" options={ATMOSPHERE_OPTIONS} value={atmosphere} onChange={setAtmosphere} />
-        <Dropdown label="Timing" options={TIMING_OPTIONS} value={timing} onChange={setTiming} />
-
-        <div className="mb-4">
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
-            Additional Instructions (Optional)
+          <p className="mt-2 text-sm text-white/60">
+            {progress || "Preparing your wedding moodboard..."}
           </p>
-          <textarea
-            className="min-h-[74px] w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-3 text-sm text-white/80 outline-none transition placeholder:text-white/25 focus:border-loverai-gold/50"
-            placeholder="E.g., pastel florals, palace courtyard, candlelit mandap..."
-            value={userPrompt}
-            onChange={(e) => setUserPrompt(e.target.value)}
-          />
+        </div>
+      );
+    }
+
+    if (generatedImages.length === 0) {
+      return (
+        <div className="flex h-full min-h-[520px] flex-col items-center justify-center text-center text-white/50">
+          <div className="rounded-[14px] border border-white/10 bg-white/5 p-3 text-white/60">
+            <PhotoIcon />
+          </div>
+          <p className="mt-8 font-['Cormorant_Garamond'] text-[28px] font-semibold text-[#f3ead7]">
+            Your Generated Wedding Scenes will appear here
+          </p>
+          <p className="mt-2 text-lg text-white/35">
+            Start by describing your vision first
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex h-full min-h-[520px] flex-col">
+        <div className="grid flex-1 grid-cols-1 gap-1.5 md:grid-cols-[1.2fr_1fr]">
+          <div className="relative overflow-hidden rounded-[2px] bg-[#b3aeaa] md:row-span-2">
+            <img src={generatedImages[0]?.url} alt={generatedImages[0]?.label || "Generated wedding scene"} className="h-full w-full object-cover" />
+          </div>
+          <div className="relative overflow-hidden rounded-[2px] bg-[#b3aeaa]">
+            {generatedImages[1] && (
+              <img src={generatedImages[1].url} alt={generatedImages[1]?.label || "Generated wedding scene"} className="h-full w-full object-cover" />
+            )}
+          </div>
+          <div className="relative overflow-hidden rounded-[2px] bg-[#b3aeaa]">
+            {generatedImages[2] && (
+              <img src={generatedImages[2].url} alt={generatedImages[2]?.label || "Generated wedding scene"} className="h-full w-full object-cover" />
+            )}
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowUploads(!showUploads)}
-          className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/38 transition hover:text-white/70"
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showUploads ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-          Upload Reference Images (Optional)
-        </button>
-
-        {showUploads && (
-          <div className="mb-4 grid gap-3">
-            <UploadPreview label="Venue photo" preview={venuePreview} inputRef={venueInputRef} onSelect={(file) => handleFileSelect(file, "venue")} />
-            <UploadPreview label="Decor inspiration" preview={decorPreview} inputRef={decorInputRef} onSelect={(file) => handleFileSelect(file, "decor")} />
+        {generatedImages[3] && (
+          <div className="mt-1.5 grid h-[160px] grid-cols-1">
+            <div className="relative overflow-hidden rounded-[2px] bg-[#b3aeaa]">
+              <img src={generatedImages[3].url} alt={generatedImages[3]?.label || "Generated wedding scene"} className="h-full w-full object-cover" />
+            </div>
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={generating}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#e4c3ad] px-5 py-4 text-sm font-bold text-[#2b1a24] shadow-[0_16px_36px_rgba(228,195,173,0.28)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <span aria-hidden="true">+</span>
-          Generate Moodboard
-        </button>
-        <p className="mt-3 text-center text-[10px] text-white/28">
-          Uses 15 credits per generation
-        </p>
-      </section>
-    </div>
-  );
-
-  const LoadingScreen = () => (
-    <div className="relative z-10 mx-auto w-full max-w-[430px] px-4 pb-8">
-      <PageHeader />
-      <section className="mt-8 rounded-2xl border border-white/12 bg-[#211914]/88 p-8 text-center shadow-[0_28px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl">
-        <div className="mx-auto mb-6 h-16 w-16 rounded-full border-4 border-loverai-gold/20 border-t-loverai-gold animate-spin" />
-        <h1 className="font-heading text-2xl font-bold text-[#f0c9d5]">
-          Creating Your Vision
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-white/55">
-          {progress || "Preparing your wedding moodboard..."}
-        </p>
-        <div className="mt-6 grid gap-2 text-left text-xs text-white/48">
-          {[
-            "Reading your style selections",
-            "Writing the editorial prompt",
-            "Generating wedding scenes",
-            "Composing your moodboard",
-          ].map((item) => (
-            <div key={item} className="rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2">
-              {item}
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-
-  const ResultScreen = () => (
-    <div className="relative z-10 mx-auto w-full max-w-[920px] px-4 pb-8">
-      <PageHeader />
-
-      <section className="pt-7 text-center">
-        <h1 className="font-heading text-[32px] font-bold leading-[1.05] text-[#f0c9d5]">
-          {moodboardTitle || "Your Wedding Vision"}
-        </h1>
-        <p className="mx-auto mt-3 max-w-[460px] text-sm font-semibold leading-6 text-white/50">
-          Review the generated editorial moodboard, add it to your cart, or
-          adjust your setup and regenerate.
-        </p>
-      </section>
-
-      <section className="mt-6 rounded-2xl border border-white/12 bg-[#211914]/88 p-3 shadow-[0_28px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:p-5">
-        <div
-          className="grid overflow-hidden rounded-xl bg-black/30"
-          style={{
-            gridTemplateColumns:
-              generatedImages.length >= 4
-                ? "1.2fr 1fr"
-                : generatedImages.length > 1
-                  ? "1fr 1fr"
-                  : "1fr",
-            gap: 3,
-            minHeight: 360,
-          }}
-        >
-          {generatedImages.map((img, index) => (
-            <div
-              key={`${img.url}-${index}`}
-              className="relative min-h-[180px] overflow-hidden"
-              style={{
-                gridRow:
-                  generatedImages.length >= 4 && index === 0
-                    ? "span 2"
-                    : undefined,
-              }}
-            >
-              <img
-                src={img.url}
-                alt={img.label || "Generated wedding scene"}
-                className="h-full w-full object-cover"
-                loading="eager"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
-                  {img.label || `Scene ${index + 1}`}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          <span className="rounded-full bg-loverai-gold/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-loverai-gold">
-            {generatedImages.length} Scenes
-          </span>
-          <span className="rounded-full bg-white/[0.05] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
-            {style} / {functionType}
-          </span>
-        </div>
-
-        {error && (
-          <div className="mt-4 rounded-xl border border-red-400/25 bg-red-500/10 px-3 py-2 text-center text-xs font-semibold text-red-200">
-            {error}
-          </div>
-        )}
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
-            onClick={handleAddToCart}
-            className={`rounded-xl border px-4 py-3 text-sm font-bold transition ${
-              addedToCart
-                ? "border-green-400/50 bg-green-500/10 text-green-200"
-                : "border-white/15 bg-white/[0.04] text-white hover:border-loverai-gold/45"
+            onClick={handleAddToMoodboard}
+            className={`inline-flex items-center gap-2 rounded-[4px] border px-4 py-2 text-sm font-semibold transition ${
+              savedToMoodboard
+                ? "border-[#89b86b] bg-[#89b86b]/15 text-[#d8efc8]"
+                : "border-white/15 bg-[#f1ede7] text-[#1f1a17] hover:bg-white"
             }`}
           >
-            {addedToCart ? "Added" : "Add to Moodboard"}
+            <SparkIcon />
+            {savedToMoodboard ? "Added to Moodboard" : "Add to Moodboard"}
           </button>
+
           <button
             type="button"
-            onClick={handleDownload}
-            className="rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm font-bold text-white transition hover:border-white/35"
+            onClick={openThemeBoard}
+            className="rounded-[4px] border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold text-white/80 transition hover:border-white/25 hover:bg-white/15"
           >
-            Download All
-          </button>
-          <button
-            type="button"
-            onClick={resetToSetup}
-            className="rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm font-bold text-white/65 transition hover:text-white"
-          >
-            Edit Setup
+            View More
           </button>
         </div>
-      </section>
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0f0907] font-sans text-white">
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-25"
-        style={{ backgroundImage: "url('/images/signup.png')" }}
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(225,195,135,0.10),transparent_32%),linear-gradient(180deg,rgba(15,9,7,0.72),rgba(15,9,7,0.96))]" />
+    <main className="min-h-screen bg-[#161210] px-4 py-6 text-white md:px-6">
+      <div className="mx-auto max-w-[1320px]">
+        <div className="mb-3 flex items-center justify-between text-sm text-white/80">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="rounded border border-white/10 px-3 py-1.5 transition hover:bg-white/5"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/couple/moodboard/wedding")}
+            className="rounded border border-white/10 px-3 py-1.5 transition hover:bg-white/5"
+          >
+            Moodboards
+          </button>
+        </div>
 
-      {generating ? (
-        <LoadingScreen />
-      ) : generatedImages.length > 0 ? (
-        <ResultScreen />
-      ) : (
-        <SetupScreen />
-      )}
+        <section className="rounded-[10px] border border-[#5d4421] bg-[#1b1512] p-3 shadow-[0_0_0_1px_rgba(199,155,45,0.06)]">
+          <div className="border border-[#4e3920] bg-[#181310] px-4 py-5">
+            <div className="text-center">
+              <h1 className="font-['Cormorant_Garamond'] text-[34px] font-semibold text-[#f7e7c7]">
+                Create Your Wedding Vision
+              </h1>
+              <p className="text-[11px] text-[#b7a48a]">
+                See your unique wedding design come to life
+              </p>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3 lg:flex-row">
+              <div className="flex flex-1 items-center gap-2 rounded-[6px] border border-[#a57710] bg-[#231b16] px-3 py-2">
+                <SparkIcon />
+                <input
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value)}
+                  placeholder="Describe your Wedding Scene..."
+                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-[#8f7b62]"
+                />
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={generating}
+                  className="rounded-[4px] border border-[#a57710] p-1 text-[#d9aa35] transition hover:bg-[#a57710]/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label="Generate vision"
+                >
+                  <SparkIcon />
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGenerate}
+                disabled={generating}
+                className="inline-flex items-center justify-center gap-2 rounded-[4px] bg-[#f4f0ea] px-4 py-2.5 text-sm font-semibold text-[#1e1915] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <SparkIcon />
+                Generate
+              </button>
+            </div>
+
+            {error && (
+              <div className="mt-3 rounded-[6px] border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                {error}
+              </div>
+            )}
+
+            <div className="mt-5 grid gap-3 lg:grid-cols-[240px_minmax(0,1fr)]">
+              <aside className="rounded-[8px] border border-white/12 bg-[#26211d] p-2.5">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-semibold text-white">Style Filters</p>
+                </div>
+
+                <div className="space-y-2">
+                  <FilterSection title="Budget (in Rupees)">
+                    <input
+                      type="range"
+                      min="1"
+                      max="100"
+                      value={budget}
+                      onChange={(e) => setBudget(Number(e.target.value))}
+                      className="w-full accent-[#c79b2d]"
+                    />
+                    <div className="mt-1 flex items-center justify-between text-[10px] text-white/60">
+                      <span>1 L</span>
+                      <span>{formatBudgetLabel(budget)}</span>
+                      <span>1 Cr</span>
+                    </div>
+                  </FilterSection>
+
+                  <FilterSection title="Theme">
+                    <div className="grid grid-cols-2 gap-1">
+                      {["Modern", "Traditional"].map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setStyle(option)}
+                          className={`rounded-[6px] border px-2 py-1.5 text-[11px] font-semibold transition ${
+                            style === option
+                              ? "border-[#f3eee8] bg-[#f3eee8] text-[#1d1714]"
+                              : "border-white/10 bg-[#201913] text-white/70 hover:border-white/20"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </FilterSection>
+
+                  <FilterSection title="Guest (PAX)">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1000"
+                      value={guestCount}
+                      onChange={(e) => setGuestCount(Number(e.target.value))}
+                      className="w-full accent-[#c79b2d]"
+                    />
+                    <div className="mt-1 flex items-center justify-between text-[10px] text-white/60">
+                      <span>0</span>
+                      <span>{guestCount}</span>
+                      <span>1000</span>
+                    </div>
+                  </FilterSection>
+
+                  <FilterSection title="Planning">
+                    <SelectField value={planningType} onChange={setPlanningType} options={PLANNING_OPTIONS} />
+                  </FilterSection>
+
+                  <FilterSection title="Functions">
+                    <SelectField value={functionType} onChange={setFunctionType} options={FUNCTION_OPTIONS} />
+                  </FilterSection>
+
+                  <FilterSection title="Venue">
+                    <SelectField value={venueType} onChange={setVenueType} options={VENUE_OPTIONS} />
+                  </FilterSection>
+
+                  <FilterSection title="Theme">
+                    <SelectField value={theme} onChange={setTheme} options={THEME_OPTIONS} />
+                  </FilterSection>
+
+                  <FilterSection title="Atmosphere">
+                    <SelectField value={atmosphere} onChange={setAtmosphere} options={ATMOSPHERE_OPTIONS} />
+                  </FilterSection>
+
+                  <FilterSection title="Timing">
+                    <SelectField value={timing} onChange={setTiming} options={TIMING_OPTIONS} />
+                  </FilterSection>
+
+                  <FilterSection title="Reference Uploads">
+                    <div className="grid gap-2">
+                      <UploadBox label="Venue photo" preview={venuePreview} inputRef={venueInputRef} onSelect={(file) => handleFileSelect(file, "venue")} />
+                      <UploadBox label="Decor inspiration" preview={decorPreview} inputRef={decorInputRef} onSelect={(file) => handleFileSelect(file, "decor")} />
+                    </div>
+                  </FilterSection>
+                </div>
+              </aside>
+
+              <section className="rounded-[8px] border border-white/14 bg-[#241d18] p-2">
+                <div className="rounded-[6px] border border-[#7b6140] bg-[#211914] p-4">
+                  {renderCanvas()}
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+        {showMoodboardModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-[360px] rounded-[10px] bg-[#f7f2eb] p-5 text-center text-[#1e1815] shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+              <button
+                type="button"
+                onClick={() => setShowMoodboardModal(false)}
+                className="absolute right-3 top-3 text-sm text-[#1e1815]/70 transition hover:text-[#1e1815]"
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#3BFF47] text-white shadow-[0_12px_30px_rgba(59,255,71,0.25)]">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              </div>
+              <h2 className="font-['Cormorant_Garamond'] text-[24px] font-semibold">
+                Added to Moodboard
+              </h2>
+              <div className="mt-5 grid gap-2">
+                <button
+                  type="button"
+                  onClick={planAnotherFunction}
+                  className="rounded-[6px] bg-[#1d1714] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                >
+                  Plan Another Function
+                </button>
+                <button
+                  type="button"
+                  onClick={openThemeBoard}
+                  className="rounded-[6px] bg-[#1d1714] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                >
+                  Go To Moodboard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

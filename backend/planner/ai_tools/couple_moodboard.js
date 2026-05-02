@@ -13,12 +13,17 @@ const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-s
 const CREDIT_COST = 15;
 const MAX_RETRIES = parseInt(process.env.MOODBOARD_MAX_RETRIES) || 1;
 const VALIDATION_ENABLED = (process.env.MOODBOARD_VALIDATION_ENABLED || "true") === "true";
+const GEMINI_API_BASE_URL = process.env.GEMINI_API_BASE_URL || "https://generativelanguage.googleapis.com/v1beta";
+const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-image-preview";
 
 const isAIEnabled = () =>
-  !!(process.env.BFL_API_KEY && process.env.BFL_API_KEY !== "your_bfl_api_key_here");
+  !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "your_gemini_api_key_here");
 
 const isGroqEnabled = () =>
   !!(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== "your_groq_api_key_here");
+
+const isGeminiAuthError = (message = "") =>
+  /GEMINI_AUTH_ERROR|Gemini API authentication failed|api key not valid|permission denied/i.test(message);
 
 // ─── Multer ───
 const upload = multer({
@@ -595,7 +600,7 @@ async function detectAspectRatio(imageBuffer) {
   }
 }
 
-async function callFluxAPI(imageBuffer, prompt, modelType = "flux-2-max", dimensions = null, seed = null) {
+async function callFluxAPI(imageBuffer, prompt, modelType = "flux-2-pro", dimensions = null, seed = null, fallbackModels = null) {
   if (!isAIEnabled()) {
     throw new Error("AI service not configured — set BFL_API_KEY");
   }
@@ -638,9 +643,15 @@ async function callFluxAPI(imageBuffer, prompt, modelType = "flux-2-max", dimens
     const errorText = await response.text();
 
     // 403 = auth error — don't retry, the API key is invalid
-    if (response.status === 403) {
-      console.error("❌ [Moodboard] BFL API key rejected (403). Check your BFL_API_KEY in .env");
-      throw new Error("BFL API authentication failed — your API key may be expired or invalid. Please check BFL_API_KEY in .env");
+    if ((response.status === 401 || response.status === 403) && fallbackModels?.length) {
+      const [nextModel, ...remainingModels] = fallbackModels;
+      console.log(`🔄 [Moodboard] ${modelType} rejected (${response.status}); trying ${nextModel}`);
+      return callFluxAPI(imageBuffer, prompt, nextModel, dimensions, seed, remainingModels);
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      console.error(`❌ [Moodboard] BFL API key rejected (${response.status}). Check your BFL_API_KEY in .env`);
+      throw new Error("BFL_AUTH_ERROR: BFL API authentication failed. Restart the backend after setting BFL_API_KEY; if it still fails, the key is invalid, expired, or not enabled for this model.");
     }
 
     // 422 = model not available — try fallback model
@@ -868,6 +879,85 @@ function generateVariationPrompts(basePrompt, functionType) {
 // ROUTES
 // ═══════════════════════════════════════════════════════════════════
 
+function mapGeminiAspectRatio(dimensions) {
+  if (!dimensions?.label) return "4:3";
+  const supportedRatios = new Set(["1:1", "3:4", "4:3", "9:16", "16:9"]);
+  if (supportedRatios.has(dimensions.label)) return dimensions.label;
+  if ((dimensions.width || 0) >= (dimensions.height || 0)) return "4:3";
+  return "3:4";
+}
+
+function extractGeminiImageParts(responseData = {}) {
+  const parts = responseData?.candidates?.flatMap((candidate) => candidate?.content?.parts || []) || [];
+  return parts
+    .filter((part) => part?.inlineData?.data)
+    .map((part, index) => ({
+      url: `data:${part.inlineData.mimeType || "image/png"};base64,${part.inlineData.data}`,
+      seed: Date.now() + index,
+      generationId: `gem_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    }));
+}
+
+async function callGeminiImageAPI(imageBuffer, prompt, modelType = GEMINI_IMAGE_MODEL, dimensions = null) {
+  if (!isAIEnabled()) {
+    throw new Error("AI service not configured — set GEMINI_API_KEY");
+  }
+
+  const promptParts = [];
+  if (imageBuffer) {
+    promptParts.push({
+      inlineData: {
+        mimeType: "image/jpeg",
+        data: imageBuffer.toString("base64"),
+      },
+    });
+  }
+  promptParts.push({ text: prompt });
+
+  const response = await fetch(`${GEMINI_API_BASE_URL}/models/${modelType}:generateContent`, {
+    method: "POST",
+    headers: {
+      "x-goog-api-key": process.env.GEMINI_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: promptParts,
+        },
+      ],
+      generationConfig: {
+        responseModalities: ["IMAGE", "TEXT"],
+        imageConfig: {
+          aspectRatio: mapGeminiAspectRatio(dimensions),
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("GEMINI_AUTH_ERROR: Gemini API authentication failed. Restart the backend after setting GEMINI_API_KEY; if it still fails, the key is invalid or does not have image generation access.");
+    }
+    throw new Error(`Gemini error ${response.status}: ${errorText.substring(0, 300)}`);
+  }
+
+  const result = await response.json();
+  const imageParts = extractGeminiImageParts(result);
+  if (imageParts.length === 0) {
+    const textParts = result?.candidates?.flatMap((candidate) => candidate?.content?.parts || [])
+      .filter((part) => part?.text)
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+    throw new Error(`Gemini returned no image output.${textParts ? ` ${textParts}` : ""}`);
+  }
+
+  return imageParts[0];
+}
+
 // Health check
 router.get("/couple-moodboard/health", async (_req, res) => {
   res.json({
@@ -875,11 +965,11 @@ router.get("/couple-moodboard/health", async (_req, res) => {
     service: "Couple Moodboard AI (Advanced V2 Pipeline)",
     groq_configured: isGroqEnabled(),
     groq_model: GROQ_VISION_MODEL,
-    flux_configured: isAIEnabled(),
+    gemini_configured: isAIEnabled(),
     credit_cost: CREDIT_COST,
     validation_enabled: VALIDATION_ENABLED,
     max_retries: MAX_RETRIES,
-    pipeline_stages: ["A:SystemPrompt", "B:GroqVision", "C:PromptHarden", "D:FluxGenerate", "E:Validate+Retry"],
+    pipeline_stages: ["A:SystemPrompt", "B:GroqVision", "C:PromptHarden", "D:GeminiGenerate", "E:Validate+Retry"],
     timestamp: new Date().toISOString(),
   });
 });
@@ -897,7 +987,7 @@ router.post(
 
     try {
       if (!isAIEnabled()) {
-        return res.status(503).json({ success: false, error: "AI service not configured — set BFL_API_KEY" });
+        return res.status(503).json({ success: false, error: "AI service not configured — set GEMINI_API_KEY" });
       }
 
       const venueFile = req.files?.venueImage?.[0];
@@ -968,13 +1058,13 @@ router.post(
       const parsedSeed = userSeed ? parseInt(userSeed) : null;
       const variationPrompts = generateVariationPrompts(hardenedPrompt, functionType);
       // Always use text-to-image for diverse moodboard scenes
-      const modelType = "flux-2-max";
+      const modelType = GEMINI_IMAGE_MODEL;
 
-      console.log(`🎨 [Moodboard] Firing 4 parallel Flux (${modelType}) calls...`);
+      console.log(`🎨 [Moodboard] Firing 4 parallel Gemini (${modelType}) calls...`);
 
       const fluxPromises = variationPrompts.map((v, idx) => {
         const variationSeed = parsedSeed ? parsedSeed + idx : null;
-        return callFluxAPI(null, v.prompt, modelType, dimensions, variationSeed)
+        return callGeminiImageAPI(null, v.prompt, modelType, dimensions)
           .then((result) => ({ success: true, label: v.label, ...result }))
           .catch((err) => {
             console.error(`❌ [Moodboard] Variation "${v.label}" failed:`, err.message);
@@ -998,6 +1088,15 @@ router.post(
       const failedCount = fluxResults.filter((r) => !r.success).length;
 
       if (generatedImages.length === 0) {
+        const firstError = fluxResults.find((r) => r.error)?.error || "";
+        if (fluxResults.some((r) => isGeminiAuthError(r.error))) {
+          return res.status(401).json({
+            success: false,
+            error: "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.",
+            details: firstError.replace(/^GEMINI_AUTH_ERROR:\s*/, ""),
+            pipelineTimings: timer.getTimings(),
+          });
+        }
         throw new Error("All 4 image generations failed. Please try again.");
       }
 
@@ -1066,6 +1165,10 @@ router.post(
       else if (error.message.includes("rate") || error.message.includes("busy")) { msg = "Service is busy. Please wait."; statusCode = 429; }
       else if (error.message.includes("credits")) { msg = error.message; statusCode = 402; }
       else if (error.message.includes("not configured")) { msg = error.message; statusCode = 503; }
+      else if (isGeminiAuthError(error.message)) {
+        msg = "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.";
+        statusCode = 401;
+      }
       return res.status(statusCode).json({ success: false, error: msg, pipelineTimings: timer.getTimings() });
     }
   }

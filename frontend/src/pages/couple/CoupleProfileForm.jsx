@@ -193,7 +193,7 @@ export default function CoupleProfileForm() {
       localStorage.removeItem(PROFILE_STEP_KEY);
       localStorage.removeItem("isNewUser");
       setServerMessage("Your wedding profile has been saved successfully! ✨");
-      navigate("/couple/moodboard");
+      navigate("/love-story");
     } catch (error) {
       setServerError(
         error?.message || "We couldn't save your profile. Please try again.",
@@ -243,9 +243,9 @@ export default function CoupleProfileForm() {
               {serverMessage}
               <button
                 style={{ display: "block", marginTop: 16, ...primaryBtn }}
-                onClick={() => navigate("/couple/moodboard")}
+                onClick={() => navigate("/love-story")}
               >
-                Go to My Journey →
+                Continue to GenAI Vision →
               </button>
             </div>
           )}

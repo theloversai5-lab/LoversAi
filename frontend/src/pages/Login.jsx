@@ -40,7 +40,7 @@ const Login = () => {
   const getCoupleNextPath = (user) => {
     const weddingProfile = user?.weddingProfile || {};
     return user?.profileCompleted || weddingProfile.completed
-      ? "/couple/moodboard"
+      ? "/love-story"
       : "/couple/onboarding";
   };
 
@@ -123,8 +123,13 @@ const Login = () => {
       provider.setCustomParameters({ prompt: "select_account" });
 
       const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      const data = await firebaseLogin(idToken, targetRole || "couple");
+      const firebaseIdToken = await result.user.getIdToken();
+
+      if (!firebaseIdToken) {
+        throw new Error("Firebase did not return a sign-in credential. Please try again.");
+      }
+
+      const data = await firebaseLogin(firebaseIdToken, targetRole || "couple");
 
       if (!data.success) {
         return;
@@ -154,7 +159,7 @@ const Login = () => {
       handleRedirectByRole(data.user);
     } catch (err) {
       console.error("Google auth error:", err);
-      setError(err.response?.data?.error || "Google sign-in failed.");
+      setError(err.response?.data?.error || err.message || "Google sign-in failed.");
     } finally {
       setLoading(false);
     }

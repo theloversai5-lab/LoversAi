@@ -6,8 +6,12 @@ import { generateToken, protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+const GOOGLE_CLIENT_ID =
+  process.env.GOOGLE_CLIENT_ID ||
+  process.env.GOOGLE_OAUTH_CLIENT_ID ||
+  process.env.GOOGLE_WEB_CLIENT_ID ||
+  "";
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID || undefined);
 
 /* ================================================================
    POST /api/auth/register — Email/Password Registration
@@ -183,20 +187,29 @@ router.post("/google", async (req, res) => {
       });
     }
 
-    if (!GOOGLE_CLIENT_ID) {
+    if (!GOOGLE_CLIENT_ID && process.env.NODE_ENV === "production") {
       return res.status(500).json({
         success: false,
-        error: "Google OAuth is not configured on the server",
+        error: "Google OAuth is not configured on the server. Set GOOGLE_CLIENT_ID to your Google Web Client ID.",
       });
     }
 
     // Verify the Google token
     let payload;
     try {
-      const ticket = await googleClient.verifyIdToken({
+      const verifyOptions = {
         idToken: credential,
-        audience: GOOGLE_CLIENT_ID,
-      });
+      };
+
+      if (GOOGLE_CLIENT_ID) {
+        verifyOptions.audience = GOOGLE_CLIENT_ID;
+      } else {
+        console.warn(
+          "GOOGLE_CLIENT_ID is not set. Google tokens are being verified without an audience check for local development.",
+        );
+      }
+
+      const ticket = await googleClient.verifyIdToken(verifyOptions);
       payload = ticket.getPayload();
     } catch (verifyErr) {
       console.error("Google token verification failed:", verifyErr);
@@ -206,12 +219,19 @@ router.post("/google", async (req, res) => {
       });
     }
 
-    const { sub: googleId, email, name, picture } = payload;
+    const { sub: googleId, email, email_verified: emailVerified, name, picture } = payload;
 
     if (!email) {
       return res.status(400).json({
         success: false,
         error: "Could not retrieve email from Google account",
+      });
+    }
+
+    if (emailVerified === false) {
+      return res.status(401).json({
+        success: false,
+        error: "Please verify your Google email address before signing in.",
       });
     }
 

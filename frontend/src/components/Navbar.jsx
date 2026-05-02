@@ -3,6 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+let cartCountRequest = null;
+let lastCartCountFetchAt = 0;
+
 const Navbar = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -57,24 +60,39 @@ const Navbar = () => {
   useEffect(() => {
     const fetchCartCount = async () => {
       if (currentUser && localStorage.getItem("userRole") === "couple") {
+        const now = Date.now();
+        if (now - lastCartCountFetchAt < 15000) return;
+        if (cartCountRequest) return;
+
         try {
+          lastCartCountFetchAt = now;
+          cartCountRequest = true;
           const { apiFetch } = await import("../api/api");
           const res = await apiFetch("/cart");
           if (res.success && res.cart) {
             setCartCount(res.cart.items?.length || 0);
           }
         } catch (err) {
-          console.error("Failed to fetch cart count:", err);
+          if (err?.response?.status !== 429) {
+            console.error("Failed to fetch cart count:", err);
+          }
+        } finally {
+          cartCountRequest = null;
         }
       }
     };
 
     fetchCartCount();
 
-    // Refresh cart count when navigating
-    const interval = setInterval(fetchCartCount, 10000); // Check every 10 seconds
+    const interval = setInterval(fetchCartCount, 30000);
     return () => clearInterval(interval);
-  }, [currentUser, location.pathname]);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser && localStorage.getItem("userRole") === "couple") {
+      lastCartCountFetchAt = 0;
+    }
+  }, [location.pathname, currentUser]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
