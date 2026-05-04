@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { quoteAPI, chatAPI, userAPI, paymentAPI } from '../../api/api';
+import { quoteAPI, chatAPI, paymentAPI } from '../../api/api';
+import { getCoupleDisplayName, getCoupleInitials } from '../../utils/coupleProfile';
 
 const CoupleProfile = () => {
   const { currentUser } = useAuth();
@@ -54,8 +55,8 @@ const CoupleProfile = () => {
   }, [currentUser]);
 
   const wp = currentUser?.weddingProfile || {};
-  const initials = `${wp.partnerName1?.[0] || 'P'}&${wp.partnerName2?.[0] || 'A'}`;
-  const coupleName = (wp.partnerName1 && wp.partnerName2) ? `${wp.partnerName1} & ${wp.partnerName2}` : currentUser?.fullName || 'Couple';
+  const initials = getCoupleInitials(currentUser);
+  const coupleName = getCoupleDisplayName(currentUser);
 
   const bidCounts = {
     accepted: quotes.filter(q => q.status === 'accepted').length,

@@ -1,9 +1,18 @@
 // routes/uploadRoutes.js — Secure file upload to Cloudinary
 import express from "express";
-import { upload } from "../utils/cloudinary.js";
+import { isCloudinaryConfigured, upload, uploadMedia } from "../utils/cloudinary.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
+
+const buildFileUrl = (req, file) => {
+  if (isCloudinaryConfigured) {
+    return file.path;
+  }
+
+  const uploadFolder = req.uploadFolder || "misc";
+  return `${req.protocol}://${req.get("host")}/uploads/${uploadFolder}/${file.filename}`;
+};
 
 /**
  * POST /api/upload/image
@@ -20,9 +29,11 @@ router.post("/image", protect, (req, res, next) => {
       return res.status(400).json({ success: false, error: "No image file provided" });
     }
 
+    const url = buildFileUrl(req, req.file);
+
     res.json({
       success: true,
-      url: req.file.path, // Cloudinary URL
+      url, // Cloudinary URL or local uploads URL
       publicId: req.file.filename,
     });
   } catch (error) {
@@ -46,7 +57,7 @@ router.post("/images", protect, (req, res, next) => {
     }
 
     const files = req.files.map((file) => ({
-      url: file.path,
+      url: buildFileUrl(req, file),
       publicId: file.filename,
     }));
 
@@ -54,6 +65,57 @@ router.post("/images", protect, (req, res, next) => {
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ success: false, error: "Failed to upload images" });
+  }
+});
+
+/**
+ * POST /api/upload/video
+ * Upload a single video to Cloudinary
+ * Returns: { success, url, publicId }
+ */
+router.post("/video", protect, (req, res, next) => {
+  req.uploadFolder = req.query.folder || "videos";
+  next();
+}, uploadMedia.single("video"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No video file provided" });
+    }
+
+    res.json({
+      success: true,
+      url: buildFileUrl(req, req.file),
+      publicId: req.file.filename,
+    });
+  } catch (error) {
+    console.error("Video upload error:", error);
+    res.status(500).json({ success: false, error: "Failed to upload video" });
+  }
+});
+
+/**
+ * POST /api/upload/videos
+ * Upload multiple videos (max 10)
+ */
+router.post("/videos", protect, (req, res, next) => {
+  req.uploadFolder = req.query.folder || "videos";
+  next();
+}, uploadMedia.array("videos", 10), (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, error: "No video files provided" });
+    }
+
+    res.json({
+      success: true,
+      files: req.files.map((file) => ({
+        url: buildFileUrl(req, file),
+        publicId: file.filename,
+      })),
+    });
+  } catch (error) {
+    console.error("Video upload error:", error);
+    res.status(500).json({ success: false, error: "Failed to upload videos" });
   }
 });
 

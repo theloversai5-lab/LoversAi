@@ -249,6 +249,19 @@ export const coupleMoodboardAPI = {
     });
     return response.data;
   },
+  editImage: async (formData) => {
+    const token = getToken();
+    const response = await axios({
+      method: 'POST',
+      url: `${apiBaseUrl}/api/ai/couple-moodboard/edit-image`,
+      data: formData,
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      timeout: 300000,
+    });
+    return response.data;
+  },
   downloadImage: (data) =>
     apiFetch('/ai/couple-moodboard/download-image', { method: 'POST', data }),
 };

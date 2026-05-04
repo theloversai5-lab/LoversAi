@@ -55,7 +55,7 @@ const stepVariants = {
 
 export default function CoupleProfileForm() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, refreshUser } = useAuth();
 
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
@@ -189,6 +189,7 @@ export default function CoupleProfileForm() {
         venue: formData.dreamVenue,
         dreamVenue: formData.dreamVenue,
       });
+      await refreshUser();
       localStorage.removeItem(PROFILE_STORAGE_KEY);
       localStorage.removeItem(PROFILE_STEP_KEY);
       localStorage.removeItem("isNewUser");

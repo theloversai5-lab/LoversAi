@@ -4,12 +4,19 @@ import fetch from "node-fetch";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
+import {
+  isCloudinaryConfigured,
+  uploadRemoteToCloudinary,
+} from "../../utils/cloudinary.js";
 
 const router = express.Router();
 
 // Check if BFL API key is configured
 const isAIEnabled = () => {
-  return process.env.BFL_API_KEY && process.env.BFL_API_KEY !== 'your_bfl_api_key_here';
+  return (
+    process.env.BFL_API_KEY &&
+    process.env.BFL_API_KEY !== "your_bfl_api_key_here"
+  );
 };
 
 // Configure multer for file uploads
@@ -19,51 +26,56 @@ const upload = multer({
     fileSize: 50 * 1024 * 1024, // 50MB
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'), false);
+      cb(new Error("Only image files are allowed"), false);
     }
-  }
+  },
 });
 
 // Video generation prompt templates
 const VIDEO_STYLES = {
-  'slow-pan': {
-    name: 'Slow Pan',
-    description: 'Smooth panning camera movement across the venue',
-    prompt: 'Create a smooth slow-panning video movement across this venue, showing all details and decorations from different angles in a cinematic style'
+  "slow-pan": {
+    name: "Slow Pan",
+    description: "Smooth panning camera movement across the venue",
+    prompt:
+      "Create a smooth slow-panning video movement across this venue, showing all details and decorations from different angles in a cinematic style",
   },
-  'zoom-in': {
-    name: 'Zoom In',
-    description: 'Camera zooms in on venue details',
-    prompt: 'Create a video with a smooth zoom-in effect on this venue, highlighting key decorative details and ambiance'
+  "zoom-in": {
+    name: "Zoom In",
+    description: "Camera zooms in on venue details",
+    prompt:
+      "Create a video with a smooth zoom-in effect on this venue, highlighting key decorative details and ambiance",
   },
-  'zoom-out': {
-    name: 'Zoom Out',
-    description: 'Camera zooms out to reveal full venue',
-    prompt: 'Create a video with a smooth zoom-out effect revealing the full venue layout and overall aesthetic'
+  "zoom-out": {
+    name: "Zoom Out",
+    description: "Camera zooms out to reveal full venue",
+    prompt:
+      "Create a video with a smooth zoom-out effect revealing the full venue layout and overall aesthetic",
   },
-  '360-rotate': {
-    name: '360 Rotation',
-    description: 'Full 360 degree venue rotation',
-    prompt: 'Create a 360 degree rotating video around this venue showing all angles and details in smooth rotation'
+  "360-rotate": {
+    name: "360 Rotation",
+    description: "Full 360 degree venue rotation",
+    prompt:
+      "Create a 360 degree rotating video around this venue showing all angles and details in smooth rotation",
   },
-  'cinematic': {
-    name: 'Cinematic',
-    description: 'Professional cinematic movement',
-    prompt: 'Create a cinematic video with dynamic camera movements, smooth transitions, and professional color grading showing this venue in the best light'
-  }
+  cinematic: {
+    name: "Cinematic",
+    description: "Professional cinematic movement",
+    prompt:
+      "Create a cinematic video with dynamic camera movements, smooth transitions, and professional color grading showing this venue in the best light",
+  },
 };
 
 // FLUX API video generation
-async function callFluxVideoAPI(imageBuffer, prompt, style = 'slow-pan') {
+async function callFluxVideoAPI(imageBuffer, prompt, style = "slow-pan") {
   if (!isAIEnabled()) {
-    throw new Error('BFL API key not configured');
+    throw new Error("BFL API key not configured");
   }
 
-  const baseUrl = process.env.FLUX_API_BASE_URL || 'https://api.bfl.ai';
-  const imageBase64 = imageBuffer.toString('base64');
+  const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
+  const imageBase64 = imageBuffer.toString("base64");
 
   const requestBody = {
     prompt,
@@ -72,15 +84,15 @@ async function callFluxVideoAPI(imageBuffer, prompt, style = 'slow-pan') {
     height: 1024,
     duration: 5, // 5 second video
     num_frames: 25,
-    safety_tolerance: 2
+    safety_tolerance: 2,
   };
 
   try {
     const response = await fetch(`${baseUrl}/v1/flux-video`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'x-key': process.env.BFL_API_KEY,
-        'Content-Type': 'application/json',
+        "x-key": process.env.BFL_API_KEY,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
     });
@@ -99,11 +111,11 @@ async function callFluxVideoAPI(imageBuffer, prompt, style = 'slow-pan') {
 
     return {
       url: result.result?.video_url || result.url,
-      format: 'mp4',
-      duration: 5
+      format: "mp4",
+      duration: 5,
     };
   } catch (error) {
-    console.error('FLUX Video API Error:', error.message);
+    console.error("FLUX Video API Error:", error.message);
     throw error;
   }
 }
@@ -116,7 +128,7 @@ async function pollForVideoResult(taskId, pollingUrl) {
   for (let i = 0; i < maxAttempts; i++) {
     try {
       const res = await fetch(pollingUrl, {
-        headers: { 'x-key': process.env.BFL_API_KEY },
+        headers: { "x-key": process.env.BFL_API_KEY },
       });
 
       if (!res.ok) {
@@ -126,16 +138,16 @@ async function pollForVideoResult(taskId, pollingUrl) {
 
       const data = await res.json();
 
-      if (data.status === 'Ready') {
+      if (data.status === "Ready") {
         return {
           url: data.result?.video_url || data.result?.url || data.url,
-          format: 'mp4',
-          duration: 5
+          format: "mp4",
+          duration: 5,
         };
       }
 
-      if (data.status === 'Error') {
-        throw new Error(data.error || 'Video generation failed');
+      if (data.status === "Error") {
+        throw new Error(data.error || "Video generation failed");
       }
 
       await new Promise((r) => setTimeout(r, delay));
@@ -145,124 +157,194 @@ async function pollForVideoResult(taskId, pollingUrl) {
     }
   }
 
-  throw new Error('Video generation timeout');
+  throw new Error("Video generation timeout");
+}
+
+async function persistGeneratedVideo(videoUrl, style) {
+  if (
+    !videoUrl ||
+    !(typeof isCloudinaryConfigured === "function"
+      ? isCloudinaryConfigured()
+      : isCloudinaryConfigured)
+  ) {
+    return {
+      url: videoUrl,
+      cloudinaryPublicId: null,
+    };
+  }
+
+  const safeStyle =
+    String(style || "video")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "video";
+
+  try {
+    const uploadResult = await uploadRemoteToCloudinary(videoUrl, {
+      folder: `loversai/generated-videos/${safeStyle}`,
+      resource_type: "video",
+      public_id: `${Date.now()}-${safeStyle}`,
+    });
+
+    return {
+      url: uploadResult?.secure_url || videoUrl,
+      cloudinaryPublicId: uploadResult?.public_id || null,
+    };
+  } catch (uploadErr) {
+    console.error("⚠️ [Video] uploadRemoteToCloudinary failed:", uploadErr);
+    return {
+      url: videoUrl,
+      cloudinaryPublicId: null,
+    };
+  }
 }
 
 /* -------------------- VIDEO GENERATION ROUTE -------------------- */
-router.post('/generate-video', protect, upload.single('image'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'Image required' });
-    }
-
-    const { style = 'slow-pan' } = req.body;
-
-    // Validate style
-    if (!VIDEO_STYLES[style]) {
-      const validStyles = Object.keys(VIDEO_STYLES).join(', ');
-      return res.status(400).json({
-        success: false,
-        error: `Invalid style. Valid options: ${validStyles}`
-      });
-    }
-
-    // Video generation costs 25 credits
-    const creditsNeeded = 25;
-
-    // Verify user is handled by protect middleware
-    const user = req.user;
-
-    if (user.credits < creditsNeeded) {
-      return res.status(402).json({
-        success: false,
-        error: 'Insufficient credits',
-        currentCredits: user.credits,
-        requiredCredits: creditsNeeded
-      });
-    }
-
-    const styleConfig = VIDEO_STYLES[style];
-
-    console.log(`🎬 Generating ${style} video with prompt: ${styleConfig.prompt.substring(0, 100)}...`);
-
-    // Call FLUX API for video generation
-    const result = await callFluxVideoAPI(req.file.buffer, styleConfig.prompt, style);
-
-    // Deduct credits after successful generation
+router.post(
+  "/generate-video",
+  protect,
+  upload.single("image"),
+  async (req, res) => {
     try {
-      const oldCredits = user.credits;
-      user.deductCredits(creditsNeeded, `Video generation - ${style}`, 'video_generation', {
-        style,
-        videoUrl: result.url
-      });
-
-      const subscription = await Subscription.findOne({ userId: user._id }).sort({ createdAt: -1 });
-      if (subscription) {
-        subscription.creditsUsed = (subscription.creditsUsed || 0) + creditsNeeded;
-        await subscription.save();
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Image required" });
       }
 
-      await user.save();
+      const { style = "slow-pan" } = req.body;
 
-      return res.json({
-        success: true,
-        style: style,
-        styleName: styleConfig.name,
-        styleDescription: styleConfig.description,
-        videoUrl: result.url,
-        format: result.format,
-        duration: result.duration,
-        timestamp: new Date().toISOString(),
-        creditInfo: {
-          oldBalance: oldCredits,
-          deducted: creditsNeeded,
-          newBalance: user.credits
+      // Validate style
+      if (!VIDEO_STYLES[style]) {
+        const validStyles = Object.keys(VIDEO_STYLES).join(", ");
+        return res.status(400).json({
+          success: false,
+          error: `Invalid style. Valid options: ${validStyles}`,
+        });
+      }
+
+      // Video generation costs 25 credits
+      const creditsNeeded = 25;
+
+      // Verify user is handled by protect middleware
+      const user = req.user;
+
+      if (user.credits < creditsNeeded) {
+        return res.status(402).json({
+          success: false,
+          error: "Insufficient credits",
+          currentCredits: user.credits,
+          requiredCredits: creditsNeeded,
+        });
+      }
+
+      const styleConfig = VIDEO_STYLES[style];
+
+      console.log(
+        `🎬 Generating ${style} video with prompt: ${styleConfig.prompt.substring(0, 100)}...`,
+      );
+
+      // Call FLUX API for video generation
+      const result = await callFluxVideoAPI(
+        req.file.buffer,
+        styleConfig.prompt,
+        style,
+      );
+      const persistedVideo = await persistGeneratedVideo(result.url, style);
+      result.url = persistedVideo.url;
+      result.cloudinaryPublicId = persistedVideo.cloudinaryPublicId;
+
+      // Deduct credits after successful generation
+      try {
+        const oldCredits = user.credits;
+        user.deductCredits(
+          creditsNeeded,
+          `Video generation - ${style}`,
+          "video_generation",
+          {
+            style,
+            videoUrl: result.url,
+          },
+        );
+
+        const subscription = await Subscription.findOne({
+          userId: user._id,
+        }).sort({ createdAt: -1 });
+        if (subscription) {
+          subscription.creditsUsed =
+            (subscription.creditsUsed || 0) + creditsNeeded;
+          await subscription.save();
         }
-      });
-    } catch (deductErr) {
-      console.error('Failed to deduct credits for video generation:', deductErr);
-      return res.json({
-        success: true,
-        style: style,
-        styleName: styleConfig.name,
-        styleDescription: styleConfig.description,
-        videoUrl: result.url,
-        format: result.format,
-        duration: result.duration,
-        timestamp: new Date().toISOString(),
-        creditWarning: 'Video generated but failed to deduct credits. Please contact support.'
+
+        await user.save();
+
+        return res.json({
+          success: true,
+          style: style,
+          styleName: styleConfig.name,
+          styleDescription: styleConfig.description,
+          videoUrl: result.url,
+          cloudinaryPublicId: result.cloudinaryPublicId,
+          format: result.format,
+          duration: result.duration,
+          timestamp: new Date().toISOString(),
+          creditInfo: {
+            oldBalance: oldCredits,
+            deducted: creditsNeeded,
+            newBalance: user.credits,
+          },
+        });
+      } catch (deductErr) {
+        console.error(
+          "Failed to deduct credits for video generation:",
+          deductErr,
+        );
+        return res.json({
+          success: true,
+          style: style,
+          styleName: styleConfig.name,
+          styleDescription: styleConfig.description,
+          videoUrl: result.url,
+          cloudinaryPublicId: result.cloudinaryPublicId,
+          format: result.format,
+          duration: result.duration,
+          timestamp: new Date().toISOString(),
+          creditWarning:
+            "Video generated but failed to deduct credits. Please contact support.",
+        });
+      }
+    } catch (err) {
+      console.error("❌ Video generation error:", err.message);
+      res.status(500).json({
+        success: false,
+        error: "Video generation failed",
+        details: err.message,
       });
     }
-  } catch (err) {
-    console.error('❌ Video generation error:', err.message);
-    res.status(500).json({
-      success: false,
-      error: 'Video generation failed',
-      details: err.message
-    });
-  }
-});
+  },
+);
 
 /* -------------------- GET VIDEO STYLES ROUTE -------------------- */
-router.get('/video-styles', (req, res) => {
+router.get("/video-styles", (req, res) => {
   try {
-    const styles = Object.keys(VIDEO_STYLES).map(key => ({
+    const styles = Object.keys(VIDEO_STYLES).map((key) => ({
       id: key,
       name: VIDEO_STYLES[key].name,
       description: VIDEO_STYLES[key].description,
-      creditCost: 25
+      creditCost: 25,
     }));
 
     res.json({
       success: true,
       styles: styles,
-      count: styles.length
+      count: styles.length,
     });
   } catch (err) {
-    console.error('❌ Error getting video styles:', err.message);
+    console.error("❌ Error getting video styles:", err.message);
     res.status(500).json({
       success: false,
-      error: 'Failed to get video styles'
+      error: "Failed to get video styles",
     });
   }
 });

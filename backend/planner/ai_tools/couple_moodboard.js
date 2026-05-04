@@ -4,26 +4,94 @@ import fetch from "node-fetch";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
+import {
+  isCloudinaryConfigured,
+  uploadRemoteToCloudinary,
+} from "../../utils/cloudinary.js";
 
 const router = express.Router();
 
 // ─── Config ───
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
+const GROQ_VISION_MODEL =
+  process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
 const CREDIT_COST = 15;
 const MAX_RETRIES = parseInt(process.env.MOODBOARD_MAX_RETRIES) || 1;
-const VALIDATION_ENABLED = (process.env.MOODBOARD_VALIDATION_ENABLED || "true") === "true";
-const GEMINI_API_BASE_URL = process.env.GEMINI_API_BASE_URL || "https://generativelanguage.googleapis.com/v1beta";
-const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-image-preview";
+const VALIDATION_ENABLED =
+  (process.env.MOODBOARD_VALIDATION_ENABLED || "true") === "true";
+const GEMINI_API_BASE_URL =
+  process.env.GEMINI_API_BASE_URL ||
+  "https://generativelanguage.googleapis.com/v1beta";
+const GEMINI_IMAGE_MODEL =
+  process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-image-preview";
 
 const isAIEnabled = () =>
-  !!(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== "your_gemini_api_key_here");
+  !!(
+    process.env.GEMINI_API_KEY &&
+    process.env.GEMINI_API_KEY !== "your_gemini_api_key_here"
+  );
 
 const isGroqEnabled = () =>
-  !!(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== "your_groq_api_key_here");
+  !!(
+    process.env.GROQ_API_KEY &&
+    process.env.GROQ_API_KEY !== "your_groq_api_key_here"
+  );
 
 const isGeminiAuthError = (message = "") =>
-  /GEMINI_AUTH_ERROR|Gemini API authentication failed|api key not valid|permission denied/i.test(message);
+  /GEMINI_AUTH_ERROR|Gemini API authentication failed|api key not valid|permission denied/i.test(
+    message,
+  );
+
+async function persistGeneratedMoodboardImages(
+  images = [],
+  functionType = "Wedding Vision",
+) {
+  if (!images.length || !isCloudinaryConfigured) return images;
+
+  const safeFolder =
+    String(functionType || "wedding-vision")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 50) || "wedding-vision";
+
+  const uploadedImages = await Promise.all(
+    images.map(async (image, index) => {
+      if (!image?.url) return image;
+
+      try {
+        const uploadResult = await uploadRemoteToCloudinary(image.url, {
+          folder: `loversai/generated-moodboards/${safeFolder}`,
+          resource_type: "image",
+          public_id: `${Date.now()}-${index}-${(image.label || "scene")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .slice(0, 30)}`,
+        });
+
+        return {
+          ...image,
+          url: uploadResult?.secure_url || image.url,
+          cloudinaryPublicId: uploadResult?.public_id || null,
+        };
+      } catch (uploadErr) {
+        // Log and return the original image object so a single failure doesn't break Promise.all
+        console.error(
+          "⚠️ [Moodboard] uploadRemoteToCloudinary failed for image:",
+          image?.url,
+          uploadErr,
+        );
+        return {
+          ...image,
+          url: image.url,
+          cloudinaryPublicId: image.cloudinaryPublicId || null,
+        };
+      }
+    }),
+  );
+
+  return uploadedImages;
+}
 
 // ─── Multer ───
 const upload = multer({
@@ -44,8 +112,12 @@ function createTimer() {
       timings[step] = Date.now() - start;
       console.log(`⏱️  [Moodboard] ${step}: ${timings[step]}ms`);
     },
-    getTimings() { return timings; },
-    elapsed() { return Date.now() - start; },
+    getTimings() {
+      return timings;
+    },
+    elapsed() {
+      return Date.now() - start;
+    },
   };
 }
 
@@ -55,7 +127,7 @@ function createTimer() {
 
 const SYSTEM_PROMPT = `You are an expert AI Prompt Engineer for photorealistic wedding decor visualization with COMPLETE VIBE TRANSFER and FULL VENUE DECORATION capability.
 
-YOUR JOB: Analyze venue + decor style reference images → Generate ONE optimized prompt for Flux-Kontext-Pro that either:
+YOUR JOB: Analyze venue + decor style reference images → Generate ONE optimized prompt for a premium wedding image model that either:
   (A) Places SPECIFIC decor elements into a venue (ELEMENT MODE), OR
   (B) Fully decorates the ENTIRE venue in the style/theme of the decor reference (FULL DECORATION MODE)
 ...while preserving 100% venue STRUCTURAL authenticity AND transferring the COMPLETE ATMOSPHERIC VIBE.
@@ -414,31 +486,50 @@ Output the detected MODE (A or B) on the first line, then the prompt.`;
 
 const SIDE_PANEL_RULES = {
   style: {
-    Modern: "contemporary clean-lined aesthetic with geometric shapes, metallic accents, minimalist arrangements, monochromatic or analogous color schemes",
-    Traditional: "classic ornate Indian wedding aesthetic with rich fabrics, gold accents, intricate patterns, marigold garlands, brass elements, vibrant saturated colors",
+    Modern:
+      "contemporary clean-lined aesthetic with geometric shapes, metallic accents, minimalist arrangements, monochromatic or analogous color schemes",
+    Traditional:
+      "classic ornate Indian wedding aesthetic with rich fabrics, gold accents, intricate patterns, marigold garlands, brass elements, vibrant saturated colors",
   },
   functionType: {
-    "Pre-wedding (Haldi/Mehendi)": "focal area is a central seating platform or gaddi with turmeric-yellow theme, marigold dominance, brass vessels",
-    "Wedding Ceremony": "focal area is a grand mandap or ceremonial arch with sacred fire pit area, heavy floral canopy, ceremonial seating",
-    "Reception": "focal area is a sweetheart table or head table with crystal chandeliers, formal round-table dining layout, dance floor",
-    "Sangeet": "focal area is a performance stage with dramatic lighting, dance floor, DJ/music setup, cocktail-height tables",
-    "Engagement": "focal area is an intimate ceremony arch or backdrop with romantic floral framing, ring ceremony area",
-    "Nikah": "focal area is a pristine white-and-green ceremony area with Islamic geometric patterns, elegant simplicity",
+    "Pre-wedding (Haldi/Mehendi)":
+      "focal area is a central seating platform or gaddi with turmeric-yellow theme, marigold dominance, brass vessels",
+    "Wedding Ceremony":
+      "focal area is a grand mandap or ceremonial arch with sacred fire pit area, heavy floral canopy, ceremonial seating",
+    Reception:
+      "focal area is a sweetheart table or head table with crystal chandeliers, formal round-table dining layout, dance floor",
+    Sangeet:
+      "focal area is a performance stage with dramatic lighting, dance floor, DJ/music setup, cocktail-height tables",
+    Engagement:
+      "focal area is an intimate ceremony arch or backdrop with romantic floral framing, ring ceremony area",
+    Nikah:
+      "focal area is a pristine white-and-green ceremony area with Islamic geometric patterns, elegant simplicity",
   },
   atmosphere: {
-    "Warm & Festive": "warm 2800-3200K amber lighting, golden glow, high saturation, joyful energy, bright fairy lights",
-    "Romantic & Intimate": "soft 3000K candlelit warmth, low-key lighting, gentle bokeh, dreamy soft-focus quality, rose-toned",
-    "Grand & Opulent": "dramatic high-contrast lighting, crystal chandeliers, rich deep colors, luxurious textures, spotlit focal points",
-    "Minimal & Elegant": "clean bright 4000K lighting, subtle accents, restrained palette, understated sophistication, crisp shadows",
-    "Bohemian & Free-spirited": "natural warm daylight, earthy tones, organic textures, whimsical elements, macramé and dried florals",
-    "Royal & Regal": "deep jewel-toned dramatic lighting, velvet and gold, heavy ornate elements, palace-worthy grandeur",
+    "Warm & Festive":
+      "warm 2800-3200K amber lighting, golden glow, high saturation, joyful energy, bright fairy lights",
+    "Romantic & Intimate":
+      "soft 3000K candlelit warmth, low-key lighting, gentle bokeh, dreamy soft-focus quality, rose-toned",
+    "Grand & Opulent":
+      "dramatic high-contrast lighting, crystal chandeliers, rich deep colors, luxurious textures, spotlit focal points",
+    "Minimal & Elegant":
+      "clean bright 4000K lighting, subtle accents, restrained palette, understated sophistication, crisp shadows",
+    "Bohemian & Free-spirited":
+      "natural warm daylight, earthy tones, organic textures, whimsical elements, macramé and dried florals",
+    "Royal & Regal":
+      "deep jewel-toned dramatic lighting, velvet and gold, heavy ornate elements, palace-worthy grandeur",
   },
   timing: {
-    "Morning (Day light)": "bright natural daylight, cool-to-neutral 5000K, crisp clear shadows, fresh morning feel",
-    "Afternoon (Bright)": "strong warm daylight 4500K, vivid colors, defined shadows, bright airy atmosphere",
-    "Sunset (Golden Hour)": "warm golden 3500K directional light, long warm shadows, honey-toned highlights, magic hour glow",
-    "Evening (Warm Glow)": "warm 2800K artificial lighting, fairy lights active, candle-like warmth, intimate evening ambiance",
-    "Night (Under Stars)": "deep dark sky, dramatic uplighting, fairy light canopy overhead, moonlit cool-blue ambient with warm accent pools",
+    "Morning (Day light)":
+      "bright natural daylight, cool-to-neutral 5000K, crisp clear shadows, fresh morning feel",
+    "Afternoon (Bright)":
+      "strong warm daylight 4500K, vivid colors, defined shadows, bright airy atmosphere",
+    "Sunset (Golden Hour)":
+      "warm golden 3500K directional light, long warm shadows, honey-toned highlights, magic hour glow",
+    "Evening (Warm Glow)":
+      "warm 2800K artificial lighting, fairy lights active, candle-like warmth, intimate evening ambiance",
+    "Night (Under Stars)":
+      "deep dark sky, dramatic uplighting, fairy light canopy overhead, moonlit cool-blue ambient with warm accent pools",
   },
 };
 
@@ -446,20 +537,31 @@ const SIDE_PANEL_RULES = {
 const MOODBOARD_TITLES = {
   "Pre-wedding (Haldi/Mehendi)": "Golden Dreams of Haldi",
   "Wedding Ceremony": "Eternal Sacred Vows",
-  "Reception": "A Night to Remember",
-  "Sangeet": "Rhythms of Celebration",
-  "Engagement": "Promise of Forever",
-  "Nikah": "Blessings of Nikkah",
+  Reception: "A Night to Remember",
+  Sangeet: "Rhythms of Celebration",
+  Engagement: "Promise of Forever",
+  Nikah: "Blessings of Nikkah",
 };
 
 // ─── Build user message for Groq vision ───
-function buildGroqMessages(venueBase64, decorBase64, venueMime, decorMime, style, functionType, atmosphere, timing, userPrompt) {
-  const styleDesc = SIDE_PANEL_RULES.style[style] || SIDE_PANEL_RULES.style.Traditional;
+function buildGroqMessages(
+  venueBase64,
+  decorBase64,
+  venueMime,
+  decorMime,
+  style,
+  functionType,
+  atmosphere,
+  timing,
+  userPrompt,
+) {
+  const styleDesc =
+    SIDE_PANEL_RULES.style[style] || SIDE_PANEL_RULES.style.Traditional;
   const fnDesc = SIDE_PANEL_RULES.functionType[functionType] || "";
   const atmosDesc = SIDE_PANEL_RULES.atmosphere[atmosphere] || "";
   const timeDesc = SIDE_PANEL_RULES.timing[timing] || "";
 
-  const userText = `Analyze these two images and generate an optimized Flux Kontext Pro prompt.
+  const userText = `Analyze these two images and generate an optimized wedding image generation prompt.
 
 Image 1 = VENUE PHOTO (the space to be decorated — structure must be preserved exactly)
 Image 2 = DECORATION REFERENCE (the style, decor, vibe to be applied to the venue)
@@ -471,7 +573,7 @@ User selections:
 - Timing: ${timing || "Evening (Warm Glow)"} → ${timeDesc}
 ${userPrompt ? `- Additional instruction: ${userPrompt}` : ""}
 
-Generate the Flux prompt now.`;
+Generate the final image prompt now.`;
 
   return [
     { role: "system", content: SYSTEM_PROMPT },
@@ -499,7 +601,17 @@ Generate the Flux prompt now.`;
 }
 
 // ─── Call Groq Vision API ───
-async function analyzeWithGroq(venueBuffer, decorBuffer, venueMime, decorMime, style, functionType, atmosphere, timing, userPrompt) {
+async function analyzeWithGroq(
+  venueBuffer,
+  decorBuffer,
+  venueMime,
+  decorMime,
+  style,
+  functionType,
+  atmosphere,
+  timing,
+  userPrompt,
+) {
   const venueBase64 = venueBuffer.toString("base64");
   const decorBase64 = decorBuffer.toString("base64");
 
@@ -512,7 +624,7 @@ async function analyzeWithGroq(venueBuffer, decorBuffer, venueMime, decorMime, s
     functionType,
     atmosphere,
     timing,
-    userPrompt
+    userPrompt,
   );
 
   console.log(`🧠 [Moodboard] Calling Groq Vision (${GROQ_VISION_MODEL})...`);
@@ -533,7 +645,9 @@ async function analyzeWithGroq(venueBuffer, decorBuffer, venueMime, decorMime, s
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Groq API error ${response.status}: ${errText.substring(0, 300)}`);
+    throw new Error(
+      `Groq API error ${response.status}: ${errText.substring(0, 300)}`,
+    );
   }
 
   const data = await response.json();
@@ -544,7 +658,10 @@ async function analyzeWithGroq(venueBuffer, decorBuffer, venueMime, decorMime, s
   console.log(`✅ [Moodboard] Groq vision complete — ${raw.length} chars`);
 
   // Parse mode and prompt
-  const lines = raw.trim().split("\n").filter((l) => l.trim());
+  const lines = raw
+    .trim()
+    .split("\n")
+    .filter((l) => l.trim());
   let mode = "MODE B";
   let prompt = raw.trim();
 
@@ -560,7 +677,14 @@ async function analyzeWithGroq(venueBuffer, decorBuffer, venueMime, decorMime, s
 // STAGE C — Prompt Hardening with Preservation Constraints
 // ═══════════════════════════════════════════════════════════════════
 
-function hardenPrompt(prompt, style, functionType, atmosphere, timing, isRetry = false) {
+function hardenPrompt(
+  prompt,
+  style,
+  functionType,
+  atmosphere,
+  timing,
+  isRetry = false,
+) {
   const styleDesc = SIDE_PANEL_RULES.style[style] || "";
   const fnDesc = SIDE_PANEL_RULES.functionType[functionType] || "";
   const atmosDesc = SIDE_PANEL_RULES.atmosphere[atmosphere] || "";
@@ -584,23 +708,35 @@ async function detectAspectRatio(imageBuffer) {
     const h = metadata.height;
     const ratio = w / h;
 
-    console.log(`📐 [Moodboard] Venue image: ${w}x${h} (ratio: ${ratio.toFixed(3)})`);
+    console.log(
+      `📐 [Moodboard] Venue image: ${w}x${h} (ratio: ${ratio.toFixed(3)})`,
+    );
 
     // Map to closest Flux-supported aspect ratios
-    if (ratio >= 1.7) return { width: 1024, height: 576, label: "16:9" };       // landscape wide
-    if (ratio >= 1.4) return { width: 1024, height: 683, label: "3:2" };        // landscape standard
-    if (ratio >= 1.2) return { width: 1024, height: 768, label: "4:3" };        // landscape
-    if (ratio >= 0.9) return { width: 1024, height: 1024, label: "1:1" };       // square
-    if (ratio >= 0.7) return { width: 768, height: 1024, label: "3:4" };        // portrait
-    if (ratio >= 0.6) return { width: 683, height: 1024, label: "2:3" };        // portrait tall
-    return { width: 576, height: 1024, label: "9:16" };                          // portrait very tall
+    if (ratio >= 1.7) return { width: 1024, height: 576, label: "16:9" }; // landscape wide
+    if (ratio >= 1.4) return { width: 1024, height: 683, label: "3:2" }; // landscape standard
+    if (ratio >= 1.2) return { width: 1024, height: 768, label: "4:3" }; // landscape
+    if (ratio >= 0.9) return { width: 1024, height: 1024, label: "1:1" }; // square
+    if (ratio >= 0.7) return { width: 768, height: 1024, label: "3:4" }; // portrait
+    if (ratio >= 0.6) return { width: 683, height: 1024, label: "2:3" }; // portrait tall
+    return { width: 576, height: 1024, label: "9:16" }; // portrait very tall
   } catch (err) {
-    console.warn("⚠️ [Moodboard] sharp metadata failed, defaulting to 1024x1024:", err.message);
+    console.warn(
+      "⚠️ [Moodboard] sharp metadata failed, defaulting to 1024x1024:",
+      err.message,
+    );
     return { width: 1024, height: 1024, label: "1:1" };
   }
 }
 
-async function callFluxAPI(imageBuffer, prompt, modelType = "flux-2-pro", dimensions = null, seed = null, fallbackModels = null) {
+async function callFluxAPI(
+  imageBuffer,
+  prompt,
+  modelType = "flux-2-pro",
+  dimensions = null,
+  seed = null,
+  fallbackModels = null,
+) {
   if (!isAIEnabled()) {
     throw new Error("AI service not configured — set BFL_API_KEY");
   }
@@ -611,7 +747,9 @@ async function callFluxAPI(imageBuffer, prompt, modelType = "flux-2-pro", dimens
   // Detect if model supports input_image (kontext models = image-to-image, others = text-to-image)
   const isKontextModel = modelType.includes("kontext");
 
-  console.log(`🎨 [Moodboard] Calling Flux (${modelType}) at ${dim.width}x${dim.height} [${isKontextModel ? "img2img" : "txt2img"}]...`);
+  console.log(
+    `🎨 [Moodboard] Calling Flux (${modelType}) at ${dim.width}x${dim.height} [${isKontextModel ? "img2img" : "txt2img"}]...`,
+  );
 
   const body = {
     prompt: prompt,
@@ -643,24 +781,44 @@ async function callFluxAPI(imageBuffer, prompt, modelType = "flux-2-pro", dimens
     const errorText = await response.text();
 
     // 403 = auth error — don't retry, the API key is invalid
-    if ((response.status === 401 || response.status === 403) && fallbackModels?.length) {
+    if (
+      (response.status === 401 || response.status === 403) &&
+      fallbackModels?.length
+    ) {
       const [nextModel, ...remainingModels] = fallbackModels;
-      console.log(`🔄 [Moodboard] ${modelType} rejected (${response.status}); trying ${nextModel}`);
-      return callFluxAPI(imageBuffer, prompt, nextModel, dimensions, seed, remainingModels);
+      console.log(
+        `🔄 [Moodboard] ${modelType} rejected (${response.status}); trying ${nextModel}`,
+      );
+      return callFluxAPI(
+        imageBuffer,
+        prompt,
+        nextModel,
+        dimensions,
+        seed,
+        remainingModels,
+      );
     }
 
     if (response.status === 401 || response.status === 403) {
-      console.error(`❌ [Moodboard] BFL API key rejected (${response.status}). Check your BFL_API_KEY in .env`);
-      throw new Error("BFL_AUTH_ERROR: BFL API authentication failed. Restart the backend after setting BFL_API_KEY; if it still fails, the key is invalid, expired, or not enabled for this model.");
+      console.error(
+        `❌ [Moodboard] BFL API key rejected (${response.status}). Check your BFL_API_KEY in .env`,
+      );
+      throw new Error(
+        "BFL_AUTH_ERROR: BFL API authentication failed. Restart the backend after setting BFL_API_KEY; if it still fails, the key is invalid, expired, or not enabled for this model.",
+      );
     }
 
     // 422 = model not available — try fallback model
     if (response.status === 422 && modelType !== "flux-2-max") {
-      console.log(`🔄 [Moodboard] ${modelType} unavailable, falling back to flux-2-max`);
+      console.log(
+        `🔄 [Moodboard] ${modelType} unavailable, falling back to flux-2-max`,
+      );
       return callFluxAPI(imageBuffer, prompt, "flux-2-max", dimensions, seed);
     }
 
-    throw new Error(`Flux error ${response.status}: ${errorText.substring(0, 200)}`);
+    throw new Error(
+      `Flux error ${response.status}: ${errorText.substring(0, 200)}`,
+    );
   }
 
   const result = await response.json();
@@ -682,8 +840,13 @@ async function pollForResult(taskId, customPollingUrl) {
     console.log(`⏳ [Moodboard] Poll ${i + 1}/${maxAttempts}`);
     try {
       const url = customPollingUrl || `${baseUrl}/v1/get_result?id=${taskId}`;
-      const res = await fetch(url, { headers: { "x-key": process.env.BFL_API_KEY } });
-      if (!res.ok) { await new Promise((r) => setTimeout(r, pollInterval)); continue; }
+      const res = await fetch(url, {
+        headers: { "x-key": process.env.BFL_API_KEY },
+      });
+      if (!res.ok) {
+        await new Promise((r) => setTimeout(r, pollInterval));
+        continue;
+      }
       const data = await res.json();
       if (data.status === "Ready") {
         return {
@@ -692,7 +855,8 @@ async function pollForResult(taskId, customPollingUrl) {
           generationId: `mb_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         };
       }
-      if (data.status === "Error") throw new Error(`Flux processing error: ${data.details || data.error}`);
+      if (data.status === "Error")
+        throw new Error(`Flux processing error: ${data.details || data.error}`);
     } catch (e) {
       if (i === maxAttempts - 1) throw e;
     }
@@ -717,12 +881,21 @@ async function validateGeneration(venueBuffer, generatedImageUrl, venueMime) {
   let generatedBase64;
   try {
     const imgResponse = await fetch(generatedImageUrl);
-    if (!imgResponse.ok) throw new Error(`Failed to fetch generated image: ${imgResponse.status}`);
+    if (!imgResponse.ok)
+      throw new Error(`Failed to fetch generated image: ${imgResponse.status}`);
     const imgBuffer = await imgResponse.buffer();
     generatedBase64 = imgBuffer.toString("base64");
   } catch (err) {
-    console.warn("⚠️ [Moodboard] Could not download generated image for validation:", err.message);
-    return { score: 0.8, pass: true, issues: ["Could not download for validation"], skipped: true };
+    console.warn(
+      "⚠️ [Moodboard] Could not download generated image for validation:",
+      err.message,
+    );
+    return {
+      score: 0.8,
+      pass: true,
+      issues: ["Could not download for validation"],
+      skipped: true,
+    };
   }
 
   const venueBase64 = venueBuffer.toString("base64");
@@ -763,7 +936,11 @@ Respond ONLY with valid JSON (no markdown, no code blocks):
       body: JSON.stringify({
         model: GROQ_VISION_MODEL,
         messages: [
-          { role: "system", content: "You are a precise image quality validator. Respond only with valid JSON." },
+          {
+            role: "system",
+            content:
+              "You are a precise image quality validator. Respond only with valid JSON.",
+          },
           {
             role: "user",
             content: [
@@ -792,8 +969,16 @@ Respond ONLY with valid JSON (no markdown, no code blocks):
 
     if (!response.ok) {
       const errText = await response.text();
-      console.warn("⚠️ [Moodboard] Validation Groq call failed:", errText.substring(0, 200));
-      return { score: 0.8, pass: true, issues: ["Validation API error"], skipped: true };
+      console.warn(
+        "⚠️ [Moodboard] Validation Groq call failed:",
+        errText.substring(0, 200),
+      );
+      return {
+        score: 0.8,
+        pass: true,
+        issues: ["Validation API error"],
+        skipped: true,
+      };
     }
 
     const data = await response.json();
@@ -809,7 +994,9 @@ Respond ONLY with valid JSON (no markdown, no code blocks):
     const score = result.overall_score || 0;
     const pass = score >= 0.75;
 
-    console.log(`🔍 [Moodboard] Validation: score=${score.toFixed(2)}, pass=${pass}, issues=${(result.issues || []).length}`);
+    console.log(
+      `🔍 [Moodboard] Validation: score=${score.toFixed(2)}, pass=${pass}, issues=${(result.issues || []).length}`,
+    );
 
     return {
       score,
@@ -824,26 +1011,47 @@ Respond ONLY with valid JSON (no markdown, no code blocks):
     };
   } catch (err) {
     console.warn("⚠️ [Moodboard] Validation parsing error:", err.message);
-    return { score: 0.8, pass: true, issues: ["Validation parse error"], skipped: true };
+    return {
+      score: 0.8,
+      pass: true,
+      issues: ["Validation parse error"],
+      skipped: true,
+    };
   }
 }
 
 // ─── Build fallback prompt for wedding moodboard (text-to-image) ───
-function buildFallbackPrompt(style, functionType, atmosphere, timing, userPrompt) {
-  const styleDesc = SIDE_PANEL_RULES.style[style] || SIDE_PANEL_RULES.style.Traditional;
-  const atmosDesc = SIDE_PANEL_RULES.atmosphere[atmosphere] || "warm golden lighting";
+function buildFallbackPrompt(
+  style,
+  functionType,
+  atmosphere,
+  timing,
+  userPrompt,
+) {
+  const styleDesc =
+    SIDE_PANEL_RULES.style[style] || SIDE_PANEL_RULES.style.Traditional;
+  const atmosDesc =
+    SIDE_PANEL_RULES.atmosphere[atmosphere] || "warm golden lighting";
   const timeDesc = SIDE_PANEL_RULES.timing[timing] || "evening warm glow";
 
   const eventStyles = {
-    "Pre-wedding (Haldi/Mehendi)": "an Indian Haldi and Mehendi pre-wedding celebration with vibrant turmeric yellows, marigold oranges, traditional brass elements, cascading flower petals, intricate mehndi patterns, and joyful festive energy. Guests wear bright yellow and orange traditional attire with gold jewelry and fresh flower accessories",
-    "Wedding Ceremony": "a grand Indian wedding ceremony with rich crimson reds, burnished golds, ivory whites. An ornate mandap with carved pillars and silk canopy, sacred fire, fresh red roses and white jasmine garlands, elaborate bridal lehenga in red and gold, groom in embroidered sherwani. Regal, sacred atmosphere",
-    "Reception": "a luxurious Indian wedding reception with sophisticated ivory, champagne gold, blush pink tones. Crystal chandeliers, elegant table settings with fine china, tall centerpieces of white hydrangeas and blush roses. The couple in glamorous reception outfits, soft ambient uplighting",
-    "Sangeet": "a vibrant Indian Sangeet night with rich jewel tones of deep purple, fuchsia, emerald, and metallic gold. Dramatic performance stage, mirror-work lanterns, sequined fabric decor, energetic dancing, colorful embroidered outfits, festive lighting",
-    "Engagement": "a romantic Indian engagement ceremony with soft pastel pink, ivory, rose gold tones. A floral arch of blush roses and white peonies, the couple elegantly dressed exchanging rings, floating candles, intimate warm lighting, tender romantic moments",
-    "Nikah": "an elegant Nikah ceremony with pristine white, emerald green, and burnished gold palette. Islamic geometric patterns in gold filigree, white roses and green ferns, the bride in ornate bridal hijab with intricate embroidery, the groom in classic sherwani. Sacred, graceful atmosphere",
+    "Pre-wedding (Haldi/Mehendi)":
+      "an Indian Haldi and Mehendi pre-wedding celebration with vibrant turmeric yellows, marigold oranges, traditional brass elements, cascading flower petals, intricate mehndi patterns, and joyful festive energy. Guests wear bright yellow and orange traditional attire with gold jewelry and fresh flower accessories",
+    "Wedding Ceremony":
+      "a grand Indian wedding ceremony with rich crimson reds, burnished golds, ivory whites. An ornate mandap with carved pillars and silk canopy, sacred fire, fresh red roses and white jasmine garlands, elaborate bridal lehenga in red and gold, groom in embroidered sherwani. Regal, sacred atmosphere",
+    Reception:
+      "a luxurious Indian wedding reception with sophisticated ivory, champagne gold, blush pink tones. Crystal chandeliers, elegant table settings with fine china, tall centerpieces of white hydrangeas and blush roses. The couple in glamorous reception outfits, soft ambient uplighting",
+    Sangeet:
+      "a vibrant Indian Sangeet night with rich jewel tones of deep purple, fuchsia, emerald, and metallic gold. Dramatic performance stage, mirror-work lanterns, sequined fabric decor, energetic dancing, colorful embroidered outfits, festive lighting",
+    Engagement:
+      "a romantic Indian engagement ceremony with soft pastel pink, ivory, rose gold tones. A floral arch of blush roses and white peonies, the couple elegantly dressed exchanging rings, floating candles, intimate warm lighting, tender romantic moments",
+    Nikah:
+      "an elegant Nikah ceremony with pristine white, emerald green, and burnished gold palette. Islamic geometric patterns in gold filigree, white roses and green ferns, the bride in ornate bridal hijab with intricate embroidery, the groom in classic sherwani. Sacred, graceful atmosphere",
   };
 
-  const baseScene = eventStyles[functionType] || "a beautiful Indian wedding celebration with elaborate decorations, rich cultural elements, and emotional moments";
+  const baseScene =
+    eventStyles[functionType] ||
+    "a beautiful Indian wedding celebration with elaborate decorations, rich cultural elements, and emotional moments";
 
   return `Award-winning photorealistic wedding photography of ${baseScene}. ${styleDesc}. ${atmosDesc}. ${timeDesc}. 8K resolution, shot on Hasselblad medium format, cinematic warm color grading with rich natural skin tones, shallow depth of field, editorial wedding magazine quality. ${userPrompt || ""}`.trim();
 }
@@ -853,19 +1061,23 @@ function generateVariationPrompts(basePrompt, functionType) {
   const variations = [
     {
       label: "Couple Portrait",
-      suffix: "Intimate waist-up portrait of a beautiful Indian couple in ornate wedding attire, soft eye contact or gentle embrace. Lush floral backdrop with warm bokeh fairy lights. Shot at f/1.8 with warm golden rim lighting. Deeply romantic, editorial bridal magazine quality.",
+      suffix:
+        "Intimate waist-up portrait of a beautiful Indian couple in ornate wedding attire, soft eye contact or gentle embrace. Lush floral backdrop with warm bokeh fairy lights. Shot at f/1.8 with warm golden rim lighting. Deeply romantic, editorial bridal magazine quality.",
     },
     {
       label: "Grand Ceremony",
-      suffix: "Breathtaking wide cinematic shot of the full decorated ceremony venue with the couple at the center, surrounded by elaborate floral arrangements, traditional structural elements, fabric draping, and atmospheric lighting. Shot at f/4 with vivid detail. Grand, spectacular composition showing the full scale of the celebration.",
+      suffix:
+        "Breathtaking wide cinematic shot of the full decorated ceremony venue with the couple at the center, surrounded by elaborate floral arrangements, traditional structural elements, fabric draping, and atmospheric lighting. Shot at f/4 with vivid detail. Grand, spectacular composition showing the full scale of the celebration.",
     },
     {
       label: "Sacred Details",
-      suffix: "Artistic close-up detail composition of wedding elements: intricate mehendi patterns on hands with ornate rings, bridal jewelry on skin, fresh flower garlands, ceremonial items, luxurious fabric textures. Macro photography style, f/2.8, warm soft directional lighting highlighting textures and golden metallics.",
+      suffix:
+        "Artistic close-up detail composition of wedding elements: intricate mehendi patterns on hands with ornate rings, bridal jewelry on skin, fresh flower garlands, ceremonial items, luxurious fabric textures. Macro photography style, f/2.8, warm soft directional lighting highlighting textures and golden metallics.",
     },
     {
       label: "Celebration",
-      suffix: "Candid photojournalistic moment of warm celebration: family blessings, joyful group embrace, or an intimate couple moment with genuine emotion. Natural expressions captured mid-action with beautiful warm ambient bokeh. Authentic and full of life. Shot at f/2.0.",
+      suffix:
+        "Candid photojournalistic moment of warm celebration: family blessings, joyful group embrace, or an intimate couple moment with genuine emotion. Natural expressions captured mid-action with beautiful warm ambient bokeh. Authentic and full of life. Shot at f/2.0.",
     },
   ];
 
@@ -888,7 +1100,10 @@ function mapGeminiAspectRatio(dimensions) {
 }
 
 function extractGeminiImageParts(responseData = {}) {
-  const parts = responseData?.candidates?.flatMap((candidate) => candidate?.content?.parts || []) || [];
+  const parts =
+    responseData?.candidates?.flatMap(
+      (candidate) => candidate?.content?.parts || [],
+    ) || [];
   return parts
     .filter((part) => part?.inlineData?.data)
     .map((part, index) => ({
@@ -898,7 +1113,12 @@ function extractGeminiImageParts(responseData = {}) {
     }));
 }
 
-async function callGeminiImageAPI(imageBuffer, prompt, modelType = GEMINI_IMAGE_MODEL, dimensions = null) {
+async function callGeminiImageAPI(
+  imageBuffer,
+  prompt,
+  modelType = GEMINI_IMAGE_MODEL,
+  dimensions = null,
+) {
   if (!isAIEnabled()) {
     throw new Error("AI service not configured — set GEMINI_API_KEY");
   }
@@ -914,45 +1134,55 @@ async function callGeminiImageAPI(imageBuffer, prompt, modelType = GEMINI_IMAGE_
   }
   promptParts.push({ text: prompt });
 
-  const response = await fetch(`${GEMINI_API_BASE_URL}/models/${modelType}:generateContent`, {
-    method: "POST",
-    headers: {
-      "x-goog-api-key": process.env.GEMINI_API_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: promptParts,
-        },
-      ],
-      generationConfig: {
-        responseModalities: ["IMAGE", "TEXT"],
-        imageConfig: {
-          aspectRatio: mapGeminiAspectRatio(dimensions),
-        },
+  const response = await fetch(
+    `${GEMINI_API_BASE_URL}/models/${modelType}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": process.env.GEMINI_API_KEY,
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: promptParts,
+          },
+        ],
+        generationConfig: {
+          responseModalities: ["IMAGE", "TEXT"],
+          imageConfig: {
+            aspectRatio: mapGeminiAspectRatio(dimensions),
+          },
+        },
+      }),
+    },
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
     if (response.status === 401 || response.status === 403) {
-      throw new Error("GEMINI_AUTH_ERROR: Gemini API authentication failed. Restart the backend after setting GEMINI_API_KEY; if it still fails, the key is invalid or does not have image generation access.");
+      throw new Error(
+        "GEMINI_AUTH_ERROR: Gemini API authentication failed. Restart the backend after setting GEMINI_API_KEY; if it still fails, the key is invalid or does not have image generation access.",
+      );
     }
-    throw new Error(`Gemini error ${response.status}: ${errorText.substring(0, 300)}`);
+    throw new Error(
+      `Gemini error ${response.status}: ${errorText.substring(0, 300)}`,
+    );
   }
 
   const result = await response.json();
   const imageParts = extractGeminiImageParts(result);
   if (imageParts.length === 0) {
-    const textParts = result?.candidates?.flatMap((candidate) => candidate?.content?.parts || [])
+    const textParts = result?.candidates
+      ?.flatMap((candidate) => candidate?.content?.parts || [])
       .filter((part) => part?.text)
       .map((part) => part.text)
       .join(" ")
       .trim();
-    throw new Error(`Gemini returned no image output.${textParts ? ` ${textParts}` : ""}`);
+    throw new Error(
+      `Gemini returned no image output.${textParts ? ` ${textParts}` : ""}`,
+    );
   }
 
   return imageParts[0];
@@ -969,7 +1199,13 @@ router.get("/couple-moodboard/health", async (_req, res) => {
     credit_cost: CREDIT_COST,
     validation_enabled: VALIDATION_ENABLED,
     max_retries: MAX_RETRIES,
-    pipeline_stages: ["A:SystemPrompt", "B:GroqVision", "C:PromptHarden", "D:GeminiGenerate", "E:Validate+Retry"],
+    pipeline_stages: [
+      "A:SystemPrompt",
+      "B:GroqVision",
+      "C:PromptHarden",
+      "D:GeminiGenerate",
+      "E:Validate+Retry",
+    ],
     timestamp: new Date().toISOString(),
   });
 });
@@ -987,18 +1223,36 @@ router.post(
 
     try {
       if (!isAIEnabled()) {
-        return res.status(503).json({ success: false, error: "AI service not configured — set GEMINI_API_KEY" });
+        return res
+          .status(503)
+          .json({
+            success: false,
+            error: "AI service not configured — set GEMINI_API_KEY",
+          });
       }
 
       const venueFile = req.files?.venueImage?.[0];
       const decorFile = req.files?.decorImage?.[0];
       const hasImages = !!(venueFile && decorFile);
 
-      const { style, functionType, atmosphere, timing, userPrompt, seed: userSeed } = req.body;
+      const {
+        style,
+        functionType,
+        atmosphere,
+        timing,
+        userPrompt,
+        seed: userSeed,
+      } = req.body;
       const user = req.user;
 
       console.log("🎨 [Moodboard] ═══ PIPELINE START ═══");
-      console.log("🎨 [Moodboard] Request:", { style, functionType, atmosphere, timing, userId: user._id });
+      console.log("🎨 [Moodboard] Request:", {
+        style,
+        functionType,
+        atmosphere,
+        timing,
+        userId: user._id,
+      });
 
       // Credit check
       if ((user.credits || 0) < CREDIT_COST) {
@@ -1025,58 +1279,92 @@ router.post(
       if (hasImages && isGroqEnabled()) {
         try {
           visionResult = await analyzeWithGroq(
-            venueFile.buffer, decorFile.buffer,
-            venueFile.mimetype, decorFile.mimetype,
-            style, functionType, atmosphere, timing, userPrompt
+            venueFile.buffer,
+            decorFile.buffer,
+            venueFile.mimetype,
+            decorFile.mimetype,
+            style,
+            functionType,
+            atmosphere,
+            timing,
+            userPrompt,
           );
           timer.mark("groqVision");
         } catch (groqErr) {
-          console.error("⚠️ [Moodboard] Groq failed, using fallback:", groqErr.message);
+          console.error(
+            "⚠️ [Moodboard] Groq failed, using fallback:",
+            groqErr.message,
+          );
           visionFallback = true;
           timer.mark("groqVisionFailed");
         }
       } else {
-        if (!hasImages) console.log("ℹ️ [Moodboard] No images — using text-to-image moodboard");
-        else console.log("⚠️ [Moodboard] No GROQ_API_KEY — using fallback prompt");
+        if (!hasImages)
+          console.log(
+            "ℹ️ [Moodboard] No images — using text-to-image moodboard",
+          );
+        else
+          console.log("⚠️ [Moodboard] No GROQ_API_KEY — using fallback prompt");
         visionFallback = true;
       }
 
       if (visionFallback || !visionResult) {
         visionResult = {
           mode: "MODE B",
-          prompt: buildFallbackPrompt(style, functionType, atmosphere, timing, userPrompt),
+          prompt: buildFallbackPrompt(
+            style,
+            functionType,
+            atmosphere,
+            timing,
+            userPrompt,
+          ),
           fallback: true,
         };
         timer.mark("fallbackPrompt");
       }
 
       // ─ Stage C: Harden prompt ─
-      const hardenedPrompt = hardenPrompt(visionResult.prompt, style, functionType, atmosphere, timing, false);
+      const hardenedPrompt = hardenPrompt(
+        visionResult.prompt,
+        style,
+        functionType,
+        atmosphere,
+        timing,
+        false,
+      );
       timer.mark("promptHarden");
 
       // ─ Stage D: Generate 4 Variation Images in Parallel ─
       const parsedSeed = userSeed ? parseInt(userSeed) : null;
-      const variationPrompts = generateVariationPrompts(hardenedPrompt, functionType);
+      const variationPrompts = generateVariationPrompts(
+        hardenedPrompt,
+        functionType,
+      );
       // Always use text-to-image for diverse moodboard scenes
       const modelType = GEMINI_IMAGE_MODEL;
 
-      console.log(`🎨 [Moodboard] Firing 4 parallel Gemini (${modelType}) calls...`);
+      console.log(
+        `🎨 [Moodboard] Firing 4 parallel Gemini (${modelType}) calls...`,
+      );
 
-      const fluxPromises = variationPrompts.map((v, idx) => {
+      const imageGenerationPromises = variationPrompts.map((v, idx) => {
         const variationSeed = parsedSeed ? parsedSeed + idx : null;
         return callGeminiImageAPI(null, v.prompt, modelType, dimensions)
           .then((result) => ({ success: true, label: v.label, ...result }))
           .catch((err) => {
-            console.error(`❌ [Moodboard] Variation "${v.label}" failed:`, err.message);
+            console.error(
+              `❌ [Moodboard] Variation "${v.label}" failed:`,
+              err.message,
+            );
             return { success: false, label: v.label, error: err.message };
           });
       });
 
-      const fluxResults = await Promise.all(fluxPromises);
-      timer.mark("fluxGeneration");
+      const imageResults = await Promise.all(imageGenerationPromises);
+      timer.mark("imageGeneration");
 
       // Collect successful results
-      const generatedImages = fluxResults
+      const rawGeneratedImages = imageResults
         .filter((r) => r.success && r.url)
         .map((r) => ({
           url: r.url,
@@ -1085,14 +1373,15 @@ router.post(
           generationId: r.generationId,
         }));
 
-      const failedCount = fluxResults.filter((r) => !r.success).length;
+      const failedCount = imageResults.filter((r) => !r.success).length;
 
-      if (generatedImages.length === 0) {
-        const firstError = fluxResults.find((r) => r.error)?.error || "";
-        if (fluxResults.some((r) => isGeminiAuthError(r.error))) {
+      if (rawGeneratedImages.length === 0) {
+        const firstError = imageResults.find((r) => r.error)?.error || "";
+        if (imageResults.some((r) => isGeminiAuthError(r.error))) {
           return res.status(401).json({
             success: false,
-            error: "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.",
+            error:
+              "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.",
             details: firstError.replace(/^GEMINI_AUTH_ERROR:\s*/, ""),
             pipelineTimings: timer.getTimings(),
           });
@@ -1100,7 +1389,27 @@ router.post(
         throw new Error("All 4 image generations failed. Please try again.");
       }
 
-      console.log(`✅ [Moodboard] ${generatedImages.length}/4 images generated successfully (${failedCount} failed)`);
+      let generatedImages = rawGeneratedImages;
+      let persistenceFailure = false;
+      try {
+        generatedImages = await persistGeneratedMoodboardImages(
+          rawGeneratedImages,
+          functionType,
+        );
+      } catch (persistErr) {
+        console.error(
+          "⚠️ [Moodboard] Failed to persist generated images:",
+          persistErr,
+          { rawGeneratedImages, functionType },
+        );
+        // Mark failure but continue with in-memory generated images so user gets results
+        persistenceFailure = true;
+      }
+
+      console.log(
+        `✅ [Moodboard] ${generatedImages.length}/4 images generated successfully (${failedCount} failed)` +
+          (persistenceFailure ? " (persistence failed for some items)" : ""),
+      );
 
       // ─ Deduct credits ─
       const moodboardTitle = MOODBOARD_TITLES[functionType] || "Wedding Vision";
@@ -1122,21 +1431,31 @@ router.post(
         totalGenerated: generatedImages.length,
         totalFailed: failedCount,
         pipelineTimings: timer.getTimings(),
+        persistenceFailure: persistenceFailure,
       };
 
       try {
         const oldCredits = user.credits;
-        user.deductCredits(CREDIT_COST, "Couple moodboard generation", "ai_generation", {
-          mode: visionResult.mode,
-          generationId: generatedImages[0]?.generationId || `mb_${Date.now()}`,
-          style,
-          functionType,
-          imageCount: generatedImages.length,
-        });
+        user.deductCredits(
+          CREDIT_COST,
+          "Couple moodboard generation",
+          "ai_generation",
+          {
+            mode: visionResult.mode,
+            generationId:
+              generatedImages[0]?.generationId || `mb_${Date.now()}`,
+            style,
+            functionType,
+            imageCount: generatedImages.length,
+          },
+        );
 
-        const subscription = await Subscription.findOne({ userId: user._id }).sort({ createdAt: -1 });
+        const subscription = await Subscription.findOne({
+          userId: user._id,
+        }).sort({ createdAt: -1 });
         if (subscription) {
-          subscription.creditsUsed = (subscription.creditsUsed || 0) + CREDIT_COST;
+          subscription.creditsUsed =
+            (subscription.creditsUsed || 0) + CREDIT_COST;
           await subscription.save();
         }
 
@@ -1148,12 +1467,18 @@ router.post(
           newBalance: user.credits,
         };
       } catch (deductErr) {
-        console.error("⚠️ [Moodboard] Credit deduction error:", deductErr.message);
-        responseData.creditWarning = "Generation succeeded but credits were not deducted.";
+        console.error(
+          "⚠️ [Moodboard] Credit deduction error:",
+          deductErr.message,
+        );
+        responseData.creditWarning =
+          "Generation succeeded but credits were not deducted.";
       }
 
       timer.mark("complete");
-      console.log(`🎨 [Moodboard] ═══ PIPELINE COMPLETE (${timer.elapsed()}ms) ═══`);
+      console.log(
+        `🎨 [Moodboard] ═══ PIPELINE COMPLETE (${timer.elapsed()}ms) ═══`,
+      );
 
       return res.json(responseData);
     } catch (error) {
@@ -1161,26 +1486,200 @@ router.post(
       timer.mark("error");
       let statusCode = 500;
       let msg = "Moodboard generation failed. Please try again.";
-      if (error.message.includes("timeout")) msg = "Generation timed out. Please try again.";
-      else if (error.message.includes("rate") || error.message.includes("busy")) { msg = "Service is busy. Please wait."; statusCode = 429; }
-      else if (error.message.includes("credits")) { msg = error.message; statusCode = 402; }
-      else if (error.message.includes("not configured")) { msg = error.message; statusCode = 503; }
-      else if (isGeminiAuthError(error.message)) {
-        msg = "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.";
+      if (error.message.includes("timeout"))
+        msg = "Generation timed out. Please try again.";
+      else if (
+        error.message.includes("rate") ||
+        error.message.includes("busy")
+      ) {
+        msg = "Service is busy. Please wait.";
+        statusCode = 429;
+      } else if (error.message.includes("credits")) {
+        msg = error.message;
+        statusCode = 402;
+      } else if (error.message.includes("not configured")) {
+        msg = error.message;
+        statusCode = 503;
+      } else if (isGeminiAuthError(error.message)) {
+        msg =
+          "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.";
         statusCode = 401;
       }
-      return res.status(statusCode).json({ success: false, error: msg, pipelineTimings: timer.getTimings() });
+      return res
+        .status(statusCode)
+        .json({
+          success: false,
+          error: msg,
+          pipelineTimings: timer.getTimings(),
+        });
     }
-  }
+  },
 );
 
 // ─── Image download proxy ───
+router.post(
+  "/couple-moodboard/edit-image",
+  protect,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      if (!isAIEnabled()) {
+        return res
+          .status(503)
+          .json({
+            success: false,
+            error: "AI service not configured — set GEMINI_API_KEY",
+          });
+      }
+
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Image file is required" });
+      }
+
+      const {
+        editPrompt = "",
+        functionType = "Wedding Ceremony",
+        style = "Modern",
+        atmosphere = "Warm & Festive",
+        timing = "Evening (Warm Glow)",
+        theme = "Wedding",
+        colorTone = "",
+        lighting = "",
+      } = req.body;
+
+      const dimensions = await detectAspectRatio(req.file.buffer);
+      // Credit check & tentative deduction for edit operation
+      const user = req.user;
+      if ((user.credits || 0) < CREDIT_COST) {
+        return res.status(402).json({
+          success: false,
+          error: "Insufficient credits for edit",
+          currentCredits: user.credits || 0,
+          requiredCredits: CREDIT_COST,
+        });
+      }
+
+      try {
+        // Deduct in-memory; we'll persist after successful edit or roll back on failure
+        user.deductCredits(
+          CREDIT_COST,
+          "Couple moodboard edit",
+          "ai_generation",
+          { functionType },
+        );
+      } catch (deductErr) {
+        console.error(
+          "⚠️ [Moodboard] Failed to deduct credits for edit:",
+          deductErr,
+        );
+        return res
+          .status(402)
+          .json({ success: false, error: "Insufficient credits" });
+      }
+      const refinementPrompt = [
+        `Edit this wedding photo for a ${functionType} moodboard.`,
+        `Keep it photoreal and premium in ${style} style.`,
+        atmosphere ? `Atmosphere: ${atmosphere}.` : "",
+        timing ? `Timing: ${timing}.` : "",
+        theme ? `Theme: ${theme}.` : "",
+        colorTone ? `Color tone: ${colorTone}.` : "",
+        lighting ? `Lighting direction: ${lighting}.` : "",
+        editPrompt
+          ? `Refinement request: ${editPrompt}.`
+          : "Refine the decor details while keeping the composition elegant.",
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      let result;
+      try {
+        result = await callGeminiImageAPI(
+          req.file.buffer,
+          refinementPrompt,
+          GEMINI_IMAGE_MODEL,
+          dimensions,
+        );
+      } catch (apiErr) {
+        // Rollback tentative credit deduction
+        try {
+          user.addCredits(
+            CREDIT_COST,
+            "Rollback edit-image",
+            "ai_generation_rollback",
+            { originalAction: "edit-image" },
+          );
+          await user.save();
+        } catch (rbErr) {
+          console.error(
+            "⚠️ [Moodboard] Failed to rollback credits after edit-image error:",
+            rbErr,
+          );
+        }
+        throw apiErr; // let outer handler return an error response
+      }
+
+      // Persist credit deduction (subscription tracking) after successful edit
+      try {
+        const subscription = await Subscription.findOne({
+          userId: user._id,
+        }).sort({ createdAt: -1 });
+        if (subscription) {
+          subscription.creditsUsed =
+            (subscription.creditsUsed || 0) + CREDIT_COST;
+          await subscription.save();
+        }
+        await user.save();
+      } catch (persistErr) {
+        console.error(
+          "⚠️ [Moodboard] Failed to persist credit deduction after edit:",
+          persistErr,
+        );
+      }
+
+      return res.json({
+        success: true,
+        image: result,
+        promptUsed: refinementPrompt,
+        dimensions,
+      });
+    } catch (error) {
+      console.error("❌ [Moodboard] Edit image error:", error);
+      let statusCode = 500;
+      let msg = "Failed to edit image. Please try again.";
+      if (error.message.includes("not configured")) {
+        msg = error.message;
+        statusCode = 503;
+      } else if (isGeminiAuthError(error.message)) {
+        msg = "Gemini authentication failed. Please verify GEMINI_API_KEY.";
+        statusCode = 401;
+      } else if (
+        error.message.includes("busy") ||
+        error.message.includes("rate")
+      ) {
+        msg = "AI service is busy. Please wait and try again.";
+        statusCode = 429;
+      }
+      return res.status(statusCode).json({ success: false, error: msg });
+    }
+  },
+);
+
 router.post("/couple-moodboard/download-image", async (req, res) => {
   try {
     const { imageUrl } = req.body;
-    if (!imageUrl) return res.status(400).json({ success: false, error: "imageUrl required" });
-    const response = await fetch(imageUrl, { headers: { "User-Agent": "LoversAI/1.0" } });
-    if (!response.ok) return res.status(response.status).json({ success: false, error: "Failed to fetch image" });
+    if (!imageUrl)
+      return res
+        .status(400)
+        .json({ success: false, error: "imageUrl required" });
+    const response = await fetch(imageUrl, {
+      headers: { "User-Agent": "LoversAI/1.0" },
+    });
+    if (!response.ok)
+      return res
+        .status(response.status)
+        .json({ success: false, error: "Failed to fetch image" });
     const buffer = await response.buffer();
     const contentType = response.headers.get("content-type") || "image/jpeg";
     res.setHeader("Content-Type", contentType);

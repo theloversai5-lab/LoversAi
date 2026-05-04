@@ -2,6 +2,9 @@
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import multerStorageCloudinary from "multer-storage-cloudinary";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Support both CJS and ESM shapes for multer-storage-cloudinary
 const CloudinaryStorage =
@@ -18,29 +21,86 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+export const isCloudinaryConfigured = Boolean(
+  process.env.CLOUDINARY_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET,
+);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const getUploadFolder = (req, file) => {
+  if (req.uploadFolder) return req.uploadFolder;
+  if (file.fieldname === "avatar") return "avatars";
+  if (file.fieldname === "portfolio") return "portfolios";
+  if (file.fieldname === "moodboard") return "moodboards";
+  if (file.fieldname === "video" || file.fieldname === "videos")
+    return "videos";
+  return "misc";
+};
+
+const getAllowedFormats = (file) => {
+  if (file.mimetype?.startsWith("video/")) {
+    return ["mp4", "mov", "webm", "m4v"];
+  }
+  return ["jpg", "jpeg", "png", "webp", "gif"];
+};
+
+const getResourceType = (file) =>
+  file.mimetype?.startsWith("video/") ? "video" : "image";
+
 // Multer storage engine for Cloudinary
-const storage = new CloudinaryStorage({
+const cloudinaryStorage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    // Determine folder based on file type or route
-    let folder = "loversai/misc";
-    if (req.uploadFolder) {
-      folder = `loversai/${req.uploadFolder}`;
-    } else if (file.fieldname === "avatar") {
-      folder = "loversai/avatars";
-    } else if (file.fieldname === "portfolio") {
-      folder = "loversai/portfolios";
-    } else if (file.fieldname === "moodboard") {
-      folder = "loversai/moodboards";
-    }
-
+    const resourceType = getResourceType(file);
     return {
-      folder,
-      allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
-      transformation: [
-        { width: 1200, height: 1200, crop: "limit", quality: "auto" },
-      ],
+      folder: `loversai/${getUploadFolder(req, file)}`,
+      resource_type: resourceType,
+      allowed_formats: getAllowedFormats(file),
+      ...(resourceType === "image"
+        ? {
+            transformation: [
+              { width: 1200, height: 1200, crop: "limit", quality: "auto" },
+            ],
+          }
+        : {}),
     };
+  },
+});
+
+const localDiskStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadFolder = getUploadFolder(req, file);
+    const destination = path.join(__dirname, "..", "uploads", uploadFolder);
+    fs.mkdirSync(destination, { recursive: true });
+    cb(null, destination);
+  },
+  filename: (_req, file, cb) => {
+    let ext = path.extname(file.originalname || "").toLowerCase();
+    if (!ext) {
+      const mime = (file.mimetype || "").toLowerCase();
+      const mimeMap = {
+        "image/jpeg": ".jpg",
+        "image/jpg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+        "image/gif": ".gif",
+        "video/mp4": ".mp4",
+        "video/quicktime": ".mov",
+        "video/webm": ".webm",
+        "video/x-m4v": ".m4v",
+      };
+      ext =
+        mimeMap[mime] ||
+        (mime.includes("/") ? `.${mime.split("/")[1]}` : ".bin");
+    }
+    const safeBase = path
+      .basename(file.originalname || "image", ext)
+      .replace(/[^a-z0-9_-]/gi, "-")
+      .slice(0, 60);
+    cb(null, `${Date.now()}-${safeBase}${ext}`);
   },
 });
 
@@ -56,11 +116,44 @@ const fileFilter = (req, file, cb) => {
 
 // Multer instance
 export const upload = multer({
-  storage,
+  storage: isCloudinaryConfigured ? cloudinaryStorage : localDiskStorage,
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max
     files: 10, // Max 10 files at once
+  },
+});
+
+const mediaFileFilter = (req, file, cb) => {
+  const allowedMimes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "video/mp4",
+    "video/quicktime",
+    "video/webm",
+    "video/x-m4v",
+  ];
+
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "Only JPG, PNG, WebP, GIF, MP4, MOV, WebM, and M4V files are allowed",
+      ),
+      false,
+    );
+  }
+};
+
+export const uploadMedia = multer({
+  storage: isCloudinaryConfigured ? cloudinaryStorage : localDiskStorage,
+  fileFilter: mediaFileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+    files: 10,
   },
 });
 
@@ -69,7 +162,7 @@ export const uploadToCloudinary = async (fileBuffer, options = {}) => {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
       folder: options.folder || "loversai/misc",
-      resource_type: "image",
+      resource_type: options.resource_type || "image",
       transformation: [
         { width: 1200, height: 1200, crop: "limit", quality: "auto" },
       ],
@@ -86,6 +179,25 @@ export const uploadToCloudinary = async (fileBuffer, options = {}) => {
 
     uploadStream.end(fileBuffer);
   });
+};
+
+export const uploadRemoteToCloudinary = async (sourceUrl, options = {}) => {
+  if (!isCloudinaryConfigured) {
+    return {
+      secure_url: sourceUrl,
+      public_id: null,
+      resource_type: options.resource_type || "image",
+      bytes: null,
+    };
+  }
+
+  const uploadOptions = {
+    folder: options.folder || "loversai/misc",
+    resource_type: options.resource_type || "auto",
+    ...options,
+  };
+
+  return cloudinary.uploader.upload(sourceUrl, uploadOptions);
 };
 
 // Delete from Cloudinary

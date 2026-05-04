@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch, quoteAPI } from "../../api/api";
+import { getCoupleDisplayName } from "../../utils/coupleProfile";
 
 const normalizeTheme = (value = "") => {
   const text = String(value).toLowerCase();
@@ -20,6 +21,8 @@ export default function WeddingCart() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const weddingProfile = currentUser?.weddingProfile || {};
+  const coupleName = getCoupleDisplayName(currentUser);
   const [eventDetails, setEventDetails] = useState({
     budget: "",
     guestCount: "",
@@ -179,13 +182,13 @@ export default function WeddingCart() {
                 My Wedding Cart
               </h1>
               <div className="mx-auto mt-3 flex max-w-[720px] flex-wrap items-center justify-center gap-2 rounded-[6px] border border-[#7b6140] bg-[#211914] px-4 py-3 text-[11px] text-white/75">
-                <span>{currentUser?.weddingProfile?.partner1 || "Kiara"} &amp; {currentUser?.weddingProfile?.partner2 || "Aarav"}</span>
+                <span>{coupleName}</span>
                 <span>|</span>
-                <span>{currentUser?.weddingProfile?.weddingDate || "02 December 2025"}</span>
+                <span>{weddingProfile.weddingDate || "02 December 2025"}</span>
                 <span>|</span>
-                <span>{currentUser?.weddingProfile?.city || "Delhi"}</span>
+                <span>{weddingProfile.city || "Delhi"}</span>
                 <span>|</span>
-                <span>{currentUser?.weddingProfile?.tradition || "Hindu"}</span>
+                <span>{weddingProfile.tradition || "Hindu"}</span>
                 <span>|</span>
                 <span>Budget: {eventDetails.budget || "50 L"}</span>
                 <span>|</span>
