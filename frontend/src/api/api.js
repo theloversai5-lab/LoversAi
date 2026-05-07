@@ -91,10 +91,10 @@ export const quoteAPI = {
   getById: (id) => apiFetch(`/quotes/${id}`),
   respond: (id, data) =>
     apiFetch(`/quotes/${id}/respond`, { method: 'PATCH', data }),
-  accept: (id) =>
-    apiFetch(`/quotes/${id}/accept`, { method: 'PATCH' }),
-  reject: (id) =>
-    apiFetch(`/quotes/${id}/reject`, { method: 'PATCH' }),
+  accept: (id, data) =>
+    apiFetch(`/quotes/${id}/accept`, { method: 'PATCH', data }),
+  reject: (id, data) =>
+    apiFetch(`/quotes/${id}/reject`, { method: 'PATCH', data }),
 };
 
 // ─── Payment APIs (Razorpay) ───

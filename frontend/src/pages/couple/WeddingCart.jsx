@@ -20,7 +20,6 @@ export default function WeddingCart() {
   const [cartItems, setCartItems] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const weddingProfile = currentUser?.weddingProfile || {};
   const coupleName = getCoupleDisplayName(currentUser);
   const [eventDetails, setEventDetails] = useState({
@@ -126,8 +125,13 @@ export default function WeddingCart() {
         } catch (clearErr) {
           console.error("Failed to clear cart:", clearErr);
         }
-        setSuccess(true);
-        setTimeout(() => navigate("/couple/bid-placed"), 1500);
+        const newQuoteId = data.quote?._id;
+        navigate(newQuoteId ? `/couple/bid-dashboard/${newQuoteId}` : "/couple/bid-placed", {
+          state: {
+            quoteId: newQuoteId || null,
+            justSubmitted: true,
+          },
+        });
       }
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.message || "Failed to submit. Please try again.";
@@ -137,23 +141,6 @@ export default function WeddingCart() {
       setSubmitting(false);
     }
   };
-
-  if (success) {
-    return (
-      <main className="min-h-screen bg-[#171311] px-4 py-10 text-white">
-        <div className="mx-auto flex min-h-[70vh] max-w-xl items-center justify-center rounded-[10px] border border-[#5d4421] bg-[#1b1512] p-8 text-center">
-          <div>
-            <h2 className="font-['Cormorant_Garamond'] text-[38px] font-semibold text-[#f7e7c7]">
-              Bid Submitted
-            </h2>
-            <p className="mt-3 text-sm text-white/55">
-              Planners will review your vision board and send quotes soon.
-            </p>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-[#171311] px-4 py-6 text-white md:px-6">

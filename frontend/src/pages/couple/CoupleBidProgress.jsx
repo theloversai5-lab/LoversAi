@@ -1,349 +1,1149 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { quoteAPI, chatAPI } from '../../api/api';
-import { io } from 'socket.io-client';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { io } from "socket.io-client";
+import { chatAPI, quoteAPI } from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
 
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const apiBaseUrl =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const stepsMap = [
-  { label: "Bid Placed", key: "pending" },
-  { label: "Vendor Review", key: "viewed" },
-  { label: "Quotation Received", key: "quoted" },
-  { label: "Booking Complete", key: "accepted" },
+  {
+    label: "Bid Placed",
+    key: "pending",
+    description: "Finding the perfect planners for your vision.",
+  },
+  {
+    label: "Vendor Review",
+    key: "viewed",
+    description: "Planners are reviewing your request and moodboard.",
+  },
+  {
+    label: "Quotation Received",
+    key: "quoted",
+    description: "Quotes are ready for you to compare and accept.",
+  },
+  {
+    label: "Booking Complete",
+    key: "accepted",
+    description: "Your planner is confirmed and booking is complete.",
+  },
+];
+
+const statusOrder = [
+  "pending",
+  "viewed",
+  "quoted",
+  "accepted",
+  "rejected",
+  "expired",
 ];
 
 const getStepStatus = (currentStatus, stepKey) => {
-  const statusOrder = ['pending', 'viewed', 'quoted', 'accepted', 'rejected', 'expired'];
   const currentIndex = statusOrder.indexOf(currentStatus);
   const stepIndex = statusOrder.indexOf(stepKey);
 
-  if (currentStatus === 'rejected' || currentStatus === 'expired') {
-    if (stepIndex > 1) return 'pending';
-    return stepIndex <= currentIndex ? 'done' : 'pending';
+  if (currentStatus === "rejected" || currentStatus === "expired") {
+    if (stepIndex > 1) return "pending";
+    return stepIndex <= currentIndex ? "done" : "pending";
   }
 
-  if (currentIndex > stepIndex) return 'done';
-  if (currentIndex === stepIndex) return 'active';
-  return 'pending';
+  if (currentIndex > stepIndex) return "done";
+  if (currentIndex === stepIndex) return "active";
+  return "pending";
 };
 
-const CoupleBidProgress = () => {
+const formatDate = (value) => {
+  if (!value) return "TBD";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatTime = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleTimeString("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+
+const formatCurrency = (value) => {
+  if (!value) return "Flexible";
+  return `Rs ${Number(value).toLocaleString("en-IN")}`;
+};
+
+const plannerLabel = (planner) =>
+  planner?.company_name || planner?.fullName || "Planner";
+
+const plannerInitial = (planner) =>
+  plannerLabel(planner).charAt(0).toUpperCase();
+
+const getDefaultPanel = (quote, requestedPanel) => {
+  if (requestedPanel) return requestedPanel;
+  if (quote?.status === "accepted") return "messages";
+  if ((quote?.responses || []).length > 0) return "proposals";
+  return "overview";
+};
+
+const metricCardClass =
+  "rounded-[24px] border border-[#5d4421] bg-[#1b1512] px-6 py-5 shadow-[0_6px_18px_rgba(0,0,0,0.35)]";
+
+export default function CoupleBidProgress() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentUser } = useAuth();
+
   const [quote, setQuote] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [activeRoomId, setActiveRoomId] = useState(
+    location.state?.roomId || "",
+  );
+  const [messages, setMessages] = useState([]);
+  const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [actionLoading, setActionLoading] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [actionLoading, setActionLoading] = useState("");
+  const [activePanel, setActivePanel] = useState(
+    location.state?.activePanel || "overview",
+  );
+
+  const socketRef = useRef(null);
+  const messageEndRef = useRef(null);
+
+  const fetchQuote = useCallback(async () => {
+    const data = await quoteAPI.getById(id);
+    if (data.success) {
+      setQuote(data.quote);
+      return data.quote;
+    }
+    throw new Error("Failed to load bid details.");
+  }, [id]);
+
+  const fetchRooms = useCallback(async () => {
+    const data = await chatAPI.getRooms();
+    if (data.success) {
+      setRooms(data.rooms || []);
+      return data.rooms || [];
+    }
+    return [];
+  }, []);
+
+  const loadRoomMessages = useCallback(async (roomId) => {
+    if (!roomId) return;
+    setChatLoading(true);
+    try {
+      const data = await chatAPI.getMessages(roomId);
+      if (data.success) {
+        setMessages(data.messages || []);
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to load chat messages.");
+    } finally {
+      setChatLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchQuote = async () => {
+    const initialize = async () => {
       try {
-        const data = await quoteAPI.getById(id);
-        if (data.success) {
-          setQuote(data.quote);
-        } else {
-          setError('Failed to load bid details');
+        setLoading(true);
+        setError("");
+        const [quoteData, roomData] = await Promise.all([
+          fetchQuote(),
+          fetchRooms(),
+        ]);
+        setActivePanel((current) =>
+          getDefaultPanel(quoteData, location.state?.activePanel || current),
+        );
+
+        const matchingRoom =
+          location.state?.roomId ||
+          roomData.find((room) => room.relatedQuote?._id === id)?._id ||
+          "";
+
+        if (matchingRoom) {
+          setActiveRoomId(matchingRoom);
         }
       } catch (err) {
-        setError(err.response?.data?.error || 'An error occurred fetching the bid');
+        setError(
+          err.response?.data?.error ||
+            err.message ||
+            "An error occurred while fetching the bid.",
+        );
       } finally {
         setLoading(false);
       }
     };
-    fetchQuote();
-  }, [id]);
 
-  // Socket.io real-time listener for quote updates
+    initialize();
+  }, [
+    fetchQuote,
+    fetchRooms,
+    id,
+    location.state?.activePanel,
+    location.state?.roomId,
+  ]);
+
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!activeRoomId) {
+      setMessages([]);
+      return;
+    }
+    loadRoomMessages(activeRoomId);
+  }, [activeRoomId, loadRoomMessages]);
 
-    const socket = io(apiBaseUrl, { transports: ['websocket', 'polling'] });
-    socket.emit('join', currentUser.id);
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    socket.on('quote_update', (data) => {
+  useEffect(() => {
+    if (!currentUser?.id) return undefined;
+
+    const socket = io(apiBaseUrl, { transports: ["websocket", "polling"] });
+    socketRef.current = socket;
+    socket.emit("join", currentUser.id);
+
+    if (activeRoomId) {
+      socket.emit("join_chat", activeRoomId);
+    }
+
+    socket.on("quote_update", (data) => {
       if (data.quoteId === id) {
-        // Re-fetch the quote to get full updated data
-        quoteAPI.getById(id).then((res) => {
-          if (res.success) setQuote(res.quote);
-        });
+        fetchQuote().catch(() => {});
+      }
+    });
+
+    socket.on("new_message", (payload) => {
+      if (!payload?.roomId || !payload?.message) return;
+
+      setRooms((prevRooms) => {
+        const existing = prevRooms.find((room) => room._id === payload.roomId);
+        if (!existing) return prevRooms;
+
+        const updated = {
+          ...existing,
+          lastMessage: {
+            content: payload.message.content,
+            sender: payload.message.sender,
+            timestamp: payload.message.createdAt || new Date().toISOString(),
+          },
+          updatedAt: payload.message.createdAt || new Date().toISOString(),
+        };
+
+        return [
+          updated,
+          ...prevRooms.filter((room) => room._id !== payload.roomId),
+        ];
+      });
+
+      if (payload.roomId === activeRoomId) {
+        setMessages((prev) => [...prev, payload.message]);
       }
     });
 
     return () => {
-      socket.off('quote_update');
+      if (activeRoomId) {
+        socket.emit("leave_chat", activeRoomId);
+      }
+      socket.off("quote_update");
+      socket.off("new_message");
       socket.disconnect();
     };
-  }, [currentUser?.id, id]);
+  }, [activeRoomId, currentUser?.id, fetchQuote, id]);
+
+  useEffect(() => {
+    if (!socketRef.current || !activeRoomId) return undefined;
+    socketRef.current.emit("join_chat", activeRoomId);
+
+    return () => {
+      socketRef.current?.emit("leave_chat", activeRoomId);
+    };
+  }, [activeRoomId]);
+
+  const acceptedResponse = useMemo(
+    () => (quote?.responses || []).find((resp) => resp.status === "accepted"),
+    [quote],
+  );
+
+  const rejectedResponses = useMemo(
+    () => (quote?.responses || []).filter((resp) => resp.status === "rejected"),
+    [quote],
+  );
+
+  const bestBidAmount = useMemo(() => {
+    const amounts = (quote?.responses || [])
+      .map((resp) => resp.quotedPrice)
+      .filter((value) => typeof value === "number");
+
+    if (!amounts.length) return null;
+    return Math.min(...amounts);
+  }, [quote]);
+
+  const quoteRooms = useMemo(() => {
+    if (!quote) return [];
+
+    const plannerIds = new Set(
+      (quote.responses || []).map((resp) => resp.planner?._id).filter(Boolean),
+    );
+
+    if (quote.hiredPlanner?._id) {
+      plannerIds.add(quote.hiredPlanner._id);
+    }
+
+    return rooms.filter((room) => {
+      if (room.relatedQuote?._id === quote._id) return true;
+      return room.participants?.some((participant) =>
+        plannerIds.has(participant._id),
+      );
+    });
+  }, [quote, rooms]);
+
+  useEffect(() => {
+    if (!quoteRooms.length || activeRoomId) return;
+    setActiveRoomId(quoteRooms[0]._id);
+  }, [activeRoomId, quoteRooms]);
+
+  const activeRoom =
+    quoteRooms.find((room) => room._id === activeRoomId) || null;
+
+  const progressMeta = useMemo(() => {
+    if (!quote) return { completed: 0 };
+    return {
+      completed: stepsMap.filter(
+        (step) => getStepStatus(quote.status, step.key) === "done",
+      ).length,
+    };
+  }, [quote]);
 
   const handleAccept = async (plannerId) => {
     setActionLoading(`accept_${plannerId}`);
+    setError("");
+
     try {
       const data = await quoteAPI.accept(id, { plannerId });
-      if (data.success) setQuote(data.quote);
+      if (data.success) {
+        await fetchQuote();
+        setActivePanel("messages");
+        await openChatForPlanner(plannerId, "messages");
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to accept quote');
+      setError(err.response?.data?.error || "Failed to accept quote.");
     } finally {
-      setActionLoading('');
+      setActionLoading("");
     }
   };
 
   const handleReject = async (plannerId) => {
     setActionLoading(`reject_${plannerId}`);
+    setError("");
+
     try {
       const data = await quoteAPI.reject(id, { plannerId });
-      if (data.success) setQuote(data.quote);
+      if (data.success) {
+        await fetchQuote();
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to reject quote');
+      setError(err.response?.data?.error || "Failed to reject quote.");
     } finally {
-      setActionLoading('');
+      setActionLoading("");
     }
   };
 
-  const handleChat = async (plannerId) => {
-    if (!plannerId) return;
+  const openChatForPlanner = async (plannerId, panel = "messages") => {
+    if (!plannerId || !quote?._id) return;
+
     try {
-      await chatAPI.createRoom({ participantId: plannerId, quoteId: quote._id });
-      // Navigate straight to the new Profile/Dashboard which holds the messages natively
-      navigate('/profile', { state: { activeTab: 'messages' } });
+      const data = await chatAPI.createRoom({
+        participantId: plannerId,
+        quoteId: quote._id,
+      });
+
+      if (data.success && data.room) {
+        const refreshedRooms = await fetchRooms();
+        setActiveRoomId(data.room._id);
+        setActivePanel(panel);
+
+        const roomExists = refreshedRooms.some(
+          (room) => room._id === data.room._id,
+        );
+        if (!roomExists) {
+          setRooms((prev) => [data.room, ...prev]);
+        }
+      }
     } catch (err) {
-      console.error('Failed to create chat:', err);
+      setError(err.response?.data?.error || "Failed to open chat.");
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!draft.trim() || !activeRoomId) return;
+
+    setSending(true);
+    setError("");
+
+    try {
+      const data = await chatAPI.sendMessage(activeRoomId, {
+        content: draft.trim(),
+      });
+      if (data.success) {
+        setMessages((prev) => [...prev, data.message]);
+        setRooms((prevRooms) =>
+          prevRooms.map((room) =>
+            room._id === activeRoomId
+              ? {
+                  ...room,
+                  lastMessage: {
+                    content: data.message.content,
+                    sender: data.message.sender,
+                    timestamp: data.message.createdAt,
+                  },
+                  updatedAt: data.message.createdAt,
+                }
+              : room,
+          ),
+        );
+        setDraft("");
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to send message.");
+    } finally {
+      setSending(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen loverai-page-bg flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-loverai-gold/30 border-t-loverai-gold rounded-full animate-spin"></div>
+      <div className="flex min-h-screen items-center justify-center bg-[#f3efe7]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#d7c7ae] border-t-[#1b1b1b]" />
       </div>
     );
   }
 
-  if (error || !quote) {
+  if (error && !quote) {
     return (
-      <div className="min-h-screen loverai-page-bg flex flex-col items-center justify-center text-center p-6">
-        <div className="text-4xl mb-4">⚠️</div>
-        <h2 className="text-2xl text-white mb-2 font-heading">Bid Not Found</h2>
-        <p className="text-white/50 mb-6">{error}</p>
-        <button onClick={() => navigate('/couple/profile')} className="loverai-btn-primary !rounded-xl">
-          Back to Dashboard
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#f3efe7] px-4 text-center text-[#1d1d1b]">
+        <h1 className="mb-3 text-3xl font-semibold">
+          Bid Dashboard Unavailable
+        </h1>
+        <p className="mb-6 max-w-md text-[#6d655c]">{error}</p>
+        <button
+          type="button"
+          onClick={() => navigate("/couple/profile")}
+          className="rounded-xl bg-[#1f1b18] px-6 py-3 text-sm font-semibold text-white"
+        >
+          Back to Couple Dashboard
         </button>
       </div>
     );
   }
 
+  const currentStatus = quote?.status || "pending";
+  const titleMap = {
+    overview: "Bid dashboard",
+    proposals: "Proposals received",
+    messages: "Messages",
+  };
+
+  const menuItems = [
+    { id: "overview", label: "Bid dashboard", badge: null },
+    {
+      id: "proposals",
+      label: "Proposals",
+      badge: quote?.responses?.length || 0,
+    },
+    { id: "messages", label: "Messages", badge: quoteRooms.length || 0 },
+  ];
+
   return (
-    <div className="min-h-screen loverai-page-bg pt-24 px-4 sm:px-8 pb-12">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-4 py-6 border-b border-white/10 mb-8">
-          <button 
-            onClick={() => navigate('/couple/profile')}
-            className="w-10 h-10 rounded-full glass-card hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-loverai-gold transition-colors"
-          >
-           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-          </button>
-          <div>
-            <h1 className="font-heading text-2xl md:text-3xl text-white">Bid Progress</h1>
-            <p className="text-white/40 text-sm mt-1">ID: {quote._id}</p>
+    <main className="min-h-screen bg-[#171311] text-white">
+      <div className="flex min-h-screen flex-col lg:flex-row">
+        <aside className="w-full border-b border-[#5d4421] bg-[#1b1512] lg:min-h-screen lg:w-[300px] lg:border-b-0 lg:border-r">
+          <div className="border-b border-[#5d4421] px-7 py-6">
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/couple/profile", { state: { activeTab: "bids" } })
+              }
+              className="text-left"
+            >
+              <p className="text-[34px] font-semibold leading-none text-[#f7e7c7]">
+                LoversAI
+              </p>
+              <p className="mt-2 text-lg text-[#c9b38a]">Wedding CRM</p>
+            </button>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Progress Timeline Column */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="glass-card rounded-3xl p-8 sm:p-12">
-              <div className="space-y-0 relative pl-4">
-                {/* Timeline base line */}
-                <div className="absolute left-8 top-8 bottom-8 w-[2px] bg-white/5"></div>
+          <div className="px-5 py-6">
+            <p className="mb-4 text-xs uppercase tracking-[0.22em] text-[#b89f79]">
+              Couple Menu
+            </p>
 
-                {stepsMap.map((step, i) => {
-                  const status = getStepStatus(quote.status, step.key);
-                  return (
-                    <div key={step.label} className="relative flex gap-6 pb-12 last:pb-0">
-                      
-                      {/* Icon */}
-                      <div className="relative z-10 flex flex-col items-center">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
-                          status === "done" 
-                            ? "bg-gradient-to-br from-green-400 to-emerald-600 text-white shadow-emerald-500/30" 
-                            : status === "active" 
-                            ? "bg-gradient-to-br from-loverai-gold to-loverai-gold-bright text-black shadow-loverai-gold/40 animate-pulse" 
-                            : "bg-white/5 border border-white/10 text-white/20"
-                        }`}>
-                          {status === "done" ? (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                          ) : status === "active" ? (
-                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                          ) : (
-                            <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
-                          )}
-                        </div>
-                      </div>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => navigate("/couple/cart")}
+                className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-white/90 transition hover:bg-white/5"
+              >
+                <span className="font-medium">+ New bid</span>
+              </button>
 
-                      {/* Content */}
-                      <div className="pt-2">
-                        <p className={`font-semibold tracking-wide ${
-                          status === "done" ? "text-emerald-400" :
-                          status === "active" ? "loverai-gradient-text" :
-                          "text-white/30"
-                        }`}>
-                          {step.label}
+              {menuItems.map((item) => {
+                const isActive = activePanel === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActivePanel(item.id)}
+                    className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition ${
+                      isActive
+                        ? "bg-[#2b2118] text-[#f7e7c7] shadow-sm"
+                        : "text-white/80 hover:bg-white/5"
+                    }`}
+                  >
+                    <span className="font-medium">{item.label}</span>
+                    {item.badge ? (
+                      <span className="rounded-full bg-[#f4ead7] px-2.5 py-1 text-xs font-semibold text-[#8f6d28]">
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 rounded-[24px] border border-[#5d4421] bg-[#1b1512] px-4 py-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#b89f79]">
+                Request Id
+              </p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                {quote._id.slice(-6).toUpperCase()}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-[#c9b38a]">
+                Submitted on {formatDate(quote.createdAt)} for{" "}
+                {quote.eventDetails?.city || "your wedding"}.
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        <section className="min-w-0 flex-1">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#5d4421] bg-[#1b1512] px-8 py-5">
+            <h1 className="text-[22px] font-semibold text-[#f7e7c7]">
+              {titleMap[activePanel]}
+            </h1>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/couple/bid-placed", {
+                    state: { quoteId: quote._id },
+                  })
+                }
+                className="rounded-full border border-[#5d4421] px-4 py-2 text-sm text-white/80 transition hover:bg-white/5"
+              >
+                Journey view
+              </button>
+              <div className="rounded-full bg-[#fae9b8] px-4 py-2 text-sm font-semibold text-[#946d18]">
+                Couple
+              </div>
+            </div>
+          </header>
+
+          <div className="px-8 py-8">
+            {error ? (
+              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            ) : null}
+
+            {activePanel === "overview" ? (
+              <div className="space-y-7">
+                <div className="grid gap-4 xl:grid-cols-3">
+                  <div className={metricCardClass}>
+                    <p className="text-[42px] font-semibold leading-none text-white">
+                      {quote.responses?.length || 0}
+                    </p>
+                    <p className="mt-2 text-sm uppercase tracking-[0.14em] text-[#b89f79]">
+                      Proposals received
+                    </p>
+                  </div>
+                  <div className={metricCardClass}>
+                    <p className="text-[42px] font-semibold leading-none text-white">
+                      {acceptedResponse ? 1 : 0}
+                    </p>
+                    <p className="mt-2 text-sm uppercase tracking-[0.14em] text-[#b89f79]">
+                      Accepted
+                    </p>
+                  </div>
+                  <div className={metricCardClass}>
+                    <p className="text-[42px] font-semibold leading-none text-white">
+                      {bestBidAmount
+                        ? formatCurrency(bestBidAmount)
+                        : "Awaiting"}
+                    </p>
+                    <p className="mt-2 text-sm uppercase tracking-[0.14em] text-[#b89f79]">
+                      Best bid
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_380px]">
+                  <div className="rounded-[28px] border border-[#5d4421] bg-[#1b1512] p-6 shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm uppercase tracking-[0.18em] text-[#b89f79]">
+                          Track your booking
                         </p>
-                        
-                        {/* Status specific sub-texts and actions */}
-                        {status === "active" && step.key === "pending" && (
-                           <p className="text-xs text-white/50 mt-1.5 opacity-80 animate-fade-in">Finding the perfect planners for your vision...</p>
-                        )}
-                        {status === "active" && step.key === "viewed" && (
-                           <p className="text-xs text-loverai-gold/80 mt-1.5 opacity-80 animate-fade-in">Planners are reviewing your request and preparing quotes.</p>
-                        )}
-                        {status === "active" && step.key === "quoted" && quote.responses && quote.responses.length > 0 && (
-                          <div className="mt-4 flex flex-col gap-4 w-full">
-                            <p className="text-sm text-loverai-gold font-medium mb-1">
-                               {quote.responses.length} Planner{quote.responses.length !== 1 ? 's have' : ' has'} bid on your vision!
-                            </p>
-                            {quote.responses.map((resp, idx) => (
-                               <div key={resp._id || idx} className="bg-white/[0.04] rounded-2xl p-4 border border-white/10 flex flex-col gap-3 transition hover:bg-white/[0.08]">
-                                  <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-3">
-                                       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-loverai-gold to-yellow-600 flex items-center justify-center text-black font-bold uppercase shadow-lg shadow-loverai-gold/20 flex-shrink-0">
-                                         {resp.planner?.avatar ? <img src={resp.planner.avatar} className="w-full h-full object-cover rounded-full" alt="" /> : (resp.planner?.fullName || resp.planner?.company_name || 'P')[0]}
-                                       </div>
-                                       <div>
-                                          <p className="text-sm text-white font-semibold flex items-center gap-2">
-                                            {resp.planner?.fullName || resp.planner?.company_name || 'Planner'}
-                                            {resp.status === 'rejected' && <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 uppercase">Rejected</span>}
-                                          </p>
-                                          <button onClick={() => window.open(`/planner/profile/${resp.planner?._id}`, '_blank')} className="text-[10px] text-loverai-gold/70 hover:text-loverai-gold transition-colors underline underline-offset-2">View Portfolio</button>
-                                       </div>
-                                    </div>
-                                    <div className="text-right flex-shrink-0">
-                                       <p className="text-lg font-bold text-loverai-gold tracking-tight">₹{resp.quotedPrice?.toLocaleString()}</p>
-                                       <p className="text-[9px] text-white/30 uppercase mt-0.5">{new Date(resp.createdAt).toLocaleDateString()}</p>
-                                    </div>
-                                  </div>
-                                  
-                                  {resp.quotedMessage && (
-                                    <div className="relative mt-2 p-3 bg-black/40 rounded-xl border border-white/5">
-                                      <svg className="absolute -top-2 left-4 w-4 h-4 text-white/5" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
-                                      <p className="text-[11px] text-white/70 italic pl-6 leading-relaxed relative z-10">"{resp.quotedMessage}"</p>
-                                    </div>
-                                  )}
+                        <h2 className="mt-2 text-3xl font-semibold text-[#f7e7c7]">
+                          Bid progress
+                        </h2>
+                      </div>
+                      <div className="rounded-full border border-[#3b2b1f] bg-[#2b2118] px-4 py-2 text-sm text-[#c9b38a]">
+                        {progressMeta.completed}/{stepsMap.length} complete
+                      </div>
+                    </div>
 
-                                  {resp.status === 'pending' && (
-                                    <div className="flex gap-2 mt-2">
-                                      <button
-                                        onClick={() => handleChat(resp.planner._id)}
-                                        className="flex-1 bg-white/10 text-white rounded-lg py-2 text-xs font-semibold hover:bg-white/20 transition-colors border border-white/5"
-                                      >
-                                        💬 Message
-                                      </button>
-                                      <button
-                                        onClick={() => handleAccept(resp.planner._id)}
-                                        disabled={actionLoading}
-                                        className="flex-1 bg-gradient-to-r from-loverai-gold to-yellow-600 text-black rounded-lg py-2 text-xs font-bold hover:brightness-110 shadow-lg shadow-loverai-gold/20 transition-all disabled:opacity-50"
-                                      >
-                                        {actionLoading === `accept_${resp.planner._id}` ? '...' : 'Accept Proposal'}
-                                      </button>
-                                      <button
-                                        onClick={() => handleReject(resp.planner._id)}
-                                        disabled={actionLoading}
-                                        className="px-3 bg-red-500/10 text-red-500 rounded-lg py-2 text-xs hover:bg-red-500/20 transition-colors disabled:opacity-50 border border-red-500/20 flex items-center justify-center font-bold"
-                                        title="Decline this proposal"
-                                      >
-                                        ✕
-                                      </button>
-                                    </div>
-                                  )}
-                               </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {/* Accepted state — show chat option */}
-                        {status === "done" && step.key === "accepted" && quote.status === "accepted" && quote.hiredPlanner && (
-                           <div className="mt-2 bg-gradient-to-r from-emerald-500/10 to-green-500/5 border border-emerald-500/20 p-4 rounded-xl">
-                             <p className="text-xs text-emerald-400/90 mb-3 font-medium">🎉 Booking confirmed with {quote.hiredPlanner?.fullName || quote.hiredPlanner?.company_name}!</p>
-                             <button
-                               onClick={() => handleChat(quote.hiredPlanner._id)}
-                               className="text-xs px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors flex items-center gap-2 font-semibold"
-                             >
-                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                               Open Chat
-                             </button>
-                           </div>
+                    <div className="relative pl-3">
+                      <div className="absolute bottom-8 left-[28px] top-5 w-px bg-[#342616]" />
+                      <div className="space-y-8">
+                        {stepsMap.map((step) => {
+                          const stepStatus = getStepStatus(
+                            currentStatus,
+                            step.key,
+                          );
+                          const isActive = stepStatus === "active";
+                          const isDone = stepStatus === "done";
+                          const isPrimaryAction = step.key === "pending";
+
+                          return (
+                            <button
+                              key={step.key}
+                              type="button"
+                              onClick={() => {
+                                if (
+                                  step.key === "quoted" &&
+                                  (quote.responses?.length || 0) > 0
+                                ) {
+                                  setActivePanel("proposals");
+                                  return;
+                                }
+                                if (
+                                  step.key === "accepted" &&
+                                  quote.hiredPlanner
+                                ) {
+                                  setActivePanel("messages");
+                                  return;
+                                }
+                                if (isPrimaryAction) {
+                                  setActivePanel("overview");
+                                }
+                              }}
+                              className="flex w-full items-start gap-5 text-left"
+                            >
+                              <div className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full border border-[#5d4421] bg-[#2b2118]">
+                                <div
+                                  className={`h-4 w-4 rounded-full ${
+                                    isActive
+                                      ? "bg-[#171412]"
+                                      : isDone
+                                        ? "bg-[#27a36a]"
+                                        : "bg-[#cabfaf]"
+                                  }`}
+                                />
+                              </div>
+
+                              <div className="min-w-0 flex-1 pt-1">
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <h3
+                                    className={`text-[18px] font-semibold ${isActive ? "text-[#15120f]" : "text-[#5a5147]"}`}
+                                  >
+                                    {step.label}
+                                  </h3>
+                                  {isActive ? (
+                                    <span className="rounded-full bg-[#fff5df] px-3 py-1 text-xs font-semibold text-[#9f7412]">
+                                      Active
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <p className="mt-2 text-sm leading-6 text-[#73695e]">
+                                  {step.description}
+                                </p>
+
+                                {step.key === "pending" && isActive ? (
+                                  <div className="mt-4 rounded-2xl bg-[#f7f2ea] px-4 py-3 text-sm text-[#6a6157]">
+                                    Your request is live and planners are being
+                                    matched now.
+                                  </div>
+                                ) : null}
+
+                                {step.key === "quoted" &&
+                                (quote.responses?.length || 0) > 0 ? (
+                                  <div className="mt-4 rounded-2xl bg-[#f7f2ea] px-4 py-3 text-sm text-[#6a6157]">
+                                    {quote.responses.length} proposal
+                                    {quote.responses.length > 1
+                                      ? "s are"
+                                      : " is"}{" "}
+                                    available for review. Open the proposals tab
+                                    to compare prices and planners.
+                                  </div>
+                                ) : null}
+
+                                {step.key === "accepted" &&
+                                quote.hiredPlanner ? (
+                                  <div className="mt-4 rounded-2xl bg-[#edf8f1] px-4 py-3 text-sm text-[#2f7b51]">
+                                    Booking confirmed with{" "}
+                                    {plannerLabel(quote.hiredPlanner)}. Continue
+                                    the conversation in Messages.
+                                  </div>
+                                ) : null}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="rounded-[28px] border border-[#5d4421] bg-[#1b1512] p-6 shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+                      <p className="mb-4 text-sm uppercase tracking-[0.18em] text-[#b0a494]">
+                        Request overview
+                      </p>
+                      <div className="overflow-hidden rounded-[24px] border border-[#3b2b1f] bg-[#2b2118] p-4">
+                        {quote.images?.[0] ? (
+                          <img
+                            src={quote.images[0].url}
+                            alt={quote.images[0].label || "Wedding vision"}
+                            className="aspect-[4/3] w-full rounded-[20px] object-cover"
+                          />
+                        ) : (
+                          <div className="aspect-[4/3] w-full rounded-[20px] bg-[#2b2118]" />
                         )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
 
-              {/* Special Handling for Rejected / Expired */}
-              {(quote.status === 'rejected' || quote.status === 'expired') && (
-                <div className="mt-8 pt-6 border-t border-white/10 text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 text-red-400 mb-3">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <div className="rounded-[28px] border border-[#5d4421] bg-[#1b1512] px-7 py-6 shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between border-b border-[#eee6da] pb-4">
+                          <span className="text-sm uppercase tracking-[0.16em] text-[#b0a494]">
+                            Budget
+                          </span>
+                          <span className="text-[18px] font-semibold">
+                            {quote.eventDetails?.budget || "Flexible"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-[#eee6da] pb-4">
+                          <span className="text-sm uppercase tracking-[0.16em] text-[#b0a494]">
+                            Location
+                          </span>
+                          <span className="text-[18px] font-semibold">
+                            {quote.eventDetails?.city || "TBD"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-[#eee6da] pb-4">
+                          <span className="text-sm uppercase tracking-[0.16em] text-[#b0a494]">
+                            Guests
+                          </span>
+                          <span className="text-[18px] font-semibold">
+                            {quote.eventDetails?.guestCount || "TBD"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-[#eee6da] pb-4">
+                          <span className="text-sm uppercase tracking-[0.16em] text-[#b0a494]">
+                            Wedding date
+                          </span>
+                          <span className="text-[18px] font-semibold">
+                            {formatDate(quote.eventDetails?.weddingDate)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-sm uppercase tracking-[0.16em] text-[#b0a494]">
+                            Notes
+                          </span>
+                          <p className="mt-3 text-[15px] leading-7 text-[#655c53]">
+                            {quote.eventDetails?.notes ||
+                              "No special notes added yet."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-red-400 font-semibold">Bid {quote.status === 'expired' ? 'Expired' : 'Rejected'}</h3>
-                  <p className="text-xs text-white/40 mt-1">Unfortunately, this request could not be fulfilled at this time.</p>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : null}
+
+            {activePanel === "proposals" ? (
+              <div className="space-y-7">
+                <div className="grid gap-4 xl:grid-cols-3">
+                  <div className={metricCardClass}>
+                    <p className="text-[42px] font-semibold leading-none">
+                      {quote.responses?.length || 0}
+                    </p>
+                    <p className="mt-2 text-sm uppercase tracking-[0.14em] text-[#b0a494]">
+                      Proposals received
+                    </p>
+                  </div>
+                  <div className={metricCardClass}>
+                    <p className="text-[42px] font-semibold leading-none">
+                      {acceptedResponse ? 1 : 0}
+                    </p>
+                    <p className="mt-2 text-sm uppercase tracking-[0.14em] text-[#b0a494]">
+                      Accepted
+                    </p>
+                  </div>
+                  <div className={metricCardClass}>
+                    <p className="text-[42px] font-semibold leading-none">
+                      {bestBidAmount
+                        ? formatCurrency(bestBidAmount)
+                        : "Awaiting"}
+                    </p>
+                    <p className="mt-2 text-sm uppercase tracking-[0.14em] text-[#b0a494]">
+                      Best bid
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  {quote.responses?.length ? (
+                    quote.responses.map((resp, index) => {
+                      const planner = resp.planner;
+                      const isAccepted = resp.status === "accepted";
+                      const isRejected = resp.status === "rejected";
+
+                      return (
+                        <div
+                          key={resp._id || index}
+                          className="rounded-[28px] border border-[#5d4421] bg-[#1b1512] p-6 shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
+                        >
+                          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-4">
+                                <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#2b2118] text-lg font-semibold text-[#f7e7c7]">
+                                  {planner?.avatar ? (
+                                    <img
+                                      src={planner.avatar}
+                                      alt=""
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    plannerInitial(planner)
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="truncate text-[18px] font-semibold text-white">
+                                    {plannerLabel(planner)}
+                                  </p>
+                                  <p className="mt-1 text-sm text-[#c9b38a]">
+                                    Submitted {formatDate(resp.createdAt)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <p className="mt-5 text-[17px] leading-8 text-[#c9b38a]">
+                                {resp.quotedMessage ||
+                                  "Planner shared a quotation for your celebration requirements."}
+                              </p>
+
+                              <div className="mt-5 flex flex-wrap gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openChatForPlanner(planner?._id)
+                                  }
+                                  className="rounded-2xl border border-[#3b2b1f] px-6 py-3 text-sm font-medium text-[#f7e7c7] transition hover:bg-white/3"
+                                >
+                                  Open chat
+                                </button>
+                                {!isAccepted && quote.status !== "accepted" ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAccept(planner?._id)}
+                                    disabled={
+                                      actionLoading === `accept_${planner?._id}`
+                                    }
+                                    className="rounded-2xl bg-[#1f9c6d] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-60"
+                                  >
+                                    {actionLoading === `accept_${planner?._id}`
+                                      ? "Accepting..."
+                                      : "Accept proposal"}
+                                  </button>
+                                ) : null}
+                                {!isRejected &&
+                                !isAccepted &&
+                                quote.status !== "accepted" ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleReject(planner?._id)}
+                                    disabled={
+                                      actionLoading === `reject_${planner?._id}`
+                                    }
+                                    className="rounded-2xl border border-[#5d4421] px-6 py-3 text-sm font-medium text-[#c9b38a] transition hover:bg-white/5 disabled:opacity-60"
+                                  >
+                                    {actionLoading === `reject_${planner?._id}`
+                                      ? "Declining..."
+                                      : "Decline"}
+                                  </button>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    navigate(`/planner/profile/${planner?._id}`)
+                                  }
+                                  className="rounded-2xl border border-[#5d4421] px-6 py-3 text-sm font-medium text-[#c9b38a] transition hover:bg-white/5"
+                                >
+                                  View profile
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="xl:text-right">
+                              <p className="text-[30px] font-semibold text-white">
+                                {formatCurrency(resp.quotedPrice)}
+                              </p>
+                              <span
+                                className={`mt-3 inline-flex rounded-full px-4 py-2 text-sm font-semibold ${
+                                  isAccepted
+                                    ? "bg-[#ddf3e6] text-[#1c8f5e]"
+                                    : isRejected
+                                      ? "bg-[#f7dede] text-[#bb4444]"
+                                      : "bg-[#faedc7] text-[#946d18]"
+                                }`}
+                              >
+                                {isAccepted
+                                  ? "Accepted"
+                                  : isRejected
+                                    ? "Rejected"
+                                    : "Pending"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="rounded-[28px] border border-[#ddd4c7] bg-white p-8 text-sm text-[#756b60]">
+                      Proposals will appear here as soon as planners respond to
+                      your request.
+                    </div>
+                  )}
+
+                  {rejectedResponses.length > 0 ? (
+                    <div className="rounded-2xl border border-[#e5ddd0] bg-[#fbf8f4] px-4 py-3 text-sm text-[#756b60]">
+                      {rejectedResponses.length} proposal
+                      {rejectedResponses.length > 1 ? "s were" : " was"}{" "}
+                      declined. You can still wait for better planner responses.
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
+            {activePanel === "messages" ? (
+              <div className="space-y-6">
+                <div className="rounded-[28px] border border-[#5d4421] bg-[#1b1512] shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
+                  <div className="grid min-h-[640px] lg:grid-cols-[320px_minmax(0,1fr)]">
+                    <div className="border-b border-[#e9dfd2] p-5 lg:border-b-0 lg:border-r">
+                      <div className="mb-5">
+                        <h2 className="text-[18px] font-semibold text-white">
+                          Messages
+                        </h2>
+                        <p className="mt-1 text-sm text-[#c9b38a]">
+                          Continue planner conversations for this bid.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        {quoteRooms.length > 0 ? (
+                          quoteRooms.map((room) => {
+                            const other = room.participants?.find(
+                              (participant) =>
+                                participant._id !== currentUser?.id,
+                            );
+
+                            return (
+                              <button
+                                key={room._id}
+                                type="button"
+                                onClick={() => setActiveRoomId(room._id)}
+                                className={`flex w-full items-center gap-3 rounded-2xl px-4 py-4 text-left transition ${
+                                  activeRoomId === room._id
+                                    ? "bg-[#2b2118]"
+                                    : "hover:bg-white/5"
+                                }`}
+                              >
+                                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-[#2b2118] text-sm font-semibold text-[#f7e7c7]">
+                                  {other?.avatar ? (
+                                    <img
+                                      src={other.avatar}
+                                      alt=""
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    plannerInitial(other)
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-[16px] font-semibold text-white">
+                                    {plannerLabel(other)}
+                                  </p>
+                                  <p className="truncate text-sm text-[#c9b38a]">
+                                    {room.lastMessage?.content ||
+                                      "Start the conversation"}
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })
+                        ) : (
+                          <div className="rounded-2xl border border-[#5d4421] bg-[#1b1512] px-4 py-4 text-sm text-[#c9b38a]">
+                            No planner chats yet. Open one from a proposal card
+                            first.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex min-h-[640px] flex-col">
+                      {activeRoom ? (
+                        <>
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e9dfd2] px-6 py-5">
+                            <div>
+                              <p className="text-[18px] font-semibold">
+                                {plannerLabel(
+                                  activeRoom.participants?.find(
+                                    (participant) =>
+                                      participant._id !== currentUser?.id,
+                                  ),
+                                )}
+                              </p>
+                              <p className="mt-1 text-sm text-[#93887b]">
+                                {quote.status === "accepted"
+                                  ? "Accepted planner"
+                                  : "Planner conversation"}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                navigate(
+                                  `/planner/profile/${
+                                    activeRoom.participants?.find(
+                                      (participant) =>
+                                        participant._id !== currentUser?.id,
+                                    )?._id
+                                  }`,
+                                )
+                              }
+                              className="rounded-2xl border border-[#ddd4c7] px-4 py-2 text-sm font-medium text-[#6c6257] transition hover:bg-[#f7f2ea]"
+                            >
+                              View profile
+                            </button>
+                          </div>
+
+                          <div className="flex-1 overflow-y-auto px-6 py-6">
+                            {chatLoading ? (
+                              <div className="flex h-full items-center justify-center text-sm text-[#8d8174]">
+                                Loading messages...
+                              </div>
+                            ) : messages.length > 0 ? (
+                              <div className="space-y-6">
+                                {messages.map((message) => {
+                                  const isMine =
+                                    message.sender?._id === currentUser?.id;
+                                  return (
+                                    <div
+                                      key={message._id}
+                                      className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                                    >
+                                      <div
+                                        className={`max-w-[78%] ${isMine ? "text-right" : "text-left"}`}
+                                      >
+                                        <div
+                                          className={`inline-block rounded-[22px] px-5 py-4 text-[16px] leading-7 ${
+                                            isMine
+                                              ? "bg-[#1f1b18] text-white"
+                                              : "bg-[#2b2118] text-[#f7e7c7]"
+                                          }`}
+                                        >
+                                          {message.content}
+                                        </div>
+                                        <p className="mt-2 text-xs text-[#b1a496]">
+                                          {formatTime(message.createdAt)}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                                <div ref={messageEndRef} />
+                              </div>
+                            ) : (
+                              <div className="flex h-full items-center justify-center text-center text-sm text-[#8d8174]">
+                                Start discussing your requirements with the
+                                planner here.
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="border-t border-[#342616] p-5">
+                            <div className="flex gap-3">
+                              <input
+                                value={draft}
+                                onChange={(event) =>
+                                  setDraft(event.target.value)
+                                }
+                                onKeyDown={(event) => {
+                                  if (
+                                    event.key === "Enter" &&
+                                    !event.shiftKey
+                                  ) {
+                                    event.preventDefault();
+                                    handleSendMessage();
+                                  }
+                                }}
+                                placeholder="Type a message..."
+                                className="flex-1 rounded-full border border-[#5d4421] bg-[#1b1512] px-5 py-3 text-sm outline-none placeholder:text-[#c9b38a] text-white"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleSendMessage}
+                                disabled={sending || !draft.trim()}
+                                className="rounded-full bg-[#1f1b18] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                              >
+                                {sending ? "Sending..." : "Send"}
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex h-full min-h-[640px] items-center justify-center px-6 text-center text-sm text-[#8d8174]">
+                          Open a planner chat from the proposals section to
+                          continue everything here inside the bid CRM.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
-
-          {/* Vision Details Column */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-heading tracking-widest text-white/40 uppercase mb-2">Request Overview</h3>
-            
-            {/* Embedded Vision Images */}
-            {quote.images && quote.images.length > 0 && (
-               <div className="glass-card rounded-2xl p-4 overflow-hidden relative">
-                 <img 
-                   src={quote.images[0].url} 
-                   alt="Primary Vision" 
-                   className="w-full aspect-[4/3] object-cover rounded-xl border border-white/10"
-                 />
-                 <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-xs text-white font-medium flex items-center gap-2">
-                   <svg className="w-3.5 h-3.5 text-loverai-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                   {quote.images.length} Vision{quote.images.length !== 1 ? 's' : ''}
-                 </div>
-               </div>
-            )}
-
-            <div className="glass-card rounded-2xl p-5 space-y-4">
-              <div className="flex justify-between items-center text-sm border-b border-light pb-3">
-                <span className="text-white/40 uppercase tracking-widest text-[10px]">Budget</span>
-                <span className="text-white font-medium">{quote.eventDetails?.budget || 'Flexible'}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm border-b border-light pb-3">
-                <span className="text-white/40 uppercase tracking-widest text-[10px]">Location</span>
-                <span className="text-white font-medium">{quote.eventDetails?.city || 'TBD'}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm border-b border-light pb-3">
-                <span className="text-white/40 uppercase tracking-widest text-[10px]">Guests</span>
-                <span className="text-white font-medium">{quote.eventDetails?.guestCount || 'TBD'}</span>
-              </div>
-              <div className="flex flex-col gap-1 text-sm pt-1">
-                <span className="text-white/40 uppercase tracking-widest text-[10px]">Any special notes</span>
-                <p className="text-white/70 text-xs italic">
-                  {quote.eventDetails?.notes ? `"${quote.eventDetails.notes}"` : 'None specified.'}
-                </p>
-              </div>
-            </div>
-
-            <div className="glass-card-subtle p-4 rounded-xl flex items-start gap-4 text-xs text-white/50">
-               <svg className="w-5 h-5 text-loverai-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-               <p>Your contact details remain hidden from planners until you choose to accept a proposal.</p>
-            </div>
-            
-          </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
-};
-
-export default CoupleBidProgress;
+}

@@ -32,11 +32,13 @@ const CoupleProfile = () => {
               const other = r.participants?.find(p => p._id !== currentUser.id) || {};
               return {
                  id: r._id,
+                 roomId: r._id,
+                 quoteId: r.relatedQuote?._id || null,
                  sender: other.fullName || other.company_name || 'Planner',
                  content: r.lastMessage.content,
                  timestamp: new Date(r.lastMessage.timestamp),
                  avatar: other.avatar,
-                 plannerId: other._id
+                  plannerId: other._id
               };
            }).sort((a,b) => b.timestamp - a.timestamp);
            setMessages(rms);
@@ -235,7 +237,7 @@ const CoupleProfile = () => {
                  <p className="text-white/40">You have not submitted any visions for quoting yet.</p>
               ) : (
                  quotes.map(q => (
-                    <div key={q._id} onClick={() => navigate(`/couple/quote/${q._id}`)} className="bg-[#18130f] border border-white/5 rounded-xl p-5 hover:bg-[#1e1713] transition cursor-pointer flex justify-between items-center">
+                    <div key={q._id} onClick={() => navigate(`/couple/bid-dashboard/${q._id}`)} className="bg-[#18130f] border border-white/5 rounded-xl p-5 hover:bg-[#1e1713] transition cursor-pointer flex justify-between items-center">
                        <div className="flex items-center gap-4">
                           {q.images?.[0]?.url && <img src={q.images[0].url} alt="" className="w-16 h-16 rounded-lg object-cover border border-white/10" />}
                           <div>
@@ -264,7 +266,11 @@ const CoupleProfile = () => {
                  <p className="text-white/40">No messages yet. Planners will contact you here once they bid.</p>
               ) : (
                  messages.map(msg => (
-                    <div key={msg.id} className="bg-[#18130f] border border-white/5 rounded-xl p-5 hover:bg-[#1e1713] transition cursor-pointer flex justify-between items-center">
+                    <div
+                      key={msg.id}
+                      onClick={() => msg.quoteId && navigate(`/couple/bid-dashboard/${msg.quoteId}`, { state: { activePanel: 'messages', roomId: msg.roomId } })}
+                      className="bg-[#18130f] border border-white/5 rounded-xl p-5 hover:bg-[#1e1713] transition cursor-pointer flex justify-between items-center"
+                    >
                        <div className="flex gap-4 items-center">
                           <div className="w-12 h-12 rounded-full border border-loverai-gold/30 flex items-center justify-center text-loverai-gold overflow-hidden">
                              {msg.avatar ? <img src={msg.avatar} alt="" className="w-full h-full object-cover" /> : msg.sender[0]}
@@ -278,9 +284,8 @@ const CoupleProfile = () => {
                     </div>
                  ))
               )}
-              {/* To fully implement Chat UI, we would integrate components/ChatWidget or a custom view here */}
               <div className="mt-8 p-4 border border-white/10 rounded-xl bg-white/[0.02]">
-                <p className="text-xs text-white/40 text-center">To continue chatting, please accept a planner's proposal via the Bids tracking screen.</p>
+                <p className="text-xs text-white/40 text-center">Open any conversation above to continue inside the quote CRM. Accepted planners can continue requirements and finalization there.</p>
               </div>
            </div>
          )}

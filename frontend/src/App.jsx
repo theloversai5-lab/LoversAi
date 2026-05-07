@@ -49,6 +49,7 @@ import PlannerDeals from "./pages/planner/PlannerDeals";
 import PlannerVendors from "./pages/planner/PlannerVendors";
 import PlannerProfile from "./pages/planner/PlannerProfile";
 import PlannerBuildQuote from "./pages/planner/PlannerBuildQuote";
+import PlannerSignup from "./pages/planner/PlannerSignup";
 
 // Vendor Pages
 import VendorLayout from "./pages/vendor/VendorLayout";
@@ -78,6 +79,7 @@ function AppContent() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/planner/signup" element={<PlannerSignup />} />
 
         {/* User form - accessible for both new and existing users */}
         <Route
@@ -217,6 +219,14 @@ function AppContent() {
           element={
             <ProtectedRoute requiredRole="couple">
               <CoupleBidPlaced />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/couple/bid-dashboard/:id"
+          element={
+            <ProtectedRoute requiredRole="couple">
+              <CoupleBidProgress />
             </ProtectedRoute>
           }
         />

@@ -10,3 +10,6 @@ backend/.env
 frontend/.env
 frontend.env.production
 backend.env.production
+.env.production
+
+
