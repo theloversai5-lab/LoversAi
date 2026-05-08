@@ -123,29 +123,57 @@ export default function PlannerSignup() {
           </div>
 
           <form onSubmit={handleEmailSignup} className="space-y-3">
+            <label htmlFor="planner-name" className="sr-only">
+              Full name
+            </label>
             <input
+              id="planner-name"
+              aria-label="Full name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Full name"
+              autoComplete="name"
               className="w-full glass-input rounded-xl px-4 py-3 text-sm"
             />
+
+            <label htmlFor="planner-company" className="sr-only">
+              Company name
+            </label>
             <input
+              id="planner-company"
+              aria-label="Company name"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="Company name"
+              autoComplete="organization"
               className="w-full glass-input rounded-xl px-4 py-3 text-sm"
             />
+
+            <label htmlFor="planner-email" className="sr-only">
+              Email address
+            </label>
             <input
+              id="planner-email"
+              aria-label="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@example.com"
+              type="email"
+              autoComplete="email"
               className="w-full glass-input rounded-xl px-4 py-3 text-sm"
             />
+
+            <label htmlFor="planner-password" className="sr-only">
+              Password
+            </label>
             <input
+              id="planner-password"
+              aria-label="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               type="password"
+              autoComplete="new-password"
               className="w-full glass-input rounded-xl px-4 py-3 text-sm"
             />
             <button

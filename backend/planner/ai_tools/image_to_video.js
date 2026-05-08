@@ -11,11 +11,15 @@ import {
 
 const router = express.Router();
 
-// Check if BFL API key is configured
+// AI configuration: prefer Gemini, optionally allow legacy FLUX when explicitly enabled
+const LEGACY_FLUX_ENABLED = process.env.LEGACY_FLUX_ENABLED === "true";
 const isAIEnabled = () => {
-  return (
-    process.env.BFL_API_KEY &&
-    process.env.BFL_API_KEY !== "your_bfl_api_key_here"
+  return !!(
+    (process.env.GEMINI_API_KEY &&
+      process.env.GEMINI_API_KEY !== "your_gemini_api_key_here") ||
+    (process.env.BFL_API_KEY &&
+      process.env.BFL_API_KEY !== "your_bfl_api_key_here" &&
+      LEGACY_FLUX_ENABLED)
   );
 };
 
@@ -70,8 +74,13 @@ const VIDEO_STYLES = {
 
 // FLUX API video generation
 async function callFluxVideoAPI(imageBuffer, prompt, style = "slow-pan") {
-  if (!isAIEnabled()) {
-    throw new Error("BFL API key not configured");
+  if (!LEGACY_FLUX_ENABLED) {
+    throw new Error(
+      "Legacy FLUX video API is disabled. Set LEGACY_FLUX_ENABLED=true to enable legacy Flux or migrate to Gemini API.",
+    );
+  }
+  if (!process.env.BFL_API_KEY) {
+    throw new Error("BFL API key missing for legacy Flux video calls");
   }
 
   const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
@@ -127,6 +136,8 @@ async function pollForVideoResult(taskId, pollingUrl) {
 
   for (let i = 0; i < maxAttempts; i++) {
     try {
+      if (!process.env.BFL_API_KEY)
+        throw new Error("BFL API key missing for legacy Flux polling");
       const res = await fetch(pollingUrl, {
         headers: { "x-key": process.env.BFL_API_KEY },
       });

@@ -68,7 +68,8 @@ function AppContent() {
   // Hide navbar and footer on admin, planner, and vendor dashboard pages
   const hideNavbarAndFooter =
     location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/planner/") ||
+    (location.pathname.startsWith("/planner/") &&
+      location.pathname !== "/planner/signup") ||
     location.pathname.startsWith("/vendor/") ||
     location.pathname === "/couple/onboarding";
 

@@ -25,10 +25,14 @@ const GEMINI_API_BASE_URL =
 const GEMINI_IMAGE_MODEL =
   process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-image-preview";
 
+const LEGACY_FLUX_ENABLED = process.env.LEGACY_FLUX_ENABLED === "true";
 const isAIEnabled = () =>
   !!(
-    process.env.GEMINI_API_KEY &&
-    process.env.GEMINI_API_KEY !== "your_gemini_api_key_here"
+    (process.env.GEMINI_API_KEY &&
+      process.env.GEMINI_API_KEY !== "your_gemini_api_key_here") ||
+    (process.env.BFL_API_KEY &&
+      process.env.BFL_API_KEY !== "your_bfl_api_key_here" &&
+      LEGACY_FLUX_ENABLED)
   );
 
 const isGroqEnabled = () =>
@@ -737,8 +741,13 @@ async function callFluxAPI(
   seed = null,
   fallbackModels = null,
 ) {
-  if (!isAIEnabled()) {
-    throw new Error("AI service not configured — set BFL_API_KEY");
+  if (!LEGACY_FLUX_ENABLED) {
+    throw new Error(
+      "Legacy FLUX API is disabled. Set LEGACY_FLUX_ENABLED=true to enable legacy Flux or migrate to Gemini API.",
+    );
+  }
+  if (!process.env.BFL_API_KEY) {
+    throw new Error("BFL API key not configured for legacy Flux calls");
   }
 
   const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
@@ -840,6 +849,8 @@ async function pollForResult(taskId, customPollingUrl) {
     console.log(`⏳ [Moodboard] Poll ${i + 1}/${maxAttempts}`);
     try {
       const url = customPollingUrl || `${baseUrl}/v1/get_result?id=${taskId}`;
+      if (!process.env.BFL_API_KEY)
+        throw new Error("BFL API key missing for legacy Flux polling");
       const res = await fetch(url, {
         headers: { "x-key": process.env.BFL_API_KEY },
       });
@@ -1223,12 +1234,10 @@ router.post(
 
     try {
       if (!isAIEnabled()) {
-        return res
-          .status(503)
-          .json({
-            success: false,
-            error: "AI service not configured — set GEMINI_API_KEY",
-          });
+        return res.status(503).json({
+          success: false,
+          error: "AI service not configured — set GEMINI_API_KEY",
+        });
       }
 
       const venueFile = req.files?.venueImage?.[0];
@@ -1505,13 +1514,11 @@ router.post(
           "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.";
         statusCode = 401;
       }
-      return res
-        .status(statusCode)
-        .json({
-          success: false,
-          error: msg,
-          pipelineTimings: timer.getTimings(),
-        });
+      return res.status(statusCode).json({
+        success: false,
+        error: msg,
+        pipelineTimings: timer.getTimings(),
+      });
     }
   },
 );
@@ -1524,12 +1531,10 @@ router.post(
   async (req, res) => {
     try {
       if (!isAIEnabled()) {
-        return res
-          .status(503)
-          .json({
-            success: false,
-            error: "AI service not configured — set GEMINI_API_KEY",
-          });
+        return res.status(503).json({
+          success: false,
+          error: "AI service not configured — set GEMINI_API_KEY",
+        });
       }
 
       if (!req.file) {

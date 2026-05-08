@@ -219,13 +219,14 @@ export default function CoupleBidProgress() {
     socketRef.current = socket;
     socket.emit("join", currentUser.id);
 
-    if (activeRoomId) {
-      socket.emit("join_chat", activeRoomId);
-    }
-
     socket.on("quote_update", (data) => {
       if (data.quoteId === id) {
-        fetchQuote().catch(() => {});
+        fetchQuote().catch((err) => {
+          console.error(
+            `CoupleBidProgress.jsx: fetchQuote failed for quote ${id}:`,
+            err,
+          );
+        });
       }
     });
 
@@ -236,14 +237,24 @@ export default function CoupleBidProgress() {
         const existing = prevRooms.find((room) => room._id === payload.roomId);
         if (!existing) return prevRooms;
 
+        // Avoid updating if lastMessage is identical
+        const existingLast = existing.lastMessage || {};
+        const newLast = {
+          content: payload.message.content,
+          sender: payload.message.sender,
+          timestamp: payload.message.createdAt || new Date().toISOString(),
+        };
+        if (
+          existingLast.timestamp === newLast.timestamp &&
+          existingLast.content === newLast.content
+        ) {
+          return prevRooms;
+        }
+
         const updated = {
           ...existing,
-          lastMessage: {
-            content: payload.message.content,
-            sender: payload.message.sender,
-            timestamp: payload.message.createdAt || new Date().toISOString(),
-          },
-          updatedAt: payload.message.createdAt || new Date().toISOString(),
+          lastMessage: newLast,
+          updatedAt: newLast.timestamp,
         };
 
         return [
@@ -253,19 +264,29 @@ export default function CoupleBidProgress() {
       });
 
       if (payload.roomId === activeRoomId) {
-        setMessages((prev) => [...prev, payload.message]);
+        setMessages((prev) => {
+          const exists = prev.some((m) => {
+            if (m._id && payload.message._id)
+              return m._id === payload.message._id;
+            // fallback composite key
+            return (
+              m.createdAt === payload.message.createdAt &&
+              m.sender?._id === payload.message.sender?._id &&
+              m.content === payload.message.content
+            );
+          });
+          if (exists) return prev;
+          return [...prev, payload.message];
+        });
       }
     });
 
     return () => {
-      if (activeRoomId) {
-        socket.emit("leave_chat", activeRoomId);
-      }
       socket.off("quote_update");
       socket.off("new_message");
       socket.disconnect();
     };
-  }, [activeRoomId, currentUser?.id, fetchQuote, id]);
+  }, [currentUser?.id, fetchQuote, id]);
 
   useEffect(() => {
     if (!socketRef.current || !activeRoomId) return undefined;
@@ -1117,7 +1138,7 @@ export default function CoupleBidProgress() {
                                   }
                                 }}
                                 placeholder="Type a message..."
-                                className="flex-1 rounded-full border border-[#5d4421] bg-[#1b1512] px-5 py-3 text-sm outline-none placeholder:text-[#c9b38a] text-white"
+                                className="flex-1 rounded-full border border-[#5d4421] bg-[#1b1512] px-5 py-3 text-sm placeholder:text-[#c9b38a] text-white focus:ring focus:ring-2 focus:ring-offset-2 focus:ring-[#b89f79]"
                               />
                               <button
                                 type="button"

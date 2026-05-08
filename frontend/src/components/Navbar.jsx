@@ -179,12 +179,18 @@ const Navbar = () => {
 
   const navLinks = getNavLinks();
 
+  const logoTarget =
+    localStorage.getItem("userRole") === "planner" ||
+    location.pathname.startsWith("/planner")
+      ? "/planner"
+      : "/";
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-2 md:px-4 pt-3 md:pt-[30px] pointer-events-none animate-fadeInDown">
         {/* Logo - Desktop */}
         <Link
-          to="/"
+          to={logoTarget}
           className="absolute left-3 md:left-[-22px] top-1 md:top-[-12px] pointer-events-auto hidden md:block z-50"
         >
           <img
@@ -199,7 +205,7 @@ const Navbar = () => {
           {/* Mobile Layout */}
           <div className="md:hidden px-3 py-3">
             <div className="flex items-center justify-between">
-              <Link to="/" className="pointer-events-auto shrink-0">
+              <Link to={logoTarget} className="pointer-events-auto shrink-0">
                 <img
                   src="/images/logo copy.png"
                   alt="Lovers AI logo"
@@ -395,11 +401,13 @@ const Navbar = () => {
           }}
         >
           <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <img
-              src="/images/LogoLoversai.png"
-              alt="Lovers AI logo"
-              className="h-[36px] w-auto object-contain"
-            />
+            <Link to={logoTarget} className="shrink-0">
+              <img
+                src="/images/LogoLoversai.png"
+                alt="Lovers AI logo"
+                className="h-[36px] w-auto object-contain"
+              />
+            </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition"

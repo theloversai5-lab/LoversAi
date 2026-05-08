@@ -46,7 +46,9 @@ if (!process.env.MONGO_URI && fs.existsSync(envProdPath)) {
 }
 
 if (!process.env.MONGO_URI) {
-  console.error("❌ Missing MONGO_URI. Set it in .env or .env.production before running.");
+  console.error(
+    "❌ Missing MONGO_URI. Set it in .env or .env.production before running.",
+  );
   process.exit(1);
 }
 
@@ -57,6 +59,13 @@ const app = express();
 const server = http.createServer(app);
 const PORT = Number(process.env.PORT) || 5000;
 
+// AI configuration helper: prefer Gemini, optionally allow legacy FLUX when explicitly enabled
+const isAIConfigured = () =>
+  !!(
+    (process.env.GEMINI_API_KEY &&
+      process.env.GEMINI_API_KEY !== "your_gemini_api_key_here") ||
+    (process.env.BFL_API_KEY && process.env.LEGACY_FLUX_ENABLED === "true")
+  );
 function isPortAvailable(port) {
   return new Promise((resolve, reject) => {
     const tester = net.createServer();
@@ -83,7 +92,9 @@ async function findAvailablePort(preferredPort, attempts = 10) {
     const port = preferredPort + offset;
     if (await isPortAvailable(port)) {
       if (port !== preferredPort) {
-        console.warn(`Port ${preferredPort} is already in use. Using ${port} instead.`);
+        console.warn(
+          `Port ${preferredPort} is already in use. Using ${port} instead.`,
+        );
       }
       return port;
     }
@@ -113,7 +124,7 @@ const corsOrigins = [
   "http://localhost:5175",
   "http://localhost:3001",
   "http://127.0.0.1:3000",
-  process.env.FRONTEND_URL
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 /* ============================================================
@@ -181,24 +192,34 @@ app.use(
     origin: corsOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-signature", "x-api-key"],
-  })
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-signature",
+      "x-api-key",
+    ],
+  }),
 );
 
 // Security headers (relaxed for dev)
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "unsafe-none" },
-  crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: false,
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "unsafe-none" },
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false,
+  }),
+);
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 300 : 5000,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { success: false, error: "Too many requests, please try again later." },
+  message: {
+    success: false,
+    error: "Too many requests, please try again later.",
+  },
   skip: (req) => {
     const isLocalhost =
       req.ip === "::1" ||
@@ -210,8 +231,6 @@ const apiLimiter = rateLimit({
   },
 });
 app.use("/api/", apiLimiter);
-
-
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -241,19 +260,21 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 ============================================================ */
 async function loadAIRoutes() {
   console.log("\n🤖 Loading AI Tools Routes...");
-  
+
   try {
     // Load Retexturing AI Tool
     const retexturingModule = await import("./planner/ai_tools/retexturing.js");
     if (retexturingModule.default) {
       app.use("/api/ai", retexturingModule.default);
       console.log("✅ Retexturing routes loaded at /api/ai");
-      
+
       // Log available endpoints
       const router = retexturingModule.default;
       router.stack?.forEach((layer) => {
         if (layer.route) {
-          const methods = Object.keys(layer.route.methods).join(", ").toUpperCase();
+          const methods = Object.keys(layer.route.methods)
+            .join(", ")
+            .toUpperCase();
           const path = layer.route.path;
           console.log(`   ${methods.padEnd(7)} /api/ai${path}`);
         }
@@ -261,7 +282,9 @@ async function loadAIRoutes() {
     }
   } catch (e) {
     console.error("❌ Failed to load Retexturing module:", e.message);
-    console.error("   Please check if the file exists at: ./planner/ai_tools/retexturing.js");
+    console.error(
+      "   Please check if the file exists at: ./planner/ai_tools/retexturing.js",
+    );
   }
 
   try {
@@ -271,12 +294,14 @@ async function loadAIRoutes() {
     if (angleChangeModule.default) {
       app.use("/api/ai", angleChangeModule.default);
       console.log("✅ Angle change routes loaded at /api/ai");
-      
+
       // Log available endpoints
       const router = angleChangeModule.default;
       router.stack?.forEach((layer) => {
         if (layer.route) {
-          const methods = Object.keys(layer.route.methods).join(", ").toUpperCase();
+          const methods = Object.keys(layer.route.methods)
+            .join(", ")
+            .toUpperCase();
           const path = layer.route.path;
           console.log(`   ${methods.padEnd(7)} /api/ai${path}`);
         }
@@ -284,12 +309,15 @@ async function loadAIRoutes() {
     }
   } catch (e) {
     console.error("❌ Failed to load Angle Change module:", e.message);
-    console.error("   Please check if the file exists at: ./planner/ai_tools/angle_image.js");
-    
+    console.error(
+      "   Please check if the file exists at: ./planner/ai_tools/angle_image.js",
+    );
+
     // Try alternative filename
     console.log("🔄 Trying alternative filename: Image_angle.js");
     try {
-      const altAngleChangeModule = await import("./planner/ai_tools/Image_angle.js");
+      const altAngleChangeModule =
+        await import("./planner/ai_tools/Image_angle.js");
       if (altAngleChangeModule.default) {
         app.use("/api/ai", altAngleChangeModule.default);
         console.log("✅ Angle change routes loaded from Image_angle.js");
@@ -305,12 +333,14 @@ async function loadAIRoutes() {
     if (videoModule.default) {
       app.use("/api/ai", videoModule.default);
       console.log("✅ Image to video routes loaded at /api/ai");
-      
+
       // Log available endpoints
       const router = videoModule.default;
       router.stack?.forEach((layer) => {
         if (layer.route) {
-          const methods = Object.keys(layer.route.methods).join(", ").toUpperCase();
+          const methods = Object.keys(layer.route.methods)
+            .join(", ")
+            .toUpperCase();
           const path = layer.route.path;
           console.log(`   ${methods.padEnd(7)} /api/ai${path}`);
         }
@@ -318,21 +348,26 @@ async function loadAIRoutes() {
     }
   } catch (e) {
     console.error("❌ Failed to load Image to Video module:", e.message);
-    console.error("   Please check if the file exists at: ./planner/ai_tools/image_to_video.js");
+    console.error(
+      "   Please check if the file exists at: ./planner/ai_tools/image_to_video.js",
+    );
   }
 
   try {
     // Load Couple Moodboard AI Tool
-    const coupleMoodboardModule = await import("./planner/ai_tools/couple_moodboard.js");
+    const coupleMoodboardModule =
+      await import("./planner/ai_tools/couple_moodboard.js");
     if (coupleMoodboardModule.default) {
       app.use("/api/ai", coupleMoodboardModule.default);
       console.log("✅ Couple moodboard routes loaded at /api/ai");
-      
+
       // Log available endpoints
       const router = coupleMoodboardModule.default;
       router.stack?.forEach((layer) => {
         if (layer.route) {
-          const methods = Object.keys(layer.route.methods).join(", ").toUpperCase();
+          const methods = Object.keys(layer.route.methods)
+            .join(", ")
+            .toUpperCase();
           const path = layer.route.path;
           console.log(`   ${methods.padEnd(7)} /api/ai${path}`);
         }
@@ -340,7 +375,9 @@ async function loadAIRoutes() {
     }
   } catch (e) {
     console.error("❌ Failed to load Couple Moodboard module:", e.message);
-    console.error("   Please check if the file exists at: ./planner/ai_tools/couple_moodboard.js");
+    console.error(
+      "   Please check if the file exists at: ./planner/ai_tools/couple_moodboard.js",
+    );
   }
 
   console.log("🤖 AI Tools loading complete!\n");
@@ -353,13 +390,13 @@ async function startServer() {
   try {
     // Load AI routes FIRST before any other routes
     await loadAIRoutes();
-    
+
     /* ============================================================
        Core Application Routes (loaded AFTER AI routes)
     ============================================================ */
-    app.use("/api/auth", authRoutes);      // ✅ JWT Auth (register, login, google, me)
-    app.use("/api/users", userRoutes);      // ✅ User profile & management (consolidated)
-    app.use("/api/quotes", quoteRoutes);    // ✅ Quote/Bid management
+    app.use("/api/auth", authRoutes); // ✅ JWT Auth (register, login, google, me)
+    app.use("/api/users", userRoutes); // ✅ User profile & management (consolidated)
+    app.use("/api/quotes", quoteRoutes); // ✅ Quote/Bid management
     app.use("/api/payment", paymentRoutes);
     app.use("/api/vendor", vendorRoutes); // 🏢 Vendor endpoints
     app.use("/api/bids", bidRoutes); // 🔨 Bid endpoints
@@ -370,15 +407,20 @@ async function startServer() {
     app.use("/api/admin", adminRoutes); // 🔒 Admin panel backend APIs
 
     // Public vendor listing (no auth required)
-    const vendorPublicRoutes = (await import("./routes/vendorRoutes.js")).default;
+    const vendorPublicRoutes = (await import("./routes/vendorRoutes.js"))
+      .default;
     // We'll add a specific public-facing endpoint below
     app.get("/api/vendors/public", async (req, res) => {
       try {
         const { default: User } = await import("./models/User.js");
         const { category, city, search } = req.query;
-        const filter = { role: "vendor", vendorVerificationStatus: { $in: ["approved", "pending"] } };
+        const filter = {
+          role: "vendor",
+          vendorVerificationStatus: { $in: ["approved", "pending"] },
+        };
         if (category) filter["vendorProfile.category"] = category;
-        if (city) filter["vendorProfile.serviceArea"] = { $regex: city, $options: "i" };
+        if (city)
+          filter["vendorProfile.serviceArea"] = { $regex: city, $options: "i" };
         if (search) {
           filter.$or = [
             { "vendorProfile.businessName": { $regex: search, $options: "i" } },
@@ -392,7 +434,9 @@ async function startServer() {
         res.json({ success: true, vendors });
       } catch (err) {
         console.error("Public vendor list error:", err);
-        res.status(500).json({ success: false, error: "Failed to fetch vendors" });
+        res
+          .status(500)
+          .json({ success: false, error: "Failed to fetch vendors" });
       }
     });
     // New users endpoint (phone capture)
@@ -415,7 +459,7 @@ async function startServer() {
         version: "2.0.0",
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || "development",
-        ai_enabled: !!(process.env.BFL_API_KEY && process.env.BFL_API_KEY !== "your_bfl_api_key_here"),
+        ai_enabled: isAIConfigured(),
         endpoints: {
           auth: "/api/auth",
           users: "/api/users",
@@ -429,9 +473,9 @@ async function startServer() {
             generate: "/api/ai/generate (POST)",
             "change-angle": "/api/ai/change-angle (POST)",
             "available-angles": "/api/ai/available-angles",
-            feedback: "/api/ai/feedback (POST)"
-          }
-        }
+            feedback: "/api/ai/feedback (POST)",
+          },
+        },
       });
     });
 
@@ -446,39 +490,45 @@ async function startServer() {
 
     // AI health endpoint (for React component) - This should come AFTER AI routes
     app.get("/api/ai/health", (req, res) => {
-      const isAIEnabled = !!(process.env.BFL_API_KEY && process.env.BFL_API_KEY !== "your_bfl_api_key_here");
-      
+      const isAIEnabled = isAIConfigured();
+
       // Check if angle change endpoint exists
       let angleChangeAvailable = false;
       try {
         // Check if route exists
-        app._router.stack.forEach(layer => {
-          if (layer.route && layer.route.path === '/api/ai/change-angle') {
+        app._router.stack.forEach((layer) => {
+          if (layer.route && layer.route.path === "/api/ai/change-angle") {
             angleChangeAvailable = true;
           }
         });
       } catch (e) {
         console.error("Error checking routes:", e);
       }
-      
+
       res.json({
         success: true,
         service: "AI Tools API",
         status: isAIEnabled ? "healthy" : "disabled",
         timestamp: new Date().toISOString(),
-        tools: ["retexturing", angleChangeAvailable ? "angle-change" : null].filter(Boolean),
+        tools: [
+          "retexturing",
+          angleChangeAvailable ? "angle-change" : null,
+        ].filter(Boolean),
         angle_change_available: angleChangeAvailable,
         ai_configuration: isAIEnabled ? "configured" : "not configured",
-        message: isAIEnabled 
-          ? "AI tools are ready to use" 
-          : "Set BFL_API_KEY in environment variables to enable AI features",
+        message: isAIEnabled
+          ? "AI tools are ready to use"
+          : "Set GEMINI_API_KEY in environment variables to enable AI features (or set LEGACY_FLUX_ENABLED=true to enable legacy Flux)",
         endpoints: {
           "GET /api/ai/themes": "Get available wedding themes",
           "GET /api/ai/available-angles": "Get available angle options",
-          "POST /api/ai/generate": "Generate venue transformation (requires image)",
-          "POST /api/ai/change-angle": angleChangeAvailable ? "Change image perspective/angle (requires image)" : "Endpoint not loaded",
-          "POST /api/ai/feedback": "Submit feedback for AI generations"
-        }
+          "POST /api/ai/generate":
+            "Generate venue transformation (requires image)",
+          "POST /api/ai/change-angle": angleChangeAvailable
+            ? "Change image perspective/angle (requires image)"
+            : "Endpoint not loaded",
+          "POST /api/ai/feedback": "Submit feedback for AI generations",
+        },
       });
     });
 
@@ -490,50 +540,56 @@ async function startServer() {
         environment: process.env.NODE_ENV || "development",
         timestamp: new Date().toISOString(),
         node_version: process.version,
-        platform: process.platform
+        platform: process.platform,
       });
     });
 
     // Themes endpoint for React component (fallback if AI routes fail)
     app.get("/api/ai/themes", (req, res) => {
       const themes = {
-        'haldi': {
-          name: 'Haldi Ceremony',
-          description: 'Vibrant yellow traditional ceremony',
-          promptPreview: 'Transform this venue into a vibrant traditional Haldi ceremony...'
+        haldi: {
+          name: "Haldi Ceremony",
+          description: "Vibrant yellow traditional ceremony",
+          promptPreview:
+            "Transform this venue into a vibrant traditional Haldi ceremony...",
         },
-        'mehendi': {
-          name: 'Mehendi Ceremony',
-          description: 'Henna-inspired festive ceremony',
-          promptPreview: 'Transform this venue into an enchanting Mehendi ceremony...'
+        mehendi: {
+          name: "Mehendi Ceremony",
+          description: "Henna-inspired festive ceremony",
+          promptPreview:
+            "Transform this venue into an enchanting Mehendi ceremony...",
         },
-        'sangeet': {
-          name: 'Sangeet Ceremony',
-          description: 'Musical night celebration',
-          promptPreview: 'Transform this venue into an electrifying Sangeet night...'
+        sangeet: {
+          name: "Sangeet Ceremony",
+          description: "Musical night celebration",
+          promptPreview:
+            "Transform this venue into an electrifying Sangeet night...",
         },
-        'wedding': {
-          name: 'Wedding Ceremony',
-          description: 'Traditional Indian wedding setup',
-          promptPreview: 'Transform this venue into a magnificent traditional Indian wedding...'
+        wedding: {
+          name: "Wedding Ceremony",
+          description: "Traditional Indian wedding setup",
+          promptPreview:
+            "Transform this venue into a magnificent traditional Indian wedding...",
         },
-        'reception': {
-          name: 'Reception Party',
-          description: 'Luxurious wedding reception',
-          promptPreview: 'Transform this venue into a luxurious wedding reception...'
+        reception: {
+          name: "Reception Party",
+          description: "Luxurious wedding reception",
+          promptPreview:
+            "Transform this venue into a luxurious wedding reception...",
         },
-        'engagement': {
-          name: 'Engagement Ceremony',
-          description: 'Romantic engagement celebration',
-          promptPreview: 'Transform this venue into a romantic engagement celebration...'
-        }
+        engagement: {
+          name: "Engagement Ceremony",
+          description: "Romantic engagement celebration",
+          promptPreview:
+            "Transform this venue into a romantic engagement celebration...",
+        },
       };
-      
+
       res.json({
         success: true,
         themes: themes,
         count: Object.keys(themes).length,
-        note: "These are wedding venue transformation themes for AI generation"
+        note: "These are wedding venue transformation themes for AI generation",
       });
     });
 
@@ -544,69 +600,77 @@ async function startServer() {
       // Debug routes endpoint
       app.get("/api/debug/routes", (req, res) => {
         const routes = [];
-        
-        function processMiddleware(layer, prefix = '') {
+
+        function processMiddleware(layer, prefix = "") {
           if (layer.route) {
             // Regular route
             const path = prefix + layer.route.path;
-            const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase());
+            const methods = Object.keys(layer.route.methods).map((m) =>
+              m.toUpperCase(),
+            );
             routes.push({ path, methods });
-          } else if (layer.name === 'router' && layer.handle.stack) {
+          } else if (layer.name === "router" && layer.handle.stack) {
             // Router middleware
             const routerPath = layer.regexp.source
-              .replace('\\/?(?=\\/|$)', '')
-              .replace('^\\', '')
-              .replace('\\/?(?=\\/|$)', '')
-              .replace(/^\^/, '')
-              .replace(/\$/, '');
-            
-            layer.handle.stack.forEach(sublayer => {
+              .replace("\\/?(?=\\/|$)", "")
+              .replace("^\\", "")
+              .replace("\\/?(?=\\/|$)", "")
+              .replace(/^\^/, "")
+              .replace(/\$/, "");
+
+            layer.handle.stack.forEach((sublayer) => {
               processMiddleware(sublayer, prefix + routerPath);
             });
           }
         }
-        
-        app._router.stack.forEach(layer => {
+
+        app._router.stack.forEach((layer) => {
           processMiddleware(layer);
         });
-        
+
         res.json({
           success: true,
           total_routes: routes.length,
-          routes: routes.sort((a, b) => a.path.localeCompare(b.path))
+          routes: routes.sort((a, b) => a.path.localeCompare(b.path)),
         });
       });
 
       // Test AI configuration endpoint
       app.get("/api/test-ai-config", (req, res) => {
-        const isAIEnabled = !!(process.env.BFL_API_KEY && process.env.BFL_API_KEY !== "your_bfl_api_key_here");
-        
+        const isAIEnabled = !!(
+          process.env.BFL_API_KEY &&
+          process.env.BFL_API_KEY !== "your_bfl_api_key_here"
+        );
+
         res.json({
           success: true,
           ai_enabled: isAIEnabled,
-          bfl_api_key_configured: !!process.env.BFL_API_KEY,
-          bfl_api_key_value: process.env.BFL_API_KEY 
-            ? (process.env.BFL_API_KEY === "your_bfl_api_key_here" 
-              ? "NOT_CONFIGURED (using placeholder)" 
-              : `${process.env.BFL_API_KEY.substring(0, 8)}...${process.env.BFL_API_KEY.substring(process.env.BFL_API_KEY.length - 4)}`)
+          gemini_api_key_configured: !!process.env.GEMINI_API_KEY,
+          gemini_api_key_value: process.env.GEMINI_API_KEY
+            ? process.env.GEMINI_API_KEY === "your_gemini_api_key_here"
+              ? "NOT_CONFIGURED (using placeholder)"
+              : `${process.env.GEMINI_API_KEY.substring(0, 8)}...${process.env.GEMINI_API_KEY.substring(process.env.GEMINI_API_KEY.length - 4)}`
             : "NOT_SET",
-          flux_api_base_url: process.env.FLUX_API_BASE_URL || "https://api.bfl.ai (default)",
+          legacy_flux_enabled: process.env.LEGACY_FLUX_ENABLED === "true",
+          flux_api_base_url:
+            process.env.FLUX_API_BASE_URL || "https://api.bfl.ai (default)",
           max_file_size: process.env.MAX_FILE_SIZE || "10485760 (10MB default)",
-          environment: process.env.NODE_ENV || "development"
+          environment: process.env.NODE_ENV || "development",
         });
       });
 
       // Simple test generation endpoint (fallback)
       app.post("/api/ai/generate-test", (req, res) => {
         console.log("🧪 Test generation endpoint called");
-        
+
         // Return mock response
         res.json({
           success: true,
           test_mode: true,
-          message: "This is a test endpoint. AI routes should be loaded separately.",
+          message:
+            "This is a test endpoint. AI routes should be loaded separately.",
           note: "Check if ./planner/ai_tools/retexturing.js exists and exports a router",
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       });
     }
@@ -638,36 +702,36 @@ async function startServer() {
         "GET    /api/profile/check-profile",
         "POST   /api/profile/save-form",
       ];
-      
+
       // Add test endpoints in development
       if (process.env.NODE_ENV !== "production") {
         availableEndpoints.push("GET    /api/debug/routes");
         availableEndpoints.push("GET    /api/test-ai-config");
         availableEndpoints.push("POST   /api/ai/generate-test");
       }
-      
+
       res.status(404).json({
         success: false,
         error: "Route not found",
         path: req.originalUrl,
         method: req.method,
         timestamp: new Date().toISOString(),
-        availableEndpoints: availableEndpoints.sort()
+        availableEndpoints: availableEndpoints.sort(),
       });
     });
 
     // Global error handler
     app.use((err, req, res, next) => {
       console.error("❌ Server Error:", err);
-      
+
       const statusCode = err.statusCode || 500;
       const message = err.message || "Internal Server Error";
-      
+
       res.status(statusCode).json({
         success: false,
         error: message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-        timestamp: new Date().toISOString()
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+        timestamp: new Date().toISOString(),
       });
     });
 
@@ -682,62 +746,92 @@ async function startServer() {
 ✨ ===========================================
 ✅ Server URL: http://localhost:${activePort}
 ⏰ Started at: ${new Date().toLocaleString()}
-📊 Environment: ${process.env.NODE_ENV || 'development'}
-🤖 AI Status: ${process.env.BFL_API_KEY && process.env.BFL_API_KEY !== 'your_bfl_api_key_here' ? 'Ready ✅' : 'Not configured ❌'}
-💳 Payment System: ${process.env.LEMON_WEBHOOK_SECRET ? 'Enabled ✅' : 'Disabled ❌'}
-🗄️  Database: ${process.env.MONGO_URI ? 'Connected ✅' : 'Not configured ❌'}
+📊 Environment: ${process.env.NODE_ENV || "development"}
+🤖 AI Status: ${isAIConfigured() ? "Ready ✅" : "Not configured ❌"}
+💳 Payment System: ${process.env.LEMON_WEBHOOK_SECRET ? "Enabled ✅" : "Disabled ❌"}
+🗄️  Database: ${process.env.MONGO_URI ? "Connected ✅" : "Not configured ❌"}
       `);
-      
+
       // Display AI endpoints
       console.log("\n🤖 AI Endpoints:");
-      console.log("   GET    /api/ai/health             - Check AI service status");
+      console.log(
+        "   GET    /api/ai/health             - Check AI service status",
+      );
       console.log("   GET    /api/ai/themes             - Get wedding themes");
-      console.log("   GET    /api/ai/available-angles   - Get available angle options");
-      console.log("   POST   /api/ai/generate           - Generate venue transformation");
-      console.log("   POST   /api/ai/change-angle       - Change image perspective");
+      console.log(
+        "   GET    /api/ai/available-angles   - Get available angle options",
+      );
+      console.log(
+        "   POST   /api/ai/generate           - Generate venue transformation",
+      );
+      console.log(
+        "   POST   /api/ai/change-angle       - Change image perspective",
+      );
       console.log("   POST   /api/ai/feedback           - Submit feedback");
-      
+
       console.log("\n👤 User & Auth Endpoints:");
-      console.log("   POST   /api/auth/firebase-login   - Firebase authentication");
+      console.log(
+        "   POST   /api/auth/firebase-login   - Firebase authentication",
+      );
       console.log("   GET    /api/users/check-profile   - Check user profile");
       console.log("   POST   /api/users/save-form       - Save user form");
       console.log("   GET    /api/users/profile         - Get user profile");
-      console.log("   GET    /api/profile/check-profile - Check profile status");
+      console.log(
+        "   GET    /api/profile/check-profile - Check profile status",
+      );
       console.log("   POST   /api/profile/save-form     - Save profile form");
-      
+
       console.log("\n💳 Payment Endpoints:");
-      console.log("   POST   /api/payment/create-checkout - Create payment checkout");
-      console.log("   GET    /api/payment/payment-status  - Check payment status");
-      console.log("   GET    /api/payment/subscription    - Get subscription info");
+      console.log(
+        "   POST   /api/payment/create-checkout - Create payment checkout",
+      );
+      console.log(
+        "   GET    /api/payment/payment-status  - Check payment status",
+      );
+      console.log(
+        "   GET    /api/payment/subscription    - Get subscription info",
+      );
       console.log("   GET    /api/payment/credits         - Get user credits");
-      console.log("   GET    /api/payment/plans           - Get available plans");
-      console.log("   POST   /api/lemon/webhook          - Lemon webhook endpoint");
-      
+      console.log(
+        "   GET    /api/payment/plans           - Get available plans",
+      );
+      console.log(
+        "   POST   /api/lemon/webhook          - Lemon webhook endpoint",
+      );
+
       console.log("\n🔧 Utility Endpoints:");
       console.log("   GET    /                           - Server status");
       console.log("   GET    /api/test                   - API test");
-      
+
       // Development-only endpoints
       if (process.env.NODE_ENV !== "production") {
         console.log("\n🧪 Development Test Endpoints:");
         console.log("   GET    /api/debug/routes           - List all routes");
-        console.log("   GET    /api/test-ai-config         - Test AI configuration");
-        console.log("   POST   /api/ai/generate-test       - Test generation endpoint");
+        console.log(
+          "   GET    /api/test-ai-config         - Test AI configuration",
+        );
+        console.log(
+          "   POST   /api/ai/generate-test       - Test generation endpoint",
+        );
       }
-      
+
       console.log("\n⚠️  Important Notes:");
-      if (!process.env.BFL_API_KEY || process.env.BFL_API_KEY === 'your_bfl_api_key_here') {
-        console.log("   ❌ AI features require BFL_API_KEY environment variable");
-        console.log("   🔑 Get API key from: https://api.bfl.ai");
-        console.log("   📝 Set in .env: BFL_API_KEY=your_actual_key_here");
+      if (!isAIConfigured()) {
+        console.log(
+          "   ❌ AI features require GEMINI_API_KEY environment variable (or enable legacy Flux with LEGACY_FLUX_ENABLED=true)",
+        );
+        console.log(
+          "   🔑 Get Gemini API key from your provider and set GEMINI_API_KEY in environment variables",
+        );
       }
-      
+
       console.log("\n✅ Server is ready! Access at:");
-      console.log(`   🌐 ${process.env.FRONTEND_URL || 'https://theloversai.co.in'}`);
+      console.log(
+        `   🌐 ${process.env.FRONTEND_URL || "https://theloversai.co.in"}`,
+      );
       console.log(`   📡 API proxied via nginx /api → backend:${activePort}`);
       console.log("\n");
     }
-    
   } catch (err) {
     console.error("❌ Fatal server error:", err);
     process.exit(1);
@@ -745,13 +839,13 @@ async function startServer() {
 }
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-  console.error('🔥 Uncaught Exception:', error);
+process.on("uncaughtException", (error) => {
+  console.error("🔥 Uncaught Exception:", error);
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("💥 Unhandled Rejection at:", promise, "reason:", reason);
 });
 
 // Start the server

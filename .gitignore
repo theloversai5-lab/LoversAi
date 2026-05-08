@@ -8,8 +8,8 @@ frontend/build
 build
 backend/.env
 frontend/.env
-frontend.env.production
-backend.env.production
+frontend/.env.production
+backend/.env.production
 .env.production
 
 
