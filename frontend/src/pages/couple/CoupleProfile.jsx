@@ -462,7 +462,9 @@ const CoupleProfile = () => {
                     </div>
                   </div>
                   <p className="text-[10px] text-white/30">
-                    {msg.timestamp.toLocaleDateString()}
+                    {msg.timestamp
+                      ? new Date(msg.timestamp).toLocaleDateString()
+                      : ""}
                   </p>
                 </div>
               ))

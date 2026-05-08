@@ -44,11 +44,29 @@ const getAllowedFormats = (file) => {
   if (file.mimetype?.startsWith("video/")) {
     return ["mp4", "mov", "webm", "m4v"];
   }
+  if (
+    [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain",
+      "application/zip",
+      "application/x-rar-compressed",
+    ].includes(file.mimetype)
+  ) {
+    return ["pdf", "doc", "docx", "xls", "xlsx", "txt", "zip", "rar"];
+  }
   return ["jpg", "jpeg", "png", "webp", "gif"];
 };
 
 const getResourceType = (file) =>
-  file.mimetype?.startsWith("video/") ? "video" : "image";
+  file.mimetype?.startsWith("video/")
+    ? "video"
+    : file.mimetype?.startsWith("image/")
+      ? "image"
+      : "raw";
 
 // Multer storage engine for Cloudinary
 const cloudinaryStorage = new CloudinaryStorage({
@@ -153,6 +171,43 @@ export const uploadMedia = multer({
   fileFilter: mediaFileFilter,
   limits: {
     fileSize: 50 * 1024 * 1024,
+    files: 10,
+  },
+});
+
+const chatFileFilter = (req, file, cb) => {
+  const allowedMimes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "text/plain",
+    "application/zip",
+    "application/x-rar-compressed",
+  ];
+
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "Only images, PDF, Word, Excel, text, ZIP, and RAR files are allowed",
+      ),
+      false,
+    );
+  }
+};
+
+export const uploadChat = multer({
+  storage: isCloudinaryConfigured ? cloudinaryStorage : localDiskStorage,
+  fileFilter: chatFileFilter,
+  limits: {
+    fileSize: 25 * 1024 * 1024,
     files: 10,
   },
 });

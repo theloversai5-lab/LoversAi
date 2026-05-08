@@ -195,6 +195,22 @@ export const uploadAPI = {
     );
     return response.data;
   },
+  uploadFile: async (file, folder = 'misc') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = getToken();
+    const response = await axios.post(
+      `${apiBaseUrl}/api/upload/file?folder=${folder}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      }
+    );
+    return response.data;
+  },
 };
 
 // ─── AI APIs ───

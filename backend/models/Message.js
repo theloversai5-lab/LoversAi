@@ -16,16 +16,18 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: [true, "Message content is required"],
       maxlength: [2000, "Message cannot exceed 2000 characters"],
       trim: true,
+      default: "",
     },
     type: {
       type: String,
       enum: ["text", "image", "file", "system"],
       default: "text",
     },
-    fileUrl: String, // For image/file messages
+    fileUrl: String,
+    fileName: String,
+    mimeType: String,
     readBy: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -37,6 +39,17 @@ const messageSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+messageSchema.pre("validate", function (next) {
+  const hasContent = Boolean(this.content && this.content.trim());
+  const hasFile = Boolean(this.fileUrl);
+
+  if (!hasContent && !hasFile) {
+    this.invalidate("content", "Message content or attachment is required");
+  }
+
+  next();
+});
 
 messageSchema.index({ chatRoom: 1, createdAt: -1 });
 

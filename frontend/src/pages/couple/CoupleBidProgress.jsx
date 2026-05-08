@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import { chatAPI, quoteAPI } from "../../api/api";
+import { chatAPI, quoteAPI, uploadAPI } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 
 const apiBaseUrl =
@@ -91,6 +91,41 @@ const plannerLabel = (planner) =>
 const plannerInitial = (planner) =>
   plannerLabel(planner).charAt(0).toUpperCase();
 
+const isImageMessage = (message) =>
+  message?.type === "image" ||
+  message?.mimeType?.startsWith("image/") ||
+  /\.(jpg|jpeg|png|gif|webp)$/i.test(message?.fileUrl || "");
+
+const renderAttachment = (message) => {
+  if (!message?.fileUrl) return null;
+
+  if (isImageMessage(message)) {
+    return (
+      <a href={message.fileUrl} target="_blank" rel="noreferrer">
+        <img
+          src={message.fileUrl}
+          alt={message.fileName || "Shared image"}
+          className="max-h-80 w-full rounded-[18px] object-cover"
+        />
+      </a>
+    );
+  }
+
+  return (
+    <a
+      href={message.fileUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-3 rounded-[18px] border border-white/10 bg-black/10 px-4 py-3 text-sm text-white"
+    >
+      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+        📎
+      </span>
+      <span className="truncate">{message.fileName || "Attachment"}</span>
+    </a>
+  );
+};
+
 const getDefaultPanel = (quote, requestedPanel) => {
   if (requestedPanel) return requestedPanel;
   if (quote?.status === "accepted") return "messages";
@@ -106,6 +141,7 @@ export default function CoupleBidProgress() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
+  const currentUserId = currentUser?.id || currentUser?._id;
 
   const [quote, setQuote] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -114,6 +150,7 @@ export default function CoupleBidProgress() {
   );
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -125,6 +162,7 @@ export default function CoupleBidProgress() {
 
   const socketRef = useRef(null);
   const messageEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const fetchQuote = useCallback(async () => {
     const data = await quoteAPI.getById(id);
@@ -213,11 +251,11 @@ export default function CoupleBidProgress() {
   }, [messages]);
 
   useEffect(() => {
-    if (!currentUser?.id) return undefined;
+    if (!currentUserId) return undefined;
 
     const socket = io(apiBaseUrl, { transports: ["websocket", "polling"] });
     socketRef.current = socket;
-    socket.emit("join", currentUser.id);
+    socket.emit("join", currentUserId);
 
     socket.on("quote_update", (data) => {
       if (data.quoteId === id) {
@@ -286,7 +324,7 @@ export default function CoupleBidProgress() {
       socket.off("new_message");
       socket.disconnect();
     };
-  }, [currentUser?.id, fetchQuote, id]);
+  }, [currentUserId, fetchQuote, id]);
 
   useEffect(() => {
     if (!socketRef.current || !activeRoomId) return undefined;
@@ -361,7 +399,12 @@ export default function CoupleBidProgress() {
       if (data.success) {
         await fetchQuote();
         setActivePanel("messages");
-        await openChatForPlanner(plannerId, "messages");
+        if (data.roomId) {
+          await fetchRooms();
+          setActiveRoomId(data.roomId);
+        } else {
+          await openChatForPlanner(plannerId, "messages");
+        }
       }
     } catch (err) {
       setError(err.response?.data?.error || "Failed to accept quote.");
@@ -389,6 +432,14 @@ export default function CoupleBidProgress() {
   const openChatForPlanner = async (plannerId, panel = "messages") => {
     if (!plannerId || !quote?._id) return;
 
+    const canChat =
+      quote.status === "accepted" && quote.hiredPlanner?._id === plannerId;
+
+    if (!canChat) {
+      setError("Chat unlocks after you accept a planner proposal.");
+      return;
+    }
+
     try {
       const data = await chatAPI.createRoom({
         participantId: plannerId,
@@ -413,14 +464,33 @@ export default function CoupleBidProgress() {
   };
 
   const handleSendMessage = async () => {
-    if (!draft.trim() || !activeRoomId) return;
+    if ((!draft.trim() && !selectedFile) || !activeRoomId) return;
 
     setSending(true);
     setError("");
 
     try {
-      const data = await chatAPI.sendMessage(activeRoomId, {
+      let payload = {
         content: draft.trim(),
+      };
+
+      if (selectedFile) {
+        const isImage = selectedFile.type.startsWith("image/");
+        const uploadResult = isImage
+          ? await uploadAPI.uploadImage(selectedFile, "chat-files")
+          : await uploadAPI.uploadFile(selectedFile, "chat-files");
+
+        payload = {
+          ...payload,
+          type: isImage ? "image" : "file",
+          fileUrl: uploadResult.url,
+          fileName: uploadResult.originalName || selectedFile.name,
+          mimeType: uploadResult.mimeType || selectedFile.type,
+        };
+      }
+
+      const data = await chatAPI.sendMessage(activeRoomId, {
+        ...payload,
       });
       if (data.success) {
         setMessages((prev) => [...prev, data.message]);
@@ -440,6 +510,7 @@ export default function CoupleBidProgress() {
           ),
         );
         setDraft("");
+        setSelectedFile(null);
       }
     } catch (err) {
       setError(err.response?.data?.error || "Failed to send message.");
@@ -846,6 +917,10 @@ export default function CoupleBidProgress() {
                       const planner = resp.planner;
                       const isAccepted = resp.status === "accepted";
                       const isRejected = resp.status === "rejected";
+                      const canOpenChat =
+                        quote.status === "accepted" &&
+                        quote.hiredPlanner?._id === planner?._id &&
+                        isAccepted;
 
                       return (
                         <div
@@ -887,9 +962,10 @@ export default function CoupleBidProgress() {
                                   onClick={() =>
                                     openChatForPlanner(planner?._id)
                                   }
-                                  className="rounded-2xl border border-[#3b2b1f] px-6 py-3 text-sm font-medium text-[#f7e7c7] transition hover:bg-white/3"
+                                  disabled={!canOpenChat}
+                                  className="rounded-2xl border border-[#3b2b1f] px-6 py-3 text-sm font-medium text-[#f7e7c7] transition hover:bg-white/3 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
-                                  Open chat
+                                  {canOpenChat ? "Open chat" : "Accept to chat"}
                                 </button>
                                 {!isAccepted && quote.status !== "accepted" ? (
                                   <button
@@ -994,7 +1070,7 @@ export default function CoupleBidProgress() {
                           quoteRooms.map((room) => {
                             const other = room.participants?.find(
                               (participant) =>
-                                participant._id !== currentUser?.id,
+                                participant._id !== currentUserId,
                             );
 
                             return (
@@ -1049,7 +1125,7 @@ export default function CoupleBidProgress() {
                                 {plannerLabel(
                                   activeRoom.participants?.find(
                                     (participant) =>
-                                      participant._id !== currentUser?.id,
+                                      participant._id !== currentUserId,
                                   ),
                                 )}
                               </p>
@@ -1066,7 +1142,7 @@ export default function CoupleBidProgress() {
                                   `/planner/profile/${
                                     activeRoom.participants?.find(
                                       (participant) =>
-                                        participant._id !== currentUser?.id,
+                                        participant._id !== currentUserId,
                                     )?._id
                                   }`,
                                 )
@@ -1083,10 +1159,10 @@ export default function CoupleBidProgress() {
                                 Loading messages...
                               </div>
                             ) : messages.length > 0 ? (
-                              <div className="space-y-6">
+                              <div className="space-y-4">
                                 {messages.map((message) => {
                                   const isMine =
-                                    message.sender?._id === currentUser?.id;
+                                    message.sender?._id === currentUserId;
                                   return (
                                     <div
                                       key={message._id}
@@ -1096,13 +1172,22 @@ export default function CoupleBidProgress() {
                                         className={`max-w-[78%] ${isMine ? "text-right" : "text-left"}`}
                                       >
                                         <div
-                                          className={`inline-block rounded-[22px] px-5 py-4 text-[16px] leading-7 ${
+                                          className={`inline-block rounded-[18px] px-4 py-3 text-[15px] leading-7 ${
                                             isMine
-                                              ? "bg-[#1f1b18] text-white"
-                                              : "bg-[#2b2118] text-[#f7e7c7]"
+                                              ? "bg-[#8f6d49] text-white rounded-br-[6px]"
+                                              : "bg-[#2b2118] text-[#f7e7c7] rounded-bl-[6px]"
                                           }`}
                                         >
-                                          {message.content}
+                                          {message.fileUrl
+                                            ? renderAttachment(message)
+                                            : null}
+                                          {message.content ? (
+                                            <p
+                                              className={`${message.fileUrl ? "mt-2" : ""} whitespace-pre-wrap break-words`}
+                                            >
+                                              {message.content}
+                                            </p>
+                                          ) : null}
                                         </div>
                                         <p className="mt-2 text-xs text-[#b1a496]">
                                           {formatTime(message.createdAt)}
@@ -1122,7 +1207,40 @@ export default function CoupleBidProgress() {
                           </div>
 
                           <div className="border-t border-[#342616] p-5">
+                            {selectedFile ? (
+                              <div className="mb-3 flex items-center justify-between rounded-2xl border border-[#5d4421] bg-[#241b15] px-4 py-3 text-sm text-[#f7e7c7]">
+                                <span className="truncate">
+                                  {selectedFile.name}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedFile(null)}
+                                  className="text-[#c9b38a] transition hover:text-white"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ) : null}
+
                             <div className="flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex h-12 w-12 items-center justify-center rounded-full border border-[#5d4421] bg-[#1b1512] text-xl text-[#c9b38a] transition hover:bg-[#2b2118]"
+                              >
+                                +
+                              </button>
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar"
+                                className="hidden"
+                                onChange={(event) =>
+                                  setSelectedFile(
+                                    event.target.files?.[0] || null,
+                                  )
+                                }
+                              />
                               <input
                                 value={draft}
                                 onChange={(event) =>
@@ -1143,8 +1261,10 @@ export default function CoupleBidProgress() {
                               <button
                                 type="button"
                                 onClick={handleSendMessage}
-                                disabled={sending || !draft.trim()}
-                                className="rounded-full bg-[#1f1b18] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                                disabled={
+                                  sending || (!draft.trim() && !selectedFile)
+                                }
+                                className="rounded-full bg-[#8f6d49] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
                               >
                                 {sending ? "Sending..." : "Send"}
                               </button>

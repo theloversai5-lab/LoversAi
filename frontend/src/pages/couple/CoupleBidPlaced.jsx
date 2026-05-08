@@ -71,6 +71,7 @@ const CoupleBidPlaced = () => {
   const [quote, setQuote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const currentUserId = currentUser?.id || currentUser?._id;
 
   const quoteId = location.state?.quoteId || null;
   const justSubmitted = Boolean(location.state?.justSubmitted);
@@ -108,10 +109,10 @@ const CoupleBidPlaced = () => {
   }, [quoteId]);
 
   useEffect(() => {
-    if (!currentUser?.id || !quote?._id) return undefined;
+    if (!currentUserId || !quote?._id) return undefined;
 
     const socket = io(apiBaseUrl, { transports: ["websocket", "polling"] });
-    socket.emit("join", currentUser.id);
+    socket.emit("join", currentUserId);
 
     socket.on("quote_update", (data) => {
       if (data.quoteId === quote._id) {
@@ -133,7 +134,7 @@ const CoupleBidPlaced = () => {
       socket.off("quote_update");
       socket.disconnect();
     };
-  }, [currentUser?.id, quote?._id]);
+  }, [currentUserId, quote?._id]);
 
   const progressMeta = useMemo(() => {
     if (!quote) return { completed: 0, activeStep: stepsMap[0] };

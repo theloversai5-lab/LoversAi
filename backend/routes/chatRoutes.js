@@ -2,6 +2,8 @@
 import express from "express";
 import ChatRoom from "../models/ChatRoom.js";
 import Message from "../models/Message.js";
+import Quote from "../models/Quote.js";
+import Bid from "../models/Bid.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -46,11 +48,61 @@ router.post("/rooms", protect, async (req, res) => {
       return res.status(400).json({ success: false, error: "Cannot create chat room with yourself" });
     }
 
+    if (quoteId) {
+      const quote = await Quote.findById(quoteId);
+
+      if (!quote) {
+        return res.status(404).json({ success: false, error: "Quote not found" });
+      }
+
+      const requesterId = req.user._id.toString();
+      const coupleId = quote.couple.toString();
+      const hiredPlannerId = quote.hiredPlanner?.toString();
+      const isAcceptedPair =
+        quote.status === "accepted" &&
+        hiredPlannerId &&
+        ((requesterId === coupleId && participantId === hiredPlannerId) ||
+          (requesterId === hiredPlannerId && participantId === coupleId));
+
+      if (!isAcceptedPair) {
+        return res.status(403).json({
+          success: false,
+          error: "Chat unlocks only after the couple accepts a planner proposal",
+        });
+      }
+    }
+
+    if (bidId) {
+      const bid = await Bid.findById(bidId);
+
+      if (!bid) {
+        return res.status(404).json({ success: false, error: "Bid not found" });
+      }
+
+      const requesterId = req.user._id.toString();
+      const coupleId = bid.coupleId.toString();
+      const hiredPlannerId = bid.hiredPlannerId?.toString();
+      const isAcceptedPair =
+        bid.status === "accepted" &&
+        hiredPlannerId &&
+        ((requesterId === coupleId && participantId === hiredPlannerId) ||
+          (requesterId === hiredPlannerId && participantId === coupleId));
+
+      if (!isAcceptedPair) {
+        return res.status(403).json({
+          success: false,
+          error: "Chat unlocks only after the couple accepts a planner proposal",
+        });
+      }
+    }
+
     const participantIds = [req.user._id.toString(), participantId].sort();
 
     // Check for existing room between the same participants
     let room = await ChatRoom.findOne({
       participants: { $all: participantIds, $size: 2 },
+      ...(quoteId ? { relatedQuote: quoteId } : {}),
+      ...(bidId ? { relatedBid: bidId } : {}),
       isActive: true,
     });
 
@@ -136,10 +188,12 @@ router.get("/rooms/:roomId/messages", protect, async (req, res) => {
 router.post("/rooms/:roomId/messages", protect, async (req, res) => {
   try {
     const { roomId } = req.params;
-    const { content, type = "text", fileUrl } = req.body;
+    const { content, type = "text", fileUrl, fileName, mimeType } = req.body;
+    const trimmedContent = content?.trim?.() || "";
+    const hasFile = Boolean(fileUrl);
 
-    if (!content || !content.trim()) {
-      return res.status(400).json({ success: false, error: "Message content is required" });
+    if (!trimmedContent && !hasFile) {
+      return res.status(400).json({ success: false, error: "Message content or attachment is required" });
     }
 
     // Verify user is a participant
@@ -158,15 +212,17 @@ router.post("/rooms/:roomId/messages", protect, async (req, res) => {
     const message = await Message.create({
       chatRoom: roomId,
       sender: req.user._id,
-      content: content.trim(),
+      content: trimmedContent,
       type,
       fileUrl: fileUrl || undefined,
+      fileName: fileName || undefined,
+      mimeType: mimeType || undefined,
       readBy: [req.user._id],
     });
 
-    // Update room's lastMessage
+    const roomPreview = trimmedContent || fileName || (type === "image" ? "Photo" : "Attachment");
     room.lastMessage = {
-      content: content.trim().substring(0, 100),
+      content: roomPreview.substring(0, 100),
       sender: req.user._id,
       timestamp: new Date(),
     };
@@ -181,6 +237,11 @@ router.post("/rooms/:roomId/messages", protect, async (req, res) => {
     // Emit via Socket.io if available
     const io = req.app.get("io");
     if (io) {
+      io.to(`chat_${roomId}`).emit("new_message", {
+        roomId,
+        message: populatedMessage,
+      });
+
       room.participants.forEach((participantId) => {
         if (participantId.toString() !== req.user._id.toString()) {
           io.to(`user_${participantId}`).emit("new_message", {

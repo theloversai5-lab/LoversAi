@@ -1,6 +1,6 @@
 // routes/uploadRoutes.js — Secure file upload to Cloudinary
 import express from "express";
-import { isCloudinaryConfigured, upload, uploadMedia } from "../utils/cloudinary.js";
+import { isCloudinaryConfigured, upload, uploadMedia, uploadChat } from "../utils/cloudinary.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -90,6 +90,28 @@ router.post("/video", protect, (req, res, next) => {
   } catch (error) {
     console.error("Video upload error:", error);
     res.status(500).json({ success: false, error: "Failed to upload video" });
+  }
+});
+
+router.post("/file", protect, (req, res, next) => {
+  req.uploadFolder = req.query.folder || "chat-files";
+  next();
+}, uploadChat.single("file"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: "No file provided" });
+    }
+
+    res.json({
+      success: true,
+      url: buildFileUrl(req, req.file),
+      publicId: req.file.filename,
+      originalName: req.file.originalname,
+      mimeType: req.file.mimetype,
+    });
+  } catch (error) {
+    console.error("File upload error:", error);
+    res.status(500).json({ success: false, error: "Failed to upload file" });
   }
 });
 

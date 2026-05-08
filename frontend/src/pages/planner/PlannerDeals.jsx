@@ -17,10 +17,10 @@ export default function PlannerDeals() {
     quoteAPI.getMyDeals().then(res => {
       if (res.success && res.deals?.length > 0) {
         setDeals(res.deals.map(d => ({
-          _id: d._id, couple: d.coupleId?.fullName || 'Couple', status: d.status || 'active',
+          _id: d._id, couple: d.couple?.fullName || 'Couple', status: d.status === 'accepted' ? 'active' : (d.status || 'active'),
           location: d.eventDetails?.city || 'N/A', date: d.eventDetails?.weddingDate ? new Date(d.eventDetails.weddingDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD',
           guests: d.eventDetails?.guestCount || 0, budget: d.eventDetails?.budget || 'N/A',
-          services: d.items?.map(i => i.category) || [], vendors: d.items?.map(i => i.vendorName) || [],
+          services: ['Planning'], vendors: [],
         })));
       } else { setDeals(mockDeals); }
     }).catch(() => setDeals(mockDeals)).finally(() => setLoading(false));

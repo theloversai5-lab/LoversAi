@@ -1,19 +1,109 @@
-// routes/quoteRoutes.js — Wedding Quote/Bid CRUD routes
+// routes/quoteRoutes.js - Wedding Quote/Bid CRUD routes
 import express from "express";
 import Quote from "../models/Quote.js";
 import User from "../models/User.js";
+import ChatRoom from "../models/ChatRoom.js";
 import { protect, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
 
-/* ================================================================
-   POST /api/quotes — Submit a new quote request (Couple only)
-================================================================ */
+const DEMO_PLANNERS = [
+  {
+    email: "demo.planner1@loversai.local",
+    fullName: "Ruchi Ratogi",
+    company_name: "Ruchi Wedding Atelier",
+    location: "Greater Noida",
+  },
+  {
+    email: "demo.planner2@loversai.local",
+    fullName: "Aarav Mehta",
+    company_name: "Golden Aisle Events",
+    location: "Delhi NCR",
+  },
+];
+
+const parseBudgetValue = (budget) => {
+  if (!budget) return 0;
+  if (typeof budget === "number") return budget;
+
+  const raw = String(budget).trim().toLowerCase();
+  const numeric = parseFloat(raw.replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(numeric)) return 0;
+
+  if (raw.includes("cr")) return Math.round(numeric * 10000000);
+  if (raw.includes("l")) return Math.round(numeric * 100000);
+  if (raw.includes("k")) return Math.round(numeric * 1000);
+  return Math.round(numeric);
+};
+
+const buildDemoResponse = (plannerId, index, eventDetails = {}) => {
+  const baseBudget = parseBudgetValue(eventDetails.budget);
+  const quotedPrice =
+    baseBudget > 0
+      ? Math.max(50000, Math.round(baseBudget * (0.72 + index * 0.08)))
+      : 250000 + index * 75000;
+
+  const city = eventDetails.city || "your city";
+  const guestCount = eventDetails.guestCount || 200;
+  const tradition = eventDetails.tradition || "wedding";
+  const templates = [
+    `We can design a warm ${tradition} celebration in ${city} for around ${guestCount} guests with decor, planning support, and guest flow management.`,
+    `Our team can handle planning, styling, and venue coordination for ${city}. This estimate keeps the experience premium while staying practical.`,
+  ];
+
+  return {
+    planner: plannerId,
+    quotedPrice,
+    quotedMessage: templates[index % templates.length],
+    status: "pending",
+  };
+};
+
+const ensureDemoPlanners = async () => {
+  const planners = [];
+
+  for (const [index, plannerData] of DEMO_PLANNERS.entries()) {
+    let planner = await User.findOne({ email: plannerData.email });
+
+    if (!planner) {
+      planner = await User.create({
+        ...plannerData,
+        password: `DemoPlanner@${index + 1}`,
+        role: "planner",
+        profileCompleted: true,
+        credits: 999,
+      });
+    }
+
+    planners.push(planner);
+  }
+
+  return planners;
+};
+
+const ensureAcceptedQuoteChatRoom = async (quoteId, coupleId, plannerId) => {
+  const participants = [coupleId.toString(), plannerId.toString()].sort();
+
+  let room = await ChatRoom.findOne({
+    participants: { $all: participants, $size: 2 },
+    relatedQuote: quoteId,
+    isActive: true,
+  });
+
+  if (!room) {
+    room = await ChatRoom.create({
+      participants,
+      relatedQuote: quoteId,
+    });
+  }
+
+  return room;
+};
+
 router.post("/", protect, authorize("couple"), async (req, res) => {
   try {
     const { images, eventDetails } = req.body;
 
-    // Validation
     if (!images || !Array.isArray(images) || images.length === 0) {
       return res.status(400).json({
         success: false,
@@ -21,12 +111,11 @@ router.post("/", protect, authorize("couple"), async (req, res) => {
       });
     }
 
-    // Validate image data
     const validImages = images.filter((img) => img.url);
     if (validImages.length === 0) {
       return res.status(400).json({
         success: false,
-        error: "Invalid image data — each image must have a URL",
+        error: "Invalid image data - each image must have a URL",
       });
     }
 
@@ -48,7 +137,19 @@ router.post("/", protect, authorize("couple"), async (req, res) => {
       },
     });
 
-    console.log(`📋 New quote request from ${req.user.email} — ${validImages.length} images`);
+    const demoPlanners = await ensureDemoPlanners();
+    if (demoPlanners.length > 0) {
+      quote.responses = demoPlanners.map((planner, index) =>
+        buildDemoResponse(planner._id, index, quote.eventDetails),
+      );
+      quote.status = "quoted";
+      await quote.save();
+    }
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("new_bid", { quoteId: quote._id, quote });
+    }
 
     res.status(201).json({
       success: true,
@@ -64,9 +165,6 @@ router.post("/", protect, authorize("couple"), async (req, res) => {
   }
 });
 
-/* ================================================================
-   GET /api/quotes/my — Get all quotes for the logged-in couple
-================================================================ */
 router.get("/my", protect, authorize("couple"), async (req, res) => {
   try {
     const quotes = await Quote.find({ couple: req.user._id })
@@ -85,9 +183,6 @@ router.get("/my", protect, authorize("couple"), async (req, res) => {
   }
 });
 
-/* ================================================================
-   GET /api/quotes/available — Get available quotes (Planner only)
-================================================================ */
 router.get("/available", protect, authorize("planner"), async (req, res) => {
   try {
     const quotes = await Quote.find({
@@ -110,9 +205,6 @@ router.get("/available", protect, authorize("planner"), async (req, res) => {
   }
 });
 
-/* ================================================================
-   GET /api/quotes/my-sent — Get quotes the planner has responded to
-================================================================ */
 router.get("/my-sent", protect, authorize("planner"), async (req, res) => {
   try {
     const quotes = await Quote.find({ "responses.planner": req.user._id })
@@ -126,9 +218,6 @@ router.get("/my-sent", protect, authorize("planner"), async (req, res) => {
   }
 });
 
-/* ================================================================
-   GET /api/quotes/my-deals — Get accepted quotes (planner's deals)
-================================================================ */
 router.get("/my-deals", protect, authorize("planner"), async (req, res) => {
   try {
     const quotes = await Quote.find({
@@ -145,9 +234,6 @@ router.get("/my-deals", protect, authorize("planner"), async (req, res) => {
   }
 });
 
-/* ================================================================
-   GET /api/quotes/:id — Get a specific quote
-================================================================ */
 router.get("/:id", protect, async (req, res) => {
   try {
     const quote = await Quote.findById(req.params.id)
@@ -159,12 +245,18 @@ router.get("/:id", protect, async (req, res) => {
       return res.status(404).json({ success: false, error: "Quote not found" });
     }
 
-    // Authorization: only the involved couple, planner, or admin can view
     const isCouple = quote.couple._id.toString() === req.user._id.toString();
-    const isPlanner = quote.responses.some(r => r.planner._id.toString() === req.user._id.toString());
+    const isPlannerParticipant =
+      quote.hiredPlanner?._id?.toString() === req.user._id.toString() ||
+      quote.responses.some((response) => response.planner._id.toString() === req.user._id.toString());
+    const isPlannerViewingAvailableLead =
+      req.user.role === "planner" &&
+      !quote.hiredPlanner &&
+      ["pending", "viewed", "quoted"].includes(quote.status) &&
+      (!quote.expiresAt || new Date(quote.expiresAt) > new Date());
     const isAdmin = req.user.role === "admin";
 
-    if (!isCouple && !isPlanner && !isAdmin) {
+    if (!isCouple && !isPlannerParticipant && !isPlannerViewingAvailableLead && !isAdmin) {
       return res.status(403).json({
         success: false,
         error: "You don't have permission to view this quote",
@@ -178,13 +270,10 @@ router.get("/:id", protect, async (req, res) => {
   }
 });
 
-/* ================================================================
-   PATCH /api/quotes/:id/respond — Planner responds with a price
-================================================================ */
 router.patch("/:id/respond", protect, authorize("planner"), async (req, res) => {
   try {
     const { quotedPrice, quotedMessage } = req.body;
-    const QUOTE_COST = 5; // Credits required to submit a quote
+    const QUOTE_COST = 5;
 
     if (!quotedPrice || quotedPrice <= 0) {
       return res.status(400).json({
@@ -205,13 +294,11 @@ router.patch("/:id/respond", protect, authorize("planner"), async (req, res) => 
       });
     }
 
-    // Check if planner already responded
-    const alreadyResponded = quote.responses.some(r => r.planner.toString() === req.user._id.toString());
+    const alreadyResponded = quote.responses.some((response) => response.planner.toString() === req.user._id.toString());
     if (alreadyResponded) {
       return res.status(400).json({ success: false, error: "You have already responded to this request." });
     }
 
-    // Check moodboard expiry
     if (quote.moodboardExpiresAt && new Date() > quote.moodboardExpiresAt) {
       quote.status = "expired";
       await quote.save();
@@ -221,7 +308,6 @@ router.patch("/:id/respond", protect, authorize("planner"), async (req, res) => 
       });
     }
 
-    // Deduct credits from planner
     const planner = await User.findById(req.user._id);
     if (!planner) {
       return res.status(404).json({ success: false, error: "Planner not found" });
@@ -236,26 +322,24 @@ router.patch("/:id/respond", protect, authorize("planner"), async (req, res) => 
       });
     }
 
-    planner.deductCredits(QUOTE_COST, `Quote submitted for bid`, "quote_submission", {
+    planner.deductCredits(QUOTE_COST, "Quote submitted for bid", "quote_submission", {
       quoteId: quote._id,
     });
     await planner.save();
 
-    // Append to responses
     quote.responses.push({
       planner: req.user._id,
       quotedPrice,
       quotedMessage: quotedMessage || "",
-      status: "pending"
+      status: "pending",
     });
 
     if (quote.status === "pending" || quote.status === "viewed") {
       quote.status = "quoted";
     }
-    
+
     await quote.save();
 
-    // Notify couple via Socket.io
     const io = req.app.get("io");
     if (io) {
       io.to(`user_${quote.couple}`).emit("quote_update", {
@@ -281,13 +365,10 @@ router.patch("/:id/respond", protect, authorize("planner"), async (req, res) => 
   }
 });
 
-/* ================================================================
-   PATCH /api/quotes/:id/accept — Couple accepts a planner's quote
-================================================================ */
 router.patch("/:id/accept", protect, authorize("couple"), async (req, res) => {
   try {
     const { plannerId } = req.body;
-    
+
     if (!plannerId) {
       return res.status(400).json({ success: false, error: "Planner ID is required to accept a proposal" });
     }
@@ -305,27 +386,47 @@ router.patch("/:id/accept", protect, authorize("couple"), async (req, res) => {
       return res.status(400).json({ success: false, error: "Already accepted a planner for this quote." });
     }
 
-    const responseIndex = quote.responses.findIndex(r => r.planner.toString() === plannerId);
+    const responseIndex = quote.responses.findIndex((response) => response.planner.toString() === plannerId);
     if (responseIndex === -1) {
       return res.status(404).json({ success: false, error: "Planner did not submit a bid on this quote." });
     }
 
     quote.hiredPlanner = plannerId;
     quote.status = "accepted";
-    quote.responses[responseIndex].status = "accepted";
+    quote.responses = quote.responses.map((response) => ({
+      ...response.toObject(),
+      status: response.planner.toString() === plannerId ? "accepted" : "rejected",
+    }));
     quote.respondedAt = new Date();
     await quote.save();
 
-    res.json({ success: true, message: "Quote accepted!", quote });
+    const room = await ensureAcceptedQuoteChatRoom(
+      quote._id,
+      quote.couple,
+      plannerId,
+    );
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(`user_${plannerId}`).emit("quote_update", {
+        quoteId: quote._id,
+        status: "accepted",
+        roomId: room._id,
+      });
+      io.to(`user_${quote.couple}`).emit("quote_update", {
+        quoteId: quote._id,
+        status: "accepted",
+        roomId: room._id,
+      });
+    }
+
+    res.json({ success: true, message: "Quote accepted!", quote, roomId: room._id });
   } catch (err) {
     console.error("Accept quote error:", err);
     res.status(500).json({ success: false, error: "Failed to accept" });
   }
 });
 
-/* ================================================================
-   PATCH /api/quotes/:id/reject — Couple rejects a planner's quote
-================================================================ */
 router.patch("/:id/reject", protect, authorize("couple"), async (req, res) => {
   try {
     const { plannerId } = req.body;
@@ -343,19 +444,12 @@ router.patch("/:id/reject", protect, authorize("couple"), async (req, res) => {
       return res.status(403).json({ success: false, error: "Not your quote" });
     }
 
-    const responseIndex = quote.responses.findIndex(r => r.planner.toString() === plannerId);
+    const responseIndex = quote.responses.findIndex((response) => response.planner.toString() === plannerId);
     if (responseIndex === -1) {
       return res.status(404).json({ success: false, error: "Planner did not submit a bid on this quote." });
     }
 
     quote.responses[responseIndex].status = "rejected";
-    
-    // If all bids are rejected, maybe set main status to rejected?
-    const allRejected = quote.responses.every(r => r.status === "rejected");
-    if (allRejected) {
-      // Actually we just leave it open if they want other planners to bid
-    }
-
     await quote.save();
 
     res.json({ success: true, message: "Proposal rejected", quote });
