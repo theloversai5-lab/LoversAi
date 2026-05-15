@@ -325,14 +325,12 @@ router.post(
       const user = req.user;
 
       if (user.credits < creditsNeeded) {
-        return res
-          .status(402)
-          .json({
-            success: false,
-            error: "Insufficient credits",
-            currentCredits: user.credits,
-            requiredCredits: creditsNeeded,
-          });
+        return res.status(402).json({
+          success: false,
+          error: "Insufficient credits",
+          currentCredits: user.credits,
+          requiredCredits: creditsNeeded,
+        });
       }
 
       // Call FLUX API with specific angle prompt
@@ -342,7 +340,10 @@ router.post(
         "flux-kontext-pro",
         angleConfig.negativePrompt,
       );
-      const persistedImage = await persistGeneratedAngleImage(result.url, angle);
+      const persistedImage = await persistGeneratedAngleImage(
+        result.url,
+        angle,
+      );
       result.url = persistedImage.url;
       result.cloudinaryPublicId = persistedImage.cloudinaryPublicId;
 

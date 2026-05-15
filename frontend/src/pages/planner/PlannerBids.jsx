@@ -75,7 +75,8 @@ export default function PlannerBids() {
       bid.couple.toLowerCase().includes(search.toLowerCase()) ||
       bid.city.toLowerCase().includes(search.toLowerCase());
     const matchStatus =
-      filterStatus === "All" || (String(bid.status || "").toLowerCase() === filterStatus.toLowerCase());
+      filterStatus === "All" ||
+      String(bid.status || "").toLowerCase() === filterStatus.toLowerCase();
     return matchSearch && matchStatus;
   });
 
@@ -211,7 +212,8 @@ export default function PlannerBids() {
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColor[bid.status] || "badge-pending"}`}
                       >
-                        {bid.status.charAt(0).toUpperCase() + bid.status.slice(1)}
+                        {bid.status.charAt(0).toUpperCase() +
+                          bid.status.slice(1)}
                       </span>
                     </td>
                     <td className="p-4 text-right">
@@ -254,7 +256,8 @@ export default function PlannerBids() {
                   {selectedBid.couple}
                 </h2>
                 <p className="text-xs text-white/30 mt-0.5">
-                  {selectedBid.city} · {selectedBid.religion} · {selectedBid.budget}
+                  {selectedBid.city} · {selectedBid.religion} ·{" "}
+                  {selectedBid.budget}
                 </p>
               </div>
               <button
@@ -325,7 +328,9 @@ export default function PlannerBids() {
                   Chat unlocks on accept
                 </button>
                 <button
-                  onClick={() => navigate(`/planner/build-quote/${selectedBid._id}`)}
+                  onClick={() =>
+                    navigate(`/planner/build-quote/${selectedBid._id}`)
+                  }
                   className="flex-1 loverai-btn-primary text-sm py-2.5 rounded-xl flex items-center justify-center gap-2"
                 >
                   <svg

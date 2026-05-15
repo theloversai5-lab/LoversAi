@@ -110,7 +110,9 @@ export default function PlannerMessages() {
     socket.on("new_message", ({ roomId, message }) => {
       if (activeRoom?._id === roomId) {
         setMessages((prev) =>
-          prev.some((item) => item._id === message._id) ? prev : [...prev, message],
+          prev.some((item) => item._id === message._id)
+            ? prev
+            : [...prev, message],
         );
       }
 
@@ -264,7 +266,9 @@ export default function PlannerMessages() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="p-8 text-center text-white/30">Loading chats...</div>
+              <div className="p-8 text-center text-white/30">
+                Loading chats...
+              </div>
             ) : filteredRooms.length === 0 ? (
               <div className="p-8 text-center text-white/30 text-sm">
                 No conversations yet. Accepted bids will appear here.
@@ -293,7 +297,9 @@ export default function PlannerMessages() {
                             {getParticipantDisplayName(other)}
                           </span>
                           <span className="text-[10px] text-white/20 shrink-0">
-                            {formatTime(room.lastMessage?.timestamp || room.updatedAt)}
+                            {formatTime(
+                              room.lastMessage?.timestamp || room.updatedAt,
+                            )}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
@@ -336,7 +342,9 @@ export default function PlannerMessages() {
                   </svg>
                 </button>
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-loverai-gold/30 to-amber-800/30 flex items-center justify-center text-loverai-gold font-heading text-sm">
-                  {getParticipantDisplayName(getOtherParticipant(activeRoom))?.charAt(0) || "?"}
+                  {getParticipantDisplayName(
+                    getOtherParticipant(activeRoom),
+                  )?.charAt(0) || "?"}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">
@@ -367,7 +375,9 @@ export default function PlannerMessages() {
                       key={message._id || index}
                       className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                     >
-                      <div className={`max-w-[78%] ${isMine ? "items-end" : "items-start"} flex flex-col`}>
+                      <div
+                        className={`max-w-[78%] ${isMine ? "items-end" : "items-start"} flex flex-col`}
+                      >
                         <div
                           className={`rounded-[18px] px-3 py-2 shadow-sm ${
                             isMine
@@ -377,7 +387,9 @@ export default function PlannerMessages() {
                         >
                           {message.fileUrl ? renderAttachment(message) : null}
                           {message.content ? (
-                            <p className={`${message.fileUrl ? "mt-2" : ""} whitespace-pre-wrap break-words text-sm leading-6`}>
+                            <p
+                              className={`${message.fileUrl ? "mt-2" : ""} whitespace-pre-wrap break-words text-sm leading-6`}
+                            >
                               {message.content}
                             </p>
                           ) : null}

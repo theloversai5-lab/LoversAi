@@ -220,7 +220,9 @@ router.get("/my-sent", protect, authorize("planner"), async (req, res) => {
     res.json({ success: true, count: quotes.length, quotes });
   } catch (err) {
     console.error("Get my sent quotes error:", err);
-    res.status(500).json({ success: false, error: "Failed to fetch sent quotes" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch sent quotes" });
   }
 });
 
@@ -245,7 +247,10 @@ router.get("/:id", protect, async (req, res) => {
     const quote = await Quote.findById(req.params.id)
       .populate("couple", "fullName email weddingProfile avatar")
       .populate("hiredPlanner", "fullName email company_name avatar")
-      .populate("responses.planner", "fullName email company_name avatar profile");
+      .populate(
+        "responses.planner",
+        "fullName email company_name avatar profile",
+      );
 
     if (!quote) {
       return res.status(404).json({ success: false, error: "Quote not found" });
@@ -254,7 +259,10 @@ router.get("/:id", protect, async (req, res) => {
     const isCouple = quote.couple._id.toString() === req.user._id.toString();
     const isPlannerParticipant =
       quote.hiredPlanner?._id?.toString() === req.user._id.toString() ||
-      quote.responses.some((response) => response.planner._id.toString() === req.user._id.toString());
+      quote.responses.some(
+        (response) =>
+          response.planner._id.toString() === req.user._id.toString(),
+      );
     const isPlannerViewingAvailableLead =
       req.user.role === "planner" &&
       !quote.hiredPlanner &&
@@ -262,7 +270,12 @@ router.get("/:id", protect, async (req, res) => {
       (!quote.expiresAt || new Date(quote.expiresAt) > new Date());
     const isAdmin = req.user.role === "admin";
 
-    if (!isCouple && !isPlannerParticipant && !isPlannerViewingAvailableLead && !isAdmin) {
+    if (
+      !isCouple &&
+      !isPlannerParticipant &&
+      !isPlannerViewingAvailableLead &&
+      !isAdmin
+    ) {
       return res.status(403).json({
         success: false,
         error: "You don't have permission to view this quote",
@@ -276,107 +289,138 @@ router.get("/:id", protect, async (req, res) => {
   }
 });
 
-router.patch("/:id/respond", protect, authorize("planner"), async (req, res) => {
-  try {
-    const { quotedPrice, quotedMessage } = req.body;
-    const QUOTE_COST = 5;
+router.patch(
+  "/:id/respond",
+  protect,
+  authorize("planner"),
+  async (req, res) => {
+    try {
+      const { quotedPrice, quotedMessage } = req.body;
+      const QUOTE_COST = 5;
 
-    if (!quotedPrice || quotedPrice <= 0) {
-      return res.status(400).json({
-        success: false,
-        error: "A valid quoted price is required",
+      if (!quotedPrice || quotedPrice <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: "A valid quoted price is required",
+        });
+      }
+
+      const quote = await Quote.findById(req.params.id);
+      if (!quote) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Quote not found" });
+      }
+
+      if (
+        quote.status === "accepted" ||
+        quote.status === "rejected" ||
+        quote.status === "expired"
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: `Cannot respond to a quote with status '${quote.status}'`,
+        });
+      }
+
+      const alreadyResponded = quote.responses.some(
+        (response) => response.planner.toString() === req.user._id.toString(),
+      );
+      if (alreadyResponded) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            error: "You have already responded to this request.",
+          });
+      }
+
+      if (quote.moodboardExpiresAt && new Date() > quote.moodboardExpiresAt) {
+        quote.status = "expired";
+        await quote.save();
+        return res.status(400).json({
+          success: false,
+          error:
+            "This moodboard has expired. The couple needs to regenerate it.",
+        });
+      }
+
+      const planner = await User.findById(req.user._id);
+      if (!planner) {
+        return res
+          .status(404)
+          .json({ success: false, error: "Planner not found" });
+      }
+
+      if (planner.credits < QUOTE_COST) {
+        return res.status(402).json({
+          success: false,
+          error: `Insufficient credits. You need ${QUOTE_COST} credits to submit a quote. Current balance: ${planner.credits}`,
+          creditsRequired: QUOTE_COST,
+          currentCredits: planner.credits,
+        });
+      }
+
+      planner.deductCredits(
+        QUOTE_COST,
+        "Quote submitted for bid",
+        "quote_submission",
+        {
+          quoteId: quote._id,
+        },
+      );
+      await planner.save();
+
+      quote.responses.push({
+        planner: req.user._id,
+        quotedPrice,
+        quotedMessage: quotedMessage || "",
+        status: "pending",
       });
-    }
 
-    const quote = await Quote.findById(req.params.id);
-    if (!quote) {
-      return res.status(404).json({ success: false, error: "Quote not found" });
-    }
+      if (quote.status === "pending" || quote.status === "viewed") {
+        quote.status = "quoted";
+      }
 
-    if (quote.status === "accepted" || quote.status === "rejected" || quote.status === "expired") {
-      return res.status(400).json({
-        success: false,
-        error: `Cannot respond to a quote with status '${quote.status}'`,
-      });
-    }
-
-    const alreadyResponded = quote.responses.some((response) => response.planner.toString() === req.user._id.toString());
-    if (alreadyResponded) {
-      return res.status(400).json({ success: false, error: "You have already responded to this request." });
-    }
-
-    if (quote.moodboardExpiresAt && new Date() > quote.moodboardExpiresAt) {
-      quote.status = "expired";
       await quote.save();
-      return res.status(400).json({
-        success: false,
-        error: "This moodboard has expired. The couple needs to regenerate it.",
+
+      const io = req.app.get("io");
+      if (io) {
+        io.to(`user_${quote.couple}`).emit("quote_update", {
+          quoteId: quote._id,
+          status: "quoted",
+          plannerName: planner.fullName || planner.company_name || "A Planner",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Quote response submitted",
+        quote,
+        creditsDeducted: QUOTE_COST,
+        remainingCredits: planner.credits,
       });
+    } catch (err) {
+      if (err.message?.includes("Insufficient credits")) {
+        return res.status(402).json({ success: false, error: err.message });
+      }
+      console.error("Respond to quote error:", err);
+      res.status(500).json({ success: false, error: "Failed to respond" });
     }
-
-    const planner = await User.findById(req.user._id);
-    if (!planner) {
-      return res.status(404).json({ success: false, error: "Planner not found" });
-    }
-
-    if (planner.credits < QUOTE_COST) {
-      return res.status(402).json({
-        success: false,
-        error: `Insufficient credits. You need ${QUOTE_COST} credits to submit a quote. Current balance: ${planner.credits}`,
-        creditsRequired: QUOTE_COST,
-        currentCredits: planner.credits,
-      });
-    }
-
-    planner.deductCredits(QUOTE_COST, "Quote submitted for bid", "quote_submission", {
-      quoteId: quote._id,
-    });
-    await planner.save();
-
-    quote.responses.push({
-      planner: req.user._id,
-      quotedPrice,
-      quotedMessage: quotedMessage || "",
-      status: "pending",
-    });
-
-    if (quote.status === "pending" || quote.status === "viewed") {
-      quote.status = "quoted";
-    }
-
-    await quote.save();
-
-    const io = req.app.get("io");
-    if (io) {
-      io.to(`user_${quote.couple}`).emit("quote_update", {
-        quoteId: quote._id,
-        status: "quoted",
-        plannerName: planner.fullName || planner.company_name || "A Planner",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Quote response submitted",
-      quote,
-      creditsDeducted: QUOTE_COST,
-      remainingCredits: planner.credits,
-    });
-  } catch (err) {
-    if (err.message?.includes("Insufficient credits")) {
-      return res.status(402).json({ success: false, error: err.message });
-    }
-    console.error("Respond to quote error:", err);
-    res.status(500).json({ success: false, error: "Failed to respond" });
-  }
-});
+  },
+);
 
 router.patch("/:id/accept", protect, authorize("couple"), async (req, res) => {
   try {
     const { plannerId } = req.body;
 
     if (!plannerId) {
-      return res.status(400).json({ success: false, error: "Planner ID is required to accept a proposal" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Planner ID is required to accept a proposal",
+        });
     }
 
     const quote = await Quote.findById(req.params.id);
@@ -389,19 +433,32 @@ router.patch("/:id/accept", protect, authorize("couple"), async (req, res) => {
     }
 
     if (quote.status === "accepted") {
-      return res.status(400).json({ success: false, error: "Already accepted a planner for this quote." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Already accepted a planner for this quote.",
+        });
     }
 
-    const responseIndex = quote.responses.findIndex((response) => response.planner.toString() === plannerId);
+    const responseIndex = quote.responses.findIndex(
+      (response) => response.planner.toString() === plannerId,
+    );
     if (responseIndex === -1) {
-      return res.status(404).json({ success: false, error: "Planner did not submit a bid on this quote." });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          error: "Planner did not submit a bid on this quote.",
+        });
     }
 
     quote.hiredPlanner = plannerId;
     quote.status = "accepted";
     quote.responses = quote.responses.map((response) => ({
       ...response.toObject(),
-      status: response.planner.toString() === plannerId ? "accepted" : "rejected",
+      status:
+        response.planner.toString() === plannerId ? "accepted" : "rejected",
     }));
     quote.respondedAt = new Date();
     await quote.save();
@@ -426,7 +483,12 @@ router.patch("/:id/accept", protect, authorize("couple"), async (req, res) => {
       });
     }
 
-    res.json({ success: true, message: "Quote accepted!", quote, roomId: room._id });
+    res.json({
+      success: true,
+      message: "Quote accepted!",
+      quote,
+      roomId: room._id,
+    });
   } catch (err) {
     console.error("Accept quote error:", err);
     res.status(500).json({ success: false, error: "Failed to accept" });
@@ -438,7 +500,12 @@ router.patch("/:id/reject", protect, authorize("couple"), async (req, res) => {
     const { plannerId } = req.body;
 
     if (!plannerId) {
-      return res.status(400).json({ success: false, error: "Planner ID is required to reject a proposal" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Planner ID is required to reject a proposal",
+        });
     }
 
     const quote = await Quote.findById(req.params.id);
@@ -450,9 +517,16 @@ router.patch("/:id/reject", protect, authorize("couple"), async (req, res) => {
       return res.status(403).json({ success: false, error: "Not your quote" });
     }
 
-    const responseIndex = quote.responses.findIndex((response) => response.planner.toString() === plannerId);
+    const responseIndex = quote.responses.findIndex(
+      (response) => response.planner.toString() === plannerId,
+    );
     if (responseIndex === -1) {
-      return res.status(404).json({ success: false, error: "Planner did not submit a bid on this quote." });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          error: "Planner did not submit a bid on this quote.",
+        });
     }
 
     quote.responses[responseIndex].status = "rejected";
