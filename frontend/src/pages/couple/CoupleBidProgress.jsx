@@ -247,8 +247,10 @@ export default function CoupleBidProgress() {
   }, [activeRoomId, loadRoomMessages]);
 
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (!chatLoading) {
+      messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, chatLoading]);
 
   useEffect(() => {
     if (!currentUserId) return undefined;
@@ -464,7 +466,12 @@ export default function CoupleBidProgress() {
   };
 
   const handleSendMessage = async () => {
-    if ((!draft.trim() && !selectedFile) || !activeRoomId) return;
+    if ((!draft.trim() && !selectedFile) || !activeRoomId) {
+      if (!activeRoomId) {
+        setError("No chat room selected. Please open a planner chat first.");
+      }
+      return;
+    }
 
     setSending(true);
     setError("");
@@ -1116,7 +1123,7 @@ export default function CoupleBidProgress() {
                       </div>
                     </div>
 
-                    <div className="flex min-h-[640px] flex-col">
+                    <div className="flex h-[640px] flex-col">
                       {activeRoom ? (
                         <>
                           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e9dfd2] px-6 py-5">
@@ -1207,6 +1214,11 @@ export default function CoupleBidProgress() {
                           </div>
 
                           <div className="border-t border-[#342616] p-5">
+                            {error ? (
+                              <div className="mb-3 rounded-2xl border border-[#d9534f] bg-[#3d2c2a] px-4 py-3 text-sm text-[#ff6b6b]">
+                                {error}
+                              </div>
+                            ) : null}
                             {selectedFile ? (
                               <div className="mb-3 flex items-center justify-between rounded-2xl border border-[#5d4421] bg-[#241b15] px-4 py-3 text-sm text-[#f7e7c7]">
                                 <span className="truncate">
