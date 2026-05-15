@@ -97,6 +97,18 @@ async function persistGeneratedMoodboardImages(
   return uploadedImages;
 }
 
+async function persistSingleGeneratedMoodboardImage(
+  image,
+  functionType = "Wedding Vision",
+) {
+  const [persistedImage] = await persistGeneratedMoodboardImages(
+    image ? [image] : [],
+    functionType,
+  );
+
+  return persistedImage || image;
+}
+
 // ─── Multer ───
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -1240,6 +1252,14 @@ router.post(
         });
       }
 
+      if (!isCloudinaryConfigured) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+        });
+      }
+
       const venueFile = req.files?.venueImage?.[0];
       const decorFile = req.files?.decorImage?.[0];
       const hasImages = !!(venueFile && decorFile);
@@ -1537,6 +1557,14 @@ router.post(
         });
       }
 
+      if (!isCloudinaryConfigured) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+        });
+      }
+
       if (!req.file) {
         return res
           .status(400)
@@ -1624,6 +1652,8 @@ router.post(
         }
         throw apiErr; // let outer handler return an error response
       }
+
+      result = await persistSingleGeneratedMoodboardImage(result, functionType);
 
       // Persist credit deduction (subscription tracking) after successful edit
       try {

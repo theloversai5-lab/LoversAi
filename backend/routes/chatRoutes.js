@@ -18,7 +18,10 @@ router.get("/rooms", protect, async (req, res) => {
       participants: req.user._id,
       isActive: true,
     })
-      .populate("participants", "fullName email avatar role company_name")
+      .populate(
+        "participants",
+        "fullName email avatar role company_name weddingProfile.partnerName1 weddingProfile.partnerName2",
+      )
       .populate("relatedQuote", "status eventDetails")
       .populate("lastMessage.sender", "fullName")
       .sort({ updatedAt: -1 });
@@ -26,7 +29,9 @@ router.get("/rooms", protect, async (req, res) => {
     res.json({ success: true, rooms });
   } catch (error) {
     console.error("Get chat rooms error:", error);
-    res.status(500).json({ success: false, error: "Failed to fetch chat rooms" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch chat rooms" });
   }
 });
 
@@ -40,60 +45,114 @@ router.post("/rooms", protect, async (req, res) => {
     const { participantId, quoteId, bidId } = req.body;
 
     if (!participantId) {
-      return res.status(400).json({ success: false, error: "participantId is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "participantId is required" });
     }
 
     // Don't allow chatting with yourself
     if (participantId === req.user._id.toString()) {
-      return res.status(400).json({ success: false, error: "Cannot create chat room with yourself" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Cannot create chat room with yourself",
+        });
     }
 
+    // Ensure mutual exclusivity between quoteId and bidId
+    if (quoteId && bidId) {
+      return res.status(400).json({
+        success: false,
+        error: "Provide either quoteId or bidId, not both",
+      });
+    }
+
+    // Centralized validator for accepted pair (quote or bid)
+    const requesterId = req.user._id.toString();
+    async function validateAcceptedPair({
+      kind,
+      id,
+      participantId,
+      requesterId,
+    }) {
+      if (!id) return { valid: true };
+
+      if (kind === "quote") {
+        const quote = await Quote.findById(id);
+        if (!quote)
+          return { valid: false, status: 404, error: "Quote not found" };
+
+        const coupleId = quote.couple.toString();
+        const hiredPlannerId = quote.hiredPlanner?.toString();
+        const isAcceptedPair =
+          quote.status === "accepted" &&
+          hiredPlannerId &&
+          ((requesterId === coupleId && participantId === hiredPlannerId) ||
+            (requesterId === hiredPlannerId && participantId === coupleId));
+
+        if (!isAcceptedPair)
+          return {
+            valid: false,
+            status: 403,
+            error:
+              "Chat unlocks only after the couple accepts a planner proposal",
+          };
+
+        return { valid: true };
+      }
+
+      if (kind === "bid") {
+        const bid = await Bid.findById(id);
+        if (!bid) return { valid: false, status: 404, error: "Bid not found" };
+
+        const coupleId = bid.coupleId.toString();
+        const hiredPlannerId = bid.hiredPlannerId?.toString();
+        const isAcceptedPair =
+          bid.status === "accepted" &&
+          hiredPlannerId &&
+          ((requesterId === coupleId && participantId === hiredPlannerId) ||
+            (requesterId === hiredPlannerId && participantId === coupleId));
+
+        if (!isAcceptedPair)
+          return {
+            valid: false,
+            status: 403,
+            error:
+              "Chat unlocks only after the couple accepts a planner proposal",
+          };
+
+        return { valid: true };
+      }
+
+      return { valid: true };
+    }
+
+    // Run validator for quote or bid if provided
     if (quoteId) {
-      const quote = await Quote.findById(quoteId);
-
-      if (!quote) {
-        return res.status(404).json({ success: false, error: "Quote not found" });
-      }
-
-      const requesterId = req.user._id.toString();
-      const coupleId = quote.couple.toString();
-      const hiredPlannerId = quote.hiredPlanner?.toString();
-      const isAcceptedPair =
-        quote.status === "accepted" &&
-        hiredPlannerId &&
-        ((requesterId === coupleId && participantId === hiredPlannerId) ||
-          (requesterId === hiredPlannerId && participantId === coupleId));
-
-      if (!isAcceptedPair) {
-        return res.status(403).json({
-          success: false,
-          error: "Chat unlocks only after the couple accepts a planner proposal",
-        });
-      }
+      const result = await validateAcceptedPair({
+        kind: "quote",
+        id: quoteId,
+        participantId,
+        requesterId,
+      });
+      if (!result.valid)
+        return res
+          .status(result.status || 400)
+          .json({ success: false, error: result.error });
     }
 
     if (bidId) {
-      const bid = await Bid.findById(bidId);
-
-      if (!bid) {
-        return res.status(404).json({ success: false, error: "Bid not found" });
-      }
-
-      const requesterId = req.user._id.toString();
-      const coupleId = bid.coupleId.toString();
-      const hiredPlannerId = bid.hiredPlannerId?.toString();
-      const isAcceptedPair =
-        bid.status === "accepted" &&
-        hiredPlannerId &&
-        ((requesterId === coupleId && participantId === hiredPlannerId) ||
-          (requesterId === hiredPlannerId && participantId === coupleId));
-
-      if (!isAcceptedPair) {
-        return res.status(403).json({
-          success: false,
-          error: "Chat unlocks only after the couple accepts a planner proposal",
-        });
-      }
+      const result = await validateAcceptedPair({
+        kind: "bid",
+        id: bidId,
+        participantId,
+        requesterId,
+      });
+      if (!result.valid)
+        return res
+          .status(result.status || 400)
+          .json({ success: false, error: result.error });
     }
 
     const participantIds = [req.user._id.toString(), participantId].sort();
@@ -116,13 +175,18 @@ router.post("/rooms", protect, async (req, res) => {
 
     // Return populated
     room = await ChatRoom.findById(room._id)
-      .populate("participants", "fullName email avatar role company_name")
+      .populate(
+        "participants",
+        "fullName email avatar role company_name weddingProfile.partnerName1 weddingProfile.partnerName2",
+      )
       .populate("relatedQuote", "status eventDetails");
 
     res.status(201).json({ success: true, room });
   } catch (error) {
     console.error("Create chat room error:", error);
-    res.status(500).json({ success: false, error: "Failed to create chat room" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to create chat room" });
   }
 });
 
@@ -141,14 +205,18 @@ router.get("/rooms/:roomId/messages", protect, async (req, res) => {
     // Verify user is a participant
     const room = await ChatRoom.findById(roomId);
     if (!room) {
-      return res.status(404).json({ success: false, error: "Chat room not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Chat room not found" });
     }
 
     const isParticipant = room.participants.some(
-      (p) => p.toString() === req.user._id.toString()
+      (p) => p.toString() === req.user._id.toString(),
     );
     if (!isParticipant) {
-      return res.status(403).json({ success: false, error: "Not a participant of this chat" });
+      return res
+        .status(403)
+        .json({ success: false, error: "Not a participant of this chat" });
     }
 
     const messages = await Message.find({ chatRoom: roomId })
@@ -166,7 +234,7 @@ router.get("/rooms/:roomId/messages", protect, async (req, res) => {
         sender: { $ne: req.user._id },
         readBy: { $ne: req.user._id },
       },
-      { $addToSet: { readBy: req.user._id } }
+      { $addToSet: { readBy: req.user._id } },
     );
 
     res.json({
@@ -193,34 +261,68 @@ router.post("/rooms/:roomId/messages", protect, async (req, res) => {
     const hasFile = Boolean(fileUrl);
 
     if (!trimmedContent && !hasFile) {
-      return res.status(400).json({ success: false, error: "Message content or attachment is required" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Message content or attachment is required",
+        });
     }
 
     // Verify user is a participant
     const room = await ChatRoom.findById(roomId);
     if (!room) {
-      return res.status(404).json({ success: false, error: "Chat room not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Chat room not found" });
     }
 
     const isParticipant = room.participants.some(
-      (p) => p.toString() === req.user._id.toString()
+      (p) => p.toString() === req.user._id.toString(),
     );
     if (!isParticipant) {
-      return res.status(403).json({ success: false, error: "Not a participant of this chat" });
+      return res
+        .status(403)
+        .json({ success: false, error: "Not a participant of this chat" });
     }
+
+    // Validate and normalize attachment data before persisting
+    const allowedMimeTypes = ["image/png", "image/jpeg", "application/pdf"];
+    let safeFileUrl;
+    if (fileUrl) {
+      try {
+        const parsed = new URL(fileUrl);
+        // Allow only https URLs from Cloudinary host if configured
+        if (
+          parsed.protocol === "https:" &&
+          process.env.CLOUDINARY_NAME &&
+          parsed.hostname.includes(process.env.CLOUDINARY_NAME)
+        ) {
+          safeFileUrl = fileUrl;
+        }
+      } catch (e) {
+        // Not an absolute URL — allow relative paths that begin with '/'
+        if (fileUrl.startsWith("/")) safeFileUrl = fileUrl;
+      }
+    }
+
+    const safeMimeType = allowedMimeTypes.includes(mimeType)
+      ? mimeType
+      : undefined;
 
     const message = await Message.create({
       chatRoom: roomId,
       sender: req.user._id,
       content: trimmedContent,
       type,
-      fileUrl: fileUrl || undefined,
+      fileUrl: safeFileUrl || undefined,
       fileName: fileName || undefined,
-      mimeType: mimeType || undefined,
+      mimeType: safeMimeType || undefined,
       readBy: [req.user._id],
     });
 
-    const roomPreview = trimmedContent || fileName || (type === "image" ? "Photo" : "Attachment");
+    const roomPreview =
+      trimmedContent || fileName || (type === "image" ? "Photo" : "Attachment");
     room.lastMessage = {
       content: roomPreview.substring(0, 100),
       sender: req.user._id,
@@ -231,7 +333,7 @@ router.post("/rooms/:roomId/messages", protect, async (req, res) => {
     // Populate sender info
     const populatedMessage = await Message.findById(message._id).populate(
       "sender",
-      "fullName avatar role"
+      "fullName avatar role",
     );
 
     // Emit via Socket.io if available
@@ -255,6 +357,7 @@ router.post("/rooms/:roomId/messages", protect, async (req, res) => {
     res.status(201).json({ success: true, message: populatedMessage });
   } catch (error) {
     console.error("Send message error:", error);
+    // Never leak internal error messages to clients
     res.status(500).json({ success: false, error: "Failed to send message" });
   }
 });
@@ -281,7 +384,9 @@ router.get("/unread", protect, async (req, res) => {
     res.json({ success: true, unreadCount });
   } catch (error) {
     console.error("Get unread count error:", error);
-    res.status(500).json({ success: false, error: "Failed to get unread count" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to get unread count" });
   }
 });
 

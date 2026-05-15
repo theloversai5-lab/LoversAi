@@ -224,6 +224,14 @@ router.post(
           .json({ success: false, error: "Image required" });
       }
 
+      if (!isCloudinaryConfigured) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Cloudinary is not configured. Generated videos must be stored in Cloudinary.",
+        });
+      }
+
       const { style = "slow-pan" } = req.body;
 
       // Validate style
@@ -326,11 +334,10 @@ router.post(
         });
       }
     } catch (err) {
-      console.error("❌ Video generation error:", err.message);
+      console.error("❌ Video generation error:", err);
       res.status(500).json({
         success: false,
         error: "Video generation failed",
-        details: err.message,
       });
     }
   },

@@ -40,15 +40,13 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-messageSchema.pre("validate", function (next) {
+messageSchema.pre("validate", function () {
   const hasContent = Boolean(this.content && this.content.trim());
   const hasFile = Boolean(this.fileUrl);
 
   if (!hasContent && !hasFile) {
     this.invalidate("content", "Message content or attachment is required");
   }
-
-  next();
 });
 
 messageSchema.index({ chatRoom: 1, createdAt: -1 });

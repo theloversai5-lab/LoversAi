@@ -13,6 +13,15 @@ import { useAuth } from "../../context/AuthContext";
 const apiBaseUrl =
   process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
+const normalizeId = (value) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value._id || value.id || String(value);
+};
+
+const isOwnMessage = (message, currentUserId) =>
+  normalizeId(message?.sender) === normalizeId(currentUserId);
+
 const stepsMap = [
   {
     label: "Bid Placed",
@@ -255,7 +264,7 @@ export default function CoupleBidProgress() {
   useEffect(() => {
     if (!currentUserId) return undefined;
 
-    const socket = io(apiBaseUrl, { transports: ["websocket", "polling"] });
+    const socket = io(apiBaseUrl, { transports: ["polling", "websocket"] });
     socketRef.current = socket;
     socket.emit("join", currentUserId);
 
@@ -311,7 +320,7 @@ export default function CoupleBidProgress() {
             // fallback composite key
             return (
               m.createdAt === payload.message.createdAt &&
-              m.sender?._id === payload.message.sender?._id &&
+              normalizeId(m.sender) === normalizeId(payload.message.sender) &&
               m.content === payload.message.content
             );
           });
@@ -520,7 +529,8 @@ export default function CoupleBidProgress() {
         setSelectedFile(null);
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to send message.");
+      console.error("Send message error:", err.response?.data || err.message || err);
+      setError(err.response?.data?.error || err.message || "Failed to send message.");
     } finally {
       setSending(false);
     }
@@ -1077,7 +1087,8 @@ export default function CoupleBidProgress() {
                           quoteRooms.map((room) => {
                             const other = room.participants?.find(
                               (participant) =>
-                                participant._id !== currentUserId,
+                                normalizeId(participant) !==
+                                normalizeId(currentUserId),
                             );
 
                             return (
@@ -1132,7 +1143,8 @@ export default function CoupleBidProgress() {
                                 {plannerLabel(
                                   activeRoom.participants?.find(
                                     (participant) =>
-                                      participant._id !== currentUserId,
+                                      normalizeId(participant) !==
+                                      normalizeId(currentUserId),
                                   ),
                                 )}
                               </p>
@@ -1149,7 +1161,8 @@ export default function CoupleBidProgress() {
                                   `/planner/profile/${
                                     activeRoom.participants?.find(
                                       (participant) =>
-                                        participant._id !== currentUserId,
+                                        normalizeId(participant) !==
+                                        normalizeId(currentUserId),
                                     )?._id
                                   }`,
                                 )
@@ -1168,8 +1181,10 @@ export default function CoupleBidProgress() {
                             ) : messages.length > 0 ? (
                               <div className="space-y-4">
                                 {messages.map((message) => {
-                                  const isMine =
-                                    message.sender?._id === currentUserId;
+                                  const isMine = isOwnMessage(
+                                    message,
+                                    currentUserId,
+                                  );
                                   return (
                                     <div
                                       key={message._id}

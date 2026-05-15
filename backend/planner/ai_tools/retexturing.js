@@ -4,6 +4,10 @@ import fetch from "node-fetch";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
+import {
+  isCloudinaryConfigured,
+  uploadRemoteToCloudinary,
+} from "../../utils/cloudinary.js";
 
 const router = express.Router();
 
@@ -278,6 +282,36 @@ async function pollForResult(taskId, customPollingUrl = null) {
   throw new Error("Generation timeout - please try again");
 }
 
+async function persistGeneratedImage(imageUrl, folder = "retexturing") {
+  if (!imageUrl) {
+    throw new Error("No generated image URL was returned");
+  }
+
+  if (!isCloudinaryConfigured) {
+    throw new Error(
+      "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+    );
+  }
+
+  const safeFolder =
+    String(folder || "retexturing")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "retexturing";
+
+  const uploadResult = await uploadRemoteToCloudinary(imageUrl, {
+    folder: `loversai/generated-images/${safeFolder}`,
+    resource_type: "image",
+    public_id: `${Date.now()}-${safeFolder}`,
+  });
+
+  return {
+    url: uploadResult?.secure_url || imageUrl,
+    cloudinaryPublicId: uploadResult?.public_id || null,
+  };
+}
+
 // AI Tools Routes
 
 // Health check endpoint
@@ -394,6 +428,14 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
       });
     }
 
+    if (!isCloudinaryConfigured) {
+      return res.status(503).json({
+        success: false,
+        error:
+          "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+      });
+    }
+
     console.log("🎨 AI Generation Request received");
 
     // Log request info for debugging
@@ -496,11 +538,19 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
       );
 
       if (result && result.url) {
+        const persistedImage = await persistGeneratedImage(
+          result.url,
+          theme || "custom",
+        );
+        result.url = persistedImage.url;
+        result.cloudinaryPublicId = persistedImage.cloudinaryPublicId;
+
         console.log(`✅ Generation successful`);
 
         const responseData = {
           success: true,
           url: result.url,
+          cloudinaryPublicId: result.cloudinaryPublicId,
           seed: result.seed,
           generationId: result.generationId,
           promptUsed: finalPrompt,

@@ -4,6 +4,10 @@ import fetch from "node-fetch";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
+import {
+  isCloudinaryConfigured,
+  uploadRemoteToCloudinary,
+} from "../../utils/cloudinary.js";
 
 const router = express.Router();
 
@@ -245,6 +249,36 @@ async function pollForResult(taskId, pollingUrl) {
   throw new Error("FLUX generation timeout");
 }
 
+async function persistGeneratedAngleImage(imageUrl, angle) {
+  if (!imageUrl) {
+    throw new Error("No generated image URL was returned");
+  }
+
+  if (!isCloudinaryConfigured) {
+    throw new Error(
+      "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+    );
+  }
+
+  const safeAngle =
+    String(angle || "angle")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "angle";
+
+  const uploadResult = await uploadRemoteToCloudinary(imageUrl, {
+    folder: `loversai/generated-angle-images/${safeAngle}`,
+    resource_type: "image",
+    public_id: `${Date.now()}-${safeAngle}`,
+  });
+
+  return {
+    url: uploadResult?.secure_url || imageUrl,
+    cloudinaryPublicId: uploadResult?.public_id || null,
+  };
+}
+
 /* -------------------- ANGLE CHANGE ROUTE -------------------- */
 router.post(
   "/change-angle",
@@ -256,6 +290,14 @@ router.post(
         return res
           .status(400)
           .json({ success: false, error: "Image required" });
+
+      if (!isCloudinaryConfigured) {
+        return res.status(503).json({
+          success: false,
+          error:
+            "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+        });
+      }
 
       const { angle = "front", imageCount = 1 } = req.body;
 
@@ -300,6 +342,9 @@ router.post(
         "flux-kontext-pro",
         angleConfig.negativePrompt,
       );
+      const persistedImage = await persistGeneratedAngleImage(result.url, angle);
+      result.url = persistedImage.url;
+      result.cloudinaryPublicId = persistedImage.cloudinaryPublicId;
 
       // Deduct credits after successful generation
       try {
@@ -326,6 +371,7 @@ router.post(
           angleName: angleConfig.name,
           angleDescription: angleConfig.description,
           url: result.url,
+          cloudinaryPublicId: result.cloudinaryPublicId,
           seed: result.seed,
           promptUsed: angleConfig.prompt.substring(0, 200) + "...",
           timestamp: new Date().toISOString(),
@@ -344,6 +390,7 @@ router.post(
           angleName: angleConfig.name,
           angleDescription: angleConfig.description,
           url: result.url,
+          cloudinaryPublicId: result.cloudinaryPublicId,
           seed: result.seed,
           promptUsed: angleConfig.prompt.substring(0, 200) + "...",
           timestamp: new Date().toISOString(),
@@ -352,11 +399,10 @@ router.post(
         });
       }
     } catch (err) {
-      console.error("❌ Angle change error:", err.message);
+      console.error("❌ Angle change error:", err);
       res.status(500).json({
         success: false,
         error: "Angle transformation failed",
-        details: err.message,
         angle: req.body.angle || "unknown",
       });
     }

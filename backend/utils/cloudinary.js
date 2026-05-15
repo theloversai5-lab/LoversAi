@@ -27,6 +27,14 @@ export const isCloudinaryConfigured = Boolean(
   process.env.CLOUDINARY_API_SECRET,
 );
 
+export const requireCloudinaryConfigured = () => {
+  if (!isCloudinaryConfigured) {
+    throw new Error(
+      "Cloudinary is not configured. Set CLOUDINARY_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.",
+    );
+  }
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -238,12 +246,9 @@ export const uploadToCloudinary = async (fileBuffer, options = {}) => {
 
 export const uploadRemoteToCloudinary = async (sourceUrl, options = {}) => {
   if (!isCloudinaryConfigured) {
-    return {
-      secure_url: sourceUrl,
-      public_id: null,
-      resource_type: options.resource_type || "image",
-      bytes: null,
-    };
+    throw new Error(
+      "Cloudinary is not configured. Remote assets cannot be persisted.",
+    );
   }
 
   const uploadOptions = {

@@ -75,7 +75,7 @@ export default function PlannerBids() {
       bid.couple.toLowerCase().includes(search.toLowerCase()) ||
       bid.city.toLowerCase().includes(search.toLowerCase());
     const matchStatus =
-      filterStatus === "All" || bid.status === filterStatus.toLowerCase();
+      filterStatus === "All" || (String(bid.status || "").toLowerCase() === filterStatus.toLowerCase());
     return matchSearch && matchStatus;
   });
 

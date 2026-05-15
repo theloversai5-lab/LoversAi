@@ -5,6 +5,38 @@ import io from "socket.io-client";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
+const normalizeId = (value) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value._id || value.id || String(value);
+};
+
+const isOwnMessage = (message, currentUserId) =>
+  normalizeId(message?.sender) === normalizeId(currentUserId);
+
+const getParticipantDisplayName = (participant) => {
+  if (!participant) return "Unknown";
+
+  const emailName = participant.email?.split("@")?.[0]?.trim();
+
+  if (participant.role === "couple") {
+    return (
+      participant.weddingProfile?.partnerName2?.trim() ||
+      participant.weddingProfile?.partnerName1?.trim() ||
+      participant.fullName?.trim() ||
+      emailName ||
+      "Couple"
+    );
+  }
+
+  return (
+    participant.company_name?.trim() ||
+    participant.fullName?.trim() ||
+    emailName ||
+    "Unknown"
+  );
+};
+
 const isImageMessage = (message) =>
   message?.type === "image" ||
   message?.mimeType?.startsWith("image/") ||
@@ -54,6 +86,7 @@ export default function PlannerMessages() {
   const [loading, setLoading] = useState(true);
   const [msgLoading, setMsgLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState(null);
   const socketRef = useRef(null);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -147,6 +180,10 @@ export default function PlannerMessages() {
           ? await uploadAPI.uploadImage(selectedFile, "chat-files")
           : await uploadAPI.uploadFile(selectedFile, "chat-files");
 
+        if (!uploadResult || !uploadResult.url) {
+          throw new Error("File upload failed");
+        }
+
         payload = {
           ...payload,
           type: isImage ? "image" : "file",
@@ -165,9 +202,13 @@ export default function PlannerMessages() {
         );
         setNewMsg("");
         setSelectedFile(null);
+        setError(null);
+      } else {
+        throw new Error(res.error || "Failed to send message");
       }
     } catch (e) {
       console.error("Send message error:", e);
+      setError(e.message || "Failed to send message");
     } finally {
       setSending(false);
     }
@@ -176,8 +217,13 @@ export default function PlannerMessages() {
   const getOtherParticipant = (room) => {
     if (!room?.participants || !currentUserId)
       return { fullName: "Unknown", role: "" };
+
+    const normalizedCurrentUserId = normalizeId(currentUserId);
+
     return (
-      room.participants.find((participant) => participant._id !== currentUserId) ||
+      room.participants.find(
+        (participant) => normalizeId(participant) !== normalizedCurrentUserId,
+      ) ||
       room.participants[0] || { fullName: "Unknown", role: "" }
     );
   };
@@ -196,7 +242,7 @@ export default function PlannerMessages() {
     const query = search.trim().toLowerCase();
     if (!query) return true;
     return (
-      other.fullName?.toLowerCase().includes(query) ||
+      getParticipantDisplayName(other).toLowerCase().includes(query) ||
       room.lastMessage?.content?.toLowerCase().includes(query)
     );
   });
@@ -239,12 +285,12 @@ export default function PlannerMessages() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-loverai-gold/30 to-amber-800/30 flex items-center justify-center text-loverai-gold font-heading text-sm shrink-0">
-                        {other.fullName?.charAt(0) || "?"}
+                        {getParticipantDisplayName(other)?.charAt(0) || "?"}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-medium text-white truncate">
-                            {other.fullName}
+                            {getParticipantDisplayName(other)}
                           </span>
                           <span className="text-[10px] text-white/20 shrink-0">
                             {formatTime(room.lastMessage?.timestamp || room.updatedAt)}
@@ -290,11 +336,11 @@ export default function PlannerMessages() {
                   </svg>
                 </button>
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-loverai-gold/30 to-amber-800/30 flex items-center justify-center text-loverai-gold font-heading text-sm">
-                  {getOtherParticipant(activeRoom).fullName?.charAt(0) || "?"}
+                  {getParticipantDisplayName(getOtherParticipant(activeRoom))?.charAt(0) || "?"}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">
-                    {getOtherParticipant(activeRoom).fullName}
+                    {getParticipantDisplayName(getOtherParticipant(activeRoom))}
                   </p>
                   <p className="text-[10px] text-white/25 capitalize">
                     {getOtherParticipant(activeRoom).role}
@@ -314,9 +360,7 @@ export default function PlannerMessages() {
                 </div>
               ) : (
                 messages.map((message, index) => {
-                  const isMine =
-                    message.sender?._id === currentUserId ||
-                    message.sender === currentUserId;
+                  const isMine = isOwnMessage(message, currentUserId);
 
                   return (
                     <div
@@ -361,6 +405,9 @@ export default function PlannerMessages() {
                     Remove
                   </button>
                 </div>
+              ) : null}
+              {error ? (
+                <div className="mb-3 text-sm text-red-400">{error}</div>
               ) : null}
 
               <div className="flex items-center gap-2">

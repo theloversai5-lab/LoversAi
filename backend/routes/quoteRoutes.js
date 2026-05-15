@@ -137,13 +137,19 @@ router.post("/", protect, authorize("couple"), async (req, res) => {
       },
     });
 
-    const demoPlanners = await ensureDemoPlanners();
-    if (demoPlanners.length > 0) {
-      quote.responses = demoPlanners.map((planner, index) =>
-        buildDemoResponse(planner._id, index, quote.eventDetails),
-      );
-      quote.status = "quoted";
-      await quote.save();
+    // Seed demo responses only when explicitly enabled via environment flag
+    if (
+      process.env.ENABLE_DEMO_RESPONSES === "true" ||
+      process.env.NODE_ENV === "development"
+    ) {
+      const demoPlanners = await ensureDemoPlanners();
+      if (demoPlanners.length > 0) {
+        quote.responses = demoPlanners.map((planner, index) =>
+          buildDemoResponse(planner._id, index, quote.eventDetails),
+        );
+        quote.status = "quoted";
+        await quote.save();
+      }
     }
 
     const io = req.app.get("io");

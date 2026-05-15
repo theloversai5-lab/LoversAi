@@ -1,9 +1,25 @@
 // routes/uploadRoutes.js — Secure file upload to Cloudinary
 import express from "express";
-import { isCloudinaryConfigured, upload, uploadMedia, uploadChat } from "../utils/cloudinary.js";
+import {
+  isCloudinaryConfigured,
+  upload,
+  uploadMedia,
+  uploadChat,
+} from "../utils/cloudinary.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
+
+const ensureCloudinaryConfigured = (_req, res, next) => {
+  if (!isCloudinaryConfigured) {
+    return res.status(503).json({
+      success: false,
+      error:
+        "Cloudinary is not configured. Uploads must be stored in Cloudinary.",
+    });
+  }
+  next();
+};
 
 const buildFileUrl = (req, file) => {
   if (isCloudinaryConfigured) {
@@ -23,7 +39,7 @@ router.post("/image", protect, (req, res, next) => {
   // Set folder based on query param
   req.uploadFolder = req.query.folder || "misc";
   next();
-}, upload.single("image"), (req, res) => {
+}, ensureCloudinaryConfigured, upload.single("image"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: "No image file provided" });
@@ -34,7 +50,7 @@ router.post("/image", protect, (req, res, next) => {
     res.json({
       success: true,
       url, // Cloudinary URL or local uploads URL
-      publicId: req.file.filename,
+      publicId: req.file.filename || req.file.public_id || null,
     });
   } catch (error) {
     console.error("Upload error:", error);
@@ -50,7 +66,7 @@ router.post("/image", protect, (req, res, next) => {
 router.post("/images", protect, (req, res, next) => {
   req.uploadFolder = req.query.folder || "misc";
   next();
-}, upload.array("images", 10), (req, res) => {
+}, ensureCloudinaryConfigured, upload.array("images", 10), (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, error: "No image files provided" });
@@ -58,7 +74,7 @@ router.post("/images", protect, (req, res, next) => {
 
     const files = req.files.map((file) => ({
       url: buildFileUrl(req, file),
-      publicId: file.filename,
+      publicId: file.filename || file.public_id || null,
     }));
 
     res.json({ success: true, files });
@@ -76,7 +92,7 @@ router.post("/images", protect, (req, res, next) => {
 router.post("/video", protect, (req, res, next) => {
   req.uploadFolder = req.query.folder || "videos";
   next();
-}, uploadMedia.single("video"), (req, res) => {
+}, ensureCloudinaryConfigured, uploadMedia.single("video"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: "No video file provided" });
@@ -85,7 +101,7 @@ router.post("/video", protect, (req, res, next) => {
     res.json({
       success: true,
       url: buildFileUrl(req, req.file),
-      publicId: req.file.filename,
+      publicId: req.file.filename || req.file.public_id || null,
     });
   } catch (error) {
     console.error("Video upload error:", error);
@@ -96,7 +112,7 @@ router.post("/video", protect, (req, res, next) => {
 router.post("/file", protect, (req, res, next) => {
   req.uploadFolder = req.query.folder || "chat-files";
   next();
-}, uploadChat.single("file"), (req, res) => {
+}, ensureCloudinaryConfigured, uploadChat.single("file"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: "No file provided" });
@@ -105,7 +121,7 @@ router.post("/file", protect, (req, res, next) => {
     res.json({
       success: true,
       url: buildFileUrl(req, req.file),
-      publicId: req.file.filename,
+      publicId: req.file.filename || req.file.public_id || null,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
     });
@@ -122,7 +138,7 @@ router.post("/file", protect, (req, res, next) => {
 router.post("/videos", protect, (req, res, next) => {
   req.uploadFolder = req.query.folder || "videos";
   next();
-}, uploadMedia.array("videos", 10), (req, res) => {
+}, ensureCloudinaryConfigured, uploadMedia.array("videos", 10), (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, error: "No video files provided" });
@@ -132,7 +148,7 @@ router.post("/videos", protect, (req, res, next) => {
       success: true,
       files: req.files.map((file) => ({
         url: buildFileUrl(req, file),
-        publicId: file.filename,
+        publicId: file.filename || file.public_id || null,
       })),
     });
   } catch (error) {
