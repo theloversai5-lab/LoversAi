@@ -60,6 +60,15 @@ const sidebarLinks = [
     ),
   },
   {
+    to: "/planner-ai-tools",
+    label: "AI Tools",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3l1.9 3.85L18 8.75l-3 2.92.71 4.13L12 13.77 8.29 15.8 9 11.67 6 8.75l4.1-.9L12 3z" />
+      </svg>
+    ),
+  },
+  {
     to: "/planner/profile",
     label: "Profile",
     icon: (
@@ -205,6 +214,17 @@ export default function PlannerLayout() {
                       View Profile
                     </Link>
                     
+                    <Link 
+                      to="/planner-ai-tools" 
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-loverai-gold hover:bg-white/5 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3l1.9 3.85L18 8.75l-3 2.92.71 4.13L12 13.77 8.29 15.8 9 11.67 6 8.75l4.1-.9L12 3z" />
+                      </svg>
+                      AI Tools
+                    </Link>
+
                     <Link 
                       to="/planner/dashboard" 
                       onClick={() => setProfileDropdownOpen(false)}

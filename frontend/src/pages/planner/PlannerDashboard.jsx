@@ -99,6 +99,30 @@ export default function PlannerDashboard() {
           icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
       </div>
 
+      <Link
+        to="/planner-ai-tools"
+        className="glass-card rounded-2xl p-5 lg:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 hover-lift hover-glow animate-fadeInUp"
+        style={{ animationDelay: '0.28s' }}
+      >
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-amber-400/15 text-amber-300 shrink-0">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3l1.9 3.85L18 8.75l-3 2.92.71 4.13L12 13.77 8.29 15.8 9 11.67 6 8.75l4.1-.9L12 3z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-lg font-heading text-white">Open AI Tools</p>
+            <p className="text-sm text-white/40 mt-1">
+              Jump into Pitch with AI, retexturing, and planner visuals directly from your dashboard.
+            </p>
+          </div>
+        </div>
+        <div className="inline-flex items-center gap-2 text-sm font-medium text-loverai-gold">
+          Launch Workspace
+          <span aria-hidden="true">→</span>
+        </div>
+      </Link>
+
       {/* Recent Bids */}
       <div className="glass-card rounded-2xl overflow-hidden animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
         <div className="flex items-center justify-between p-5 border-b border-white/5">
@@ -134,7 +158,7 @@ export default function PlannerDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
         <Link to="/planner/bids" className="glass-card rounded-xl p-4 hover-lift hover-glow text-center group">
           <svg className="w-8 h-8 text-emerald-400 mx-auto mb-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <p className="text-sm font-medium text-white">Review New Bids</p>
@@ -149,6 +173,11 @@ export default function PlannerDashboard() {
           <svg className="w-8 h-8 text-loverai-gold mx-auto mb-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
           <p className="text-sm font-medium text-white">Manage Deals</p>
           <p className="text-[10px] text-white/30 mt-1">Track active wedding projects</p>
+        </Link>
+        <Link to="/planner-ai-tools" className="glass-card rounded-xl p-4 hover-lift hover-glow text-center group">
+          <svg className="w-8 h-8 text-amber-300 mx-auto mb-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3l1.9 3.85L18 8.75l-3 2.92.71 4.13L12 13.77 8.29 15.8 9 11.67 6 8.75l4.1-.9L12 3z" /></svg>
+          <p className="text-sm font-medium text-white">Open AI Tools</p>
+          <p className="text-[10px] text-white/30 mt-1">Create smarter planner pitches and visuals</p>
         </Link>
       </div>
     </div>

@@ -53,10 +53,12 @@ const PlannerPage = () => {
       <div className="relative w-full overflow-hidden min-h-screen">
         <div
           className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: `url("./images/planner.png")`, filter: "brightness(0.6)" }}
+          style={{
+            backgroundImage: 'url("/images/planner.png")',
+            filter: "brightness(1.34) saturate(1.02) contrast(1.02)",
+          }}
         />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-loverai-deep/20 via-transparent to-loverai-deep/60"></div>
-        <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-loverai-gold/[0.03] rounded-full blur-[150px] z-[1]"></div>
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/[0.01] via-transparent to-black/[0.04]"></div>
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
           <img src="/images/LogoLoversai.png" alt="LoversAI" className="h-16 w-auto mb-6 animate-float" />
@@ -66,21 +68,6 @@ const PlannerPage = () => {
           <p className="text-white/50 text-lg max-w-lg text-center mb-10 animate-fadeInUp stagger-2">
             Powerful tools to grow your wedding planning business
           </p>
-          
-          <div className="flex gap-4 animate-fadeInUp stagger-3">
-            <button
-              onClick={() => handleNavigate('/planner/dashboard')}
-              className="loverai-btn-primary text-[15px]"
-            >
-              Open Dashboard
-            </button>
-            <button
-              onClick={() => handleNavigate('/planner-ai-tools')}
-              className="loverai-btn-outline text-[15px]"
-            >
-              AI Tools
-            </button>
-          </div>
         </div>
       </div>
 

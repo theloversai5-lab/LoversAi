@@ -9,8 +9,13 @@ const sharedWeddingBackground = {
 export default function Signup() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const initialRole = queryParams.get("role") || "Couple";
+  const requestedRole = queryParams.get("role");
+  const normalizedRequestedRole =
+    requestedRole?.toLowerCase() === "planner" ? "Planner" : "Couple";
+  const initialRole = requestedRole ? normalizedRequestedRole : "Couple";
   const mismatch = queryParams.get("mismatch") === "true";
+  const lockedRole = Boolean(requestedRole);
+  const isPlannerExperience = initialRole === "Planner";
 
   const [role, setRole] = useState(initialRole);
   const [name, setName] = useState("");
@@ -48,7 +53,7 @@ export default function Signup() {
       setError("Please fill in all required fields.");
       return;
     }
-    if ((role === "Planner" || role === "Vendor") && !companyName.trim()) {
+    if (role === "Planner" && !companyName.trim()) {
       setError("Please enter your company name.");
       return;
     }
@@ -65,18 +70,13 @@ export default function Signup() {
         fullName: name.trim(),
         role: role.toLowerCase(),
         partnerName: role === "Couple" ? partnerName.trim() : undefined,
-        companyName:
-          role === "Planner" || role === "Vendor"
-            ? companyName.trim()
-            : undefined,
+        companyName: role === "Planner" ? companyName.trim() : undefined,
       });
 
       if (data.success) {
         const lowerRole = role.toLowerCase();
         if (lowerRole === "planner") {
-          navigate("/planner/dashboard");
-        } else if (lowerRole === "vendor") {
-          navigate("/vendor/onboarding");
+          navigate("/planner");
         } else if (lowerRole === "couple") {
           localStorage.setItem(
             "lovers-ai-couple-profile",
@@ -138,27 +138,154 @@ export default function Signup() {
       ),
       desc: "Manage wedding projects",
     },
-    Vendor: {
-      icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-          />
-        </svg>
-      ),
-      desc: "Showcase your services",
-    },
   };
 
+  const roleOptions = lockedRole ? [initialRole] : ["Couple", "Planner"];
+
+  const plannerSignupContent = (
+    <>
+      {mismatch && (
+        <div className="mb-4 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          Please create or log into a planner account to continue.
+        </div>
+      )}
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          {error}
+        </div>
+      )}
+
+      {isLoggedIn ? (
+        <div className="rounded-lg border border-blue-400/20 bg-blue-500/10 p-4 text-sm text-blue-100">
+          <p className="mb-3">
+            You are already logged in. To create a planner account with a different profile, logout first.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              navigate("/", { replace: true });
+            }}
+            className="planner-auth-submit"
+          >
+            Logout and Return to Home
+          </button>
+        </div>
+      ) : (
+        <>
+          <form onSubmit={handleSignup} className="planner-auth-form">
+            <label>Full Name</label>
+            <div className="planner-auth-input-wrap">
+              <input
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="planner-auth-input"
+              />
+            </div>
+
+            <label>Company Name</label>
+            <div className="planner-auth-input-wrap">
+              <input
+                type="text"
+                placeholder="Your planner company"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="planner-auth-input"
+              />
+            </div>
+
+            <label>Email</label>
+            <div className="planner-auth-input-wrap">
+              <input
+                type="email"
+                placeholder="email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="planner-auth-input"
+              />
+            </div>
+
+            <label>Password</label>
+            <div className="planner-auth-input-wrap">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="planner-auth-input"
+              />
+              <button
+                type="button"
+                onClick={togglePassword}
+                className="planner-auth-inline-icon"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3l18 18M10.584 10.587a2 2 0 102.829 2.826M9.88 5.09A10.97 10.97 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.916 10.916 0 01-2.287 3.95M6.228 6.228A10.94 10.94 0 002.458 12C3.732 16.057 7.523 19 12 19a10.94 10.94 0 005.772-1.772" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            <button type="submit" disabled={loading} className="planner-auth-submit">
+              {loading ? "Creating..." : "Sign up"}
+            </button>
+          </form>
+
+          <div className="planner-auth-divider">
+            <span>or</span>
+          </div>
+
+          <button className="planner-auth-google" type="button">
+            Sign up with Google
+          </button>
+
+          <div className="planner-auth-switch">
+            Already have an account? <Link to="/login?role=planner">Sign in</Link>
+          </div>
+        </>
+      )}
+    </>
+  );
+
   return (
+    isPlannerExperience ? (
+      <div className="planner-auth-shell">
+        <div className="planner-auth-frame animate-fadeInUp">
+          <div className="planner-auth-nav">
+            <div className="planner-auth-nav-links">
+              <button type="button" onClick={() => navigate("/")} className="planner-auth-nav-link">Home</button>
+              <button type="button" onClick={() => navigate("/couples")} className="planner-auth-nav-link">Couples</button>
+              <button type="button" onClick={() => navigate("/planner")} className="planner-auth-nav-link">Planner</button>
+              <button type="button" onClick={() => navigate("/pricing")} className="planner-auth-nav-link">Features</button>
+            </div>
+            <button type="button" onClick={() => navigate("/login?role=planner")} className="planner-auth-nav-cta">
+              Sign In
+            </button>
+          </div>
+
+          <div className="planner-auth-grid">
+            <div className="planner-auth-copy">
+              <h1>Sign up</h1>
+              <p>Create your planner account to manage projects and access your workspace.</p>
+              {plannerSignupContent}
+            </div>
+
+            <div className="planner-auth-visual">
+              <img src="/images/bridal.png" alt="Planner signup visual" />
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : (
     <div className="loverai-wedding-shell min-h-screen flex items-center justify-center">
       <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
       <div className="loverai-wedding-overlay" />
@@ -228,8 +355,8 @@ export default function Signup() {
           ) : (
             <>
               {/* Role Selector */}
-              <div className="flex gap-3 mb-8">
-                {["Couple", "Planner", "Vendor"].map((r) => (
+              <div className={`grid gap-3 mb-8 ${roleOptions.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+                {roleOptions.map((r) => (
                   <button
                     key={r}
                     type="button"
@@ -325,7 +452,7 @@ export default function Signup() {
                   </div>
                 )}
 
-                {(role === "Planner" || role === "Vendor") && (
+                {role === "Planner" && (
                   <div className="animate-fadeIn">
                     <label className="block text-white/60 text-[13px] font-medium mb-1.5">
                       Company Name
@@ -466,5 +593,6 @@ export default function Signup() {
         </div>
       </div>
     </div>
+    )
   );
 }

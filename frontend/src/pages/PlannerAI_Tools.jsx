@@ -128,16 +128,102 @@ const PitchAIPage = ({ navigateTo }) => {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative w-full h-screen flex items-center justify-center text-white overflow-hidden">
+      <div className="relative w-full min-h-screen flex items-center justify-center text-white overflow-hidden px-4 py-24">
         <div
           className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: `url("./images/bridal.png")` }}
+          style={{ backgroundImage: 'url("/images/signup.png")' }}
         ></div>
-        <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,6,4,0.08),rgba(10,6,4,0.28))] z-10"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,239,222,0.12),transparent_36%)] z-10"></div>
+
+        <div className="relative z-20 w-full max-w-7xl">
+          <div className="glass-card-strong loverai-auth-panel rounded-[34px] overflow-hidden">
+            <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="p-8 md:p-10 lg:p-14 border-b lg:border-b-0 lg:border-r border-white/10">
+                <p className="text-[12px] uppercase tracking-[0.34em] text-white/55 mb-5">
+                  Planner AI Workspace
+                </p>
+                <h1 className="font-heading text-[46px] leading-[0.94] md:text-[64px] text-[#fff6ea]">
+                  Pitch with AI
+                </h1>
+                <p className="mt-5 max-w-xl text-base md:text-lg leading-8 text-white/65">
+                  Create polished wedding concepts, retexture venue ideas, explore alternate image angles, and build premium visual pitches for couples.
+                </p>
+
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <button
+                    onClick={() =>
+                      handleToolClick("retexturing", () => setShowRetexturing(true))
+                    }
+                    className="loverai-btn-primary text-[15px]"
+                  >
+                    Open Retexturing
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleToolClick("angle-changer", () => setShowAngleChanger(true))
+                    }
+                    className="loverai-btn-outline text-[15px]"
+                  >
+                    Explore Angles
+                  </button>
+                </div>
+
+                <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {[
+                    { label: "Image Retexturing", value: "Live Tool" },
+                    { label: "Angle Change", value: "Planner Ready" },
+                    { label: "Image to Video", value: "Coming Soon" },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-4 backdrop-blur-md"
+                    >
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-white/45">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-lg font-semibold text-[#fff3e1]">
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6 md:p-8 lg:p-10">
+                <div className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.06)] p-4 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.2)]">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2 rounded-[24px] overflow-hidden h-[220px] md:h-[260px]">
+                      <img
+                        src="/images/pitch with ai.gif"
+                        alt="Planner AI board preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-[22px] overflow-hidden h-[180px]">
+                      <img
+                        src="/images/golden.png"
+                        alt="Retexturing preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="rounded-[22px] overflow-hidden h-[180px]">
+                      <img
+                        src="/images/Picture1.png"
+                        alt="Angle change preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Image Retexturing Section */}
-      <div id="ai-tools-section" className="bg-black py-20 px-4">
+      <div id="ai-tools-section" className="bg-[#0f0a07] py-20 px-4">
         <div className="w-full px-[6%]">
           <h2
             onClick={() =>
@@ -191,7 +277,7 @@ const PitchAIPage = ({ navigateTo }) => {
       </div>
 
       {/* Image Angle Section */}
-      <div className="bg-black py-20 px-4">
+      <div className="bg-[#0f0a07] py-20 px-4">
         <div className="w-full px-[6%] mt-16">
           <h2
             onClick={() =>
@@ -264,7 +350,7 @@ const PitchAIPage = ({ navigateTo }) => {
       </div>
 
       {/* Image to Video Section */}
-      <div className="bg-black py-20 px-4">
+      <div className="bg-[#0f0a07] py-20 px-4">
         <div className="w-full px-[6%] mt-32">
           <h2
             onClick={() =>
@@ -330,7 +416,7 @@ const PitchAIPage = ({ navigateTo }) => {
       </div>
 
       {/* Pricing Plans Section */}
-      <div id="subscriptions-section" className="bg-black py-20 px-4">
+      <div id="subscriptions-section" className="bg-[#0f0a07] py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-[64px] text-white text-center mb-8 heading-font">
             Choose Your Creative Plan

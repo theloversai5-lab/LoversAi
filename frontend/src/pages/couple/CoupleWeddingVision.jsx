@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { coupleMoodboardAPI } from "../../api/api";
 import { saveThemeMoodboard } from "./CoupleThemeMoodboard";
+import { useAuth } from "../../context/AuthContext";
 
 const FUNCTION_OPTIONS = [
   "Haldi",
@@ -75,6 +76,7 @@ const SparkIcon = () => (
 
 export default function CoupleWeddingVision() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const [venueImage, setVenueImage] = useState(null);
   const [venuePreview, setVenuePreview] = useState(null);
@@ -252,6 +254,14 @@ export default function CoupleWeddingVision() {
     setSavedToMoodboard(false);
   };
 
+  const coupleName =
+    currentUser?.fullName ||
+    currentUser?.displayName ||
+    currentUser?.email?.split("@")[0] ||
+    "Couple";
+
+  const coupleInitial = coupleName.charAt(0).toUpperCase();
+
   const FilterSection = ({ title, children }) => (
     <div className="rounded-[8px] border border-white/10 bg-[#2a241f] p-2.5">
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/70">
@@ -385,61 +395,97 @@ export default function CoupleWeddingVision() {
   };
 
   return (
-    <main className="min-h-screen bg-[#161210] px-4 py-6 text-white md:px-6">
-      <div className="mx-auto max-w-[1320px]">
-        <div className="mb-3 flex items-center justify-between text-sm text-white/80">
+    <main className="loverai-wedding-shell min-h-screen px-3 py-4 text-white md:px-6">
+      <div
+        className="loverai-wedding-bg"
+        style={{ backgroundImage: 'url("/images/signup.png"), url("/images/bridal.png")' }}
+      />
+      <div className="loverai-wedding-overlay" />
+      <div className="relative z-10 mx-auto max-w-[1380px]">
+        <div className="mb-3 flex items-center justify-between px-1 text-sm text-white/70">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded border border-white/10 px-3 py-1.5 transition hover:bg-white/5"
+            className="transition hover:text-white"
           >
             Back
           </button>
           <button
             type="button"
             onClick={() => navigate("/couple/moodboard/wedding")}
-            className="rounded border border-white/10 px-3 py-1.5 transition hover:bg-white/5"
+            className="transition hover:text-white"
           >
             Moodboards
           </button>
         </div>
 
-        <section className="rounded-[10px] border border-[#5d4421] bg-[#1b1512] p-3 shadow-[0_0_0_1px_rgba(199,155,45,0.06)]">
-          <div className="border border-[#4e3920] bg-[#181310] px-4 py-5">
-            <div className="text-center">
-              <h1 className="font-['Cormorant_Garamond'] text-[34px] font-semibold text-[#f7e7c7]">
-                Create Your Wedding Vision
-              </h1>
-              <p className="text-[11px] text-[#b7a48a]">
-                See your unique wedding design come to life
-              </p>
+        <div className="glass-card-strong rounded-[30px] px-4 py-4 md:px-6 md:py-5">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="glass-card rounded-full px-5 py-3 flex items-center gap-8 md:gap-12 text-white/90">
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="text-lg font-medium transition hover:text-loverai-gold"
+                >
+                  Home
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/pricing")}
+                  className="text-lg font-medium transition hover:text-loverai-gold"
+                >
+                  Pricing
+                </button>
+              </div>
+
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/couple/cart")}
+                  className="glass-card rounded-full px-4 py-3 text-white/80 transition hover:text-white"
+                  aria-label="Cart"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 20a1 1 0 1 0 0 2 1 1 0 1 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 1 0 0-2zM3 3h2l3.6 7.59-1.35 2.44A2 2 0 0 0 8.5 16H21v-2H8.5l1.1-2h7.45a2 2 0 0 0 1.9-1.4l2.5-9v-.1H5.21L4.27 2H1v2h2z" />
+                  </svg>
+                </button>
+                <div className="glass-card rounded-full px-3 py-2.5 flex items-center gap-3">
+                  <span className="max-w-[180px] truncate text-sm text-white/85">
+                    {coupleName}
+                  </span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#f0d196] to-[#d58b49] text-sm font-semibold text-[#2a1b13]">
+                    {coupleInitial}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-5 flex flex-col gap-3 lg:flex-row">
-              <div className="flex flex-1 items-center gap-2 rounded-[6px] border border-[#a57710] bg-[#231b16] px-3 py-2">
+            <div className="flex flex-col gap-3 lg:flex-row">
+              <div className="glass-card flex flex-1 items-center gap-3 rounded-2xl px-4 py-3">
                 <SparkIcon />
                 <input
                   value={userPrompt}
                   onChange={(e) => setUserPrompt(e.target.value)}
                   placeholder="Describe your Wedding Scene..."
-                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-[#8f7b62]"
+                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/35 md:text-base"
                 />
-                <button
-                  type="button"
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="rounded-[4px] border border-[#a57710] p-1 text-[#d9aa35] transition hover:bg-[#a57710]/10 disabled:cursor-not-allowed disabled:opacity-60"
-                  aria-label="Generate vision"
-                >
-                  <SparkIcon />
-                </button>
               </div>
 
               <button
                 type="button"
                 onClick={handleGenerate}
                 disabled={generating}
-                className="inline-flex items-center justify-center gap-2 rounded-[4px] bg-[#f4f0ea] px-4 py-2.5 text-sm font-semibold text-[#1e1915] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="loverai-btn-primary inline-flex items-center justify-center gap-2 !rounded-2xl !px-6 !py-3 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <SparkIcon />
                 Generate
@@ -447,15 +493,15 @@ export default function CoupleWeddingVision() {
             </div>
 
             {error && (
-              <div className="mt-3 rounded-[6px] border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              <div className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
                 {error}
               </div>
             )}
 
-            <div className="mt-5 grid gap-3 lg:grid-cols-[240px_minmax(0,1fr)]">
-              <aside className="rounded-[8px] border border-white/12 bg-[#26211d] p-2.5">
+            <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
+              <aside className="glass-card rounded-[24px] p-3 md:p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[11px] font-semibold text-white">Style Filters</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Style Filters</p>
                 </div>
 
                 <div className="space-y-2">
@@ -543,14 +589,15 @@ export default function CoupleWeddingVision() {
                 </div>
               </aside>
 
-              <section className="rounded-[8px] border border-white/14 bg-[#241d18] p-2">
-                <div className="rounded-[6px] border border-[#7b6140] bg-[#211914] p-4">
+              <section className="glass-card rounded-[24px] p-3">
+                <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-[rgba(18,11,9,0.62)] p-4">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_55%)] pointer-events-none" />
                   {renderCanvas()}
                 </div>
               </section>
             </div>
           </div>
-        </section>
+        </div>
         {showMoodboardModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
             <div className="relative w-full max-w-[360px] rounded-[10px] bg-[#f7f2eb] p-5 text-center text-[#1e1815] shadow-[0_24px_80px_rgba(0,0,0,0.45)]">

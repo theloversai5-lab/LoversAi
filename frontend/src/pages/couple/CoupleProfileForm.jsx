@@ -445,7 +445,8 @@ export default function CoupleProfileForm() {
                 }}
                 type="button"
               >
-                {opt}
+                <span style={optionTitle}>{opt}</span>
+                <span style={optionHint}>Select this range</span>
               </button>
             ))}
           </div>
@@ -697,15 +698,17 @@ export default function CoupleProfileForm() {
             />
             <h1
               style={{
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: 600,
-                color: "#D48C8C",
-                letterSpacing: "0.05em",
-                margin: 0,
+                color: "rgba(255,245,234,0.85)",
+                letterSpacing: "0.28em",
+                margin: "0 0 6px",
+                textTransform: "uppercase",
               }}
             >
-              Build Your Wedding Profile
+              Lovers AI
             </h1>
+            <p style={heroHeading}>Build your wedding profile</p>
           </div>
           <span style={progressPill}>
             {isComplete ? "Ready ✨" : `Step ${step} of ${TOTAL_STEPS}`}
@@ -767,9 +770,9 @@ const card = {
   position: "relative",
   zIndex: 10,
   width: "100%",
-  maxWidth: 580,
-  borderRadius: 28,
-  padding: "36px 40px 44px",
+  maxWidth: 720,
+  borderRadius: 32,
+  padding: "34px 34px 40px",
   boxShadow: "0 40px 120px rgba(0,0,0,0.55)",
 };
 
@@ -782,14 +785,22 @@ const cardHeader = {
 
 const progressPill = {
   fontSize: 12,
-  letterSpacing: "0.12em",
-  textTransform: "uppercase",
-  color: "#D48C8C",
-  padding: "6px 14px",
+  letterSpacing: "0.08em",
+  textTransform: "none",
+  color: "#fff2e1",
+  padding: "8px 15px",
   borderRadius: 99,
-  border: "1px solid rgba(212,140,140,0.22)",
-  background: "rgba(212,140,140,0.06)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "rgba(255,255,255,0.08)",
   whiteSpace: "nowrap",
+};
+
+const heroHeading = {
+  fontFamily: "'DM Serif Display', serif",
+  fontSize: "clamp(34px, 5vw, 56px)",
+  lineHeight: 0.95,
+  color: "#fff6ea",
+  margin: 0,
 };
 
 const stepHeading = {
@@ -811,15 +822,15 @@ const supportingText = {
 const actionsRow = {
   display: "flex",
   gap: 12,
-  marginTop: 30,
+  marginTop: 34,
   flexWrap: "wrap",
 };
 
 const primaryBtn = {
   background: "linear-gradient(135deg, #f0d196, #C59854)",
   color: "#1C1613",
-  padding: "13px 28px",
-  borderRadius: 12,
+  padding: "15px 30px",
+  borderRadius: 18,
   border: "none",
   cursor: "pointer",
   fontSize: 15,
@@ -832,8 +843,8 @@ const primaryBtn = {
 const secondaryBtn = {
   background: "rgba(255,255,255,0.06)",
   color: "#D48C8C",
-  padding: "13px 22px",
-  borderRadius: 12,
+  padding: "15px 24px",
+  borderRadius: 18,
   border: "1px solid rgba(212,140,140,0.22)",
   cursor: "pointer",
   fontSize: 14,
@@ -870,14 +881,15 @@ const inputStyle = {
 
 const optionGrid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-  gap: 12,
-  marginTop: 24,
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 14,
+  marginTop: 28,
 };
 
 const optionCard = {
-  padding: "16px 14px",
-  borderRadius: 14,
+  minHeight: 116,
+  padding: "22px 18px",
+  borderRadius: 22,
   border: "1px solid rgba(225,195,135,0.18)",
   background: "rgba(255,255,255,0.04)",
   color: "#F9F7F5",
@@ -885,7 +897,10 @@ const optionCard = {
   cursor: "pointer",
   fontFamily: "'Poppins', sans-serif",
   transition: "all 0.2s ease",
-  textAlign: "center",
+  textAlign: "left",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
 };
 
 const selectedCard = {
@@ -893,6 +908,20 @@ const selectedCard = {
   borderColor: "rgba(197,152,84,0.55)",
   color: "#f0d196",
   boxShadow: "0 4px 20px rgba(197,152,84,0.18)",
+};
+
+const optionTitle = {
+  fontSize: 24,
+  lineHeight: 1.05,
+  fontFamily: "'DM Serif Display', serif",
+  color: "inherit",
+};
+
+const optionHint = {
+  fontSize: 12,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "rgba(249,247,245,0.5)",
 };
 
 const summaryCard = {
