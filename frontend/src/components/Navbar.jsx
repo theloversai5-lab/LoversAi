@@ -14,7 +14,11 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const dropdownRef = useRef(null);
-  const mobileMenuRef = useRef(null);
+  const plannerMenuRef = useRef(null);
+  const mobilePanelRef = useRef(null);
+  const isPlannerLanding = location.pathname === "/planner";
+  const isMainLanding = location.pathname === "/";
+  const isHamburgerLanding = isPlannerLanding || isMainLanding;
 
   const handleLogout = async () => {
     try {
@@ -29,6 +33,12 @@ const Navbar = () => {
 
   const handleProfileClick = () => {
     navigate("/profile");
+    setDropdownOpen(false);
+    setMobileMenuOpen(false);
+  };
+
+  const handleMenuNavigate = (path) => {
+    navigate(path);
     setDropdownOpen(false);
     setMobileMenuOpen(false);
   };
@@ -106,17 +116,20 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        mobileMenuOpen &&
-        mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target)
-      ) {
+      if (!mobileMenuOpen) return;
+
+      const activeMenuRef =
+        isHamburgerLanding && window.innerWidth >= 768
+          ? plannerMenuRef.current
+          : mobilePanelRef.current;
+
+      if (activeMenuRef && !activeMenuRef.contains(event.target)) {
         setMobileMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [mobileMenuOpen]);
+  }, [isHamburgerLanding, mobileMenuOpen]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -178,6 +191,8 @@ const Navbar = () => {
   };
 
   const navLinks = getNavLinks();
+  const userLabel =
+    currentUser?.displayName || currentUser?.email?.split("@")[0] || "User";
 
   const logoTarget =
     localStorage.getItem("userRole") === "planner" ||
@@ -187,7 +202,11 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-2 md:px-4 pt-3 md:pt-[30px] pointer-events-none animate-fadeInDown">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 flex px-2 md:px-4 pt-3 md:pt-[30px] pointer-events-none animate-fadeInDown ${
+          isHamburgerLanding ? "justify-end" : "justify-center"
+        }`}
+      >
         {/* Logo - Desktop */}
         <Link
           to={logoTarget}
@@ -201,7 +220,13 @@ const Navbar = () => {
         </Link>
 
         {/* Main Navbar Container — Glassmorphism */}
-        <div className="pointer-events-auto relative w-full max-w-[900px] rounded-[28px] md:rounded-full transition-all duration-300 glass-card-strong">
+        <div
+          className={`pointer-events-auto relative transition-all duration-300 ${
+            isHamburgerLanding
+              ? "w-auto max-w-none rounded-none bg-transparent shadow-none backdrop-blur-0"
+              : "w-full max-w-[900px] rounded-[28px] md:rounded-full glass-card-strong"
+          }`}
+        >
           {/* Mobile Layout */}
           <div className="md:hidden px-3 py-3">
             <div className="flex items-center justify-between">
@@ -245,139 +270,259 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Layout */}
-          <div className="hidden md:flex items-center justify-between px-10 py-0 min-h-[64px]">
-            <nav className="flex items-center gap-12 text-[19px] font-medium text-white">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="relative hover:text-loverai-gold transition-colors duration-300 whitespace-nowrap after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-loverai-gold after:to-amber-600 after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            {currentUser ? (
-              <div
-                className="flex items-center gap-3 ml-auto"
-                ref={dropdownRef}
-              >
-                {localStorage.getItem("userRole") === "couple" && (
-                  <button
-                    onClick={() => navigate("/couple/cart")}
-                    className="relative p-2 text-white/80 hover:text-loverai-gold transition-colors"
-                    aria-label="Cart"
-                  >
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M9 20a1 1 0 1 0 0 2 1 1 0 1 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 1 0 0-2zM3 3h2l3.6 7.59-1.35 2.44A2 2 0 0 0 8.5 16H21v-2H8.5l1.1-2h7.45a2 2 0 0 0 1.9-1.4l2.5-9v-.1H5.21L4.27 2H1v2h2z" />
-                    </svg>
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-loverai-gold text-[10px] font-bold text-loverai-dark animate-pulse">
-                        {cartCount}
-                      </span>
-                    )}
-                  </button>
-                )}
-                <span className="text-white/80 text-[16px] max-w-[180px] truncate">
-                  {currentUser.displayName || currentUser.email?.split("@")[0]}
-                </span>
+          <div
+            className={`hidden md:flex items-center justify-between ${
+              isHamburgerLanding
+                ? "px-0 py-0 min-h-0"
+                : "px-10 py-0 min-h-[64px]"
+            }`}
+          >
+            {isHamburgerLanding ? (
+              <div className="relative mr-2 md:mr-6" ref={plannerMenuRef}>
                 <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="w-9 h-9 bg-gradient-to-br from-loverai-gold to-amber-700 rounded-full flex items-center justify-center text-loverai-dark font-semibold shadow-lg hover:scale-105 transition-transform duration-300"
-                  aria-label="User menu"
+                  type="button"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="w-14 h-14 rounded-full border border-white/20 bg-[#221917]/85 flex items-center justify-center text-white shadow-xl backdrop-blur-xl transition-all duration-300 hover:bg-[#2d211e]/90"
+                  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={mobileMenuOpen}
                 >
-                  {getUserInitials()}
+                  <div className="flex flex-col gap-[4px]">
+                    <span
+                      className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""}`}
+                    />
+                    <span
+                      className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`}
+                    />
+                    <span
+                      className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""}`}
+                    />
+                  </div>
                 </button>
 
-                {dropdownOpen && (
-                  <div className="absolute right-6 top-full mt-2 w-48 glass-card-strong rounded-xl shadow-2xl py-2 z-50 animate-fadeIn">
-                    <div className="px-4 py-3 border-b border-white/10">
-                      <p className="text-xs text-white/50">Signed in as</p>
-                      <p className="text-sm font-medium text-white truncate">
+                <div
+                  className={`absolute right-0 top-full mt-4 w-[320px] rounded-[28px] border border-white/12 bg-[#1a1412]/95 p-4 shadow-2xl backdrop-blur-2xl transition-all duration-300 ${
+                    mobileMenuOpen
+                      ? "pointer-events-auto translate-y-0 opacity-100"
+                      : "pointer-events-none -translate-y-2 opacity-0"
+                  }`}
+                >
+                  {currentUser && (
+                    <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/40">
+                        Signed in as
+                      </p>
+                      <p className="mt-1 truncate text-lg font-medium text-white">
+                        {userLabel}
+                      </p>
+                      <p className="truncate text-sm text-white/45">
                         {currentUser.email}
                       </p>
                     </div>
-                    <button
-                      onClick={handleProfileClick}
-                      className="flex items-center w-full px-4 py-3 text-white/70 hover:bg-white/10 hover:text-white transition-colors text-left"
-                    >
-                      <svg
-                        className="w-4 h-4 mr-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                      Profile
-                    </button>
-                    {isAdminEmail(currentUser?.email) && (
+                  )}
+                  <nav className="flex flex-col gap-2">
+                    {navLinks.map((link) => (
                       <button
-                        onClick={() => {
-                          navigate("/admin");
-                          setDropdownOpen(false);
-                        }}
-                        className="flex items-center w-full px-4 py-3 text-white/70 hover:bg-white/10 hover:text-white transition-colors text-left"
+                        key={link.to}
+                        type="button"
+                        onClick={() => handleMenuNavigate(link.to)}
+                        className="rounded-2xl px-4 py-3 text-left text-lg font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                      >
+                        {link.label}
+                      </button>
+                    ))}
+
+                    {currentUser ? (
+                      <>
+                        {localStorage.getItem("userRole") === "couple" && (
+                          <button
+                            onClick={() => {
+                              navigate("/couple/cart");
+                              setMobileMenuOpen(false);
+                            }}
+                            className="flex items-center justify-between rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                          >
+                            <span>My Cart</span>
+                            {cartCount > 0 && (
+                              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-loverai-gold px-2 text-[11px] font-bold text-loverai-dark">
+                                {cartCount}
+                              </span>
+                            )}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            handleProfileClick();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          Profile
+                        </button>
+                        {isAdminEmail(currentUser?.email) && (
+                          <button
+                            onClick={() => {
+                              navigate("/admin");
+                              setMobileMenuOpen(false);
+                            }}
+                            className="rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                          >
+                            Admin
+                          </button>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          className="rounded-2xl px-4 py-3 text-left text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={handleSignInClick}
+                        className="mt-2 rounded-2xl px-4 py-3 text-left text-white loverai-btn-primary"
+                      >
+                        Sign In
+                      </button>
+                    )}
+                  </nav>
+                </div>
+              </div>
+            ) : (
+              <>
+                <nav className="flex items-center gap-12 text-[19px] font-medium text-white">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      className="relative hover:text-loverai-gold transition-colors duration-300 whitespace-nowrap after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-loverai-gold after:to-amber-600 after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+
+                {currentUser ? (
+                  <div
+                    className="flex items-center gap-3 ml-auto"
+                    ref={dropdownRef}
+                  >
+                    {localStorage.getItem("userRole") === "couple" && (
+                      <button
+                        onClick={() => navigate("/couple/cart")}
+                        className="relative p-2 text-white/80 hover:text-loverai-gold transition-colors"
+                        aria-label="Cart"
                       >
                         <svg
-                          className="w-4 h-4 mr-3"
+                          width="22"
+                          height="22"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                          <polyline points="9 22 9 12 15 12 15 22" />
-                        </svg>
-                        Admin
-                      </button>
-                    )}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-3 text-white/70 hover:bg-red-500/10 hover:text-red-400 transition-colors text-left border-t border-white/10"
-                    >
-                      <svg
-                        className="w-4 h-4 mr-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
-                      Logout
+                        >
+                          <path d="M9 20a1 1 0 1 0 0 2 1 1 0 1 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 1 0 0-2zM3 3h2l3.6 7.59-1.35 2.44A2 2 0 0 0 8.5 16H21v-2H8.5l1.1-2h7.45a2 2 0 0 0 1.9-1.4l2.5-9v-.1H5.21L4.27 2H1v2h2z" />
+                        </svg>
+                        {cartCount > 0 && (
+                          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-loverai-gold text-[10px] font-bold text-loverai-dark animate-pulse">
+                            {cartCount}
+                          </span>
+                        )}
+                      </button>
+                    )}
+                    <span className="text-white/80 text-[16px] max-w-[180px] truncate">
+                      {currentUser.displayName || currentUser.email?.split("@")[0]}
+                    </span>
+                    <button
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      className="w-9 h-9 bg-gradient-to-br from-loverai-gold to-amber-700 rounded-full flex items-center justify-center text-loverai-dark font-semibold shadow-lg hover:scale-105 transition-transform duration-300"
+                      aria-label="User menu"
+                    >
+                      {getUserInitials()}
+                    </button>
+
+                    {dropdownOpen && (
+                      <div className="absolute right-6 top-full mt-2 w-48 glass-card-strong rounded-xl shadow-2xl py-2 z-50 animate-fadeIn">
+                        <div className="px-4 py-3 border-b border-white/10">
+                          <p className="text-xs text-white/50">Signed in as</p>
+                          <p className="text-sm font-medium text-white truncate">
+                            {currentUser.email}
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleProfileClick}
+                          className="flex items-center w-full px-4 py-3 text-white/70 hover:bg-white/10 hover:text-white transition-colors text-left"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                          Profile
+                        </button>
+                        {isAdminEmail(currentUser?.email) && (
+                          <button
+                            onClick={() => {
+                              navigate("/admin");
+                              setDropdownOpen(false);
+                            }}
+                            className="flex items-center w-full px-4 py-3 text-white/70 hover:bg-white/10 hover:text-white transition-colors text-left"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-3"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                              <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                            Admin
+                          </button>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center w-full px-4 py-3 text-white/70 hover:bg-red-500/10 hover:text-red-400 transition-colors text-left border-t border-white/10"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                            />
+                          </svg>
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="ml-auto">
+                    <button
+                      onClick={handleSignInClick}
+                      className="loverai-btn-primary text-[16px] !px-10 inline-block"
+                    >
+                      Sign In
                     </button>
                   </div>
                 )}
-              </div>
-            ) : (
-              <div className="ml-auto">
-                <button
-                  onClick={handleSignInClick}
-                  className="loverai-btn-primary text-[16px] !px-10 inline-block"
-                >
-                  Sign In
-                </button>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -392,7 +537,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Panel */}
         <div
-          ref={mobileMenuRef}
+          ref={mobilePanelRef}
           className={`md:hidden fixed top-0 right-0 w-[280px] h-full glass-sidebar shadow-2xl transition-transform duration-300 ease-out z-50 ${
             mobileMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
@@ -453,7 +598,7 @@ const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => handleMenuNavigate(link.to)}
                 className="px-4 py-3 text-white/70 hover:bg-white/10 hover:text-loverai-gold rounded-xl transition-colors"
               >
                 {link.label}

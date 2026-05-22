@@ -98,17 +98,6 @@ function Home() {
         className="relative z-0 w-full overflow-hidden min-h-screen md:min-h-[967px]"
         style={{ minHeight: "100vh" }}
       >
-        {/* Center Logo */}
-        {!transitioning && !loading && (
-          <div className="absolute z-20 top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center animate-fadeInUp">
-            <img
-              src="/images/LogoLoversai.png"
-              alt="LoversAI"
-              className="h-24 md:h-32 w-auto mx-auto animate-float drop-shadow-2xl"
-            />
-          </div>
-        )}
-
         {/* Navigation Buttons - Only show for unauthenticated users */}
         {!loading && !currentUser && (
           <div className="absolute w-full flex justify-between items-center z-20 px-8 sm:px-16 bottom-[15%] md:bottom-[20%]">

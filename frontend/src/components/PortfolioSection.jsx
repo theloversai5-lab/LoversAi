@@ -10,13 +10,8 @@ const portfolioImages = [
 ];
 
 const PortfolioSection = () => (
-  <section className="relative overflow-hidden py-20 px-4">
-    <div
-      className="absolute inset-0 bg-cover bg-center"
-      style={{ backgroundImage: 'url("/images/signup.png")' }}
-    />
-    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,5,4,0.08),rgba(8,5,4,0.28))]" />
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,236,220,0.12),transparent_34%)]" />
+  <section className="relative overflow-hidden bg-[#0b0706] py-20 px-4">
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,236,220,0.08),transparent_30%)]" />
 
     <div className="relative z-10 text-center">
       <h2 className="text-[#fff4e8] heading-font" style={{ fontWeight: 400, fontSize: '72px', letterSpacing: '-0.02em', lineHeight: '1' }}>

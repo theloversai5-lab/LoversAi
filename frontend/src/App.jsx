@@ -50,6 +50,7 @@ import PlannerVendors from "./pages/planner/PlannerVendors";
 import PlannerProfile from "./pages/planner/PlannerProfile";
 import PlannerBuildQuote from "./pages/planner/PlannerBuildQuote";
 import PlannerSignup from "./pages/planner/PlannerSignup";
+import PlannerOnboarding from "./pages/planner/PlannerOnboarding";
 
 // Vendor Pages
 import VendorLayout from "./pages/vendor/VendorLayout";
@@ -65,22 +66,39 @@ import VendorProfile from "./pages/vendor/VendorProfile";
 function AppContent() {
   const location = useLocation();
 
-  // Hide navbar and footer on admin, planner, and vendor dashboard pages
-  const hideNavbarAndFooter =
+  const hideNavbar =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/planner/") ||
+    location.pathname === "/planner" ||
+    location.pathname === "/planner-ai-tools" ||
+    location.pathname.startsWith("/vendor/") ||
+    location.pathname === "/couple/onboarding" ||
+    location.pathname === "/user-form";
+
+  const hideFooter =
     location.pathname.startsWith("/admin") ||
     (location.pathname.startsWith("/planner/") &&
       location.pathname !== "/planner/signup") ||
     location.pathname.startsWith("/vendor/") ||
-    location.pathname === "/couple/onboarding";
+    location.pathname === "/couple/onboarding" ||
+    location.pathname === "/user-form";
 
   return (
     <>
-      {!hideNavbarAndFooter && <Navbar />}
+      {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/planner/signup" element={<PlannerSignup />} />
+        <Route
+          path="/planner/onboarding"
+          element={
+            <ProtectedRoute requiredRole="planner">
+              <PlannerOnboarding />
+            </ProtectedRoute>
+          }
+        />
 
         {/* User form - accessible for both new and existing users */}
         <Route
@@ -280,7 +298,7 @@ function AppContent() {
           }
         />
       </Routes>
-      {!hideNavbarAndFooter && <Footer />}
+      {!hideFooter && <Footer />}
     </>
   );
 }

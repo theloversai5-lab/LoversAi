@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PortfolioSection from '../components/PortfolioSection';
+import PlannerQuickMenu from '../components/PlannerQuickMenu';
 
 const PlannerPage = () => {
   const navigate = useNavigate();
@@ -23,7 +24,6 @@ const PlannerPage = () => {
   const tools = [
     {
       title: "Find Leads",
-      desc: "Browse live couple bids and pitch your services",
       image: "/images/couple_leads_image.jpeg",
       onClick: () => handleNavigate('/planner/bids'),
       badge: "Live",
@@ -31,7 +31,6 @@ const PlannerPage = () => {
     },
     {
       title: "Pitch with AI",
-      desc: "Use AI tools to create stunning presentations",
       image: "/images/pitch with ai.gif",
       onClick: () => handleNavigate('/planner-ai-tools'),
       badge: "AI Powered",
@@ -39,7 +38,6 @@ const PlannerPage = () => {
     },
     {
       title: "Find Vendors",
-      desc: "Discover verified vendors for your projects",
       image: "/images/executive_wedding.jpeg",
       onClick: () => handleNavigate('/planner/vendors'),
       badge: "Directory",
@@ -49,26 +47,33 @@ const PlannerPage = () => {
 
   return (
     <>
+      <div className="fixed left-6 top-6 z-30 sm:left-8 sm:top-8">
+        <button
+          type="button"
+          onClick={() => navigate("/planner")}
+          aria-label="Lovers AI home"
+          className="transition hover:opacity-90"
+        >
+          <img
+            src="/images/LogoLoversai.png"
+            alt="Lovers AI"
+            className="h-20 w-auto object-contain sm:h-24"
+          />
+        </button>
+      </div>
+
+      <PlannerQuickMenu />
+
       {/* Hero Section */}
       <div className="relative w-full overflow-hidden min-h-screen">
         <div
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{
             backgroundImage: 'url("/images/planner.png")',
-            filter: "brightness(1.34) saturate(1.02) contrast(1.02)",
+            filter: "brightness(1.08) saturate(1.12) contrast(1.08)",
           }}
         />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/[0.01] via-transparent to-black/[0.04]"></div>
-
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
-          <img src="/images/LogoLoversai.png" alt="LoversAI" className="h-16 w-auto mb-6 animate-float" />
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-heading text-white mb-4 text-center animate-fadeInUp">
-            Planner
-          </h1>
-          <p className="text-white/50 text-lg max-w-lg text-center mb-10 animate-fadeInUp stagger-2">
-            Powerful tools to grow your wedding planning business
-          </p>
-        </div>
+        <div className="absolute inset-0 z-[1] bg-transparent"></div>
       </div>
 
       {/* Planner Tools Section */}
@@ -106,10 +111,9 @@ const PlannerPage = () => {
 
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <div className="glass-card rounded-xl p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                    <h3 className="text-xl font-heading text-white mb-1">{tool.title}</h3>
-                    <p className="text-white/50 text-sm">{tool.desc}</p>
-                  </div>
+                  <h3 className="text-2xl font-heading text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
+                    {tool.title}
+                  </h3>
                 </div>
               </div>
             ))}

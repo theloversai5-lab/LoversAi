@@ -27,7 +27,7 @@ export default function PlannerSignup() {
 
       const data = await firebaseLogin(idToken, "planner");
       if (data.success) {
-        navigate("/planner/dashboard");
+        navigate("/planner/onboarding");
       } else {
         setError(data.error || "Failed to sign up with Google");
       }
@@ -63,7 +63,7 @@ export default function PlannerSignup() {
       });
 
       if (data.success) {
-        navigate("/planner/dashboard");
+        navigate("/planner/onboarding");
       } else {
         setError(data.error || "Signup failed");
       }

@@ -4,6 +4,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
 import { auth } from "../firebase/firebase";
+import PlannerQuickMenu from "../components/PlannerQuickMenu";
 
 const sharedWeddingBackground = {
   backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
@@ -499,16 +500,21 @@ const Login = () => {
     isPlannerExperience ? (
       <div className="planner-auth-shell">
         <div className="planner-auth-frame animate-fadeInUp">
-          <div className="planner-auth-nav">
-            <div className="planner-auth-nav-links">
-              <button type="button" onClick={() => navigate("/")} className="planner-auth-nav-link">Home</button>
-              <button type="button" onClick={() => navigate("/couples")} className="planner-auth-nav-link">Couples</button>
-              <button type="button" onClick={() => navigate("/planner")} className="planner-auth-nav-link">Planner</button>
-              <button type="button" onClick={() => navigate("/pricing")} className="planner-auth-nav-link">Features</button>
-            </div>
-            <button type="button" onClick={() => navigate("/signup?role=planner")} className="planner-auth-nav-cta">
-              Sign Up
+          <div className="mb-10 flex items-start justify-between gap-6">
+            <button
+              type="button"
+              onClick={() => navigate("/planner")}
+              aria-label="Lovers AI home"
+              className="transition hover:opacity-90"
+            >
+              <img
+                src="/images/LogoLoversai.png"
+                alt="Lovers AI"
+                className="h-20 w-auto object-contain sm:h-24"
+              />
             </button>
+
+            <PlannerQuickMenu className="relative z-40" />
           </div>
 
           <div className="planner-auth-grid">

@@ -76,7 +76,7 @@ export default function Signup() {
       if (data.success) {
         const lowerRole = role.toLowerCase();
         if (lowerRole === "planner") {
-          navigate("/planner");
+          navigate("/planner/onboarding");
         } else if (lowerRole === "couple") {
           localStorage.setItem(
             "lovers-ai-couple-profile",
@@ -262,7 +262,7 @@ export default function Signup() {
         <div className="planner-auth-frame animate-fadeInUp">
           <div className="planner-auth-nav">
             <div className="planner-auth-nav-links">
-              <button type="button" onClick={() => navigate("/")} className="planner-auth-nav-link">Home</button>
+              <button type="button" onClick={() => navigate("/planner")} className="planner-auth-nav-link">Home</button>
               <button type="button" onClick={() => navigate("/couples")} className="planner-auth-nav-link">Couples</button>
               <button type="button" onClick={() => navigate("/planner")} className="planner-auth-nav-link">Planner</button>
               <button type="button" onClick={() => navigate("/pricing")} className="planner-auth-nav-link">Features</button>
