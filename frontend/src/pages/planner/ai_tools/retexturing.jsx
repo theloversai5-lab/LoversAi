@@ -16,7 +16,7 @@ const RetexturingTool = ({ onClose }) => {
   const [selectedTheme, setSelectedTheme] = useState("");
   const [customPrompt, setCustomPrompt] = useState("");
   const [modelType, setModelType] = useState("flux-kontext-pro");
-  const [imageCount] = useState(1);
+  const [imageCount, setImageCount] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [generationHistory, setGenerationHistory] = useState([]);
@@ -40,7 +40,19 @@ const RetexturingTool = ({ onClose }) => {
     wedding: "Wedding Ceremony",
     reception: "Reception Party",
     engagement: "Engagement Ceremony",
+    cocktail: "Cocktail Party",
   };
+
+  const UI_THEMES = [
+    { key: "", label: "Custom Only", icon: null, dots: [] },
+    { key: "haldi", label: "Haldi", icon: "sun", dots: ["bg-yellow-400", "bg-amber-500", "bg-orange-400"] },
+    { key: "mehendi", label: "Mehendi", icon: "hash", dots: ["bg-green-600", "bg-emerald-800", "bg-orange-400"] },
+    { key: "sangeet", label: "Sangeet", icon: "music", dots: ["bg-red-500", "bg-yellow-400", "bg-red-800"] },
+    { key: "wedding", label: "Wedding", icon: "heart", dots: ["bg-red-600", "bg-yellow-500", "bg-gray-100"] },
+    { key: "reception", label: "Reception", icon: "lock", dots: ["bg-blue-900", "bg-slate-400", "bg-sky-400"] },
+    { key: "engagement", label: "Engagement", icon: "star", dots: ["bg-pink-400", "bg-gray-100", "bg-rose-300"] },
+    { key: "cocktail", label: "Cocktail", icon: "cocktail", dots: ["bg-purple-600", "bg-indigo-700", "bg-cyan-400"] },
+  ];
 
   // Check API health and load credits on component mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -259,8 +271,11 @@ const RetexturingTool = ({ onClose }) => {
       // Prepare form data
       const formData = new FormData();
       formData.append("image", selectedImage);
-      formData.append("theme", selectedTheme);
-      formData.append("customPrompt", customPrompt);
+      formData.append("theme", selectedTheme === "cocktail" ? "" : selectedTheme);
+      formData.append("customPrompt", selectedTheme === "cocktail"
+        ? `Transform this venue into a luxurious cocktail party with elegant cocktail tables, sophisticated ambient lighting, chic bar service area, with a purple, indigo and cyan color theme. ${customPrompt}`.trim()
+        : customPrompt
+      );
       formData.append("modelType", modelType);
       formData.append("imageCount", imageCount.toString());
 
@@ -441,14 +456,16 @@ const RetexturingTool = ({ onClose }) => {
         toastOptions={{
           duration: 4000,
           style: {
-            background: "#363636",
+            background: "#1c1c1e",
             color: "#fff",
             fontSize: "14px",
+            borderRadius: "12px",
+            border: "1px solid rgba(255,255,255,0.1)",
           },
           success: {
             duration: 3000,
             iconTheme: {
-              primary: "#4ade80",
+              primary: "#eab308",
               secondary: "#000",
             },
           },
@@ -459,757 +476,528 @@ const RetexturingTool = ({ onClose }) => {
               secondary: "#000",
             },
           },
-          loading: {
-            duration: 60000,
-            style: {
-              minWidth: "300px",
-            },
-          },
         }}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white font-['Poppins'] text-lg">
-        {/* Header */}
-        <header className="py-8 px-4 md:px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-6 mb-6">
-              {/* Logo Section */}
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-                  <span className="text-3xl">💍</span>
-                </div>
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-1 drop-shadow-lg">
-                    Retexturing AI
-                  </h1>
-                  <p className="text-gray-300 font-medium text-sm md:text-base">
-                    Transform Any Image Into Your Dream Wedding Space
-                  </p>
-                </div>
-              </div>
+      <div className="min-h-screen bg-[#0e0e10] text-white font-['Poppins'] relative overflow-hidden py-12 px-4 md:px-8 lg:px-16">
+        {/* Modern ambient glassmorphic glows */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-yellow-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none"></div>
 
-              {/* Credits Display */}
-              <div className="flex items-center gap-6">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 min-w-[200px]">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-gray-300">
-                      Your Credits
-                    </h3>
-                    <button
-                      onClick={fetchUserCredits}
-                      disabled={loadingCredits || isGenerating}
-                      className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition-colors disabled:opacity-50"
-                    >
-                      {loadingCredits ? "..." : "🔄"}
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">🎫</span>
-                      <span className="text-2xl font-bold">
-                        {loadingCredits ? "..." : userCredits.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      {imageCount} image = {currentCreditCost} credits
-                    </div>
-                  </div>
-
-                  {/* Credit status indicator */}
-                  {selectedImage && (
-                    <div
-                      className={`text-sm font-medium px-2 py-1 rounded ${
-                        creditInfo.hasEnough
-                          ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                          : "bg-red-500/20 text-red-300 border border-red-500/30"
-                      }`}
-                    >
-                      {creditInfo.hasEnough
-                        ? "✓ Enough credits for generation"
-                        : `✗ Need ${currentCreditCost - userCredits} more credits`}
-                    </div>
-                  )}
-
-                  {userCredits === 0 && (
-                    <button
-                      onClick={handleBuyCredits}
-                      className="w-full mt-3 bg-gradient-to-r from-yellow-500 to-amber-600 text-black py-2 rounded-lg font-semibold hover:from-yellow-600 hover:to-amber-700 transition-all"
-                    >
-                      🔥 Buy Credits
-                    </button>
-                  )}
-                </div>
-
+        {/* Top Header Section */}
+        <header className="max-w-[1400px] mx-auto mb-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            {/* Back Button + Title */}
+            <div>
+              <div className="flex items-center gap-3 mb-1">
                 <button
                   onClick={closeAndReset}
-                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-all hover:rotate-90"
-                  title="Close"
+                  className="hover:opacity-75 transition-opacity text-2xl font-light text-white"
+                  title="Go Back"
                 >
-                  <span className="text-xl">✕</span>
+                  ←
                 </button>
+                <h1 className="text-3xl md:text-[36px] font-bold text-white tracking-tight">
+                  Retexturing AI
+                </h1>
               </div>
+              <p className="text-gray-400 font-medium text-xs md:text-sm pl-8">
+                Transform venues with intelligent AI
+              </p>
             </div>
 
-            <p className="text-center text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
-              Use AI to visualize your venue in different wedding themes
-              instantly. From rustic charm to royal elegance.
-            </p>
+            {/* Outlined Badges + Sleek Credits Pill */}
+            <div className="flex flex-wrap items-center gap-2 pl-8 md:pl-0">
+              <span className="border border-white/20 px-4 py-1.5 rounded-full text-[11px] font-medium text-white/80 select-none">
+                Smart Prompts
+              </span>
+              <span className="border border-white/20 px-4 py-1.5 rounded-full text-[11px] font-medium text-white/80 select-none">
+                Structure Preservation
+              </span>
+              <span className="border border-white/20 px-4 py-1.5 rounded-full text-[11px] font-medium text-white/80 select-none">
+                Multiple Variations
+              </span>
+              
+              {/* Dynamic Credits Display */}
+              <button
+                onClick={fetchUserCredits}
+                disabled={loadingCredits || isGenerating}
+                className="bg-white/10 hover:bg-white/20 border border-white/15 px-4 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 transition-all text-white ml-2 cursor-pointer disabled:opacity-50"
+                title="Click to refresh credits"
+              >
+                <span>🎫</span>
+                <span>{loadingCredits ? "..." : userCredits.toLocaleString()} Credits</span>
+                <span className={loadingCredits ? "animate-spin text-[8px]" : "text-[8px]"}>🔄</span>
+              </button>
+            </div>
           </div>
         </header>
 
-        {/* Step Indicator */}
-        <div className="max-w-7xl mx-auto mb-8 px-4">
-          <div className="flex items-center justify-center gap-4 md:gap-8">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-amber-600 flex items-center justify-center font-bold text-black">
-                1
-              </div>
-              <span className="font-medium text-gray-300">Upload Image</span>
-            </div>
-            <div className="w-8 h-0.5 bg-gray-600"></div>
-            <div className="flex items-center gap-4 opacity-50">
-              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-400">
-                2
-              </div>
-              <span className="font-medium text-gray-400">Choose Theme</span>
-            </div>
-            <div className="w-8 h-0.5 bg-gray-600"></div>
-            <div className="flex items-center gap-4 opacity-50">
-              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-gray-400">
-                3
-              </div>
-              <span className="font-medium text-gray-400">Generate</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {/* Upload Section */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">
-                    Upload Your Venue Image
-                  </h2>
-                  <p className="text-gray-300">
-                    Select a high-quality image for AI transformation
-                  </p>
-                </div>
-
-                <div
-                  className={`border-3 border-dashed rounded-xl cursor-pointer transition-all duration-300 ${
-                    selectedImage
-                      ? "border-yellow-500 bg-yellow-500/10"
-                      : "border-gray-600 bg-white/5 hover:border-yellow-400 hover:bg-yellow-500/5"
-                  } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
-                  onClick={() => !isGenerating && fileInputRef.current?.click()}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    disabled={isGenerating}
-                  />
-
-                  {selectedImage ? (
-                    <div className="relative">
-                      <img
-                        src={URL.createObjectURL(selectedImage)}
-                        alt="Selected venue"
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
-                        <div className="text-center text-white">
-                          <span className="text-3xl block mb-2">📷</span>
-                          <p className="font-medium">Click to change image</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-12 text-center">
-                      <span className="text-5xl block mb-4 text-gray-400">
-                        📷
-                      </span>
-                      <h3 className="text-xl font-semibold text-white mb-2">
-                        Drop your venue image here
-                      </h3>
-                      <p className="text-gray-400 mb-4">
-                        or click to browse files
-                      </p>
-                      <div className="text-sm text-gray-500">
-                        Supports: JPG, PNG, WEBP • Max 50MB
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Wedding Function Theme */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white">
-                    Wedding Function Theme
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {Object.entries(themes).map(([key, label]) => (
-                    <button
-                      key={key}
-                      className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                        selectedTheme === key
-                          ? "border-yellow-500 bg-yellow-500/20 text-yellow-300"
-                          : "border-gray-700 bg-white/5 hover:border-yellow-400 hover:bg-yellow-500/10 text-white"
-                      } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
-                      onClick={() => setSelectedTheme(key)}
-                      disabled={isGenerating}
-                    >
-                      <div className="text-center">
-                        <div className="text-2xl mb-2">🎨</div>
-                        <span className="font-medium text-sm">{label}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Prompt Section */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white">
-                    Custom Prompt (Optional)
-                  </h3>
-                </div>
-
-                <textarea
-                  className="w-full p-4 bg-white/10 border border-white/20 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/30 transition-all resize-none text-white placeholder-gray-400"
-                  placeholder="Add specific details about decorations, colors, or style..."
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  disabled={isGenerating}
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Model Selection */}
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    AI Model
-                  </h3>
-                  <p className="text-gray-300">
-                    Choose your AI model for generation
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <button
-                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
-                      modelType === "flux-kontext-pro"
-                        ? "border-yellow-500 bg-yellow-500/20"
-                        : "border-gray-700 bg-white/5 hover:border-yellow-400 hover:bg-yellow-500/10"
-                    } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
-                    onClick={() => setModelType("flux-kontext-pro")}
-                    disabled={isGenerating}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-bold text-white">Ultra</div>
-                        <div className="text-sm text-gray-300">
-                          High quality, slower
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-black text-xs font-bold rounded-full">
-                        Premium
-                      </span>
-                    </div>
-                  </button>
-
-                  <button
-                    className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
-                      modelType === "flux-kontext-dev"
-                        ? "border-yellow-500 bg-yellow-500/20"
-                        : "border-gray-700 bg-white/5 hover:border-yellow-400 hover:bg-yellow-500/10"
-                    } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
-                    onClick={() => setModelType("flux-kontext-dev")}
-                    disabled={isGenerating}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-bold text-white">Basic</div>
-                        <div className="text-sm text-gray-300">
-                          Balanced quality & speed
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 bg-gray-700 text-gray-300 text-xs font-bold rounded-full">
-                        Basic
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Preview Section */}
-              {/* Image Retexturing Preview */}
-              <div className="w-full px-[6%] mt-32">
-                {/* Section Title */}
-                <h2
-                  className="text-[64px] text-white mb-16 heading-font"
-                  style={{ lineHeight: "1.05" }}
-                >
-                  Image Retexturing →
-                </h2>
-
-                {/* Main Container */}
-                <div
-                  className="w-full rounded-[56px] p-14 md:p-16"
-                  style={{ backgroundColor: "#C9AB98" }}
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {/* BEFORE IMAGE */}
-                    <div className="relative rounded-[32px] overflow-hidden h-[480px] bg-black/10">
-                      <div className="absolute top-6 left-6 z-10 bg-black text-white px-6 py-2 rounded-full text-[14px]">
-                        Before
-                      </div>
-
-                      {selectedImage ? (
-                        <img
-                          src={URL.createObjectURL(selectedImage)}
-                          alt="Original venue"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-black/70 text-2xl heading-font">
-                          Upload Image
-                        </div>
-                      )}
-                    </div>
-
-                    {/* AFTER IMAGE */}
-                    <div className="relative rounded-[32px] overflow-hidden h-[480px] bg-black/10">
-                      <div className="absolute top-6 left-6 z-10 bg-black text-white px-6 py-2 rounded-full text-[14px]">
-                        After
-                      </div>
-
-                      {generatedImage ? (
-                        <img
-                          src={generatedImage.url}
-                          alt="AI Generated venue"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-black/70 text-2xl heading-font">
-                          Generated Result
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Generate Button */}
-          <div className="mb-8">
-            <button
-              className={`w-full py-5 px-6 rounded-xl font-bold text-xl transition-all duration-300 ${
-                !selectedImage || isGenerating || apiStatus === "error"
-                  ? "bg-gray-700 cursor-not-allowed text-gray-400"
-                  : "bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-black shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
-              }`}
-              onClick={handleGenerate}
-              disabled={!selectedImage || isGenerating || apiStatus === "error"}
-            >
-              {isGenerating ? (
-                <div className="flex items-center justify-center gap-3">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div>
-                  <span>Generating... Please wait</span>
-                </div>
-              ) : apiStatus === "error" ? (
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-xl">⚠️</span>
-                  <span>Backend Connection Failed</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-xl">✨</span>
-                  <span>Generate Transformation</span>
-                </div>
-              )}
-            </button>
-
-            {/* Insufficient Credits Message */}
-            {userCredits < currentCreditCost && selectedImage && (
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-red-400">⚠️</span>
-                    <span className="text-red-300">
-                      Insufficient credits! Need{" "}
-                      {currentCreditCost - userCredits} more.
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleBuyCredits}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    Buy Credits
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Results Section */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Generated Results
+        {/* Main Grid Workspace */}
+        <main className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column (Upload, Model, Quantity, Custom Prompt) - spans 5 of 12 */}
+          <div className="lg:col-span-5 space-y-6">
+            
+            {/* 1. Upload Card */}
+            <div className="bg-white text-black rounded-[32px] p-8 shadow-xl flex flex-col h-full min-h-[350px]">
+              <h2 className="text-[22px] font-bold text-[#111] mb-1">
+                Upload Your Venue Image
               </h2>
-              <p className="text-gray-300">Your AI-transformed venue images</p>
-            </div>
+              <p className="text-[13px] text-gray-500 mb-6 font-normal">
+                Upload a clear image of your venue to get started
+              </p>
 
-            {/* Current Generation */}
-            {isGenerating && (
-              <div className="bg-gradient-to-r from-yellow-500/10 to-amber-600/10 rounded-xl p-8 text-center mb-6 border border-yellow-500/20">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-yellow-500/30 border-t-yellow-500 mx-auto mb-6"></div>
-                <h3 className="text-xl font-bold text-white mb-3">
-                  Generating your venue transformation...
-                </h3>
-                <p className="text-gray-300 mb-6">
-                  This may take 30-60 seconds. Please don't close this window.
-                </p>
-                <div className="w-full bg-yellow-500/20 rounded-full h-2 overflow-hidden mb-4">
-                  <div className="bg-gradient-to-r from-yellow-500 to-amber-600 h-full w-3/4 animate-pulse"></div>
-                </div>
-                <div className="text-sm text-gray-400">
-                  Using {currentCreditCost} credits. Will have{" "}
-                  {userCredits - currentCreditCost} credits remaining.
-                </div>
-              </div>
-            )}
+              <div
+                className={`flex-1 border-2 border-dashed rounded-[24px] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
+                  selectedImage
+                    ? "border-yellow-500 bg-yellow-50/10"
+                    : "border-gray-200 hover:border-black hover:bg-gray-50"
+                } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={() => !isGenerating && fileInputRef.current?.click()}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  disabled={isGenerating}
+                />
 
-            {/* Generated Image Display */}
-            {generatedImage && !isGenerating && (
-              <div className="mb-8">
-                <div className="relative rounded-xl overflow-hidden mb-6 shadow-2xl">
-                  <img
-                    src={generatedImage.url}
-                    alt="Generated venue"
-                    className="w-full h-auto"
-                  />
-                  <div className="absolute bottom-4 right-4 flex gap-3">
-                    <div className="bg-black/70 text-white px-4 py-2 rounded-lg backdrop-blur-sm">
-                      Used: {generatedImage.creditsUsed} credits
-                    </div>
-                    <button
-                      className="bg-white hover:bg-gray-100 text-gray-900 px-5 py-3 rounded-lg shadow-lg flex items-center gap-2 font-bold transition-all hover:shadow-xl"
-                      onClick={() => downloadImage(generatedImage.url)}
-                    >
-                      <span className="text-lg">📥</span>
-                      Download
-                    </button>
-                  </div>
-                </div>
-
-                {/* Credit Summary */}
-                {generatedImage.creditInfo && (
-                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <span className="text-green-400 text-2xl">✅</span>
-                        <div>
-                          <div className="font-bold text-green-300">
-                            Credits deducted successfully
-                          </div>
-                          <div className="text-sm text-green-400">
-                            {generatedImage.creditInfo.deducted} credits used •
-                            New balance: {generatedImage.creditInfo.newBalance}
-                          </div>
-                        </div>
+                {selectedImage ? (
+                  <div className="relative w-full h-full min-h-[180px] rounded-[16px] overflow-hidden group">
+                    <img
+                      src={URL.createObjectURL(selectedImage)}
+                      alt="Selected venue"
+                      className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-[16px]">
+                      <div className="text-center text-white">
+                        <span className="text-2xl block mb-1">📷</span>
+                        <p className="text-xs font-semibold">Change Image</p>
                       </div>
-                      <button
-                        onClick={fetchUserCredits}
-                        className="text-sm bg-green-500/20 hover:bg-green-500/30 text-green-300 px-3 py-1 rounded transition-colors"
-                      >
-                        Refresh
-                      </button>
                     </div>
+                  </div>
+                ) : (
+                  <div className="py-6">
+                    {/* Cloud upload icon inside a dark circle */}
+                    <div className="w-16 h-16 bg-[#18181b] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 13v8" />
+                        <path d="M12 13l-3 3" />
+                        <path d="M12 13l3 3" />
+                        <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+                      </svg>
+                    </div>
+                    <p className="text-[15px] font-bold text-black mb-1">
+                      Drop image or click to browse
+                    </p>
+                    <p className="text-[11px] text-gray-400">
+                      JPG, PNG, WebP up to 10MB
+                    </p>
                   </div>
                 )}
-
-                {/* Feedback Section */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <h4 className="text-lg font-bold text-white mb-4">
-                    How do you like this result?
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button
-                      className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-bold"
-                      onClick={() =>
-                        handleFeedback(generatedImage.id, "positive")
-                      }
-                    >
-                      <span className="text-xl">👍</span>
-                      Great Result!
-                    </button>
-                    <button
-                      className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white py-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-bold"
-                      onClick={() =>
-                        handleFeedback(generatedImage.id, "negative")
-                      }
-                    >
-                      <span className="text-xl">👎</span>
-                      Try Again
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Generation History */}
-            {generationHistory.length > 0 && (
-              <div className="mt-8">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                  <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                    <span>📚</span>
-                    Previous Generations
-                  </h3>
-                  <div className="flex gap-3">
-                    <button
-                      className="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm font-bold px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-colors"
-                      onClick={checkApiHealth}
-                    >
-                      <span className="text-base">🔄</span>
-                      Refresh
-                    </button>
-                    <button
-                      className="text-red-400 hover:text-red-300 flex items-center gap-2 text-sm font-bold px-3 py-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors"
-                      onClick={handleClearHistory}
-                    >
-                      <span className="text-base">🗑️</span>
-                      Clear All
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {generationHistory.map((item) => (
-                    <div
-                      key={item.id}
-                      className="relative group rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow"
-                    >
-                      <img
-                        src={item.url}
-                        alt="Previous generation"
-                        className="w-full h-40 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="flex gap-3">
-                          <button
-                            className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-lg transition-colors"
-                            onClick={() => {
-                              setGeneratedImage(item);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                            title="View details"
-                          >
-                            👁️
-                          </button>
-                          <button
-                            className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-lg transition-colors"
-                            onClick={() =>
-                              downloadImage(item.url, `venue-${item.id}.jpg`)
-                            }
-                            title="Download"
-                          >
-                            📥
-                          </button>
-                          <button
-                            className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg transition-colors"
-                            onClick={() => handleDeleteGeneration(item.id)}
-                            title="Delete"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-2">
-                        <div className="flex justify-between">
-                          <span className="truncate">
-                            {themes[item.theme] || "Custom"}
-                          </span>
-                          <span className="text-yellow-300">
-                            {item.creditsUsed} credits
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {!generatedImage &&
-              !isGenerating &&
-              generationHistory.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-6 text-gray-400">🎨</div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
-                    No generations yet
-                  </h3>
-                  <p className="text-gray-400 mb-8 max-w-md mx-auto">
-                    Upload an image and select a theme to start transforming
-                    your venue!
-                  </p>
-                  <div className="flex justify-center gap-4">
-                    <button
-                      className="text-gray-400 hover:text-white flex items-center gap-2 font-bold px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                      onClick={() =>
-                        toast.info(
-                          "1. Upload venue photo\n2. Select theme\n3. Click Generate",
-                        )
-                      }
-                    >
-                      <span className="text-lg">💡</span>
-                      Quick tips
-                    </button>
-                    <button
-                      className="text-yellow-400 hover:text-yellow-300 flex items-center gap-2 font-bold px-4 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 rounded-lg transition-colors"
-                      onClick={checkApiHealth}
-                    >
-                      <span className="text-lg">🔗</span>
-                      Check connection
-                    </button>
-                  </div>
-                </div>
-              )}
-          </div>
-
-          {/* Credit System Info */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-              <span>💰</span>
-              Credit System Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-yellow-500/10 p-5 rounded-xl border border-yellow-500/20">
-                <div className="text-yellow-300 font-bold text-lg mb-3">
-                  Standard Generation
-                </div>
-                <div className="text-gray-300 mb-2">10 credits per image</div>
-                <div className="text-sm text-gray-400">
-                  Basic quality models
-                </div>
-              </div>
-              <div className="bg-amber-500/10 p-5 rounded-xl border border-amber-500/20">
-                <div className="text-amber-300 font-bold text-lg mb-3">
-                  Premium Generation
-                </div>
-                <div className="text-gray-300 mb-2">15 credits per image</div>
-                <div className="text-sm text-gray-400">
-                  Pro/max quality models
-                </div>
-              </div>
-              <div className="bg-purple-500/10 p-5 rounded-xl border border-purple-500/20">
-                <div className="text-purple-300 font-bold text-lg mb-3">
-                  Credit Packs
-                </div>
-                <div className="text-gray-300 mb-2">
-                  Basic: 1300 credits • Premium: 6500 credits
-                </div>
-                <div className="text-sm text-gray-400">
-                  Buy more from Pricing page
-                </div>
               </div>
             </div>
+
+            {/* AI Model & Quantity Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* 2. AI Model Selection Card */}
+              <div className="bg-white text-black rounded-[32px] p-6 shadow-xl flex flex-col justify-between h-[160px]">
+                <div className="text-center">
+                  <h3 className="text-[13px] font-bold text-black mb-0.5">AI Model</h3>
+                  <p className="text-[10px] text-gray-400 font-medium mb-3">Choose your model</p>
+                </div>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => !isGenerating && setModelType("flux-kontext-dev")}
+                    disabled={isGenerating}
+                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
+                      modelType === "flux-kontext-dev"
+                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
+                        : "border-gray-100 text-gray-400 hover:border-gray-200"
+                    }`}
+                  >
+                    Basic {modelType === "flux-kontext-dev" && <span className="text-[7px]">🟡</span>}
+                  </button>
+                  <button
+                    onClick={() => !isGenerating && setModelType("flux-kontext-pro")}
+                    disabled={isGenerating}
+                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
+                      modelType === "flux-kontext-pro"
+                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
+                        : "border-gray-100 text-gray-400 hover:border-gray-200"
+                    }`}
+                  >
+                    Ultra {modelType === "flux-kontext-pro" && <span className="text-[7px]">🟡</span>}
+                  </button>
+                </div>
+              </div>
+
+              {/* 3. Number of Images Card */}
+              <div className="bg-white text-black rounded-[32px] p-6 shadow-xl flex flex-col justify-between h-[160px]">
+                <div className="text-center">
+                  <h3 className="text-[13px] font-bold text-black mb-0.5">Number of Images</h3>
+                  <p className="text-[10px] text-gray-400 font-medium mb-3">Choose quantity</p>
+                </div>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => !isGenerating && setImageCount(1)}
+                    disabled={isGenerating}
+                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
+                      imageCount === 1
+                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
+                        : "border-gray-100 text-gray-400 hover:border-gray-200"
+                    }`}
+                  >
+                    1 Single {imageCount === 1 && <span className="text-[7px]">🟡</span>}
+                  </button>
+                  <button
+                    onClick={() => !isGenerating && setImageCount(4)}
+                    disabled={isGenerating}
+                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
+                      imageCount === 4
+                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
+                        : "border-gray-100 text-gray-400 hover:border-gray-200"
+                    }`}
+                  >
+                    4 Multiple {imageCount === 4 && <span className="text-[7px]">🟡</span>}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* 4. Custom Prompt (Optional) Card */}
+            <div className="bg-white text-black rounded-[32px] p-8 shadow-xl">
+              <h3 className="text-[16px] font-bold text-black mb-3">
+                Custom Prompt (Optional)
+              </h3>
+              <textarea
+                className="w-full p-4 bg-white border border-gray-200 rounded-[20px] focus:border-black focus:outline-none text-[13px] leading-relaxed text-black placeholder-gray-400 resize-none h-[110px]"
+                placeholder="Add specific details like 'fairy lights', 'minimalist decor', 'traditional mandap'..."
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                disabled={isGenerating}
+              />
+            </div>
+
           </div>
+
+          {/* Right Column (Preview Card, Theme Selection Card) - spans 7 of 12 */}
+          <div className="lg:col-span-7 space-y-6">
+
+            {/* 5. Generated Images Preview Card */}
+            {isGenerating ? (
+              /* Beautiful active loading state */
+              <div className="bg-white text-black rounded-[32px] p-12 shadow-xl flex flex-col items-center justify-center text-center min-h-[380px] animate-pulse">
+                <div className="relative mb-6">
+                  {/* Glowing spinner */}
+                  <div className="w-16 h-16 rounded-full border-4 border-yellow-100 border-t-yellow-400 animate-spin"></div>
+                  <span className="absolute inset-0 flex items-center justify-center text-xl">✨</span>
+                </div>
+                <h3 className="text-[20px] font-bold text-black mb-2">Transforming Your Venue...</h3>
+                <p className="text-[13px] text-gray-400 max-w-sm mb-6 font-normal">
+                  Our advanced AI model is analyzing structure and rendering your theme decoration concept. This takes 30-60 seconds.
+                </p>
+                <div className="w-full max-w-xs bg-gray-100 h-1.5 rounded-full overflow-hidden mb-1">
+                  <div className="bg-gradient-to-r from-yellow-400 to-amber-500 h-full w-4/5 animate-pulse rounded-full"></div>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-2">
+                  Deducting {currentCreditCost} credits on success • Balance will be {userCredits - currentCreditCost}
+                </p>
+              </div>
+            ) : generatedImage ? (
+              /* Active generated image card */
+              <div className="bg-white text-black rounded-[32px] p-6 shadow-xl flex flex-col justify-between min-h-[380px]">
+                <div className="relative rounded-[24px] overflow-hidden flex-1 bg-gray-50 flex items-center justify-center min-h-[280px]">
+                  <img
+                    src={generatedImage.url}
+                    alt="AI Transformation Result"
+                    className="w-full h-full max-h-[420px] object-cover rounded-[24px]"
+                  />
+                  {/* Floating badges */}
+                  <div className="absolute top-4 left-4 z-10 bg-black/70 backdrop-blur-md text-white text-[11px] px-4 py-1.5 rounded-full font-bold select-none">
+                    After: {themes[generatedImage.theme] || "Custom Theme"}
+                  </div>
+
+                  {/* Floating actions */}
+                  <div className="absolute bottom-4 right-4 flex gap-2">
+                    <button
+                      className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-xl shadow-lg flex items-center gap-1.5 text-xs font-bold transition-all"
+                      onClick={() => downloadImage(generatedImage.url)}
+                    >
+                      <span>📥</span> Download
+                    </button>
+                  </div>
+                </div>
+
+                {/* Rating + Info Footer */}
+                <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-gray-100 pt-4">
+                  <div className="text-[11px] text-gray-400 font-semibold">
+                    {generatedImage.creditInfo ? (
+                      <span>Deducted: {generatedImage.creditInfo.deducted} credits • Balance: {generatedImage.creditInfo.newBalance}</span>
+                    ) : (
+                      <span>Credits used: {currentCreditCost} credits</span>
+                    )}
+                  </div>
+                  <div className="flex gap-1.5 items-center justify-end">
+                    <span className="text-[11px] text-gray-400 font-semibold mr-1">Feedback:</span>
+                    <button
+                      className="w-8 h-8 rounded-full bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center text-xs transition-all"
+                      onClick={() => handleFeedback(generatedImage.id, "positive")}
+                      title="Great Result!"
+                    >
+                      👍
+                    </button>
+                    <button
+                      className="w-8 h-8 rounded-full bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center text-xs transition-all"
+                      onClick={() => handleFeedback(generatedImage.id, "negative")}
+                      title="Try Again"
+                    >
+                      👎
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Dotted star icon empty state */
+              <div className="bg-white text-black rounded-[32px] p-12 shadow-xl flex flex-col items-center justify-center text-center min-h-[380px]">
+                <div className="w-16 h-16 flex items-center justify-center text-black mb-4">
+                  {/* Stylized star from screenshot */}
+                  <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L12 2z" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="2.5" />
+                  </svg>
+                </div>
+                <h2 className="text-[20px] font-bold text-black mb-1">
+                  Generated Images Will Appear Here
+                </h2>
+                <p className="text-[13px] text-gray-500 max-w-[340px] font-normal leading-relaxed">
+                  Upload an image and configure your settings to start transforming your venue
+                </p>
+              </div>
+            )}
+
+            {/* 6. Wedding Function Selection Card */}
+            <div className="bg-white text-black rounded-[32px] p-8 shadow-xl">
+              <h3 className="text-[20px] font-bold text-black mb-1">
+                Wedding Function Selection
+              </h3>
+              <p className="text-[13px] text-gray-500 mb-8 font-normal">
+                Choose a wedding function theme
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {UI_THEMES.map((theme) => {
+                  const isSelected = selectedTheme === theme.key;
+                  return (
+                    <button
+                      key={theme.key}
+                      onClick={() => !isGenerating && setSelectedTheme(theme.key)}
+                      disabled={isGenerating}
+                      className={`rounded-[22px] p-4 flex flex-col items-center justify-between text-center transition-all duration-300 border h-[125px] hover:shadow-md hover:-translate-y-0.5 ${
+                        isSelected
+                          ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm ring-1 ring-yellow-400"
+                          : "border-gray-100 bg-white text-black hover:border-gray-200"
+                      }`}
+                    >
+                      {theme.key === "" ? (
+                        <div className="flex-1 flex items-center justify-center font-bold text-xs text-black">
+                          Custom Only
+                        </div>
+                      ) : (
+                        <>
+                          {/* Theme Specific SVGs */}
+                          <div className="flex-1 flex items-center justify-center">
+                            {theme.icon === "sun" && (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                              </svg>
+                            )}
+                            {theme.icon === "hash" && (
+                              <span className="text-xl font-bold text-black/75">#</span>
+                            )}
+                            {theme.icon === "music" && (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M9 18V5l12-2v13" />
+                                <circle cx="6" cy="18" r="3" />
+                                <circle cx="18" cy="16" r="3" />
+                              </svg>
+                            )}
+                            {theme.icon === "heart" && (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                              </svg>
+                            )}
+                            {theme.icon === "lock" && (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                              </svg>
+                            )}
+                            {theme.icon === "star" && (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            )}
+                            {theme.icon === "cocktail" && (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M22 22H2M12 22V12m0 0 8-8H4l8 8ZM18 2h-4v2h4V2Z" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className="font-bold text-[13px] text-black mb-1.5 select-none">{theme.label}</span>
+                          <div className="flex gap-1 items-center justify-center">
+                            {theme.dots.map((dotClass, idx) => (
+                              <span key={idx} className={`w-2 h-2 rounded-full ${dotClass}`} />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+        </main>
+
+        {/* 7. Bottom Generate Button Section */}
+        <div className="max-w-[1400px] mx-auto mt-10 mb-6">
+          <button
+            onClick={handleGenerate}
+            disabled={!selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost}
+            className={`w-full py-5 rounded-[22px] font-bold text-[17px] tracking-wide transition-all duration-300 shadow-md ${
+              !selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost
+                ? "bg-[#c4c4c9] text-[#e0e0e5] cursor-not-allowed shadow-none"
+                : "bg-[#8e8e93] text-black hover:bg-black hover:text-white transform hover:-translate-y-0.5"
+            }`}
+          >
+            {isGenerating ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></span>
+                Generating Transformation...
+              </span>
+            ) : apiStatus === "error" ? (
+              "Backend Connection Unreachable"
+            ) : userCredits < currentCreditCost && selectedImage ? (
+              `Insufficient Credits (Need ${currentCreditCost} Credits, Balance: ${userCredits})`
+            ) : (
+              "Generate"
+            )}
+          </button>
+
+          {/* Credits Alert Bar (Beautiful inline warning) */}
+          {userCredits < currentCreditCost && selectedImage && (
+            <div className="mt-4 p-4 bg-red-950/20 border border-red-900/30 rounded-[20px] backdrop-blur-md max-w-lg mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
+                <span className="text-xs text-red-300 font-semibold">
+                  Insufficient credits! Need {currentCreditCost - userCredits} more.
+                </span>
+              </div>
+              <button
+                onClick={handleBuyCredits}
+                className="bg-red-800/80 hover:bg-red-700 text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-colors shadow-sm"
+              >
+                Buy Credits
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Footer */}
-        <footer className="mt-12 py-8 px-4 bg-gradient-to-b from-gray-900/50 to-black/50 border-t border-white/10">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        {/* Previous Transformations Grid */}
+        {generationHistory.length > 0 && (
+          <section className="max-w-[1400px] mx-auto mt-16 border-t border-white/10 pt-10 mb-12">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <div>
-                <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b border-white/20">
-                  Connect With Us
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <span>📚</span>
+                  Previous Concepts
                 </h3>
-                <div className="flex gap-4">
-                  <button
-                    type="button"
-                    className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors"
-                  >
-                    📘
-                  </button>
-                  <button
-                    type="button"
-                    className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors"
-                  >
-                    📷
-                  </button>
-                  <button
-                    type="button"
-                    className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors"
-                  >
-                    🐦
-                  </button>
-                </div>
+                <p className="text-xs text-gray-400">View and download your previous design concepts</p>
               </div>
+              <button
+                className="text-xs font-bold px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-300 transition-all flex items-center gap-1"
+                onClick={handleClearHistory}
+              >
+                <span>🗑️</span> Clear History
+              </button>
+            </div>
 
-              <div className="text-center">
-                <div className="inline-block border-2 border-white/30 px-6 py-3 rounded-xl bg-black/40 backdrop-blur-sm mb-4">
-                  <h2 className="text-2xl font-bold text-white">
-                    💍 Retexturing AI
-                  </h2>
-                </div>
-                <p className="text-gray-400 font-bold">
-                  &copy; {new Date().getFullYear()} The Lovers AI. All rights
-                  reserved.
-                </p>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {generationHistory.map((item) => (
+                <div
+                  key={item.id}
+                  className="relative group rounded-[22px] overflow-hidden shadow-lg border border-white/5 bg-white/5 aspect-[4/3] transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <img
+                    src={item.url}
+                    alt="Transformation"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                    <button
+                      className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg text-xs font-bold hover:bg-gray-100 transition-all"
+                      onClick={() => {
+                        setGeneratedImage(item);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      title="Quick View"
+                    >
+                      👁️
+                    </button>
+                    <button
+                      className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center shadow-lg text-xs font-bold hover:bg-gray-100 transition-all"
+                      onClick={() => downloadImage(item.url, `concept-${item.id}.jpg`)}
+                      title="Download"
+                    >
+                      📥
+                    </button>
+                    <button
+                      className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg text-xs font-bold hover:bg-red-600 transition-all"
+                      onClick={() => handleDeleteGeneration(item.id)}
+                      title="Delete"
+                    >
+                      ✕
+                    </button>
+                  </div>
 
-              <div className="text-right">
-                <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b border-white/20">
-                  Quick Links
-                </h3>
-                <div className="flex flex-wrap justify-end gap-4">
-                  <a
-                    href="#features"
-                    className="text-gray-300 hover:text-white font-medium px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    Features
-                  </a>
-                  <a
-                    href="#gallery"
-                    className="text-gray-300 hover:text-white font-medium px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    Gallery
-                  </a>
-                  <a
-                    href="#upload"
-                    className="text-gray-300 hover:text-white font-medium px-3 py-1 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    Try Now
-                  </a>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-[10px] text-gray-300 flex justify-between items-center select-none">
+                    <span className="font-bold truncate max-w-[80px]">
+                      {themes[item.theme] || "Custom Theme"}
+                    </span>
+                    <span className="bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded font-bold">
+                      {item.creditsUsed || 10} pts
+                    </span>
+                  </div>
                 </div>
-                <p className="text-gray-400 mt-4">
-                  Transform your wedding dreams into visual reality{" "}
-                  <span className="text-red-400">❤️</span>
-                </p>
-              </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Dynamic Premium Footer */}
+        <footer className="max-w-[1400px] mx-auto mt-20 pt-8 border-t border-white/5 text-center text-xs text-gray-500 select-none">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="font-medium">
+              &copy; {new Date().getFullYear()} The Lovers AI. All rights reserved.
+            </p>
+            <div className="flex gap-4">
+              <a href="#features" className="hover:text-white transition-colors">Features</a>
+              <a href="#gallery" className="hover:text-white transition-colors">Gallery</a>
+              <a href="#terms" className="hover:text-white transition-colors">Terms of Service</a>
             </div>
           </div>
         </footer>
+
       </div>
     </>
   );

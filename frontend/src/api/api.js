@@ -7,6 +7,7 @@ const apiBaseUrl = configuredApiBaseUrl.replace(/\/api\/?$/, '').replace(/\/$/, 
 const api = axios.create({
   baseURL: `${apiBaseUrl}/api`,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 10000, // ⏳ 10-second timeout to prevent infinite hangs
 });
 
 // ─── JWT Token helpers ───
@@ -27,6 +28,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      error.message = 'Connection timed out. Please verify that your backend server is running on port 5000.';
+    } else if (error.message === 'Network Error') {
+      error.message = 'Network Error: Cannot connect to backend server. Please verify that the backend is running on port 5000 and has not crashed.';
+    }
+
     if (error.response) {
       console.error('API Error:', error.response.status, error.response.data);
 

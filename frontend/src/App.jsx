@@ -1,4 +1,5 @@
 // App.jsx
+import React, { useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -64,6 +65,14 @@ import VendorProfile from "./pages/vendor/VendorProfile";
 
 function AppContent() {
   const location = useLocation();
+  const [isAIToolOpen, setIsAIToolOpen] = useState(false);
+
+  // Reset active tool state when routing changes
+  React.useEffect(() => {
+    if (location.pathname !== "/planner-ai-tools") {
+      setIsAIToolOpen(false);
+    }
+  }, [location.pathname]);
 
   // Hide navbar and footer on admin, planner, and vendor dashboard pages
   const hideNavbarAndFooter =
@@ -107,7 +116,7 @@ function AppContent() {
           path="/planner-ai-tools"
           element={
             <ProtectedRoute requiredRole="planner">
-              <PlannerAITools />
+              <PlannerAITools onToggleTool={setIsAIToolOpen} />
             </ProtectedRoute>
           }
         />
@@ -280,7 +289,7 @@ function AppContent() {
           }
         />
       </Routes>
-      {!hideNavbarAndFooter && <Footer />}
+      {!hideNavbarAndFooter && !isAIToolOpen && <Footer />}
     </>
   );
 }
