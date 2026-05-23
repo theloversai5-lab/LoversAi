@@ -210,12 +210,12 @@ const Navbar = () => {
         {/* Logo - Desktop */}
         <Link
           to={logoTarget}
-          className="absolute left-3 md:left-[-22px] top-1 md:top-[-12px] pointer-events-auto hidden md:block z-50"
+          className="absolute left-3 md:left-[15px] top-1 md:top-[18px] pointer-events-auto hidden md:block z-50"
         >
           <img
             src="/images/logo copy.png"
             alt="Lovers AI logo"
-            className="h-[200px] w-auto object-contain transition-transform duration-300 hover:scale-105"
+            className="h-[81px] w-auto object-contain transition-transform duration-300 hover:scale-105"
           />
         </Link>
 
