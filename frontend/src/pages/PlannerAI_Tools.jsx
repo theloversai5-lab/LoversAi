@@ -142,8 +142,11 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
     }
   };
 
+  const isToolActive = showRetexturing || showAngleChanger || showImageToVideo;
+
   return (
     <>
+<<<<<<< HEAD
       <div className="fixed left-6 top-6 z-30 sm:left-8 sm:top-8">
         <button
           type="button"
@@ -160,13 +163,26 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       </div>
 
       <PlannerQuickMenu />
+=======
+      {/* Solid Black Header Bar for Active Tools to prevent scrolling overlap */}
+      {isToolActive && (
+        <div 
+          className="fixed top-0 left-0 right-0 h-[95px] md:h-[148px] bg-black transition-all duration-300 pointer-events-none border-b border-white/5 shadow-2xl"
+          style={{ zIndex: 40 }}
+        ></div>
+      )}
+>>>>>>> origin/Ai-tools
 
       {/* Hero Section */}
       {!showRetexturing && !showAngleChanger && !showImageToVideo && (
-        <div className="relative w-full h-screen flex items-center justify-center text-white overflow-hidden">
+        <div className="relative w-screen h-screen flex items-center justify-center text-white overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center z-0"
-            style={{ backgroundImage: `url("./images/bridal.png")` }}
+            style={{ 
+              backgroundImage: `url("./images/bridal.png")`,
+              backgroundSize: "cover",
+              backgroundPosition: "center"
+            }}
           ></div>
           <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
         </div>
@@ -177,10 +193,14 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
         <div
           id="ai-tools-section"
           className={`bg-black px-4 transition-all duration-300 ${
-            showRetexturing ? "pt-28 pb-10 md:pt-36 md:pb-16" : "py-20"
+            showRetexturing ? "pt-32 pb-10 md:pt-[175px] md:pb-16" : "py-20"
           }`}
         >
-          <div className="w-full px-[6%] md:px-[10%] transition-all duration-300">
+          <div
+            className={`w-full transition-all duration-300 ${
+              showRetexturing ? "max-w-[1550px] mx-auto px-4 md:px-8" : "px-[6%] md:px-[10%]"
+            }`}
+          >
             {!showRetexturing && (
               <h2
                 onClick={() =>
@@ -197,29 +217,29 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
             {/* BEFORE CLICK — show preview */}
             {!showRetexturing && (
               <div
-                className="bg-[#C9AB98] rounded-[56px] p-16 cursor-pointer"
+                className="glass-card rounded-[40px] md:rounded-[56px] p-8 md:p-16 border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
                 onClick={() =>
                   handleToolClick("retexturing", () => setShowRetexturing(true))
                 }
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
-                  <div className="relative rounded-[32px] overflow-hidden">
-                    <div className="absolute top-6 left-6 bg-black text-white px-6 py-2 rounded-full text-[16px] z-10">
+                  <div className="relative rounded-[32px] overflow-hidden aspect-[4/3.4]">
+                    <div className="absolute top-6 left-6 bg-black/60 border border-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium z-10">
                       Before
                     </div>
                     <img
                       src="./images/blue.jpg"
-                      className="w-full h-[480px] object-cover"
+                      className="w-full h-full object-cover"
                       alt="Blue themed venue"
                     />
                   </div>
-                  <div className="relative rounded-[32px] overflow-hidden">
-                    <div className="absolute top-6 left-6 bg-black text-white px-6 py-2 rounded-full text-[16px] z-10">
+                  <div className="relative rounded-[32px] overflow-hidden aspect-[4/3.4]">
+                    <div className="absolute top-6 left-6 bg-black/60 border border-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium z-10">
                       After
                     </div>
                     <img
                       src="./images/golden.png"
-                      className="w-full h-[480px] object-cover"
+                      className="w-full h-full object-cover"
                       alt="Golden themed venue"
                     />
                   </div>
@@ -239,10 +259,16 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       {!showRetexturing && !showImageToVideo && (
         <div
           className={`bg-black px-4 transition-all duration-300 ${
-            showAngleChanger ? "pt-28 pb-10 md:pt-36 md:pb-16" : "py-20"
+            showAngleChanger ? "pt-32 pb-10 md:pt-[175px] md:pb-16" : "py-20"
           }`}
         >
-          <div className={`w-full px-[6%] md:px-[10%] transition-all duration-300 ${showAngleChanger ? "" : "mt-16"}`}>
+          <div
+            className={`w-full transition-all duration-300 ${
+              showAngleChanger
+                ? "max-w-[1550px] mx-auto px-4 md:px-8"
+                : "px-[6%] md:px-[10%] mt-16"
+            }`}
+          >
             {!showAngleChanger && (
               <h2
                 onClick={() =>
@@ -259,7 +285,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
             {/* BEFORE CLICK — preview */}
             {!showAngleChanger && (
               <div
-                className="w-full rounded-[56px] p-16 bg-[#C9AB98] cursor-pointer"
+                className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
                 onClick={() =>
                   handleToolClick("angle-changer", () =>
                     setShowAngleChanger(true),
@@ -318,7 +344,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       {!showRetexturing && !showAngleChanger && !showImageToVideo && (
         <>
           <div className="bg-black py-20 px-4">
-            <div className="w-full px-[6%] md:px-[10%] mt-32 transition-all duration-300">
+            <div className="w-full px-[6%] md:px-[10%] mt-16 transition-all duration-300">
               <h2
                 onClick={() =>
                   handleToolClick("image-to-video", () =>
@@ -330,7 +356,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 Image to Video →
               </h2>
               <div
-                className="w-full rounded-[56px] p-16 bg-[#C9AB98] cursor-pointer"
+                className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
                 onClick={() =>
                   handleToolClick("image-to-video", () =>
                     setShowImageToVideo(true)
@@ -339,24 +365,24 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               >
                 <div className="grid md:grid-cols-2 gap-14">
                   <div className="relative">
-                    <div className="absolute top-6 left-6 bg-black text-white px-6 py-2 rounded-full text-[16px] z-10">
+                    <div className="absolute top-6 left-6 bg-black/60 border border-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium z-10">
                       Before
                     </div>
-                    <div className="rounded-[32px] overflow-hidden">
+                    <div className="rounded-[32px] overflow-hidden aspect-[4/3.4]">
                       <img
                         src="./images/mandap-image.png"
                         alt="Video before"
-                        className="w-full h-[480px] object-cover rounded-[32px]"
+                        className="w-full h-full object-cover rounded-[32px]"
                       />
                     </div>
                   </div>
                   <div className="relative">
-                    <div className="absolute top-6 left-6 bg-black text-white px-6 py-2 rounded-full text-[16px] z-10">
+                    <div className="absolute top-6 left-6 bg-black/60 border border-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium z-10">
                       After
                     </div>
-                    <div className="rounded-[32px] overflow-hidden">
+                    <div className="rounded-[32px] overflow-hidden aspect-[4/3.4]">
                       <video
-                        className="w-full h-[480px] object-cover rounded-[32px]"
+                        className="w-full h-full object-cover rounded-[32px]"
                         autoPlay
                         loop
                         muted
@@ -390,195 +416,196 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               {/* Pricing cards */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
                 {/* Free Plan */}
-                <div className="bg-[#C9AB98] rounded-[40px] p-10 flex flex-col justify-between h-full">
-                  <h3 className="text-xl font-bold mb-2">Free Plan</h3>
-                  <div className="text-[36px] font-semibold text-black mb-1">
+                <div className="glass-card border border-white/10 p-10 rounded-[32px] hover:border-loverai-gold/30 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full">
+                  <h3 className="text-xl font-bold text-white mb-2">Free Plan</h3>
+                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
                     ₹ 0
                   </div>
-                  <div className="text-sm text-gray-600 mb-6">/month</div>
-                  <p className="text-sm text-gray-700 mb-6">
+                  <div className="text-sm text-white/50 mb-6">/month</div>
+                  <p className="text-sm text-white/70 mb-6">
                     Perfect for getting started with AI creativity.
                   </p>
 
-                  <ul className="space-y-4 text-[16px] text-black mt-6 mb-8 flex-grow">
+                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Retexturizing
+                      <span className="text-loverai-gold mr-3">✓</span> Retexturizing
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image
+                      <span className="text-loverai-gold mr-3">✓</span> Image
                       upscaling
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image views
+                      <span className="text-loverai-gold mr-3">✓</span> Image views
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Standard
+                      <span className="text-loverai-gold mr-3">✓</span> Standard
                       quality output
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Community
+                      <span className="text-loverai-gold mr-3">✓</span> Community
                       support
                     </li>
                   </ul>
                 </div>
 
                 {/* Basic Plan */}
-                <div className="bg-[#C9AB98] rounded-[40px] p-10 flex flex-col justify-between h-full">
-                  <h3 className="text-xl font-bold mb-2">Basic Plan</h3>
-                  <div className="text-[36px] font-semibold text-black mb-1">
+                <div className="glass-card border border-white/10 p-10 rounded-[32px] hover:border-loverai-gold/30 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full">
+                  <h3 className="text-xl font-bold text-white mb-2">Basic Plan</h3>
+                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
                     ₹ 4,349
                   </div>
-                  <div className="text-sm text-gray-600 mb-6">/month</div>
-                  <p className="text-sm text-gray-700 mb-6">
+                  <div className="text-sm text-white/50 mb-6">/month</div>
+                  <p className="text-sm text-white/70 mb-6">
                     Great for individual creators and small projects.
                   </p>
 
-                  <ul className="space-y-4 text-[16px] text-black mt-6 mb-8 flex-grow">
+                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span>{" "}
+                      <span className="text-loverai-gold mr-3">✓</span>{" "}
                       RetexturCredits per month: 1,300/img
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Number of
+                      <span className="text-loverai-gold mr-3">✓</span> Number of
                       images: 130
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Storage: 5GB
+                      <span className="text-loverai-gold mr-3">✓</span> Storage: 5GB
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Retexturing
+                      <span className="text-loverai-gold mr-3">✓</span> Retexturing
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image views
+                      <span className="text-loverai-gold mr-3">✓</span> Image views
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image to video
+                      <span className="text-loverai-gold mr-3">✓</span> Image to video
                       Conversion
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Generative
+                      <span className="text-loverai-gold mr-3">✓</span> Generative
                       image and video editing
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> High quality
+                      <span className="text-loverai-gold mr-3">✓</span> High quality
                       output
                     </li>
                   </ul>
 
                   <button
                     onClick={() => handlePurchase("basic")}
-                    className="bg-black text-white rounded-full py-4 mt-10 hover:opacity-90 transition"
+                    className="w-full mt-10 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wide transition-all duration-300 loverai-btn-primary"
                   >
                     {currentUser ? "Buy Now" : "Login to Purchase"}
                   </button>
                 </div>
 
                 {/* Premium Plan */}
-                <div className="bg-[#C9AB98] rounded-[40px] p-10 flex flex-col justify-between h-full">
-                  <h3 className="text-xl font-bold mb-2">Premium Plan</h3>
-                  <div className="text-[36px] font-semibold text-black mb-1">
+                <div className="glass-card border border-[#e6c6b2]/30 shadow-[0_0_30px_rgba(230,198,178,0.1)] p-10 rounded-[32px] hover:border-loverai-gold/50 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Most Popular</div>
+                  <h3 className="text-xl font-bold text-white mb-2">Premium Plan</h3>
+                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
                     ₹ 9,349
                   </div>
-                  <div className="text-sm text-gray-600 mb-6">/month</div>
-                  <p className="text-sm text-gray-700 mb-6">
+                  <div className="text-sm text-white/50 mb-6">/month</div>
+                  <p className="text-sm text-white/70 mb-6">
                     Unlock full creative potential and advanced tools.
                   </p>
 
-                  <ul className="space-y-4 text-[16px] text-black mt-6 mb-8 flex-grow">
+                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Credits per
+                      <span className="text-loverai-gold mr-3">✓</span> Credits per
                       month: 6,500
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Number of
+                      <span className="text-loverai-gold mr-3">✓</span> Number of
                       images: 650
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Storage: 15GB
+                      <span className="text-loverai-gold mr-3">✓</span> Storage: 15GB
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Retexturing
+                      <span className="text-loverai-gold mr-3">✓</span> Retexturing
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image views
+                      <span className="text-loverai-gold mr-3">✓</span> Image views
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image to video
+                      <span className="text-loverai-gold mr-3">✓</span> Image to video
                       Conversion
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Generative
+                      <span className="text-loverai-gold mr-3">✓</span> Generative
                       image and video editing
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> 4D quality
+                      <span className="text-loverai-gold mr-3">✓</span> 4D quality
                       output
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Priority email
+                      <span className="text-loverai-gold mr-3">✓</span> Priority email
                       support
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Community
+                      <span className="text-loverai-gold mr-3">✓</span> Community
                       support
                     </li>
                   </ul>
 
                   <button
                     onClick={() => handlePurchase("premium")}
-                    className="bg-black text-white rounded-full py-4 mt-10 hover:opacity-90 transition"
+                    className="w-full mt-10 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wide transition-all duration-300 loverai-btn-primary"
                   >
                     {currentUser ? "Buy Now" : "Login to Purchase"}
                   </button>
                 </div>
 
                 {/* Enterprise */}
-                <div className="bg-[#C9AB98] rounded-[40px] p-10 flex flex-col justify-between h-full">
-                  <h3 className="text-xl font-bold mb-2">Enterprise</h3>
-                  <div className="text-[36px] font-semibold text-black mb-1">
+                <div className="glass-card border border-white/10 p-10 rounded-[32px] hover:border-loverai-gold/30 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full">
+                  <h3 className="text-xl font-bold text-white mb-2">Enterprise</h3>
+                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
                     Customisable
                   </div>
-                  <div className="text-sm text-gray-600 mb-6"></div>
-                  <p className="text-sm text-gray-700 mb-6">
+                  <div className="text-sm text-white/50 mb-6"></div>
+                  <p className="text-sm text-white/70 mb-6">
                     Unlock full creative potential and advanced tools.
                   </p>
 
-                  <ul className="space-y-4 text-[16px] text-black mt-6 mb-8 flex-grow">
+                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Unlimited
+                      <span className="text-loverai-gold mr-3">✓</span> Unlimited
                       conversions
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Unlimited
+                      <span className="text-loverai-gold mr-3">✓</span> Unlimited
                       quality output
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Retexturing
+                      <span className="text-loverai-gold mr-3">✓</span> Retexturing
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image views
+                      <span className="text-loverai-gold mr-3">✓</span> Image views
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Image to video
+                      <span className="text-loverai-gold mr-3">✓</span> Image to video
                       Conversion
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Advanced
+                      <span className="text-loverai-gold mr-3">✓</span> Advanced
                       security features
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Priority
+                      <span className="text-loverai-gold mr-3">✓</span> Priority
                       support
                     </li>
                     <li className="flex items-center">
-                      <span className="text-green-600 mr-2">✔️</span> Generative
+                      <span className="text-loverai-gold mr-3">✓</span> Generative
                       image and video editing
                     </li>
                   </ul>
 
                   <button
                     onClick={() => setShowContactPopup(true)}
-                    className="bg-black text-white rounded-full py-4 mt-10 hover:opacity-90 transition"
+                    className="w-full mt-10 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wide transition-all duration-300 loverai-btn-primary"
                   >
                     Contact Us
                   </button>
@@ -642,33 +669,33 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                   <h2 className="text-[56px] text-white text-center mb-16 heading-font">
                     Top-Up Pricing
                   </h2>
-                  <div className="w-full max-w-[1200px] bg-[#C9AB98] rounded-[48px] p-16">
+                  <div className="w-full max-w-[1200px] glass-card rounded-[40px] md:rounded-[48px] p-8 md:p-16 border border-white/10">
                     <div className="grid grid-cols-3 text-center">
-                      <div className="text-[18px] font-semibold text-black pb-6 border-b border-black/30">
+                      <div className="text-[16px] md:text-[18px] font-semibold text-white pb-6 border-b border-white/10">
                         Current Plan
                       </div>
-                      <div className="text-[18px] font-semibold text-black pb-6 border-b border-black/30">
+                      <div className="text-[16px] md:text-[18px] font-semibold text-white pb-6 border-b border-white/10">
                         Number of Credits
                       </div>
-                      <div className="text-[18px] font-semibold text-black pb-6 border-b border-black/30">
+                      <div className="text-[16px] md:text-[18px] font-semibold text-white pb-6 border-b border-white/10">
                         Price per Credit
                       </div>
                     </div>
                     <div>
-                      <div className="grid grid-cols-3 text-center py-8 border-b border-black/20 text-black text-[18px]">
+                      <div className="grid grid-cols-3 text-center py-8 border-b border-white/5 text-white/80 text-[15px] md:text-[18px]">
                         <div>Free</div>
                         <div>10</div>
-                        <div>₹17.00</div>
+                        <div className="text-loverai-gold font-medium">₹17.00</div>
                       </div>
-                      <div className="grid grid-cols-3 text-center py-8 border-b border-black/20 text-black text-[18px]">
+                      <div className="grid grid-cols-3 text-center py-8 border-b border-white/5 text-white/80 text-[15px] md:text-[18px]">
                         <div>Basic</div>
                         <div>10</div>
-                        <div>₹13.60</div>
+                        <div className="text-loverai-gold font-medium">₹13.60</div>
                       </div>
-                      <div className="grid grid-cols-3 text-center py-8 text-black text-[18px]">
+                      <div className="grid grid-cols-3 text-center py-8 text-white/80 text-[15px] md:text-[18px]">
                         <div>Premium</div>
                         <div>10</div>
-                        <div>₹8.50</div>
+                        <div className="text-loverai-gold font-medium">₹8.50</div>
                       </div>
                     </div>
                   </div>
@@ -737,8 +764,8 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
 
       {/* Active Image to Video Tool Inline */}
       {showImageToVideo && (
-        <div className="bg-black px-4 pt-28 pb-10 md:pt-36 md:pb-16 transition-all duration-300">
-          <div className="w-full px-[6%] md:px-[10%] transition-all duration-300">
+        <div className="bg-black px-4 pt-32 pb-10 md:pt-[175px] md:pb-16 transition-all duration-300">
+          <div className="w-full max-w-[1550px] mx-auto px-4 md:px-8 transition-all duration-300">
             <ImageToVideo onClose={() => setShowImageToVideo(false)} />
           </div>
         </div>

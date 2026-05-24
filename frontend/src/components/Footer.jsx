@@ -158,6 +158,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
   return (
     <>
       <footer
+<<<<<<< HEAD
         className={
           isPlannerFooter
             ? "relative overflow-hidden bg-transparent px-4 pb-10 pt-16 footer-blurred-bg sm:px-8 lg:px-12"
@@ -204,6 +205,96 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                     <div
                       key={item}
                       className="rounded-[22px] border border-white/10 bg-white/[0.05] px-4 py-4 text-sm text-[#f8ede8]/82 backdrop-blur-md"
+=======
+        className="fixed bottom-0 left-0 right-0 overflow-hidden px-6 py-16 sm:px-10 md:px-16 lg:px-24 bg-transparent footer-blurred-bg z-40"
+        style={{
+          "--footer-bg-image": "url('/images/footer.png')",
+        }}
+      >
+        <div
+          className="relative z-10 mx-auto max-w-[1400px] w-full rounded-[32px] md:rounded-[40px] p-8 md:p-12 glass-card border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300"
+        >
+          <div className="grid gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
+            <div className="flex flex-col items-center text-center md:items-center md:text-center md:pl-6">
+              <h2
+                className="text-white text-2xl md:text-[32px] lg:text-[36px] leading-[1.1] tracking-[-0.02em] font-normal text-center"
+                style={{
+                  fontFamily: "'Dream Avenue', 'DM Serif Display', serif",
+                }}
+              >
+                Let&apos;s Work
+                <br />
+                With Expert!
+              </h2>
+
+              <div className="mt-6 flex flex-col items-center md:items-center">
+                <img
+                  src="/images/logo copy.png"
+                  alt="Lovers AI Logo"
+                  className="h-[140px] md:h-[160px] w-auto object-contain transition-transform duration-300 hover:scale-[1.03]"
+                />
+
+                <p className="footer-text-font mt-4 text-[11px] text-white/40 tracking-wider">
+                  &copy;2025 LoversAI. All rights reserved.
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden w-[1px] bg-white/10 mx-4 md:block" />
+
+            <div>
+              <div className="mb-8">
+                <h3 className="footer-heading-font mb-4 text-2xl md:text-[28px] font-light text-white">
+                  Join our newsletter
+                </h3>
+
+                <div className="space-y-4">
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="footer-text-font w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-3.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 text-sm transition-all duration-300"
+                  />
+
+                  <div className="flex flex-col gap-3 sm:flex-row items-stretch">
+                    <div className="flex flex-1 gap-3">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="footer-text-font w-[110px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 text-sm transition-all cursor-pointer"
+                      >
+                        <option value="+91" className="bg-black/90 text-white">+91 IN</option>
+                        <option value="+1" className="bg-black/90 text-white">+1 US</option>
+                        <option value="+44" className="bg-black/90 text-white">+44 UK</option>
+                        <option value="+61" className="bg-black/90 text-white">+61 AU</option>
+                        <option value="+971" className="bg-black/90 text-white">+971 UAE</option>
+                      </select>
+
+                      <input
+                        type="tel"
+                        name="book_call_phone"
+                        value={phone}
+                        onChange={(e) =>
+                          setPhone(
+                            e.target.value
+                              .replace(/[^\d]/g, "")
+                              .slice(0, requiredDigits),
+                          )
+                        }
+                        placeholder={`Enter your ${phonePlaceholder}`}
+                        className="footer-text-font flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-3.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 text-sm transition-all"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleBookCall}
+                      className="rounded-full px-8 py-3.5 text-sm font-semibold text-black transition-all duration-300 active:scale-95 shadow-md shadow-black/10 hover:shadow-lg flex items-center justify-center shrink-0 cursor-pointer"
+                      style={{ backgroundColor: "#D0B1A4" }}
+                      onMouseEnter={(e) => e.currentTarget.style.filter = "brightness(1.08)"}
+                      onMouseLeave={(e) => e.currentTarget.style.filter = "none"}
+>>>>>>> origin/Ai-tools
                     >
                       {item}
                     </div>
@@ -222,6 +313,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                 </div>
               </div>
 
+<<<<<<< HEAD
               <div className="space-y-8">
                 <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.16)] backdrop-blur-xl sm:p-6">
                   <div className="mb-6">
@@ -232,6 +324,48 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                       Leave your email and phone number and we will help you
                       set up the planner side properly.
                     </p>
+=======
+              <div className="grid grid-cols-2 gap-y-8 gap-x-4 sm:grid-cols-4 pt-8 border-t border-white/10">
+                {Object.keys(footerLinks).map((category) => (
+                  <div key={category}>
+                    <h4 className="footer-heading-font mb-3.5 text-sm font-semibold tracking-wider uppercase text-white/50">
+                      {category}
+                    </h4>
+
+                    <ul className="space-y-2">
+                      {footerLinks[category].map((item) => (
+                        <li key={item.label}>
+                          {item.page || item.action ? (
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => {
+                                if (item.action === "contact") {
+                                  if (typeof openContactPopup === "function") {
+                                    openContactPopup(fullPhone);
+                                  } else {
+                                    setShowLocalContactPopup(true);
+                                  }
+                                } else {
+                                  handleFooterNavigation(
+                                    item.page,
+                                    item.target,
+                                  );
+                                }
+                              }}
+                              className="footer-text-font cursor-pointer text-sm font-normal text-white/70 transition-colors duration-200 hover:text-loverai-gold"
+                            >
+                              {item.label}
+                            </span>
+                          ) : (
+                            <span className="footer-text-font text-sm font-normal text-white/30">
+                              {item.label}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+>>>>>>> origin/Ai-tools
                   </div>
 
                   <div className="grid gap-4">

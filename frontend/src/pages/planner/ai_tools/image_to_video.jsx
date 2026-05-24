@@ -138,14 +138,14 @@ const ImageToVideo = ({ onClose }) => {
         </header>
 
         {/* Main Workspace White Card Panel */}
-        <main className="max-w-[1400px] mx-auto bg-white text-black rounded-[32px] p-8 shadow-2xl mb-8">
+        <main className="max-w-[1400px] mx-auto glass-card-strong text-white rounded-[32px] p-8 mb-8">
           
           {/* Main Title inside the card */}
           <div className="text-center mb-10 select-none">
-            <h2 className="text-2xl md:text-3xl font-black text-black mb-1">
+            <h2 className="text-2xl md:text-3xl font-black text-white mb-1">
               AI Video Generation Workflow
             </h2>
-            <p className="text-xs md:text-sm text-gray-500 font-medium">
+            <p className="text-xs md:text-sm text-white/50 font-medium">
               Upload &rarr; Select Motion &rarr; Generate your dynamic video
             </p>
           </div>
@@ -155,19 +155,19 @@ const ImageToVideo = ({ onClose }) => {
             {/* Column 1: Upload Image (Step 1) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6 select-none">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm mb-2 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
                   1
                 </div>
-                <h3 className="text-lg font-bold text-black">Upload Image</h3>
-                <p className="text-xs text-gray-500">Choose your photo</p>
+                <h3 className="text-lg font-bold text-white">Upload Image</h3>
+                <p className="text-xs text-white/50">Choose your photo</p>
               </div>
 
-              <div className="flex-1 bg-[#F9FAFB] rounded-[24px] border border-gray-100 p-4 shadow-sm flex flex-col min-h-[360px]">
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col min-h-[580px]">
                 <div
                   className={`flex-1 border border-dashed rounded-[20px] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
                     imagePreview
-                      ? "border-blue-500 bg-blue-50/5"
-                      : "border-gray-200 bg-white hover:border-black hover:bg-gray-50"
+                      ? "border-loverai-gold bg-loverai-gold/5"
+                      : "border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10"
                   }`}
                   onClick={() => fileInputRef.current?.click()}
                   onDrop={handleDrop}
@@ -197,16 +197,16 @@ const ImageToVideo = ({ onClose }) => {
                     </div>
                   ) : (
                     <div className="py-12 select-none">
-                      <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 border border-gray-100">
+                      <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 border border-white/10">
                         📸
                       </div>
-                      <p className="text-[15px] font-bold text-black mb-1">
+                      <p className="text-[15px] font-bold text-white mb-1">
                         Drop image here
                       </p>
-                      <p className="text-[13px] text-gray-500 mb-4">
+                      <p className="text-[13px] text-white/50 mb-4">
                         or click to browse
                       </p>
-                      <p className="text-[10px] text-gray-400 font-semibold tracking-wide">
+                      <p className="text-[10px] text-white/30 font-semibold tracking-wide">
                         JPG, PNG, WebP
                       </p>
                     </div>
@@ -219,7 +219,7 @@ const ImageToVideo = ({ onClose }) => {
                       e.stopPropagation();
                       clear();
                     }}
-                    className="mt-3 text-xs text-red-500 hover:text-red-700 font-bold flex items-center justify-center gap-1 py-1.5 px-4 bg-red-50 hover:bg-red-100 rounded-xl transition-all self-center cursor-pointer"
+                    className="mt-3 text-xs text-red-400 hover:text-red-300 font-bold flex items-center justify-center gap-1 py-1.5 px-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all self-center cursor-pointer"
                   >
                     Remove Photo
                   </button>
@@ -230,24 +230,24 @@ const ImageToVideo = ({ onClose }) => {
             {/* Column 2: Select Motion (Step 2) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6 select-none">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm mb-2 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
                   2
                 </div>
-                <h3 className="text-lg font-bold text-black">Select Motion</h3>
-                <p className="text-xs text-gray-500">Choose effect type</p>
+                <h3 className="text-lg font-bold text-white">Select Motion</h3>
+                <p className="text-xs text-white/50">Choose effect type</p>
               </div>
 
-              <div className="flex-1 bg-[#F9FAFB] rounded-[24px] border border-gray-100 p-4 shadow-sm flex flex-col justify-center gap-4 min-h-[360px]">
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col justify-center gap-4 min-h-[580px]">
                 
                 {/* Dynamic Movement Card */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
+                <div className="bg-white/5 p-5 rounded-2xl border border-white/10 flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white text-lg select-none shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-lg select-none shadow-sm border border-blue-500/20">
                       ↔️
                     </div>
                     <div>
-                      <h4 className="font-bold text-black text-[15px]">Dynamic Movement</h4>
-                      <p className="text-[11px] text-gray-400">Control panning pace & speed</p>
+                      <h4 className="font-bold text-white text-[15px]">Dynamic Movement</h4>
+                      <p className="text-[11px] text-white/40">Control panning pace & speed</p>
                     </div>
                   </div>
                   
@@ -259,25 +259,25 @@ const ImageToVideo = ({ onClose }) => {
                       max="100" 
                       value={dynamicMovement}
                       onChange={(e) => setDynamicMovement(parseInt(e.target.value))}
-                      className="w-full accent-black h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer"
+                      className="w-full accent-loverai-gold h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
                     />
-                    <div className="flex justify-between items-center text-[10px] text-gray-400 font-bold mt-1">
+                    <div className="flex justify-between items-center text-[10px] text-white/40 font-bold mt-1">
                       <span>Subtle</span>
-                      <span className="text-black bg-gray-100 px-1.5 py-0.5 rounded">{dynamicMovement}%</span>
+                      <span className="text-white bg-white/10 px-1.5 py-0.5 rounded">{dynamicMovement}%</span>
                       <span>Intense</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Focus Effect Card */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
+                <div className="bg-white/5 p-5 rounded-2xl border border-white/10 flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white text-lg select-none shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-lg select-none shadow-sm border border-amber-500/20">
                       🔍
                     </div>
                     <div>
-                      <h4 className="font-bold text-black text-[15px]">Focus Effect</h4>
-                      <p className="text-[11px] text-gray-400">Intelligent zoom & depth tracking</p>
+                      <h4 className="font-bold text-white text-[15px]">Focus Effect</h4>
+                      <p className="text-[11px] text-white/40">Intelligent zoom & depth tracking</p>
                     </div>
                   </div>
                   
@@ -289,11 +289,11 @@ const ImageToVideo = ({ onClose }) => {
                       max="100" 
                       value={focusEffect}
                       onChange={(e) => setFocusEffect(parseInt(e.target.value))}
-                      className="w-full accent-black h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer"
+                      className="w-full accent-loverai-gold h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
                     />
-                    <div className="flex justify-between items-center text-[10px] text-gray-400 font-bold mt-1">
+                    <div className="flex justify-between items-center text-[10px] text-white/40 font-bold mt-1">
                       <span>Low</span>
-                      <span className="text-black bg-gray-100 px-1.5 py-0.5 rounded">{focusEffect}%</span>
+                      <span className="text-white bg-white/10 px-1.5 py-0.5 rounded">{focusEffect}%</span>
                       <span>High</span>
                     </div>
                   </div>
@@ -305,23 +305,23 @@ const ImageToVideo = ({ onClose }) => {
             {/* Column 3: Generate Video (Step 3) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6 select-none">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm mb-2 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
                   3
                 </div>
-                <h3 className="text-lg font-bold text-black">Generate Video</h3>
-                <p className="text-xs text-gray-500">Create your result</p>
+                <h3 className="text-lg font-bold text-white">Generate Video</h3>
+                <p className="text-xs text-white/50">Create your result</p>
               </div>
 
-              <div className="flex-1 bg-[#F9FAFB] rounded-[24px] border border-gray-100 p-4 shadow-sm flex flex-col justify-between min-h-[360px]">
-                <div className="flex-1 border border-dashed border-gray-200 bg-white rounded-[20px] flex flex-col items-center justify-center p-6 text-center">
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col justify-between min-h-[580px]">
+                <div className="flex-1 border border-dashed border-white/10 bg-white/5 rounded-[20px] flex flex-col items-center justify-center p-6 text-center">
                   <div className="py-12 select-none">
-                    <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 border border-gray-100">
+                    <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 border border-white/10">
                       🎬
                     </div>
-                    <p className="text-[15px] font-bold text-black mb-1">
+                    <p className="text-[15px] font-bold text-white mb-1">
                       Video appears here
                     </p>
-                    <p className="text-[13px] text-gray-500">
+                    <p className="text-[13px] text-white/40">
                       Upload & select motion first
                     </p>
                   </div>
@@ -330,7 +330,7 @@ const ImageToVideo = ({ onClose }) => {
                 {/* Coming Soon Button */}
                 <button
                   disabled={true}
-                  className="w-full mt-4 bg-gray-300 text-gray-600 rounded-[16px] py-4 font-bold flex items-center justify-center gap-2 cursor-not-allowed select-none transition-all shadow-sm"
+                  className="w-full mt-4 bg-white/5 text-white/20 border border-white/5 rounded-[16px] py-4 font-bold flex items-center justify-center gap-2 cursor-not-allowed select-none transition-all shadow-sm"
                 >
                   <span>🚧</span> Coming Soon
                 </button>

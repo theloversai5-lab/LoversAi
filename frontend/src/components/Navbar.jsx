@@ -215,7 +215,7 @@ const Navbar = () => {
           <img
             src="/images/logo copy.png"
             alt="Lovers AI logo"
-            className="h-[81px] w-auto object-contain transition-transform duration-300 hover:scale-105"
+            className="h-[95px] w-auto object-contain transition-transform duration-300 hover:scale-105"
           />
         </Link>
 
@@ -234,7 +234,7 @@ const Navbar = () => {
                 <img
                   src="/images/logo copy.png"
                   alt="Lovers AI logo"
-                  className="h-[64px] w-auto object-contain transition-transform duration-300 hover:scale-105"
+                  className="h-[75px] w-auto object-contain transition-transform duration-300 hover:scale-105"
                 />
               </Link>
               <div className="flex items-center gap-3">
@@ -550,7 +550,7 @@ const Navbar = () => {
               <img
                 src="/images/LogoLoversai.png"
                 alt="Lovers AI logo"
-                className="h-[36px] w-auto object-contain"
+                className="h-[43px] w-auto object-contain"
               />
             </Link>
             <button

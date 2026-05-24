@@ -451,6 +451,32 @@ const RetexturingTool = ({ onClose }) => {
 
   return (
     <>
+      <style>{`
+        .scrollbar-visible::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+          display: block !important;
+        }
+        .scrollbar-visible::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 9999px;
+        }
+        .scrollbar-visible::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 9999px;
+          border: 1px solid #f1f5f9;
+        }
+        .scrollbar-visible::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        .scrollbar-hidden::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hidden {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -533,385 +559,395 @@ const RetexturingTool = ({ onClose }) => {
           </div>
         </header>
 
-        {/* Main Grid Workspace */}
-        <main className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left Column (Upload, Model, Quantity, Custom Prompt) - spans 5 of 12 */}
-          <div className="lg:col-span-5 space-y-6">
+        {/* Main Workspace White Card Panel */}
+        <main className="max-w-[1400px] mx-auto glass-card-strong text-white rounded-[32px] p-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* 1. Upload Card */}
-            <div className="bg-white text-black rounded-[32px] p-8 shadow-xl flex flex-col h-full min-h-[350px]">
-              <h2 className="text-[22px] font-bold text-[#111] mb-1">
-                Upload Your Venue Image
-              </h2>
-              <p className="text-[13px] text-gray-500 mb-6 font-normal">
-                Upload a clear image of your venue to get started
-              </p>
+            {/* Column 1: Upload Image (Step 1) */}
+            <div className="flex flex-col h-full">
+              <div className="flex flex-col items-center text-center mb-6 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
+                  1
+                </div>
+                <h2 className="text-xl font-bold text-white">Upload Image</h2>
+                <p className="text-xs text-white/50">Add your venue photo</p>
+              </div>
 
-              <div
-                className={`flex-1 border-2 border-dashed rounded-[24px] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
-                  selectedImage
-                    ? "border-yellow-500 bg-yellow-50/10"
-                    : "border-gray-200 hover:border-black hover:bg-gray-50"
-                } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={() => !isGenerating && fileInputRef.current?.click()}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  disabled={isGenerating}
-                />
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col min-h-[580px]">
+                <div
+                  className={`flex-1 border border-dashed rounded-[20px] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
+                    selectedImage
+                      ? "border-loverai-gold bg-loverai-gold/5"
+                      : "border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10"
+                  } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={() => !isGenerating && fileInputRef.current?.click()}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    disabled={isGenerating}
+                  />
 
-                {selectedImage ? (
-                  <div className="relative w-full h-full min-h-[180px] rounded-[16px] overflow-hidden group">
-                    <img
-                      src={URL.createObjectURL(selectedImage)}
-                      alt="Selected venue"
-                      className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
+                  {selectedImage ? (
+                    <div className="relative w-full h-full min-h-[220px] rounded-[16px] overflow-hidden group">
+                      <img
+                        src={URL.createObjectURL(selectedImage)}
+                        alt="Selected venue"
+                        className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
+                      />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-[16px]">
+                        <div className="text-center text-white">
+                          <span className="text-2xl block mb-1">📷</span>
+                          <p className="text-xs font-semibold">Change Image</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-12 select-none">
+                      <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 border border-white/10">
+                        📸
+                      </div>
+                      <p className="text-[15px] font-bold text-white mb-1">
+                        Drop your image here
+                      </p>
+                      <p className="text-[13px] text-white/50 mb-4">
+                        or click to browse files
+                      </p>
+                      <p className="text-[10px] text-white/30 font-semibold">
+                        Supports JPG, PNG, WebP • Max 10MB
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {selectedImage && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImage(null);
+                    }}
+                    disabled={isGenerating}
+                    className="mt-3 text-xs text-red-400 hover:text-red-300 font-bold flex items-center justify-center gap-1 py-1.5 px-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all self-center cursor-pointer"
+                  >
+                    Clear Image
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Column 2: Select Theme & Options (Step 2) */}
+            <div className="flex flex-col h-full">
+              <div className="flex flex-col items-center text-center mb-6 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
+                  2
+                </div>
+                <h2 className="text-xl font-bold text-white">Select Theme</h2>
+                <p className="text-xs text-white/50">Choose decor and settings</p>
+              </div>
+
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col justify-between min-h-[580px]">
+                <div className="flex-grow flex flex-col gap-3.5 overflow-y-auto pr-1">
+                  
+                  {/* Wedding Theme Selection */}
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[11px] font-bold text-white/70 select-none">Wedding Theme Selection</span>
+                    <div className="grid grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1.5 scrollbar-hidden">
+                      {UI_THEMES.map((theme) => {
+                        const isSelected = selectedTheme === theme.key;
+                        return (
+                          <button
+                            key={theme.key}
+                            onClick={() => !isGenerating && setSelectedTheme(theme.key)}
+                            disabled={isGenerating}
+                            className={`rounded-xl p-2 flex flex-col items-center justify-center text-center transition-all duration-200 border h-[72px] cursor-pointer ${
+                              isSelected
+                                ? "border-loverai-gold bg-white/10 text-white shadow-sm font-bold"
+                                : "border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:bg-white/10"
+                            } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
+                          >
+                            {theme.key === "" ? (
+                              <div className={`flex-1 flex items-center justify-center font-bold text-[11px] ${isSelected ? "text-white" : "text-white/70"}`}>
+                                Custom Only
+                              </div>
+                            ) : (
+                              <>
+                                <div className={`flex-1 flex items-center justify-center ${isSelected ? "text-loverai-gold" : "text-white/60"}`}>
+                                  {theme.icon === "sun" && (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                      <circle cx="12" cy="12" r="4" />
+                                      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                                    </svg>
+                                  )}
+                                  {theme.icon === "hash" && (
+                                    <span className="text-sm font-bold">#</span>
+                                  )}
+                                  {theme.icon === "music" && (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                      <path d="M9 18V5l12-2v13" />
+                                      <circle cx="6" cy="18" r="3" />
+                                      <circle cx="18" cy="16" r="3" />
+                                    </svg>
+                                  )}
+                                  {theme.icon === "heart" && (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                                    </svg>
+                                  )}
+                                  {theme.icon === "lock" && (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    </svg>
+                                  )}
+                                  {theme.icon === "star" && (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg>
+                                  )}
+                                  {theme.icon === "cocktail" && (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                      <path d="M22 22H2M12 22V12m0 0 8-8H4l8 8ZM18 2h-4v2h4V2Z" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <span className={`font-bold text-[10px] mt-0.5 select-none ${isSelected ? "text-white" : "text-white/70"}`}>{theme.label}</span>
+                                <div className="flex gap-0.5 items-center justify-center mt-0.5">
+                                  {theme.dots.map((dotClass, idx) => (
+                                    <span key={idx} className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Custom Prompt */}
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[11px] font-bold text-white/70 select-none">Custom Prompt (Optional)</span>
+                    <textarea
+                      className="w-full p-2.5 bg-white/5 border border-white/10 rounded-xl focus:border-loverai-gold focus:outline-none text-[11px] leading-relaxed text-white placeholder-white/30 resize-none h-[64px] transition-all animate-none scrollbar-hidden"
+                      placeholder="Add fairy lights, traditional decor, minimalist mandap..."
+                      value={customPrompt}
+                      onChange={(e) => setCustomPrompt(e.target.value)}
+                      disabled={isGenerating}
                     />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-[16px]">
-                      <div className="text-center text-white">
-                        <span className="text-2xl block mb-1">📷</span>
-                        <p className="text-xs font-semibold">Change Image</p>
+                  </div>
+
+                  {/* Model & Quantity side-by-side */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Model */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[11px] font-bold text-white/70 select-none">AI Model</span>
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => !isGenerating && setModelType("flux-kontext-dev")}
+                          disabled={isGenerating}
+                          className={`w-full py-1.5 px-2 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 border cursor-pointer ${
+                            modelType === "flux-kontext-dev"
+                              ? "border-loverai-gold bg-white/10 text-white shadow-sm font-bold"
+                              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:bg-white/10"
+                          }`}
+                        >
+                          Basic {modelType === "flux-kontext-dev" && <span className="text-[6px]">🟡</span>}
+                        </button>
+                        <button
+                          onClick={() => !isGenerating && setModelType("flux-kontext-pro")}
+                          disabled={isGenerating}
+                          className={`w-full py-1.5 px-2 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 border cursor-pointer ${
+                            modelType === "flux-kontext-pro"
+                              ? "border-loverai-gold bg-white/10 text-white shadow-sm font-bold"
+                              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:bg-white/10"
+                          }`}
+                        >
+                          Ultra {modelType === "flux-kontext-pro" && <span className="text-[6px]">🟡</span>}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Quantity */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[11px] font-bold text-white/70 select-none">Quantity</span>
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => !isGenerating && setImageCount(1)}
+                          disabled={isGenerating}
+                          className={`w-full py-1.5 px-2 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 border cursor-pointer ${
+                            imageCount === 1
+                              ? "border-loverai-gold bg-white/10 text-white shadow-sm font-bold"
+                              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:bg-white/10"
+                          }`}
+                        >
+                          1 Single {imageCount === 1 && <span className="text-[6px]">🟡</span>}
+                        </button>
+                        <button
+                          onClick={() => !isGenerating && setImageCount(4)}
+                          disabled={isGenerating}
+                          className={`w-full py-1.5 px-2 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 border cursor-pointer ${
+                            imageCount === 4
+                              ? "border-loverai-gold bg-white/10 text-white shadow-sm font-bold"
+                              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:bg-white/10"
+                          }`}
+                        >
+                          4 Multiple {imageCount === 4 && <span className="text-[6px]">🟡</span>}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Generate Button Wrapper at the bottom of Column 2 */}
+                <div className="mt-4 pt-3 border-t border-white/10">
+                  <button
+                    onClick={handleGenerate}
+                    disabled={!selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost}
+                    className={`w-full py-2.5 px-4 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer block text-center shadow-md ${
+                      !selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost
+                        ? "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed shadow-none"
+                        : "bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark hover:brightness-110 shadow-lg hover:shadow-loverai-gold/20 transform active:scale-95"
+                    }`}
+                  >
+                    {isGenerating ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Generating...</span>
+                      </div>
+                    ) : (
+                      "Generate"
+                    )}
+                  </button>
+
+                  {/* credits details inside column 2 bottom */}
+                  {selectedImage && (
+                    <div className="mt-2 text-center">
+                      <p className="text-[10px] text-gray-400 font-semibold">
+                        Cost: {currentCreditCost} Credits
+                      </p>
+                      {userCredits < currentCreditCost && (
+                        <div className="mt-1.5 p-1.5 bg-red-50 border border-red-200 rounded-lg max-w-[220px] mx-auto">
+                          <p className="text-[9px] text-red-600 font-bold leading-tight">
+                            Insufficient credits! (Need {currentCreditCost - userCredits} more)
+                          </p>
+                          <button
+                            onClick={handleBuyCredits}
+                            className="mt-1 text-[8px] bg-red-600 hover:bg-red-700 text-white font-bold px-2 py-0.5 rounded transition-colors cursor-pointer"
+                          >
+                            Buy Credits
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Column 3: Download Result (Step 3) */}
+            <div className="flex flex-col h-full">
+              <div className="flex flex-col items-center text-center mb-6 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
+                  3
+                </div>
+                <h2 className="text-xl font-bold text-white">Download Result</h2>
+                <p className="text-xs text-white/50">Your transformed view</p>
+              </div>
+
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col min-h-[580px]">
+                {isGenerating ? (
+                  /* Loading State */
+                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
+                    <div className="relative mb-6">
+                      <div className="w-12 h-12 rounded-full border-4 border-white/10 border-t-loverai-gold animate-spin"></div>
+                      <span className="absolute inset-0 flex items-center justify-center text-md">✨</span>
+                    </div>
+                    <h3 className="text-sm font-bold text-white mb-1">
+                      Transforming Your Venue...
+                    </h3>
+                    <p className="text-xs text-white/50 max-w-[200px] mb-4">
+                      Our advanced AI is rendering the decorative concepts. This takes 30-60 seconds.
+                    </p>
+                    <div className="w-full max-w-[150px] bg-white/10 h-1 rounded-full overflow-hidden">
+                      <div className="bg-gradient-to-r from-loverai-gold to-amber-500 h-full w-4/5 animate-pulse rounded-full"></div>
+                    </div>
+                  </div>
+                ) : generatedImage ? (
+                  /* Generated Results Display */
+                  <div className="flex-1 flex flex-col justify-between h-full">
+                    <div className="relative rounded-xl overflow-hidden aspect-video bg-white/5 flex items-center justify-center mb-4 shadow-inner min-h-[220px]">
+                      <img
+                        src={generatedImage.url}
+                        alt="AI Transformation Result"
+                        className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">
+                        {themes[generatedImage.theme] || "Custom Theme"}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <button
+                        onClick={() => downloadImage(generatedImage.url)}
+                        className="w-full bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark hover:brightness-110 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                      >
+                        📥 Download Result
+                      </button>
+
+                      <div className="flex items-center justify-between border-t border-white/10 pt-3">
+                        <span className="text-[10px] text-white/50 font-semibold">
+                          Credits Used: {currentCreditCost}
+                        </span>
+                        <div className="flex gap-1.5 items-center justify-end">
+                          <button
+                            className="w-6 h-6 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-400 flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                            onClick={() => handleFeedback(generatedImage.id, "positive")}
+                            title="Love it!"
+                          >
+                            👍
+                          </button>
+                          <button
+                            className="w-6 h-6 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                            onClick={() => handleFeedback(generatedImage.id, "negative")}
+                            title="Needs improvements"
+                          >
+                            👎
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="py-6">
-                    {/* Cloud upload icon inside a dark circle */}
-                    <div className="w-16 h-16 bg-[#18181b] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 13v8" />
-                        <path d="M12 13l-3 3" />
-                        <path d="M12 13l3 3" />
-                        <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+                  /* Empty State */
+                  <div className="flex-1 border border-dashed border-white/10 bg-white/5 rounded-[20px] flex flex-col items-center justify-center p-6 text-center select-none">
+                    <div className="text-4xl font-light text-white/40 mb-4 select-none">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto">
+                        <path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L12 2z" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="12" cy="12" r="2.5" />
                       </svg>
                     </div>
-                    <p className="text-[15px] font-bold text-black mb-1">
-                      Drop image or click to browse
+                    <p className="text-[15px] font-bold text-white mb-1">
+                      Download your result
                     </p>
-                    <p className="text-[11px] text-gray-400">
-                      JPG, PNG, WebP up to 10MB
+                    <p className="text-[13px] text-white/50 mb-4">
+                      Transformed venue will appear here
+                    </p>
+                    <p className="text-[10px] text-white/30">
+                      High quality JPG format
                     </p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* AI Model & Quantity Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
-              {/* 2. AI Model Selection Card */}
-              <div className="bg-white text-black rounded-[32px] p-6 shadow-xl flex flex-col justify-between h-[160px]">
-                <div className="text-center">
-                  <h3 className="text-[13px] font-bold text-black mb-0.5">AI Model</h3>
-                  <p className="text-[10px] text-gray-400 font-medium mb-3">Choose your model</p>
-                </div>
-                <div className="space-y-1.5">
-                  <button
-                    onClick={() => !isGenerating && setModelType("flux-kontext-dev")}
-                    disabled={isGenerating}
-                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
-                      modelType === "flux-kontext-dev"
-                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
-                        : "border-gray-100 text-gray-400 hover:border-gray-200"
-                    }`}
-                  >
-                    Basic {modelType === "flux-kontext-dev" && <span className="text-[7px]">🟡</span>}
-                  </button>
-                  <button
-                    onClick={() => !isGenerating && setModelType("flux-kontext-pro")}
-                    disabled={isGenerating}
-                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
-                      modelType === "flux-kontext-pro"
-                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
-                        : "border-gray-100 text-gray-400 hover:border-gray-200"
-                    }`}
-                  >
-                    Ultra {modelType === "flux-kontext-pro" && <span className="text-[7px]">🟡</span>}
-                  </button>
-                </div>
-              </div>
-
-              {/* 3. Number of Images Card */}
-              <div className="bg-white text-black rounded-[32px] p-6 shadow-xl flex flex-col justify-between h-[160px]">
-                <div className="text-center">
-                  <h3 className="text-[13px] font-bold text-black mb-0.5">Number of Images</h3>
-                  <p className="text-[10px] text-gray-400 font-medium mb-3">Choose quantity</p>
-                </div>
-                <div className="space-y-1.5">
-                  <button
-                    onClick={() => !isGenerating && setImageCount(1)}
-                    disabled={isGenerating}
-                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
-                      imageCount === 1
-                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
-                        : "border-gray-100 text-gray-400 hover:border-gray-200"
-                    }`}
-                  >
-                    1 Single {imageCount === 1 && <span className="text-[7px]">🟡</span>}
-                  </button>
-                  <button
-                    onClick={() => !isGenerating && setImageCount(4)}
-                    disabled={isGenerating}
-                    className={`w-full py-2 px-3 rounded-[12px] text-[11px] font-bold transition-all flex items-center justify-center gap-1 border ${
-                      imageCount === 4
-                        ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm"
-                        : "border-gray-100 text-gray-400 hover:border-gray-200"
-                    }`}
-                  >
-                    4 Multiple {imageCount === 4 && <span className="text-[7px]">🟡</span>}
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-            {/* 4. Custom Prompt (Optional) Card */}
-            <div className="bg-white text-black rounded-[32px] p-8 shadow-xl">
-              <h3 className="text-[16px] font-bold text-black mb-3">
-                Custom Prompt (Optional)
-              </h3>
-              <textarea
-                className="w-full p-4 bg-white border border-gray-200 rounded-[20px] focus:border-black focus:outline-none text-[13px] leading-relaxed text-black placeholder-gray-400 resize-none h-[110px]"
-                placeholder="Add specific details like 'fairy lights', 'minimalist decor', 'traditional mandap'..."
-                value={customPrompt}
-                onChange={(e) => setCustomPrompt(e.target.value)}
-                disabled={isGenerating}
-              />
-            </div>
-
-          </div>
-
-          {/* Right Column (Preview Card, Theme Selection Card) - spans 7 of 12 */}
-          <div className="lg:col-span-7 space-y-6">
-
-            {/* 5. Generated Images Preview Card */}
-            {isGenerating ? (
-              /* Beautiful active loading state */
-              <div className="bg-white text-black rounded-[32px] p-12 shadow-xl flex flex-col items-center justify-center text-center min-h-[380px] animate-pulse">
-                <div className="relative mb-6">
-                  {/* Glowing spinner */}
-                  <div className="w-16 h-16 rounded-full border-4 border-yellow-100 border-t-yellow-400 animate-spin"></div>
-                  <span className="absolute inset-0 flex items-center justify-center text-xl">✨</span>
-                </div>
-                <h3 className="text-[20px] font-bold text-black mb-2">Transforming Your Venue...</h3>
-                <p className="text-[13px] text-gray-400 max-w-sm mb-6 font-normal">
-                  Our advanced AI model is analyzing structure and rendering your theme decoration concept. This takes 30-60 seconds.
-                </p>
-                <div className="w-full max-w-xs bg-gray-100 h-1.5 rounded-full overflow-hidden mb-1">
-                  <div className="bg-gradient-to-r from-yellow-400 to-amber-500 h-full w-4/5 animate-pulse rounded-full"></div>
-                </div>
-                <p className="text-[10px] text-gray-400 mt-2">
-                  Deducting {currentCreditCost} credits on success • Balance will be {userCredits - currentCreditCost}
-                </p>
-              </div>
-            ) : generatedImage ? (
-              /* Active generated image card */
-              <div className="bg-white text-black rounded-[32px] p-6 shadow-xl flex flex-col justify-between min-h-[380px]">
-                <div className="relative rounded-[24px] overflow-hidden flex-1 bg-gray-50 flex items-center justify-center min-h-[280px]">
-                  <img
-                    src={generatedImage.url}
-                    alt="AI Transformation Result"
-                    className="w-full h-full max-h-[420px] object-cover rounded-[24px]"
-                  />
-                  {/* Floating badges */}
-                  <div className="absolute top-4 left-4 z-10 bg-black/70 backdrop-blur-md text-white text-[11px] px-4 py-1.5 rounded-full font-bold select-none">
-                    After: {themes[generatedImage.theme] || "Custom Theme"}
-                  </div>
-
-                  {/* Floating actions */}
-                  <div className="absolute bottom-4 right-4 flex gap-2">
-                    <button
-                      className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-xl shadow-lg flex items-center gap-1.5 text-xs font-bold transition-all"
-                      onClick={() => downloadImage(generatedImage.url)}
-                    >
-                      <span>📥</span> Download
-                    </button>
-                  </div>
-                </div>
-
-                {/* Rating + Info Footer */}
-                <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-gray-100 pt-4">
-                  <div className="text-[11px] text-gray-400 font-semibold">
-                    {generatedImage.creditInfo ? (
-                      <span>Deducted: {generatedImage.creditInfo.deducted} credits • Balance: {generatedImage.creditInfo.newBalance}</span>
-                    ) : (
-                      <span>Credits used: {currentCreditCost} credits</span>
-                    )}
-                  </div>
-                  <div className="flex gap-1.5 items-center justify-end">
-                    <span className="text-[11px] text-gray-400 font-semibold mr-1">Feedback:</span>
-                    <button
-                      className="w-8 h-8 rounded-full bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center text-xs transition-all"
-                      onClick={() => handleFeedback(generatedImage.id, "positive")}
-                      title="Great Result!"
-                    >
-                      👍
-                    </button>
-                    <button
-                      className="w-8 h-8 rounded-full bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center text-xs transition-all"
-                      onClick={() => handleFeedback(generatedImage.id, "negative")}
-                      title="Try Again"
-                    >
-                      👎
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Dotted star icon empty state */
-              <div className="bg-white text-black rounded-[32px] p-12 shadow-xl flex flex-col items-center justify-center text-center min-h-[380px]">
-                <div className="w-16 h-16 flex items-center justify-center text-black mb-4">
-                  {/* Stylized star from screenshot */}
-                  <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L12 2z" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="12" cy="12" r="2.5" />
-                  </svg>
-                </div>
-                <h2 className="text-[20px] font-bold text-black mb-1">
-                  Generated Images Will Appear Here
-                </h2>
-                <p className="text-[13px] text-gray-500 max-w-[340px] font-normal leading-relaxed">
-                  Upload an image and configure your settings to start transforming your venue
-                </p>
-              </div>
-            )}
-
-            {/* 6. Wedding Function Selection Card */}
-            <div className="bg-white text-black rounded-[32px] p-8 shadow-xl">
-              <h3 className="text-[20px] font-bold text-black mb-1">
-                Wedding Function Selection
-              </h3>
-              <p className="text-[13px] text-gray-500 mb-8 font-normal">
-                Choose a wedding function theme
-              </p>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {UI_THEMES.map((theme) => {
-                  const isSelected = selectedTheme === theme.key;
-                  return (
-                    <button
-                      key={theme.key}
-                      onClick={() => !isGenerating && setSelectedTheme(theme.key)}
-                      disabled={isGenerating}
-                      className={`rounded-[22px] p-4 flex flex-col items-center justify-between text-center transition-all duration-300 border h-[125px] hover:shadow-md hover:-translate-y-0.5 ${
-                        isSelected
-                          ? "border-yellow-400 bg-yellow-50/10 text-black shadow-sm ring-1 ring-yellow-400"
-                          : "border-gray-100 bg-white text-black hover:border-gray-200"
-                      }`}
-                    >
-                      {theme.key === "" ? (
-                        <div className="flex-1 flex items-center justify-center font-bold text-xs text-black">
-                          Custom Only
-                        </div>
-                      ) : (
-                        <>
-                          {/* Theme Specific SVGs */}
-                          <div className="flex-1 flex items-center justify-center">
-                            {theme.icon === "sun" && (
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <circle cx="12" cy="12" r="4" />
-                                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-                              </svg>
-                            )}
-                            {theme.icon === "hash" && (
-                              <span className="text-xl font-bold text-black/75">#</span>
-                            )}
-                            {theme.icon === "music" && (
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path d="M9 18V5l12-2v13" />
-                                <circle cx="6" cy="18" r="3" />
-                                <circle cx="18" cy="16" r="3" />
-                              </svg>
-                            )}
-                            {theme.icon === "heart" && (
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                              </svg>
-                            )}
-                            {theme.icon === "lock" && (
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                              </svg>
-                            )}
-                            {theme.icon === "star" && (
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                              </svg>
-                            )}
-                            {theme.icon === "cocktail" && (
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                <path d="M22 22H2M12 22V12m0 0 8-8H4l8 8ZM18 2h-4v2h4V2Z" />
-                              </svg>
-                            )}
-                          </div>
-                          <span className="font-bold text-[13px] text-black mb-1.5 select-none">{theme.label}</span>
-                          <div className="flex gap-1 items-center justify-center">
-                            {theme.dots.map((dotClass, idx) => (
-                              <span key={idx} className={`w-2 h-2 rounded-full ${dotClass}`} />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
           </div>
         </main>
-
-        {/* 7. Bottom Generate Button Section */}
-        <div className="max-w-[1400px] mx-auto mt-10 mb-6">
-          <button
-            onClick={handleGenerate}
-            disabled={!selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost}
-            className={`w-full py-5 rounded-[22px] font-bold text-[17px] tracking-wide transition-all duration-300 shadow-md ${
-              !selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost
-                ? "bg-[#c4c4c9] text-[#e0e0e5] cursor-not-allowed shadow-none"
-                : "bg-[#8e8e93] text-black hover:bg-black hover:text-white transform hover:-translate-y-0.5"
-            }`}
-          >
-            {isGenerating ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></span>
-                Generating Transformation...
-              </span>
-            ) : apiStatus === "error" ? (
-              "Backend Connection Unreachable"
-            ) : userCredits < currentCreditCost && selectedImage ? (
-              `Insufficient Credits (Need ${currentCreditCost} Credits, Balance: ${userCredits})`
-            ) : (
-              "Generate"
-            )}
-          </button>
-
-          {/* Credits Alert Bar (Beautiful inline warning) */}
-          {userCredits < currentCreditCost && selectedImage && (
-            <div className="mt-4 p-4 bg-red-950/20 border border-red-900/30 rounded-[20px] backdrop-blur-md max-w-lg mx-auto flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">⚠️</span>
-                <span className="text-xs text-red-300 font-semibold">
-                  Insufficient credits! Need {currentCreditCost - userCredits} more.
-                </span>
-              </div>
-              <button
-                onClick={handleBuyCredits}
-                className="bg-red-800/80 hover:bg-red-700 text-white text-[11px] font-bold px-4 py-2 rounded-xl transition-colors shadow-sm"
-              >
-                Buy Credits
-              </button>
-            </div>
-          )}
-        </div>
 
         {/* Previous Transformations Grid */}
         {generationHistory.length > 0 && (
