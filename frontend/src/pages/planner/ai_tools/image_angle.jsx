@@ -495,25 +495,25 @@ const AngleChangeComponent = ({ onClose }) => {
         </header>
 
         {/* Main Workspace White Card Panel */}
-        <main className="max-w-[1400px] mx-auto bg-white text-black rounded-[32px] p-8 shadow-2xl mb-8">
+        <main className="max-w-[1400px] mx-auto glass-card-strong text-white rounded-[32px] p-8 mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             {/* Column 1: Upload Image (Step 1) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm mb-2 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
                   1
                 </div>
-                <h2 className="text-xl font-bold text-black">Upload Image</h2>
-                <p className="text-xs text-gray-500">Add your venue photo</p>
+                <h2 className="text-xl font-bold text-white">Upload Image</h2>
+                <p className="text-xs text-white/50">Add your venue photo</p>
               </div>
 
-              <div className="flex-1 bg-[#F9FAFB] rounded-[24px] border border-gray-100 p-4 shadow-sm flex flex-col min-h-[380px]">
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col min-h-[580px]">
                 <div
                   className={`flex-1 border border-dashed rounded-[20px] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all duration-300 ${
                     imagePreview
-                      ? "border-yellow-500 bg-yellow-50/5"
-                      : "border-gray-200 bg-white hover:border-black hover:bg-gray-50"
+                      ? "border-loverai-gold bg-loverai-gold/5"
+                      : "border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10"
                   } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
                   onClick={() => !isGenerating && fileInputRef.current?.click()}
                   onDrop={handleDrop}
@@ -545,16 +545,16 @@ const AngleChangeComponent = ({ onClose }) => {
                   ) : (
                     <div className="py-12">
                       {/* Plus Icon */}
-                      <div className="text-4xl font-light text-gray-400 mb-4 select-none">
+                      <div className="text-4xl font-light text-white/40 mb-4 select-none">
                         +
                       </div>
-                      <p className="text-[15px] font-bold text-black mb-1">
+                      <p className="text-[15px] font-bold text-white mb-1">
                         Drop your image here
                       </p>
-                      <p className="text-[13px] text-gray-500 mb-4">
+                      <p className="text-[13px] text-white/50 mb-4">
                         or click to browse files
                       </p>
-                      <p className="text-[10px] text-gray-400">
+                      <p className="text-[10px] text-white/30">
                         Supports JPG, PNG, WebP • Max 10MB
                       </p>
                     </div>
@@ -565,7 +565,7 @@ const AngleChangeComponent = ({ onClose }) => {
                   <button
                     onClick={clearAll}
                     disabled={isGenerating}
-                    className="mt-3 text-xs text-red-500 hover:text-red-750 font-bold flex items-center justify-center gap-1 py-1.5 px-4 bg-red-50 hover:bg-red-100 rounded-xl transition-all self-center cursor-pointer"
+                    className="mt-3 text-xs text-red-400 hover:text-red-300 font-bold flex items-center justify-center gap-1 py-1.5 px-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all self-center cursor-pointer"
                   >
                     Clear Image
                   </button>
@@ -576,14 +576,14 @@ const AngleChangeComponent = ({ onClose }) => {
             {/* Column 2: Select Angle (Step 2) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm mb-2 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
                   2
                 </div>
-                <h2 className="text-xl font-bold text-black">Select Angle</h2>
-                <p className="text-xs text-gray-500">Choose perspective view</p>
+                <h2 className="text-xl font-bold text-white">Select Angle</h2>
+                <p className="text-xs text-white/50">Choose perspective view</p>
               </div>
 
-              <div className="flex-1 bg-[#F9FAFB] rounded-[24px] border border-gray-100 p-4 shadow-sm flex flex-col justify-between min-h-[380px]">
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col justify-between min-h-[580px]">
                 <div className="space-y-3">
                   {angles.map((angle) => {
                     const isSelected = selectedAngles.includes(angle.id);
@@ -594,21 +594,21 @@ const AngleChangeComponent = ({ onClose }) => {
                         disabled={isGenerating}
                         className={`w-full p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
                           isSelected
-                            ? "border-yellow-500 bg-yellow-50/50 text-black shadow-sm"
-                            : "border-gray-200 bg-white hover:border-gray-300 text-black hover:bg-gray-50/80"
+                            ? "border-loverai-gold bg-white/10 text-white shadow-sm"
+                            : "border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10"
                         } ${isGenerating ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="font-bold text-sm text-black">
+                            <div className={`font-bold text-sm ${isSelected ? "text-loverai-gold" : "text-white"}`}>
                               {angle.name}
                             </div>
-                            <div className="text-xs text-gray-500 mt-0.5">
+                            <div className="text-xs text-white/40 mt-0.5">
                               {angle.desc}
                             </div>
                           </div>
                           {isSelected && (
-                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-sm animate-pulse"></span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-loverai-gold shadow-sm animate-pulse"></span>
                           )}
                         </div>
                       </button>
@@ -617,7 +617,7 @@ const AngleChangeComponent = ({ onClose }) => {
                 </div>
 
                 {/* Generate Button positioned at the bottom of Column 2 */}
-                <div className="mt-6 pt-4 border-t border-gray-100">
+                <div className="mt-6 pt-4 border-t border-white/10">
                   <button
                     onClick={handleGenerate}
                     disabled={
@@ -631,8 +631,8 @@ const AngleChangeComponent = ({ onClose }) => {
                       selectedAngles.length === 0 ||
                       isGenerating ||
                       apiStatus === "error"
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-[#27272a] text-white hover:bg-black shadow-md hover:shadow-lg transform active:scale-95"
+                        ? "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed"
+                        : "bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark hover:brightness-110 shadow-lg hover:shadow-loverai-gold/20 transform active:scale-95"
                     }`}
                   >
                     {isGenerating ? (
@@ -673,29 +673,29 @@ const AngleChangeComponent = ({ onClose }) => {
             {/* Column 3: Download Result (Step 3) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center font-bold text-sm mb-2 select-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
                   3
                 </div>
-                <h2 className="text-xl font-bold text-black">Download Result</h2>
-                <p className="text-xs text-gray-500">Your transformed view</p>
+                <h2 className="text-xl font-bold text-white">Download Result</h2>
+                <p className="text-xs text-white/50">Your transformed view</p>
               </div>
 
-              <div className="flex-1 bg-white rounded-[24px] border border-gray-100 p-4 shadow-sm flex flex-col min-h-[380px]">
+              <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col min-h-[580px]">
                 {isGenerating ? (
                   /* Loading State */
                   <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                     <div className="relative mb-6">
-                      <div className="w-12 h-12 rounded-full border-4 border-yellow-100 border-t-yellow-500 animate-spin"></div>
+                      <div className="w-12 h-12 rounded-full border-4 border-white/10 border-t-loverai-gold animate-spin"></div>
                       <span className="absolute inset-0 flex items-center justify-center text-md">✨</span>
                     </div>
-                    <h3 className="text-sm font-bold text-black mb-1">
+                    <h3 className="text-sm font-bold text-white mb-1">
                       Transforming Perspectives...
                     </h3>
-                    <p className="text-xs text-gray-500 max-w-[200px] mb-4">
+                    <p className="text-xs text-white/50 max-w-[200px] mb-4">
                       Our advanced AI is rendering the selected views. This takes 30-60 seconds.
                     </p>
-                    <div className="w-full max-w-[150px] bg-gray-150 h-1 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-yellow-400 to-amber-500 h-full w-4/5 animate-pulse rounded-full"></div>
+                    <div className="w-full max-w-[150px] bg-white/10 h-1 rounded-full overflow-hidden">
+                      <div className="bg-gradient-to-r from-loverai-gold to-amber-500 h-full w-4/5 animate-pulse rounded-full"></div>
                     </div>
                   </div>
                 ) : generatedResult ? (
@@ -706,9 +706,9 @@ const AngleChangeComponent = ({ onClose }) => {
                         {generatedResult.results.map((result, index) => (
                           <div
                             key={index}
-                            className="bg-gray-50 border border-gray-150 rounded-xl p-3"
+                            className="bg-white/5 border border-white/10 rounded-xl p-3"
                           >
-                            <div className="relative rounded-lg overflow-hidden mb-3 aspect-video bg-gray-200">
+                            <div className="relative rounded-lg overflow-hidden mb-3 aspect-video bg-white/5">
                               <img
                                 src={result.url}
                                 alt={`${result.angleName} view`}
@@ -719,7 +719,7 @@ const AngleChangeComponent = ({ onClose }) => {
                               </div>
                             </div>
                             <div className="flex justify-between items-center">
-                              <div className="text-[10px] text-gray-400 font-semibold">
+                              <div className="text-[10px] text-white/40 font-semibold">
                                 {result.creditCost} credits
                               </div>
                               <button
@@ -729,7 +729,7 @@ const AngleChangeComponent = ({ onClose }) => {
                                     `angle-${result.angle}-${Date.now()}.jpg`,
                                   )
                                 }
-                                className="bg-[#27272a] hover:bg-black text-white px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                className="bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
                               >
                                 📥 Download
                               </button>
@@ -739,7 +739,7 @@ const AngleChangeComponent = ({ onClose }) => {
                       </div>
                     ) : (
                       <div className="flex flex-col justify-between h-full">
-                        <div className="relative rounded-xl overflow-hidden aspect-video bg-gray-150 mb-4 shadow-inner">
+                        <div className="relative rounded-xl overflow-hidden aspect-video bg-white/5 mb-4 shadow-inner">
                           <img
                             src={generatedResult.url}
                             alt="Generated angle view"
@@ -753,25 +753,25 @@ const AngleChangeComponent = ({ onClose }) => {
                         <div className="flex flex-col gap-3">
                           <button
                             onClick={() => downloadImage(generatedResult.url)}
-                            className="w-full bg-[#27272a] hover:bg-black text-white py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                            className="w-full bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark hover:brightness-110 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                           >
                             📥 Download Result
                           </button>
 
-                          <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                            <span className="text-[10px] text-gray-400 font-semibold">
+                          <div className="flex items-center justify-between border-t border-white/10 pt-3">
+                            <span className="text-[10px] text-white/50 font-semibold">
                               Credits Used: {modelType === "flux-kontext-pro" ? "20" : "15"}
                             </span>
-                            <div className="flex gap-1">
+                            <div className="flex gap-1.5">
                               <button
-                                className="w-6 h-6 rounded-full bg-green-50 hover:bg-green-100 text-green-600 flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                                className="w-6 h-6 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-400 flex items-center justify-center text-[10px] transition-all cursor-pointer"
                                 onClick={() => toast.success("Feedback sent! Thank you.")}
                                 title="Love it!"
                               >
                                 👍
                               </button>
                               <button
-                                className="w-6 h-6 rounded-full bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center text-[10px] transition-all cursor-pointer"
+                                className="w-6 h-6 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-[10px] transition-all cursor-pointer"
                                 onClick={() => toast.success("Feedback sent! Thank you.")}
                                 title="Needs improvements"
                               >
@@ -785,17 +785,17 @@ const AngleChangeComponent = ({ onClose }) => {
                   </div>
                 ) : (
                   /* Empty State (matches screenshot exactly) */
-                  <div className="flex-1 border border-dashed border-gray-200 bg-white rounded-[20px] flex flex-col items-center justify-center p-6 text-center">
-                    <div className="text-4xl font-light text-gray-400 mb-4 select-none">
+                  <div className="flex-1 border border-dashed border-white/10 bg-white/5 rounded-[20px] flex flex-col items-center justify-center p-6 text-center">
+                    <div className="text-4xl font-light text-white/40 mb-4 select-none">
                       ↓
                     </div>
-                    <p className="text-[15px] font-bold text-black mb-1">
+                    <p className="text-[15px] font-bold text-white mb-1">
                       Download your result
                     </p>
-                    <p className="text-[13px] text-gray-500 mb-4">
+                    <p className="text-[13px] text-white/50 mb-4">
                       Click to save transformed image
                     </p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-white/30">
                       High quality JPG format
                     </p>
                   </div>
