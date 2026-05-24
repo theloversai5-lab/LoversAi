@@ -307,11 +307,7 @@ function AppContent() {
           }
         />
       </Routes>
-<<<<<<< HEAD
-      {!hideFooter && <Footer />}
-=======
-      {!hideNavbarAndFooter && !isAIToolOpen && <Footer />}
->>>>>>> origin/Ai-tools
+      {!hideFooter && !isAIToolOpen && <Footer />}
     </>
   );
 }

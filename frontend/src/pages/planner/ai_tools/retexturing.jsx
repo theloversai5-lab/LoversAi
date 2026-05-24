@@ -984,20 +984,6 @@ const RetexturingTool = ({ onClose }) => {
           </section>
         )}
 
-        {/* Dynamic Premium Footer */}
-        <footer className="max-w-[1400px] mx-auto mt-20 pt-8 border-t border-white/5 text-center text-xs text-gray-500 select-none">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="font-medium">
-              &copy; {new Date().getFullYear()} The Lovers AI. All rights reserved.
-            </p>
-            <div className="flex gap-4">
-              <a href="#features" className="hover:text-white transition-colors">Features</a>
-              <a href="#gallery" className="hover:text-white transition-colors">Gallery</a>
-              <a href="#terms" className="hover:text-white transition-colors">Terms of Service</a>
-            </div>
-          </div>
-        </footer>
-
       </div>
     </>
   );
