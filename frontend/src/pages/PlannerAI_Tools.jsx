@@ -142,11 +142,8 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
     }
   };
 
-  const isToolActive = showRetexturing || showAngleChanger || showImageToVideo;
-
   return (
     <>
-<<<<<<< HEAD
       <div className="fixed left-6 top-6 z-30 sm:left-8 sm:top-8">
         <button
           type="button"
@@ -163,15 +160,6 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       </div>
 
       <PlannerQuickMenu />
-=======
-      {/* Solid Black Header Bar for Active Tools to prevent scrolling overlap */}
-      {isToolActive && (
-        <div 
-          className="fixed top-0 left-0 right-0 h-[95px] md:h-[148px] bg-black transition-all duration-300 pointer-events-none border-b border-white/5 shadow-2xl"
-          style={{ zIndex: 40 }}
-        ></div>
-      )}
->>>>>>> origin/Ai-tools
 
       {/* Hero Section */}
       {!showRetexturing && !showAngleChanger && !showImageToVideo && (

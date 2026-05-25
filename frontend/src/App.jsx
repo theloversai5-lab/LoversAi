@@ -77,6 +77,8 @@ function AppContent() {
 
   const hideNavbar =
     location.pathname.startsWith("/admin") ||
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
     location.pathname.startsWith("/planner/") ||
     location.pathname === "/planner" ||
     location.pathname === "/planner-ai-tools" ||
