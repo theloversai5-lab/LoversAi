@@ -111,7 +111,7 @@ export default function PlannerDashboard() {
             </svg>
           </div>
           <div>
-            <p className="text-lg font-heading text-white">Open AI Tools</p>
+            <p className="text-lg font-heading text-white">Pitch with AI</p>
             <p className="text-sm text-white/40 mt-1">
               Jump into Pitch with AI, retexturing, and planner visuals directly from your dashboard.
             </p>
@@ -158,7 +158,7 @@ export default function PlannerDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
         <Link to="/planner/bids" className="glass-card rounded-xl p-4 hover-lift hover-glow text-center group">
           <svg className="w-8 h-8 text-emerald-400 mx-auto mb-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <p className="text-sm font-medium text-white">Review New Bids</p>
@@ -174,9 +174,14 @@ export default function PlannerDashboard() {
           <p className="text-sm font-medium text-white">Manage Deals</p>
           <p className="text-[10px] text-white/30 mt-1">Track active wedding projects</p>
         </Link>
+        <Link to="/planner/vendors" className="glass-card rounded-xl p-4 hover-lift hover-glow text-center group">
+          <svg className="w-8 h-8 text-rose-200 mx-auto mb-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+          <p className="text-sm font-medium text-white">Find Vendors</p>
+          <p className="text-[10px] text-white/30 mt-1">Source vendor partners for each wedding brief</p>
+        </Link>
         <Link to="/planner-ai-tools" className="glass-card rounded-xl p-4 hover-lift hover-glow text-center group">
           <svg className="w-8 h-8 text-amber-300 mx-auto mb-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3l1.9 3.85L18 8.75l-3 2.92.71 4.13L12 13.77 8.29 15.8 9 11.67 6 8.75l4.1-.9L12 3z" /></svg>
-          <p className="text-sm font-medium text-white">Open AI Tools</p>
+          <p className="text-sm font-medium text-white">Pitch with AI</p>
           <p className="text-[10px] text-white/30 mt-1">Create smarter planner pitches and visuals</p>
         </Link>
       </div>

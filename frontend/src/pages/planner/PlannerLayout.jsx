@@ -54,6 +54,7 @@ const sidebarLinks = [
   {
     to: "/planner/vendors",
     label: "Find Vendors",
+    featured: true,
     icon: (
       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -63,6 +64,7 @@ const sidebarLinks = [
   {
     to: "/planner-ai-tools",
     label: "Pitch with AI",
+    featured: true,
     icon: (
       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3l1.9 3.85L18 8.75l-3 2.92.71 4.13L12 13.77 8.29 15.8 9 11.67 6 8.75l4.1-.9L12 3z" />
@@ -142,22 +144,27 @@ export default function PlannerLayout() {
           {sidebarLinks.map((link) => {
             const isActive = location.pathname === link.to;
             const badge = link.badgeKey === "unread" ? unreadCount : 0;
+            const isFeatured = Boolean(link.featured);
 
             return (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
+                className={`group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
                   isActive
                     ? "glass-card border-loverai-gold/20 text-loverai-gold"
-                    : "text-white/50 hover:bg-white/[0.04] hover:text-loverai-gold/80"
+                    : isFeatured
+                      ? "border-[#d0b1a4]/30 bg-[linear-gradient(135deg,rgba(208,177,164,0.16),rgba(208,177,164,0.06))] text-[#f2d9cf] shadow-[0_10px_24px_rgba(0,0,0,0.16)] hover:border-[#d0b1a4]/45 hover:bg-[linear-gradient(135deg,rgba(208,177,164,0.22),rgba(208,177,164,0.1))] hover:text-white"
+                      : "border-transparent text-white/50 hover:bg-white/[0.04] hover:text-loverai-gold/80"
                 }`}
               >
                 <span
                   className={`transition-colors ${
                     isActive
                       ? "text-loverai-gold"
-                      : "text-white/30 group-hover:text-loverai-gold/60"
+                      : isFeatured
+                        ? "text-[#e6c5b7] group-hover:text-[#f8e7df]"
+                        : "text-white/30 group-hover:text-loverai-gold/60"
                   }`}
                 >
                   {link.icon}

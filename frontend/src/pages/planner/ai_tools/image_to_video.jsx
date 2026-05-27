@@ -5,11 +5,11 @@ const ImageToVideo = ({ onClose }) => {
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  
+
   // Interactive Motion States
   const [dynamicMovement, setDynamicMovement] = useState(40);
   const [focusEffect, setFocusEffect] = useState(20);
-  
+
   // Theme state: defaults to dark page backdrop
   const [isDarkTheme, setIsDarkTheme] = useState(true);
 
@@ -20,7 +20,7 @@ const ImageToVideo = ({ onClose }) => {
       toast.error("Please upload a valid image file");
       return;
     }
-    
+
     setSelectedImage(file);
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -38,7 +38,7 @@ const ImageToVideo = ({ onClose }) => {
       toast.error("Please drop a valid image file");
       return;
     }
-    
+
     setSelectedImage(file);
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -81,7 +81,9 @@ const ImageToVideo = ({ onClose }) => {
         }}
       />
 
-      <div className={`min-h-screen ${isDarkTheme ? "bg-[#0e0e10]" : "bg-gray-150"} text-white font-['Poppins'] relative overflow-hidden py-12 px-4 md:px-8 lg:px-16 transition-colors duration-500`}>
+      <div
+        className={`min-h-screen ${isDarkTheme ? "bg-[#0e0e10]" : "bg-gray-100"} text-white font-['Poppins'] relative overflow-hidden py-12 px-4 md:px-8 lg:px-16 transition-colors duration-500`}
+      >
         {/* Modern ambient glassmorphic glows */}
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[150px] pointer-events-none"></div>
@@ -121,16 +123,20 @@ const ImageToVideo = ({ onClose }) => {
               <span className="border border-white/20 px-4 py-1.5 rounded-full text-[11px] font-medium text-white/80 select-none">
                 HD Quality
               </span>
-              
+
               {/* Dynamic Theme Toggle Switch */}
               <div className="flex items-center gap-2 ml-4">
-                <span className="text-xs text-gray-400 font-medium select-none">Theme:</span>
-                <button 
+                <span className="text-xs text-gray-400 font-medium select-none">
+                  Theme:
+                </span>
+                <button
                   onClick={() => setIsDarkTheme(!isDarkTheme)}
                   className="w-12 h-6 rounded-full bg-white/10 border border-white/20 relative transition-all duration-300 flex items-center p-0.5 cursor-pointer"
                   title="Toggle background theme"
                 >
-                  <div className={`w-[18px] h-[18px] rounded-full bg-blue-500 shadow-md transform transition-all duration-300 ${isDarkTheme ? 'translate-x-6 bg-blue-400' : 'translate-x-0 bg-amber-400'}`}></div>
+                  <div
+                    className={`w-[18px] h-[18px] rounded-full bg-blue-500 shadow-md transform transition-all duration-300 ${isDarkTheme ? "translate-x-6 bg-blue-400" : "translate-x-0 bg-amber-400"}`}
+                  ></div>
                 </button>
               </div>
             </div>
@@ -139,7 +145,6 @@ const ImageToVideo = ({ onClose }) => {
 
         {/* Main Workspace White Card Panel */}
         <main className="max-w-[1400px] mx-auto glass-card-strong text-white rounded-[32px] p-8 mb-8">
-          
           {/* Main Title inside the card */}
           <div className="text-center mb-10 select-none">
             <h2 className="text-2xl md:text-3xl font-black text-white mb-1">
@@ -151,7 +156,6 @@ const ImageToVideo = ({ onClose }) => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
             {/* Column 1: Upload Image (Step 1) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6 select-none">
@@ -238,7 +242,6 @@ const ImageToVideo = ({ onClose }) => {
               </div>
 
               <div className="flex-1 glass-card rounded-[24px] p-4 flex flex-col justify-center gap-4 min-h-[580px]">
-                
                 {/* Dynamic Movement Card */}
                 <div className="bg-white/5 p-5 rounded-2xl border border-white/10 flex flex-col gap-4">
                   <div className="flex items-center gap-3">
@@ -246,24 +249,32 @@ const ImageToVideo = ({ onClose }) => {
                       ↔️
                     </div>
                     <div>
-                      <h4 className="font-bold text-white text-[15px]">Dynamic Movement</h4>
-                      <p className="text-[11px] text-white/40">Control panning pace & speed</p>
+                      <h4 className="font-bold text-white text-[15px]">
+                        Dynamic Movement
+                      </h4>
+                      <p className="text-[11px] text-white/40">
+                        Control panning pace & speed
+                      </p>
                     </div>
                   </div>
-                  
+
                   {/* Slider */}
                   <div className="flex flex-col gap-1">
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="100" 
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
                       value={dynamicMovement}
-                      onChange={(e) => setDynamicMovement(parseInt(e.target.value))}
+                      onChange={(e) =>
+                        setDynamicMovement(parseInt(e.target.value))
+                      }
                       className="w-full accent-loverai-gold h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between items-center text-[10px] text-white/40 font-bold mt-1">
                       <span>Subtle</span>
-                      <span className="text-white bg-white/10 px-1.5 py-0.5 rounded">{dynamicMovement}%</span>
+                      <span className="text-white bg-white/10 px-1.5 py-0.5 rounded">
+                        {dynamicMovement}%
+                      </span>
                       <span>Intense</span>
                     </div>
                   </div>
@@ -276,29 +287,34 @@ const ImageToVideo = ({ onClose }) => {
                       🔍
                     </div>
                     <div>
-                      <h4 className="font-bold text-white text-[15px]">Focus Effect</h4>
-                      <p className="text-[11px] text-white/40">Intelligent zoom & depth tracking</p>
+                      <h4 className="font-bold text-white text-[15px]">
+                        Focus Effect
+                      </h4>
+                      <p className="text-[11px] text-white/40">
+                        Intelligent zoom & depth tracking
+                      </p>
                     </div>
                   </div>
-                  
+
                   {/* Slider */}
                   <div className="flex flex-col gap-1">
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="100" 
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
                       value={focusEffect}
                       onChange={(e) => setFocusEffect(parseInt(e.target.value))}
                       className="w-full accent-loverai-gold h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between items-center text-[10px] text-white/40 font-bold mt-1">
                       <span>Low</span>
-                      <span className="text-white bg-white/10 px-1.5 py-0.5 rounded">{focusEffect}%</span>
+                      <span className="text-white bg-white/10 px-1.5 py-0.5 rounded">
+                        {focusEffect}%
+                      </span>
                       <span>High</span>
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
@@ -336,7 +352,6 @@ const ImageToVideo = ({ onClose }) => {
                 </button>
               </div>
             </div>
-
           </div>
         </main>
       </div>

@@ -24,7 +24,7 @@ const PlannerPage = () => {
   const tools = [
     {
       title: "Find Leads",
-      image: "/images/couple_leads_image.jpeg",
+      image: "/images/Occluded text _ Sand dune.gif",
       onClick: () => handleNavigate('/planner/bids'),
       badge: "Live",
       badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
@@ -38,7 +38,7 @@ const PlannerPage = () => {
     },
     {
       title: "Find Vendors",
-      image: "/images/executive_wedding.jpeg",
+      image: "/images/execute.gif",
       onClick: () => handleNavigate('/planner/vendors'),
       badge: "Directory",
       badgeColor: "bg-blue-400/20 text-blue-400 border-blue-400/30",

@@ -325,15 +325,6 @@ export default function Signup() {
             <span>or</span>
           </div>
 
-<<<<<<< HEAD
-          <button
-            className="planner-auth-google"
-            type="button"
-            onClick={handleGoogleSignup}
-            disabled={loading}
-          >
-            Sign up with Google
-=======
           <button className="planner-auth-google" type="button">
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
               <path
@@ -354,7 +345,6 @@ export default function Signup() {
               />
             </svg>
             <span>Sign up with Google</span>
->>>>>>> origin/Ai-tools
           </button>
 
           <div className="planner-auth-switch">

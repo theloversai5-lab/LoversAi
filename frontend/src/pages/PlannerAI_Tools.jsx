@@ -74,6 +74,9 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
     }
   }, [showRetexturing, showAngleChanger, showImageToVideo, onToggleTool]);
 
+  const isToolActive =
+    showRetexturing || showAngleChanger || showImageToVideo;
+
   const handlePurchase = async (plan) => {
     console.log("🚀 handlePurchase called for plan:", plan);
 
@@ -144,19 +147,15 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
 
   return (
     <>
-<<<<<<< HEAD
-      <div className="fixed left-6 top-6 z-30 sm:left-8 sm:top-8">
-=======
       {/* Solid Black Header Bar for Active Tools to prevent scrolling overlap */}
       {isToolActive && (
-        <div 
+        <div
           className="fixed top-0 left-0 right-0 h-[95px] md:h-[148px] bg-black transition-all duration-300 pointer-events-none border-b border-white/5 shadow-2xl"
           style={{ zIndex: 40 }}
         ></div>
       )}
 
       <div className="fixed left-6 top-6 z-50 sm:left-8 sm:top-8">
->>>>>>> origin/Ai-tools
         <button
           type="button"
           onClick={() => navigate("/planner")}
@@ -171,11 +170,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
         </button>
       </div>
 
-<<<<<<< HEAD
-      <PlannerQuickMenu />
-=======
       <PlannerQuickMenu className="fixed right-6 top-6 z-50 sm:right-8 sm:top-8" />
->>>>>>> origin/Ai-tools
 
       {/* Hero Section */}
       {!showRetexturing && !showAngleChanger && !showImageToVideo && (

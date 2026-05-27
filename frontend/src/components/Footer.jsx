@@ -46,7 +46,8 @@ const Footer = ({ navigateTo, openContactPopup }) => {
   const [saveError, setSaveError] = useState("");
 
   const isPlannerFooter =
-    location.pathname === "/planner" || location.pathname.startsWith("/planner/");
+    location.pathname === "/planner" ||
+    location.pathname.startsWith("/planner/");
   const footerLinks = defaultFooterLinks;
   const fullPhone = `${countryCode} ${phone}`.trim();
   const requiredDigits = phoneRules[countryCode]?.digits || 10;
@@ -142,63 +143,51 @@ const Footer = ({ navigateTo, openContactPopup }) => {
         <div
           className={
             isPlannerFooter
-<<<<<<< HEAD
-              ? "relative z-10 mx-auto w-full max-w-[1400px] rounded-[40px] border border-white/15 p-8 shadow-[0_0_60px_rgba(255,255,255,0.05)] backdrop-blur-md md:p-12"
-              : "relative z-10 mx-auto w-full max-w-[1400px] rounded-[40px] border border-white/15 p-8 shadow-[0_0_60px_rgba(255,255,255,0.05)] backdrop-blur-md md:p-12"
-          }
-          style={
-            {
-              background: "rgba(255, 255, 255, 0.08)",
-            }
-          }
-        >
-          <div className="grid gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
-              <div className="flex flex-col items-center text-center md:items-center md:pl-12 md:text-center">
-=======
               ? "relative z-10 mx-auto w-full max-w-[1380px] rounded-[36px] border border-white/12 bg-[linear-gradient(145deg,rgba(17,10,8,0.9),rgba(41,24,21,0.78))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-xl sm:p-8 lg:p-10"
               : "relative z-10 mx-auto w-full max-w-[1400px] rounded-[32px] md:rounded-[40px] p-8 md:p-12 glass-card border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300"
           }
         >
           {isPlannerFooter ? (
             <div className="grid gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
-              <div className="flex flex-col gap-7">
-                <div className="space-y-4">
+              <div className="flex min-h-[620px] flex-col">
+                <div className="pt-3">
                   <span className="footer-text-font inline-flex w-fit rounded-full border border-[#e9cfc1]/20 bg-[#f7e4db]/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#f4ddd4]">
                     For Wedding Planners
                   </span>
+                </div>
+
+                <div className="flex flex-1 flex-col justify-center pb-10 pt-6">
                   <h2 className="footer-heading-font max-w-xl text-[clamp(38px,5vw,62px)] leading-[0.98] text-white">
                     Built to help planners win better weddings.
                   </h2>
-                  <p className="footer-text-font max-w-xl text-sm leading-7 text-[#f5e8e1]/72 sm:text-base">
-                    Discover qualified leads, pitch faster, and manage vendor
-                    coordination from one polished workflow.
-                  </p>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {[
-                    "Qualified couple leads",
-                    "AI-powered pitch support",
-                    "Vendor-ready coordination",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-[22px] border border-white/10 bg-white/[0.05] px-4 py-4 text-sm text-[#f8ede8]/82 backdrop-blur-md"
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
+                <div className="mt-auto space-y-4 pb-8">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[
+                      "Qualified couple leads",
+                      "AI-powered pitch support",
+                      "Vendor-ready coordination",
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="rounded-[22px] border border-white/10 bg-white/[0.05] px-4 py-4 text-sm text-[#f8ede8]/82 backdrop-blur-md"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
 
-                <div className="flex items-center gap-4 pt-2">
-                  <img
-                    src="/images/logo copy.png"
-                    alt="Lovers AI Logo"
-                    className="h-16 w-auto object-contain"
-                  />
-                  <p className="footer-text-font text-sm text-[#f5e8e1]/58">
-                    &copy;2025 LoversAI. Planner growth, simplified.
-                  </p>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src="/images/logo copy.png"
+                      alt="Lovers AI Logo"
+                      className="h-16 w-auto object-contain"
+                    />
+                    <p className="footer-text-font text-sm text-[#f5e8e1]/58">
+                      &copy;2025 LoversAI. Planner growth, simplified.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -209,8 +198,8 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                       Book a planner growth call
                     </h3>
                     <p className="footer-text-font mt-2 max-w-xl text-sm leading-6 text-[#f5e8e1]/66">
-                      Leave your email and phone number and we will help you
-                      set up the planner side properly.
+                      Leave your email and phone number and we will help you set
+                      up the planner side properly.
                     </p>
                   </div>
 
@@ -234,11 +223,36 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                           onChange={(e) => setCountryCode(e.target.value)}
                           className="h-14 w-full rounded-[18px] border border-white/10 bg-white/[0.08] px-3 text-sm md:text-base text-white focus:outline-none focus:ring-2 focus:ring-[#dcb6a6] transition-all duration-300 focus:bg-white/[0.12] cursor-pointer"
                         >
-                          <option value="+91" className="bg-[#1f1411] text-white">+91 IN</option>
-                          <option value="+1" className="bg-[#1f1411] text-white">+1 US</option>
-                          <option value="+44" className="bg-[#1f1411] text-white">+44 UK</option>
-                          <option value="+61" className="bg-[#1f1411] text-white">+61 AU</option>
-                          <option value="+971" className="bg-[#1f1411] text-white">+971 UAE</option>
+                          <option
+                            value="+91"
+                            className="bg-[#1f1411] text-white"
+                          >
+                            +91 IN
+                          </option>
+                          <option
+                            value="+1"
+                            className="bg-[#1f1411] text-white"
+                          >
+                            +1 US
+                          </option>
+                          <option
+                            value="+44"
+                            className="bg-[#1f1411] text-white"
+                          >
+                            +44 UK
+                          </option>
+                          <option
+                            value="+61"
+                            className="bg-[#1f1411] text-white"
+                          >
+                            +61 AU
+                          </option>
+                          <option
+                            value="+971"
+                            className="bg-[#1f1411] text-white"
+                          >
+                            +971 UAE
+                          </option>
                         </select>
                       </label>
 
@@ -288,13 +302,18 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                                 type="button"
                                 onClick={() => {
                                   if (item.action === "contact") {
-                                    if (typeof openContactPopup === "function") {
+                                    if (
+                                      typeof openContactPopup === "function"
+                                    ) {
                                       openContactPopup(fullPhone);
                                     } else {
                                       setShowLocalContactPopup(true);
                                     }
                                   } else {
-                                    handleFooterNavigation(item.page, item.target);
+                                    handleFooterNavigation(
+                                      item.page,
+                                      item.target,
+                                    );
                                   }
                                 }}
                                 className="footer-text-font text-left text-sm font-light text-[#f2dfd8]/72 transition-colors duration-200 hover:text-loverai-gold"
@@ -317,7 +336,6 @@ const Footer = ({ navigateTo, openContactPopup }) => {
           ) : (
             <div className="grid gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
               <div className="flex flex-col items-center text-center md:items-center md:text-center md:pl-6">
->>>>>>> origin/Ai-tools
                 <h2
                   className="text-white text-2xl md:text-[32px] lg:text-[36px] leading-[1.1] tracking-[-0.02em] font-normal text-center"
                   style={{
@@ -366,11 +384,33 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                           onChange={(e) => setCountryCode(e.target.value)}
                           className="footer-text-font w-[110px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 text-sm transition-all cursor-pointer"
                         >
-                          <option value="+91" className="bg-black/90 text-white">+91 IN</option>
-                          <option value="+1" className="bg-black/90 text-white">+1 US</option>
-                          <option value="+44" className="bg-black/90 text-white">+44 UK</option>
-                          <option value="+61" className="bg-black/90 text-white">+61 AU</option>
-                          <option value="+971" className="bg-black/90 text-white">+971 UAE</option>
+                          <option
+                            value="+91"
+                            className="bg-black/90 text-white"
+                          >
+                            +91 IN
+                          </option>
+                          <option value="+1" className="bg-black/90 text-white">
+                            +1 US
+                          </option>
+                          <option
+                            value="+44"
+                            className="bg-black/90 text-white"
+                          >
+                            +44 UK
+                          </option>
+                          <option
+                            value="+61"
+                            className="bg-black/90 text-white"
+                          >
+                            +61 AU
+                          </option>
+                          <option
+                            value="+971"
+                            className="bg-black/90 text-white"
+                          >
+                            +971 UAE
+                          </option>
                         </select>
 
                         <input
@@ -394,8 +434,12 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                         onClick={handleBookCall}
                         className="rounded-full px-8 py-3.5 text-sm font-semibold text-black transition-all duration-300 active:scale-95 shadow-md shadow-black/10 hover:shadow-lg flex items-center justify-center shrink-0 cursor-pointer"
                         style={{ backgroundColor: "#D0B1A4" }}
-                        onMouseEnter={(e) => e.currentTarget.style.filter = "brightness(1.08)"}
-                        onMouseLeave={(e) => e.currentTarget.style.filter = "none"}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.filter = "brightness(1.08)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.filter = "none")
+                        }
                       >
                         {saving ? "Saving..." : "Book a Free Call"}
                       </button>
@@ -419,7 +463,9 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                                 tabIndex={0}
                                 onClick={() => {
                                   if (item.action === "contact") {
-                                    if (typeof openContactPopup === "function") {
+                                    if (
+                                      typeof openContactPopup === "function"
+                                    ) {
                                       openContactPopup(fullPhone);
                                     } else {
                                       setShowLocalContactPopup(true);
@@ -448,6 +494,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                 </div>
               </div>
             </div>
+          )}
         </div>
       </footer>
 

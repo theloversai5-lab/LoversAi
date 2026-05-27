@@ -478,7 +478,7 @@ const AngleChangeComponent = ({ onClose }) => {
               <span className="border border-white/20 px-4 py-1.5 rounded-full text-[11px] font-medium text-white/80 select-none">
                 Professional Quality
               </span>
-              
+
               {/* Dynamic Credits Display */}
               <button
                 onClick={fetchUserCredits}
@@ -487,8 +487,17 @@ const AngleChangeComponent = ({ onClose }) => {
                 title="Click to refresh credits"
               >
                 <span>🎫</span>
-                <span>{loadingCredits ? "..." : userCredits.toLocaleString()} Credits</span>
-                <span className={loadingCredits ? "animate-spin text-[8px]" : "text-[8px]"}>🔄</span>
+                <span>
+                  {loadingCredits ? "..." : userCredits.toLocaleString()}{" "}
+                  Credits
+                </span>
+                <span
+                  className={
+                    loadingCredits ? "animate-spin text-[8px]" : "text-[8px]"
+                  }
+                >
+                  🔄
+                </span>
               </button>
             </div>
           </div>
@@ -497,7 +506,6 @@ const AngleChangeComponent = ({ onClose }) => {
         {/* Main Workspace White Card Panel */}
         <main className="max-w-[1400px] mx-auto glass-card-strong text-white rounded-[32px] p-8 mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
             {/* Column 1: Upload Image (Step 1) */}
             <div className="flex flex-col h-full">
               <div className="flex flex-col items-center text-center mb-6">
@@ -600,7 +608,9 @@ const AngleChangeComponent = ({ onClose }) => {
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className={`font-bold text-sm ${isSelected ? "text-loverai-gold" : "text-white"}`}>
+                            <div
+                              className={`font-bold text-sm ${isSelected ? "text-loverai-gold" : "text-white"}`}
+                            >
                               {angle.name}
                             </div>
                             <div className="text-xs text-white/40 mt-0.5">
@@ -654,7 +664,8 @@ const AngleChangeComponent = ({ onClose }) => {
                       {!creditInfo.hasEnough && (
                         <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg max-w-[220px] mx-auto">
                           <p className="text-[9px] text-red-600 font-bold leading-tight">
-                            Insufficient credits! (Need {currentCreditCost - userCredits} more)
+                            Insufficient credits! (Need{" "}
+                            {currentCreditCost - userCredits} more)
                           </p>
                           <button
                             onClick={handleBuyCredits}
@@ -676,7 +687,9 @@ const AngleChangeComponent = ({ onClose }) => {
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-sm mb-2 select-none">
                   3
                 </div>
-                <h2 className="text-xl font-bold text-white">Download Result</h2>
+                <h2 className="text-xl font-bold text-white">
+                  Download Result
+                </h2>
                 <p className="text-xs text-white/50">Your transformed view</p>
               </div>
 
@@ -686,13 +699,16 @@ const AngleChangeComponent = ({ onClose }) => {
                   <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                     <div className="relative mb-6">
                       <div className="w-12 h-12 rounded-full border-4 border-white/10 border-t-loverai-gold animate-spin"></div>
-                      <span className="absolute inset-0 flex items-center justify-center text-md">✨</span>
+                      <span className="absolute inset-0 flex items-center justify-center text-md">
+                        ✨
+                      </span>
                     </div>
                     <h3 className="text-sm font-bold text-white mb-1">
                       Transforming Perspectives...
                     </h3>
                     <p className="text-xs text-white/50 max-w-[200px] mb-4">
-                      Our advanced AI is rendering the selected views. This takes 30-60 seconds.
+                      Our advanced AI is rendering the selected views. This
+                      takes 30-60 seconds.
                     </p>
                     <div className="w-full max-w-[150px] bg-white/10 h-1 rounded-full overflow-hidden">
                       <div className="bg-gradient-to-r from-loverai-gold to-amber-500 h-full w-4/5 animate-pulse rounded-full"></div>
@@ -760,19 +776,24 @@ const AngleChangeComponent = ({ onClose }) => {
 
                           <div className="flex items-center justify-between border-t border-white/10 pt-3">
                             <span className="text-[10px] text-white/50 font-semibold">
-                              Credits Used: {modelType === "flux-kontext-pro" ? "20" : "15"}
+                              Credits Used:{" "}
+                              {modelType === "flux-kontext-pro" ? "20" : "15"}
                             </span>
                             <div className="flex gap-1.5">
                               <button
                                 className="w-6 h-6 rounded-full bg-green-500/10 hover:bg-green-500/20 text-green-400 flex items-center justify-center text-[10px] transition-all cursor-pointer"
-                                onClick={() => toast.success("Feedback sent! Thank you.")}
+                                onClick={() =>
+                                  toast.success("Feedback sent! Thank you.")
+                                }
                                 title="Love it!"
                               >
                                 👍
                               </button>
                               <button
                                 className="w-6 h-6 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 flex items-center justify-center text-[10px] transition-all cursor-pointer"
-                                onClick={() => toast.success("Feedback sent! Thank you.")}
+                                onClick={() =>
+                                  toast.success("Feedback sent! Thank you.")
+                                }
                                 title="Needs improvements"
                               >
                                 👎
@@ -802,7 +823,6 @@ const AngleChangeComponent = ({ onClose }) => {
                 )}
               </div>
             </div>
-
           </div>
         </main>
 
@@ -845,7 +865,7 @@ const AngleChangeComponent = ({ onClose }) => {
                   />
                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-350 flex items-center justify-center gap-3">
                     <button
-                      className="w-8 h-8 rounded-full bg-white hover:bg-gray-150 flex items-center justify-center shadow-lg transition-colors cursor-pointer text-sm"
+                      className="w-8 h-8 rounded-full bg-white hover:bg-gray-200 flex items-center justify-center shadow-lg transition-colors cursor-pointer text-sm"
                       onClick={() => {
                         setGeneratedResult({
                           success: true,
@@ -862,24 +882,28 @@ const AngleChangeComponent = ({ onClose }) => {
                       👁️
                     </button>
                     <button
-                      className="w-8 h-8 rounded-full bg-white hover:bg-gray-150 flex items-center justify-center shadow-lg transition-colors cursor-pointer text-sm"
-                      onClick={() => downloadImage(item.url, `angle-${item.angle}.jpg`)}
+                      className="w-8 h-8 rounded-full bg-white hover:bg-gray-200 flex items-center justify-center shadow-lg transition-colors cursor-pointer text-sm"
+                      onClick={() =>
+                        downloadImage(item.url, `angle-${item.angle}.jpg`)
+                      }
                       title="Download image"
                     >
                       📥
                     </button>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-[9px] p-2.5 flex justify-between items-center">
-                    <span className="truncate max-w-[80px] font-medium">{item.angleName}</span>
-                    <span className="text-yellow-400 font-bold">{item.creditsUsed || 15} Cr</span>
+                    <span className="truncate max-w-[80px] font-medium">
+                      {item.angleName}
+                    </span>
+                    <span className="text-yellow-400 font-bold">
+                      {item.creditsUsed || 15} Cr
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-
-
       </div>
     </>
   );
