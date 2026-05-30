@@ -52,26 +52,6 @@ const sidebarLinks = [
     ),
   },
   {
-    to: "/planner/vendors",
-    label: "Find Vendors",
-    featured: true,
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-  },
-  {
-    to: "/planner-ai-tools",
-    label: "Pitch with AI",
-    featured: true,
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3l1.9 3.85L18 8.75l-3 2.92.71 4.13L12 13.77 8.29 15.8 9 11.67 6 8.75l4.1-.9L12 3z" />
-      </svg>
-    ),
-  },
-  {
     to: "/planner/profile",
     label: "Profile",
     icon: (

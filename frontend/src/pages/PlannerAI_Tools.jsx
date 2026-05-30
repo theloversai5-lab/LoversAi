@@ -9,6 +9,169 @@ import { useAuth } from "../context/AuthContext";
 import { paymentAPI } from "../api/api";
 import PlannerQuickMenu from "../components/PlannerQuickMenu";
 
+const SafePlannerQuickMenu =
+  typeof PlannerQuickMenu === "function" ? PlannerQuickMenu : () => null;
+const SafeRetexturingTool =
+  typeof RetexturingTool === "function" ? RetexturingTool : () => null;
+const SafeAngleChangeComponent =
+  typeof AngleChangeComponent === "function"
+    ? AngleChangeComponent
+    : () => null;
+const SafeImageToVideo =
+  typeof ImageToVideo === "function" ? ImageToVideo : () => null;
+
+const RUPEE = "\u20B9";
+
+const pricingPlans = [
+  {
+    name: "Free Plan",
+    price: "0",
+    description: "Perfect for getting started with AI creativity.",
+    features: [
+      "Retexturizing",
+      "Image upscaling",
+      "Image views",
+      "Standard quality output",
+      "Community support",
+    ],
+  },
+  {
+    name: "Basic Plan",
+    key: "basic",
+    price: "4,349",
+    description: "Great for individual creators and small projects.",
+    features: [
+      "Credits per month: 1,300",
+      "Number of images: 130",
+      "Storage: 5GB",
+      "Retexturing",
+      "Image views",
+      "Image to video conversion",
+      "Generative image and video editing",
+      "High quality output",
+    ],
+  },
+  {
+    name: "Premium Plan",
+    key: "premium",
+    price: "9,349",
+    description: "Unlock full creative potential and advanced tools.",
+    features: [
+      "Credits per month: 6,500",
+      "Number of images: 650",
+      "Storage: 15GB",
+      "Retexturing",
+      "Image views",
+      "Image to video conversion",
+      "Generative image and video editing",
+      "4D quality output",
+      "Priority email support",
+      "Community support",
+    ],
+    featured: true,
+  },
+  {
+    name: "Enterprise",
+    price: "Customisable",
+    description: "Unlock full creative potential and advanced tools.",
+    features: [
+      "Unlimited conversions",
+      "Unlimited quality output",
+      "Retexturing",
+      "Image views",
+      "Image to video conversion",
+      "Advanced security features",
+      "Priority support",
+      "Generative image and video editing",
+    ],
+    cta: "Contact Us",
+  },
+];
+
+const topUpPricing = [
+  { plan: "Free", credits: "10", pricePerCredit: "17.00" },
+  { plan: "Basic", credits: "10", pricePerCredit: "13.60" },
+  { plan: "Premium", credits: "10", pricePerCredit: "8.50" },
+];
+
+const featureComparisonRows = [
+  { label: "Image Retexturing", plans: [true, true, true, true] },
+  { label: "Image Views", plans: [true, true, true, true] },
+  { label: "Image to Video Conversions", plans: [false, true, true, true] },
+  {
+    label: "Generative Image and Video Editing",
+    plans: [false, true, true, true],
+  },
+  { label: "Standard Quality Output", plans: [true, false, false, false] },
+  { label: "High Quality Output", plans: [false, true, false, false] },
+  { label: "HD Quality Output", plans: [false, false, true, true] },
+  { label: "Community Support", plans: [true, true, true, false] },
+  { label: "Priority Email Support", plans: [false, false, true, true] },
+  { label: "Custom AI Models", plans: [false, false, false, true] },
+];
+
+function StatusIcon({ enabled }) {
+  if (enabled) {
+    return (
+      <span
+        aria-label="Included"
+        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/12 text-emerald-400"
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M3.5 8.5l3 3 6-7" />
+        </svg>
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-label="Not included"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-orange-500/12 text-orange-400"
+    >
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      >
+        <path d="M4 8h8" />
+      </svg>
+    </span>
+  );
+}
+
+function PriceValue({ value }) {
+  const isNumericPrice = /^\d[\d,]*([.]\d+)?$/.test(value);
+
+  if (!isNumericPrice) {
+    return (
+      <div className="mb-1 text-[36px] font-semibold tracking-tight text-loverai-gold font-heading">
+        {value}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-1 flex items-baseline gap-2 text-loverai-gold font-heading">
+      <span className="text-[28px] font-semibold">{RUPEE}</span>
+      <span className="text-[36px] font-semibold tracking-tight tabular-nums">
+        {value}
+      </span>
+    </div>
+  );
+}
+
 const PitchAIPage = ({ navigateTo, onToggleTool }) => {
   const [showAngleChanger, setShowAngleChanger] = useState(false);
   const [showRetexturing, setShowRetexturing] = useState(false);
@@ -74,15 +237,12 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
     }
   }, [showRetexturing, showAngleChanger, showImageToVideo, onToggleTool]);
 
-  const isToolActive =
-    showRetexturing || showAngleChanger || showImageToVideo;
-
   const handlePurchase = async (plan) => {
-    console.log("🚀 handlePurchase called for plan:", plan);
+    console.log("ðŸš€ handlePurchase called for plan:", plan);
 
     // Check if user is authenticated
     if (!currentUser) {
-      console.log("❌ User not authenticated, redirecting to login");
+      console.log("âŒ User not authenticated, redirecting to login");
 
       // Store the current page to redirect back after login
       sessionStorage.setItem("redirectAfterLogin", "/planner-ai-tools");
@@ -100,7 +260,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
 
     // If user is authenticated, proceed with purchase
     try {
-      console.log("✅ User authenticated, getting email...");
+      console.log("âœ… User authenticated, getting email...");
 
       // Get user email
       let userEmail = "";
@@ -113,10 +273,10 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
         userEmail = currentUser.profile.email;
       }
 
-      console.log("📧 User email found:", userEmail);
+      console.log("ðŸ“§ User email found:", userEmail);
 
       if (!userEmail || !isValidEmail(userEmail)) {
-        console.error("❌ Invalid or missing email");
+        console.error("âŒ Invalid or missing email");
         alert(
           "Please complete your profile with a valid email address before purchasing",
         );
@@ -128,59 +288,55 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
         const data = await paymentAPI.createCheckout(plan);
 
         if (data.success && data.checkoutUrl) {
-          console.log("✅ Checkout URL received:", data.checkoutUrl);
+          console.log("âœ… Checkout URL received:", data.checkoutUrl);
           window.location.href = data.checkoutUrl;
         } else {
-          console.error("❌ Failed to create checkout:", data);
+          console.error("âŒ Failed to create checkout:", data);
           alert("Failed to initiate checkout. Please try again.");
         }
       } catch (error) {
-        console.error("❌ Error creating checkout:", error);
-        console.log("🔄 Using direct Lemon checkout as fallback");
+        console.error("âŒ Error creating checkout:", error);
+        console.log("ðŸ”„ Using direct Lemon checkout as fallback");
         openLemonCheckout(plan, userEmail);
       }
     } catch (error) {
-      console.error("❌ Error in handlePurchase:", error);
+      console.error("âŒ Error in handlePurchase:", error);
       alert("An error occurred. Please try again.");
     }
   };
 
   return (
     <>
-      {/* Solid Black Header Bar for Active Tools to prevent scrolling overlap */}
-      {isToolActive && (
-        <div
-          className="fixed top-0 left-0 right-0 h-[95px] md:h-[148px] bg-black transition-all duration-300 pointer-events-none border-b border-white/5 shadow-2xl"
-          style={{ zIndex: 40 }}
-        ></div>
+      {!showImageToVideo && (
+        <>
+          <div className="fixed left-6 top-6 z-30 sm:left-8 sm:top-8">
+            <button
+              type="button"
+              onClick={() => navigate("/planner")}
+              aria-label="Lovers AI home"
+              className="transition hover:opacity-90"
+            >
+              <img
+                src="/images/LogoLoversai.png"
+                alt="Lovers AI"
+                className="h-20 w-auto object-contain sm:h-24"
+              />
+            </button>
+          </div>
+
+          <SafePlannerQuickMenu className="fixed right-6 top-6 z-50 sm:right-8 sm:top-8" />
+        </>
       )}
-
-      <div className="fixed left-6 top-6 z-50 sm:left-8 sm:top-8">
-        <button
-          type="button"
-          onClick={() => navigate("/planner")}
-          aria-label="Lovers AI home"
-          className="transition hover:opacity-90"
-        >
-          <img
-            src="/images/LogoLoversai.png"
-            alt="Lovers AI"
-            className="h-20 w-auto object-contain sm:h-24"
-          />
-        </button>
-      </div>
-
-      <PlannerQuickMenu className="fixed right-6 top-6 z-50 sm:right-8 sm:top-8" />
 
       {/* Hero Section */}
       {!showRetexturing && !showAngleChanger && !showImageToVideo && (
         <div className="relative w-screen h-screen flex items-center justify-center text-white overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center z-0"
-            style={{ 
+            style={{
               backgroundImage: `url("./images/bridal.png")`,
               backgroundSize: "cover",
-              backgroundPosition: "center"
+              backgroundPosition: "center",
             }}
           ></div>
           <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
@@ -192,12 +348,14 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
         <div
           id="ai-tools-section"
           className={`bg-black px-4 transition-all duration-300 ${
-            showRetexturing ? "pt-32 pb-10 md:pt-[175px] md:pb-16" : "py-20"
+            showRetexturing ? "pt-16 pb-4 md:pt-20 md:pb-6" : "py-20"
           }`}
         >
           <div
             className={`w-full transition-all duration-300 ${
-              showRetexturing ? "max-w-[1550px] mx-auto px-4 md:px-8" : "px-[6%] md:px-[10%]"
+              showRetexturing
+                ? "max-w-[1550px] mx-auto px-2 md:px-4"
+                : "px-[6%] md:px-[10%]"
             }`}
           >
             {!showRetexturing && (
@@ -209,11 +367,11 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-5xl font-light text-white mb-12 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image Retexturing →
+                Image Retexturing ->
               </h2>
             )}
 
-            {/* BEFORE CLICK — show preview */}
+            {/* BEFORE CLICK â€” show preview */}
             {!showRetexturing && (
               <div
                 className="glass-card rounded-[40px] md:rounded-[56px] p-8 md:p-16 border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
@@ -246,9 +404,9 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               </div>
             )}
 
-            {/* AFTER CLICK — show retexturing app directly */}
+            {/* AFTER CLICK â€” show retexturing app directly */}
             {showRetexturing && (
-              <RetexturingTool onClose={() => setShowRetexturing(false)} />
+              <SafeRetexturingTool onClose={() => setShowRetexturing(false)} />
             )}
           </div>
         </div>
@@ -258,13 +416,13 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       {!showRetexturing && !showImageToVideo && (
         <div
           className={`bg-black px-4 transition-all duration-300 ${
-            showAngleChanger ? "pt-32 pb-10 md:pt-[175px] md:pb-16" : "py-20"
+            showAngleChanger ? "pt-16 pb-4 md:pt-20 md:pb-6" : "py-20"
           }`}
         >
           <div
             className={`w-full transition-all duration-300 ${
               showAngleChanger
-                ? "max-w-[1550px] mx-auto px-4 md:px-8"
+                ? "max-w-[1550px] mx-auto px-2 md:px-4"
                 : "px-[6%] md:px-[10%] mt-16"
             }`}
           >
@@ -277,11 +435,11 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[64px] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image Angle →
+                Image Angle ->
               </h2>
             )}
 
-            {/* BEFORE CLICK — preview */}
+            {/* BEFORE CLICK â€” preview */}
             {!showAngleChanger && (
               <div
                 className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
@@ -331,9 +489,11 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               </div>
             )}
 
-            {/* AFTER CLICK — open tool INLINE */}
+            {/* AFTER CLICK â€” open tool INLINE */}
             {showAngleChanger && (
-              <AngleChangeComponent onClose={() => setShowAngleChanger(false)} />
+              <SafeAngleChangeComponent
+                onClose={() => setShowAngleChanger(false)}
+              />
             )}
           </div>
         </div>
@@ -352,7 +512,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[64px] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image to Video →
+                Image to Video ->
               </h2>
               <div
                 className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
@@ -408,209 +568,62 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 Choose Your Creative Plan
               </h2>
               <p className="text-gray-400 text-center max-w-3xl mx-auto mb-20">
-                Unlock the full potential of AI-powered content creation with plans
-                designed for every creator.
+                Unlock the full potential of AI-powered content creation with
+                plans designed for every creator.
               </p>
 
               {/* Pricing cards */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
-                {/* Free Plan */}
-                <div className="glass-card border border-white/10 p-10 rounded-[32px] hover:border-loverai-gold/30 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full">
-                  <h3 className="text-xl font-bold text-white mb-2">Free Plan</h3>
-                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
-                    ₹ 0
-                  </div>
-                  <div className="text-sm text-white/50 mb-6">/month</div>
-                  <p className="text-sm text-white/70 mb-6">
-                    Perfect for getting started with AI creativity.
-                  </p>
-
-                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Retexturizing
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image
-                      upscaling
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image views
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Standard
-                      quality output
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Community
-                      support
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Basic Plan */}
-                <div className="glass-card border border-white/10 p-10 rounded-[32px] hover:border-loverai-gold/30 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full">
-                  <h3 className="text-xl font-bold text-white mb-2">Basic Plan</h3>
-                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
-                    ₹ 4,349
-                  </div>
-                  <div className="text-sm text-white/50 mb-6">/month</div>
-                  <p className="text-sm text-white/70 mb-6">
-                    Great for individual creators and small projects.
-                  </p>
-
-                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span>{" "}
-                      RetexturCredits per month: 1,300/img
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Number of
-                      images: 130
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Storage: 5GB
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Retexturing
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image views
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image to video
-                      Conversion
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Generative
-                      image and video editing
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> High quality
-                      output
-                    </li>
-                  </ul>
-
-                  <button
-                    onClick={() => handlePurchase("basic")}
-                    className="w-full mt-10 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wide transition-all duration-300 loverai-btn-primary"
+              <div className="grid gap-10 mb-16 md:grid-cols-2 lg:grid-cols-4">
+                {pricingPlans.map((plan) => (
+                  <div
+                    key={plan.name}
+                    className={`glass-card relative flex h-full flex-col justify-between rounded-[32px] border p-10 transition-all duration-300 hover:scale-[1.02] ${
+                      plan.featured
+                        ? "border-[#e6c6b2]/30 shadow-[0_0_30px_rgba(230,198,178,0.1)] hover:border-loverai-gold/50"
+                        : "border-white/10 hover:border-loverai-gold/30"
+                    }`}
                   >
-                    {currentUser ? "Buy Now" : "Login to Purchase"}
-                  </button>
-                </div>
-
-                {/* Premium Plan */}
-                <div className="glass-card border border-[#e6c6b2]/30 shadow-[0_0_30px_rgba(230,198,178,0.1)] p-10 rounded-[32px] hover:border-loverai-gold/50 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full relative overflow-hidden">
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Most Popular</div>
-                  <h3 className="text-xl font-bold text-white mb-2">Premium Plan</h3>
-                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
-                    ₹ 9,349
+                    {plan.featured && (
+                      <div className="absolute top-0 right-0 rounded-bl-lg bg-gradient-to-r from-loverai-gold to-amber-700 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-loverai-dark">
+                        Most Popular
+                      </div>
+                    )}
+                    <h3 className="mb-2 text-xl font-bold text-white">
+                      {plan.name}
+                    </h3>
+                    <PriceValue value={plan.price} />
+                    <div className="mb-6 text-sm text-white/50">
+                      {plan.key ? "/month" : plan.price === "0" ? "/month" : ""}
+                    </div>
+                    <p className="mb-6 text-sm text-white/70">
+                      {plan.description}
+                    </p>
+                    <ul className="mt-6 mb-8 flex-grow space-y-4 text-[16px] text-white/90">
+                      {plan.features.map((feature) => (
+                        <li key={feature} className="flex items-start gap-3">
+                          <StatusIcon enabled />
+                          <span className="leading-6">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {plan.key ? (
+                      <button
+                        onClick={() => handlePurchase(plan.key)}
+                        className="loverai-btn-primary mt-10 w-full rounded-full py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-300"
+                      >
+                        {currentUser ? "Buy Now" : "Login to Purchase"}
+                      </button>
+                    ) : plan.cta ? (
+                      <button
+                        onClick={() => setShowContactPopup(true)}
+                        className="loverai-btn-primary mt-10 w-full rounded-full py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-300"
+                      >
+                        {plan.cta}
+                      </button>
+                    ) : null}
                   </div>
-                  <div className="text-sm text-white/50 mb-6">/month</div>
-                  <p className="text-sm text-white/70 mb-6">
-                    Unlock full creative potential and advanced tools.
-                  </p>
-
-                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Credits per
-                      month: 6,500
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Number of
-                      images: 650
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Storage: 15GB
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Retexturing
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image views
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image to video
-                      Conversion
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Generative
-                      image and video editing
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> 4D quality
-                      output
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Priority email
-                      support
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Community
-                      support
-                    </li>
-                  </ul>
-
-                  <button
-                    onClick={() => handlePurchase("premium")}
-                    className="w-full mt-10 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wide transition-all duration-300 loverai-btn-primary"
-                  >
-                    {currentUser ? "Buy Now" : "Login to Purchase"}
-                  </button>
-                </div>
-
-                {/* Enterprise */}
-                <div className="glass-card border border-white/10 p-10 rounded-[32px] hover:border-loverai-gold/30 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between h-full">
-                  <h3 className="text-xl font-bold text-white mb-2">Enterprise</h3>
-                  <div className="text-[36px] font-semibold text-loverai-gold mb-1 font-heading">
-                    Customisable
-                  </div>
-                  <div className="text-sm text-white/50 mb-6"></div>
-                  <p className="text-sm text-white/70 mb-6">
-                    Unlock full creative potential and advanced tools.
-                  </p>
-
-                  <ul className="space-y-4 text-[16px] text-white/90 mt-6 mb-8 flex-grow">
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Unlimited
-                      conversions
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Unlimited
-                      quality output
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Retexturing
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image views
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Image to video
-                      Conversion
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Advanced
-                      security features
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Priority
-                      support
-                    </li>
-                    <li className="flex items-center">
-                      <span className="text-loverai-gold mr-3">✓</span> Generative
-                      image and video editing
-                    </li>
-                  </ul>
-
-                  <button
-                    onClick={() => setShowContactPopup(true)}
-                    className="w-full mt-10 py-3.5 rounded-full text-sm font-semibold uppercase tracking-wide transition-all duration-300 loverai-btn-primary"
-                  >
-                    Contact Us
-                  </button>
-                </div>
+                ))}
               </div>
-
               {/* Rest of the component remains the same... */}
               {showContactPopup && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999]">
@@ -620,7 +633,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     </h2>
 
                     <p className="text-gray-700 mb-2">
-                      📧 Email:{" "}
+                      ðŸ“§ Email:{" "}
                       <a
                         href="mailto:aanssha@theloversai.co.in"
                         onClick={(e) => e.stopPropagation()}
@@ -631,12 +644,12 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     </p>
 
                     <p className="text-gray-700 mb-2">
-                      📞 Phone: +91 9821640951 | +91 9266355235
+                      ðŸ“ž Phone: +91 9821640951 | +91 9266355235
                     </p>
 
                     {/* WhatsApp */}
                     <p className="text-gray-700 mb-6">
-                      💬 WhatsApp:{" "}
+                      ðŸ’¬ WhatsApp:{" "}
                       <a
                         href="https://wa.me/919266355235"
                         target="_blank"
@@ -649,7 +662,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     </p>
 
                     <p className="text-gray-700 mb-6">
-                      📍 Address: G-29, RG Trade Tower, NSP, Pitampura, Delhi
+                      ðŸ“ Address: G-29, RG Trade Tower, NSP, Pitampura, Delhi
                     </p>
 
                     <button
@@ -681,74 +694,57 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                       </div>
                     </div>
                     <div>
-                      <div className="grid grid-cols-3 text-center py-8 border-b border-white/5 text-white/80 text-[15px] md:text-[18px]">
-                        <div>Free</div>
-                        <div>10</div>
-                        <div className="text-loverai-gold font-medium">₹17.00</div>
-                      </div>
-                      <div className="grid grid-cols-3 text-center py-8 border-b border-white/5 text-white/80 text-[15px] md:text-[18px]">
-                        <div>Basic</div>
-                        <div>10</div>
-                        <div className="text-loverai-gold font-medium">₹13.60</div>
-                      </div>
-                      <div className="grid grid-cols-3 text-center py-8 text-white/80 text-[15px] md:text-[18px]">
-                        <div>Premium</div>
-                        <div>10</div>
-                        <div className="text-loverai-gold font-medium">₹8.50</div>
-                      </div>
+                      {topUpPricing.map((row, index) => (
+                        <div
+                          key={row.plan}
+                          className={`grid grid-cols-3 py-8 text-center text-[15px] text-white/80 md:text-[18px] ${
+                            index < topUpPricing.length - 1
+                              ? "border-b border-white/5"
+                              : ""
+                          }`}
+                        >
+                          <div>{row.plan}</div>
+                          <div className="tabular-nums">{row.credits}</div>
+                          <div className="font-medium text-loverai-gold tabular-nums">
+                            {RUPEE}
+                            {row.pricePerCredit}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
-
               {/* Features Comparison Table */}
               <div className="w-full px-[6%] md:px-[10%] mt-32 transition-all duration-300">
-                <div className="w-full border border-gray-600 rounded-[8px] overflow-hidden">
+                <div className="w-full overflow-hidden rounded-[8px] border border-gray-600">
                   <div className="grid grid-cols-5">
-                    {/* Header row */}
-                    <div className="bg-black text-white text-[18px] font-medium p-6">
+                    <div className="bg-black p-6 text-[18px] font-medium text-white">
                       Features
                     </div>
-                    <div className="bg-black text-white text-[18px] font-medium p-6 text-center">
+                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
                       Free
                     </div>
-                    <div className="bg-black text-white text-[18px] font-medium p-6 text-center">
+                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
                       Basic
                     </div>
-                    <div className="bg-black text-white text-[18px] font-medium p-6 text-center">
+                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
                       Premium
                     </div>
-                    <div className="bg-black text-white text-[18px] font-medium p-6 text-center">
+                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
                       Enterprise
                     </div>
-
-                    {/* Feature rows */}
-                    {[
-                      ["Image Retexturing", "✔️", "✔️", "✔️", "✔️"],
-                      ["Image Views", "✔️", "✔️", "✔️", "✔️"],
-                      ["Image to Video Conversions", "—", "✔️", "✔️", "✔️"],
-                      ["Generative Image and video Editing", "—", "✔️", "✔️", "✔️"],
-                      ["Standard Quality Output", "✔️", "—", "—", "—"],
-                      ["High Quality Output", "—", "✔️", "—", "—"],
-                      ["HD Quality Output", "—", "—", "✔️", "✔️"],
-                      ["Community Support", "✔️", "✔️", "✔️", "—"],
-                      ["Priority Email Support", "—", "—", "✔️", "✔️"],
-                      ["Custom AI Models", "—", "—", "—", "✔️"],
-                    ].map((row, index) => (
-                      <React.Fragment key={index}>
-                        <div className="border-t border-gray-700 text-white text-[16px] p-6">
-                          {row[0]}
+                    {featureComparisonRows.map((row) => (
+                      <React.Fragment key={row.label}>
+                        <div className="border-t border-gray-700 p-6 text-[16px] text-white">
+                          {row.label}
                         </div>
-                        {row.slice(1).map((cell, cellIndex) => (
+                        {row.plans.map((enabled, cellIndex) => (
                           <div
                             key={cellIndex}
-                            className="border-t border-gray-700 text-white text-[16px] p-6 text-center"
+                            className="flex items-center justify-center border-t border-gray-700 p-6 text-center"
                           >
-                            {cell === "✔️" ? (
-                              <span className="text-green-500 text-[22px]">✔</span>
-                            ) : (
-                              <span className="text-orange-500 text-[20px]">—</span>
-                            )}
+                            <StatusIcon enabled={enabled} />
                           </div>
                         ))}
                       </React.Fragment>
@@ -763,9 +759,9 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
 
       {/* Active Image to Video Tool Inline */}
       {showImageToVideo && (
-        <div className="bg-black px-4 pt-32 pb-10 md:pt-[175px] md:pb-16 transition-all duration-300">
-          <div className="w-full max-w-[1550px] mx-auto px-4 md:px-8 transition-all duration-300">
-            <ImageToVideo onClose={() => setShowImageToVideo(false)} />
+        <div className="bg-black px-0 py-0 transition-all duration-300">
+          <div className="w-full transition-all duration-300">
+            <SafeImageToVideo onClose={() => setShowImageToVideo(false)} />
           </div>
         </div>
       )}
@@ -774,3 +770,4 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
 };
 
 export default PitchAIPage;
+

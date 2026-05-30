@@ -50,7 +50,7 @@ const PlannerPage = () => {
       <div className="fixed left-6 top-6 z-30 sm:left-8 sm:top-8">
         <button
           type="button"
-          onClick={() => navigate("/planner")}
+          onClick={() => navigate("/")}
           aria-label="Lovers AI home"
           className="transition hover:opacity-90"
         >
@@ -109,12 +109,6 @@ const PlannerPage = () => {
                   </span>
                 </div>
 
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-2xl font-heading text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
-                    {tool.title}
-                  </h3>
-                </div>
               </div>
             ))}
           </div>

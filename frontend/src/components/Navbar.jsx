@@ -19,6 +19,7 @@ const Navbar = () => {
   const isPlannerLanding = location.pathname === "/planner";
   const isMainLanding = location.pathname === "/";
   const isHamburgerLanding = isPlannerLanding || isMainLanding;
+  const shouldShowHamburgerSignIn = !currentUser && !isMainLanding;
 
   const handleLogout = async () => {
     try {
@@ -278,113 +279,115 @@ const Navbar = () => {
             }`}
           >
             {isHamburgerLanding ? (
-              <div className="relative mr-2 md:mr-6" ref={plannerMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="w-14 h-14 rounded-full border border-white/20 bg-[#221917]/85 flex items-center justify-center text-white shadow-xl backdrop-blur-xl transition-all duration-300 hover:bg-[#2d211e]/90"
-                  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-                  aria-expanded={mobileMenuOpen}
-                >
-                  <div className="flex flex-col gap-[4px]">
-                    <span
-                      className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""}`}
-                    />
-                    <span
-                      className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`}
-                    />
-                    <span
-                      className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""}`}
-                    />
-                  </div>
-                </button>
-
-                <div
-                  className={`absolute right-0 top-full mt-4 w-[320px] rounded-[28px] border border-white/12 bg-[#1a1412]/95 p-4 shadow-2xl backdrop-blur-2xl transition-all duration-300 ${
-                    mobileMenuOpen
-                      ? "pointer-events-auto translate-y-0 opacity-100"
-                      : "pointer-events-none -translate-y-2 opacity-0"
-                  }`}
-                >
-                  {currentUser && (
-                    <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/40">
-                        Signed in as
-                      </p>
-                      <p className="mt-1 truncate text-lg font-medium text-white">
-                        {userLabel}
-                      </p>
-                      <p className="truncate text-sm text-white/45">
-                        {currentUser.email}
-                      </p>
+              <div className="mr-2 flex items-center gap-3 md:mr-6">
+                <div className="relative" ref={plannerMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="w-14 h-14 rounded-full border border-white/20 bg-[#221917]/85 flex items-center justify-center text-white shadow-xl backdrop-blur-xl transition-all duration-300 hover:bg-[#2d211e]/90"
+                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={mobileMenuOpen}
+                  >
+                    <div className="flex flex-col gap-[4px]">
+                      <span
+                        className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""}`}
+                      />
+                      <span
+                        className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`}
+                      />
+                      <span
+                        className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""}`}
+                      />
                     </div>
-                  )}
-                  <nav className="flex flex-col gap-2">
-                    {navLinks.map((link) => (
-                      <button
-                        key={link.to}
-                        type="button"
-                        onClick={() => handleMenuNavigate(link.to)}
-                        className="rounded-2xl px-4 py-3 text-left text-lg font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
-                      >
-                        {link.label}
-                      </button>
-                    ))}
+                  </button>
 
-                    {currentUser ? (
-                      <>
-                        {localStorage.getItem("userRole") === "couple" && (
-                          <button
-                            onClick={() => {
-                              navigate("/couple/cart");
-                              setMobileMenuOpen(false);
-                            }}
-                            className="flex items-center justify-between rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
-                          >
-                            <span>My Cart</span>
-                            {cartCount > 0 && (
-                              <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-loverai-gold px-2 text-[11px] font-bold text-loverai-dark">
-                                {cartCount}
-                              </span>
-                            )}
-                          </button>
-                        )}
+                  <div
+                    className={`absolute right-0 top-full mt-4 w-[320px] rounded-[28px] border border-white/12 bg-[#1a1412]/95 p-4 shadow-2xl backdrop-blur-2xl transition-all duration-300 ${
+                      mobileMenuOpen
+                        ? "pointer-events-auto translate-y-0 opacity-100"
+                        : "pointer-events-none -translate-y-2 opacity-0"
+                    }`}
+                  >
+                    {currentUser && (
+                      <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-[0.22em] text-white/40">
+                          Signed in as
+                        </p>
+                        <p className="mt-1 truncate text-lg font-medium text-white">
+                          {userLabel}
+                        </p>
+                        <p className="truncate text-sm text-white/45">
+                          {currentUser.email}
+                        </p>
+                      </div>
+                    )}
+                    <nav className="flex flex-col gap-2">
+                      {navLinks.map((link) => (
                         <button
-                          onClick={() => {
-                            handleProfileClick();
-                            setMobileMenuOpen(false);
-                          }}
-                          className="rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                          key={link.to}
+                          type="button"
+                          onClick={() => handleMenuNavigate(link.to)}
+                          className="rounded-2xl px-4 py-3 text-left text-lg font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
                         >
-                          Profile
+                          {link.label}
                         </button>
-                        {isAdminEmail(currentUser?.email) && (
+                      ))}
+
+                      {currentUser ? (
+                        <>
+                          {localStorage.getItem("userRole") === "couple" && (
+                            <button
+                              onClick={() => {
+                                navigate("/couple/cart");
+                                setMobileMenuOpen(false);
+                              }}
+                              className="flex items-center justify-between rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                            >
+                              <span>My Cart</span>
+                              {cartCount > 0 && (
+                                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-loverai-gold px-2 text-[11px] font-bold text-loverai-dark">
+                                  {cartCount}
+                                </span>
+                              )}
+                            </button>
+                          )}
                           <button
                             onClick={() => {
-                              navigate("/admin");
+                              handleProfileClick();
                               setMobileMenuOpen(false);
                             }}
                             className="rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
                           >
-                            Admin
+                            Profile
                           </button>
-                        )}
+                          {isAdminEmail(currentUser?.email) && (
+                            <button
+                              onClick={() => {
+                                navigate("/admin");
+                                setMobileMenuOpen(false);
+                              }}
+                              className="rounded-2xl px-4 py-3 text-left text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                            >
+                              Admin
+                            </button>
+                          )}
+                          <button
+                            onClick={handleLogout}
+                            className="rounded-2xl px-4 py-3 text-left text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                          >
+                            Logout
+                          </button>
+                        </>
+                      ) : shouldShowHamburgerSignIn ? (
                         <button
-                          onClick={handleLogout}
-                          className="rounded-2xl px-4 py-3 text-left text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                          onClick={handleSignInClick}
+                          className="mt-2 rounded-2xl px-4 py-3 text-left text-white loverai-btn-primary"
                         >
-                          Logout
+                          Sign In
                         </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={handleSignInClick}
-                        className="mt-2 rounded-2xl px-4 py-3 text-left text-white loverai-btn-primary"
-                      >
-                        Sign In
-                      </button>
-                    )}
-                  </nav>
+                      ) : null}
+                    </nav>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -661,14 +664,14 @@ const Navbar = () => {
                   Logout
                 </button>
               </>
-            ) : (
+            ) : shouldShowHamburgerSignIn ? (
               <button
                 onClick={handleSignInClick}
                 className="mt-4 px-4 py-3 text-center loverai-btn-primary rounded-xl w-full"
               >
                 Sign In
               </button>
-            )}
+            ) : null}
           </nav>
         </div>
       </header>

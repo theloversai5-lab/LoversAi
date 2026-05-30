@@ -224,6 +224,7 @@ export const uploadAPI = {
 export const aiAPI = {
   checkHealth: () => apiFetch('/ai/health'),
   getThemes: () => apiFetch('/ai/themes'),
+  getVideoStyles: () => apiFetch('/ai/video-styles'),
   checkCredits: (data) =>
     apiFetch('/ai/check-credits', { method: 'POST', data }),
   generate: async (formData) => {
@@ -247,6 +248,19 @@ export const aiAPI = {
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
+    });
+    return response.data;
+  },
+  generateVideo: async (formData) => {
+    const token = getToken();
+    const response = await axios({
+      method: 'POST',
+      url: `${apiBaseUrl}/api/ai/generate-video`,
+      data: formData,
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      timeout: 310000,
     });
     return response.data;
   },
