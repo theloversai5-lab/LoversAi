@@ -786,8 +786,47 @@ export default function CoupleWeddingVision() {
 
                 {/* 2. Scrollable Style Filters List */}
                 <div className="flex-1 overflow-y-auto space-y-3.5 pr-1.5 custom-scrollbar">
-                  {/* Style Filters (Modern/Traditional theme buttons & dropdown selects) */}
-                  <FilterSection title="Theme">
+                  {/* Budget Slider at the very top of the scrollable list */}
+                  <FilterSection title="Budget (in Rupees)">
+                    <input
+                      type="range"
+                      min="1"
+                      max="100"
+                      value={budget}
+                      onChange={(e) => setBudget(Number(e.target.value))}
+                      className="w-full accent-[#e6c6b2]"
+                    />
+                    <div className="mt-1.5 flex items-center justify-between text-[13px] font-semibold text-white/80">
+                      <span>1 L</span>
+                      <span className="text-[#e6c6b2] font-bold">{formatBudgetLabel(budget)}</span>
+                      <span>1 Cr</span>
+                    </div>
+                  </FilterSection>
+
+                  {/* Functions Select dropdown right below Budget */}
+                  <FilterSection title="Functions">
+                    <SelectField value={functionType} onChange={setFunctionType} options={FUNCTION_OPTIONS} />
+                  </FilterSection>
+
+                  {/* Guest Slider right below Functions */}
+                  <FilterSection title="Guest (PAX)">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1000"
+                      value={guestCount}
+                      onChange={(e) => setGuestCount(Number(e.target.value))}
+                      className="w-full accent-[#e6c6b2]"
+                    />
+                    <div className="mt-1.5 flex items-center justify-between text-[13px] font-semibold text-white/80">
+                      <span>0</span>
+                      <span className="text-[#e6c6b2] font-bold">{guestCount}</span>
+                      <span>1000</span>
+                    </div>
+                  </FilterSection>
+
+                  {/* Style toggle button options */}
+                  <FilterSection title="Style">
                     <div className="grid grid-cols-2 gap-1.5">
                       {["Modern", "Traditional"].map((option) => (
                         <button
@@ -810,10 +849,6 @@ export default function CoupleWeddingVision() {
                     <SelectField value={planningType} onChange={setPlanningType} options={PLANNING_OPTIONS} />
                   </FilterSection>
 
-                  <FilterSection title="Functions">
-                    <SelectField value={functionType} onChange={setFunctionType} options={FUNCTION_OPTIONS} />
-                  </FilterSection>
-
                   <FilterSection title="Venue">
                     <SelectField value={venueType} onChange={setVenueType} options={VENUE_OPTIONS} />
                   </FilterSection>
@@ -828,39 +863,6 @@ export default function CoupleWeddingVision() {
 
                   <FilterSection title="Timing">
                     <SelectField value={timing} onChange={setTiming} options={TIMING_OPTIONS} />
-                  </FilterSection>
-
-                  {/* 3. Sliders below all other Style Filters */}
-                  <FilterSection title="Budget (in Rupees)">
-                    <input
-                      type="range"
-                      min="1"
-                      max="100"
-                      value={budget}
-                      onChange={(e) => setBudget(Number(e.target.value))}
-                      className="w-full accent-[#e6c6b2]"
-                    />
-                    <div className="mt-1.5 flex items-center justify-between text-[13px] font-semibold text-white/80">
-                      <span>1 L</span>
-                      <span className="text-[#e6c6b2] font-bold">{formatBudgetLabel(budget)}</span>
-                      <span>1 Cr</span>
-                    </div>
-                  </FilterSection>
-
-                  <FilterSection title="Guest (PAX)">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1000"
-                      value={guestCount}
-                      onChange={(e) => setGuestCount(Number(e.target.value))}
-                      className="w-full accent-[#e6c6b2]"
-                    />
-                    <div className="mt-1.5 flex items-center justify-between text-[13px] font-semibold text-white/80">
-                      <span>0</span>
-                      <span className="text-[#e6c6b2] font-bold">{guestCount}</span>
-                      <span>1000</span>
-                    </div>
                   </FilterSection>
                 </div>
               </aside>

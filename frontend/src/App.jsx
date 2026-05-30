@@ -60,16 +60,17 @@ import VendorPortfolio from "./pages/vendor/VendorPortfolio";
 import VendorEarnings from "./pages/vendor/VendorEarnings";
 import VendorMessages from "./pages/vendor/VendorMessages";
 import VendorProfile from "./pages/vendor/VendorProfile";
-
 function AppContent() {
   const location = useLocation();
 
-  // Hide navbar and footer on admin, planner, and vendor dashboard pages
+  // Hide navbar and footer on admin, planner, vendor dashboard, and couple AI tools pages
   const hideNavbarAndFooter =
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/planner/") ||
     location.pathname.startsWith("/vendor/") ||
-    location.pathname === "/couple/onboarding";
+    location.pathname === "/couple/onboarding" ||
+    location.pathname === "/love-story" ||
+    location.pathname.startsWith("/couple/moodboard");
 
   return (
     <>
