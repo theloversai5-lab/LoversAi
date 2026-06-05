@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { coupleMoodboardAPI } from "../../api/api";
+import { coupleMoodboardAPI, userAPI } from "../../api/api";
 import { saveThemeMoodboard } from "./CoupleThemeMoodboard";
 import { useAuth } from "../../context/AuthContext";
 
@@ -10,8 +10,7 @@ const FUNCTION_OPTIONS = [
   "Sangeet",
   "Wedding Ceremony",
   "Reception",
-  "Engagement",
-  "Nikah",
+  "Small Event (Birthday, Wedding Ceremony)",
 ];
 
 const ATMOSPHERE_OPTIONS = [
@@ -31,8 +30,12 @@ const TIMING_OPTIONS = [
   "Night (Under Stars)",
 ];
 
-const PLANNING_OPTIONS = ["Decoration", "Functions", "Haldi", "Venue", "Theme", "Timing"];
-const VENUE_OPTIONS = ["Farm House", "Banquet", "Resort", "Beachside", "Temple Lawn"];
+const PLANNING_OPTIONS = [
+  "Decor / Planning / Venue",
+  "Fashion / Photography",
+  "Sounds / Lights / Entertainment"
+];
+const VENUE_OPTIONS = ["Open lawn", "Banquet"];
 const THEME_OPTIONS = ["Carnival", "Royal", "Pastel", "Garden", "Minimal Luxe"];
 
 const EDIT_COLOR_TONE_OPTIONS = ["Original", "Warm Gold", "Cool Pastel", "Vibrant Emerald", "Classic Crimson"];
@@ -78,10 +81,71 @@ const SparkIcon = () => (
   </svg>
 );
 
+const callGroqAPI = async (messages, responseFormat = null) => {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.REACT_APP_GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: messages.some(m => Array.isArray(m.content) && m.content.some(c => c.type === "image_url")) 
+        ? "llama-3.2-11b-vision-preview" 
+        : "llama-3.3-70b-versatile",
+      messages,
+      temperature: 0.3,
+      max_tokens: 2048,
+      ...(responseFormat ? { response_format: responseFormat } : {})
+    })
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Groq API error ${response.status}: ${errorText.substring(0, 300)}`);
+  }
+  const data = await response.json();
+  return data.choices[0].message.content;
+};
+
 export default function CoupleWeddingVision() {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+  // Load wedding profile details from backend (dynamic - real data entered during onboarding)
+  const [weddingProfile, setWeddingProfile] = useState({});
+
+  useEffect(() => {
+    userAPI.getProfile()
+      .then((data) => {
+        // Backend returns the profile; map fields to what we display
+        const wp = data?.weddingProfile || data?.user?.weddingProfile || data || {};
+        setWeddingProfile({
+          brideName: wp.partnerName1 || wp.brideName || "",
+          groomName: wp.partnerName2 || wp.groomName || "",
+          weddingDate: wp.weddingDate || "",
+          dateNotDecided: wp.dateNotDecided || false,
+          city: wp.city || "",
+          religion: wp.tradition || wp.religion || "",
+          budget: wp.budget || "",
+          guestCount: wp.guestCount || "",
+        });
+      })
+      .catch(() => {
+        // Fallback to localStorage if API fails
+        try {
+          const saved = localStorage.getItem("lovers-ai-couple-profile");
+          if (saved) setWeddingProfile(JSON.parse(saved));
+        } catch { /* ignore */ }
+      });
+  }, []);
+
+  const formatWeddingDate = (dateStr) => {
+    if (!dateStr) return null;
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }).toUpperCase();
+    } catch { return null; }
+  };
 
   const handleLogout = async () => {
     try {
@@ -111,8 +175,8 @@ export default function CoupleWeddingVision() {
   const [userPrompt, setUserPrompt] = useState("");
   const [budget, setBudget] = useState(11);
   const [guestCount, setGuestCount] = useState(0);
-  const [planningType, setPlanningType] = useState("Decoration");
-  const [venueType, setVenueType] = useState("Farm House");
+  const [planningType, setPlanningType] = useState("Decor / Planning / Venue");
+  const [venueType, setVenueType] = useState("Banquet");
   const [theme, setTheme] = useState("Carnival");
 
   const [generating, setGenerating] = useState(false);
@@ -344,47 +408,141 @@ export default function CoupleWeddingVision() {
     setProgress("Preparing your wedding vision...");
 
     try {
-      const formData = new FormData();
-      if (venueImage) formData.append("venueImage", venueImage);
-      if (decorImage) formData.append("decorImage", decorImage);
-      formData.append("style", style);
-      formData.append("functionType", functionType);
-      formData.append("atmosphere", atmosphere);
-      formData.append("timing", timing);
-      formData.append("userPrompt", buildVisionPrompt());
-
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setProgress("Analyzing your wedding direction...");
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setProgress("Generating wedding scenes with Gemini AI...");
-
-      const result = await coupleMoodboardAPI.generate(formData);
-
-      if (result.success && result.generatedImages?.length > 0) {
-        setGeneratedImages(result.generatedImages);
-        setMoodboardTitle(result.moodboardTitle || TITLE_MAP[functionType] || "Wedding Vision");
-        setGenerationMeta(result);
-      } else if (result.success && result.generatedImageUrl) {
-        setGeneratedImages([
-          {
-            url: result.generatedImageUrl,
-            label: "Generated",
-            seed: result.seed,
-          },
-        ]);
-        setMoodboardTitle(TITLE_MAP[functionType] || "Wedding Vision");
-        setGenerationMeta(result);
-      } else {
-        throw new Error(result.error || "Generation failed");
+      let decorStyleDescription = "";
+      if (decorPreview) {
+        setProgress("Analyzing decor inspiration with Groq Vision...");
+        try {
+          const visionContent = [
+            { type: "text", text: "Describe the wedding decoration style, floral arrangements, colors, and key elements in this image in 2-3 sentences. Focus on specific visual components." },
+            { type: "image_url", image_url: { url: decorPreview } }
+          ];
+          decorStyleDescription = await callGroqAPI([{ role: "user", content: visionContent }]);
+        } catch (err) {
+          console.error("Groq vision analysis failed for decor image:", err);
+        }
       }
+
+      let venueDescription = "";
+      if (venuePreview) {
+        setProgress("Analyzing venue reference with Groq Vision...");
+        try {
+          const visionContent = [
+            { type: "text", text: "Describe the architectural style, flooring, ceiling, pillars, and structural elements of the venue in this image in 2-3 sentences." },
+            { type: "image_url", image_url: { url: venuePreview } }
+          ];
+          venueDescription = await callGroqAPI([{ role: "user", content: visionContent }]);
+        } catch (err) {
+          console.error("Groq vision analysis failed for venue image:", err);
+        }
+      }
+
+      setProgress("Generating custom scene concepts with Groq...");
+      const systemPrompt = `You are a world-class Indian wedding visual planner and prompt engineer.
+Given the following design filters selected by the couple:
+- Style: ${style}
+- Function/Ceremony: ${functionType}
+- Atmosphere: ${atmosphere}
+- Time of Day: ${timing}
+- Venue Type: ${venueType}
+- Theme: ${theme}
+- Primary Planning Focus: ${planningType}
+- Estimated Budget: ${formatBudgetLabel(budget)}
+- Guest Count: ${guestCount} PAX
+${userPrompt ? `- User's Vision Note: "${userPrompt}"` : ""}
+${decorStyleDescription ? `- Inspiration Image Description: "${decorStyleDescription}"` : ""}
+${venueDescription ? `- Venue Image Description: "${venueDescription}"` : ""}
+
+You need to generate 4 distinct, highly detailed text-to-image prompts (about 60-80 words each) for 4 different aspects of this wedding. The prompts must match the selected theme, budget, style, and atmosphere, ensuring cultural accuracy and premium luxury aesthetics.
+
+Generate prompts for these 4 specific slots:
+1. "Primary Wedding Scene" (Label: "Primary Wedding Scene"): A breathtaking wide-angle editorial shot of the couple at the center of the ceremony. Focus on the main setup, mandap/altar, and overall grand scale.
+2. "Decor & Detailing" (Label: "Decor & Detailing"): A close-up macro/editorial shot focusing on intricate decor details like luxury table settings, fine cutlery, floral centerpieces, candles, and custom stationery.
+3. "Venue Atmosphere" (Label: "Venue Atmosphere"): A wide-angle atmospheric shot showing the scale and lighting of the entire venue (e.g., resort lawns, heritage palace courtyards, beachfront). Focus on the ambient light, fairy lights, lanterns, and structural mood.
+4. "Ceremony & Theme Detail" (Label: "Ceremony & Theme Detail"): A detailed shot capturing specific ceremonial rituals, traditional elements (like sacred fire, garlands, incense), and thematic custom fabric/structures.
+
+Format your response as a JSON object with exactly these 4 keys: "primary", "decor", "atmosphere", "ceremony".
+Ensure each prompt is highly descriptive, containing specific camera angles (e.g., wide shot, macro detail, cinematic lighting, f/1.8 bokeh, f/4 sharpness), lighting conditions (e.g., golden hour glow, warm candle lights, twilight), and styling elements. Do not wrap the JSON in markdown code blocks or add any text other than the JSON string.`;
+
+      const groqResponse = await callGroqAPI([
+        { role: "user", content: systemPrompt }
+      ], { type: "json_object" });
+
+      let promptJSON;
+      try {
+        promptJSON = JSON.parse(groqResponse);
+      } catch (jsonErr) {
+        console.error("JSON parsing of Groq response failed, trying to extract JSON string:", jsonErr);
+        const match = groqResponse.match(/\{[\s\S]*\}/);
+        if (match) {
+          promptJSON = JSON.parse(match[0]);
+        } else {
+          throw new Error("Failed to parse Groq response as JSON");
+        }
+      }
+
+      const primaryPrompt = promptJSON.primary || buildVisionPrompt() + " Primary Wedding Scene";
+      const decorPrompt = promptJSON.decor || buildVisionPrompt() + " Decor & Detailing close up";
+      const atmospherePrompt = promptJSON.atmosphere || buildVisionPrompt() + " Venue Atmosphere ambient lighting";
+      const ceremonyPrompt = promptJSON.ceremony || buildVisionPrompt() + " Ceremony & Theme Detail traditional setup";
+
+      const seeds = [
+        Math.floor(Math.random() * 1000000),
+        Math.floor(Math.random() * 1000000),
+        Math.floor(Math.random() * 1000000),
+        Math.floor(Math.random() * 1000000)
+      ];
+
+      const getPollinationsUrl = (p, s) => {
+        const cleanPrompt = p.replace(/[^\w\s\-\,\.\']/gi, '');
+        return `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=1024&height=768&seed=${s}&nologo=true&model=flux`;
+      };
+
+      const imageUrls = [
+        getPollinationsUrl(primaryPrompt, seeds[0]),
+        getPollinationsUrl(decorPrompt, seeds[1]),
+        getPollinationsUrl(atmospherePrompt, seeds[2]),
+        getPollinationsUrl(ceremonyPrompt, seeds[3])
+      ];
+
+      setProgress("Generating 4 high-fidelity wedding visual scenes...");
+      
+      const preloadImage = (url) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.src = url;
+          img.onload = () => resolve(url);
+          img.onerror = (e) => reject(e);
+        });
+      };
+
+      // Preload in parallel, catching failures gracefully to ensure robust loading
+      await Promise.all(
+        imageUrls.map(url => 
+          preloadImage(url).catch(err => {
+            console.error("Failed to preload image:", url, err);
+            return url;
+          })
+        )
+      );
+
+      const finalGeneratedImages = [
+        { url: imageUrls[0], label: "Primary Wedding Scene", seed: seeds[0] },
+        { url: imageUrls[1], label: "Decor & Detailing", seed: seeds[1] },
+        { url: imageUrls[2], label: "Venue Atmosphere", seed: seeds[2] },
+        { url: imageUrls[3], label: "Ceremony & Theme Detail", seed: seeds[3] }
+      ];
+
+      setGeneratedImages(finalGeneratedImages);
+      setMoodboardTitle(TITLE_MAP[functionType] || "Wedding Vision");
+      setGenerationMeta({
+        success: true,
+        generatedImages: finalGeneratedImages,
+        moodboardTitle: TITLE_MAP[functionType] || "Wedding Vision",
+        finalPrompt: `Primary: ${primaryPrompt} | Decor: ${decorPrompt} | Atmosphere: ${atmospherePrompt} | Ceremony: ${ceremonyPrompt}`
+      });
     } catch (err) {
-      const apiMessage = err.response?.data?.error;
-      const apiDetails = err.response?.data?.details;
-      const message = [apiMessage || err.message || "Generation failed. Please try again.", apiDetails]
-        .filter(Boolean)
-        .join(" ");
       console.error("Moodboard generation error:", err);
-      setError(message);
+      setError(err.message || "Generation failed. Please try again.");
     } finally {
       setProgress("");
       setGenerating(false);
@@ -438,19 +596,68 @@ export default function CoupleWeddingVision() {
     </div>
   );
 
-  const SelectField = ({ value, onChange, options }) => (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-[10px] border border-[#e6c6b2]/20 bg-[#f2dad0] px-3.5 py-2.5 text-[14px] font-semibold text-[#251f1b] outline-none transition focus:border-[#e6c6b2] cursor-pointer shadow-sm hover:bg-[#e6c6b2] hover:text-[#251f1b] duration-200"
-    >
-      {options.map((option) => (
-        <option key={option} value={option} className="bg-[#201913] text-white">
-          {option}
-        </option>
-      ))}
-    </select>
-  );
+  const SelectField = ({ value, onChange, options }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (containerRef.current && !containerRef.current.contains(event.target)) {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+      <div className="relative w-full" ref={containerRef}>
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex w-full items-center justify-between rounded-[10px] border border-[#e6c6b2]/20 bg-[#f2dad0] px-3.5 py-2.5 text-[14px] font-semibold text-[#251f1b] outline-none transition focus:border-[#e6c6b2] cursor-pointer shadow-sm hover:bg-[#e6c6b2] hover:text-[#251f1b] duration-200"
+        >
+          <span>{value}</span>
+          <svg
+            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {isOpen && (
+          <div className="absolute left-0 right-0 mt-1.5 z-[999] rounded-[10px] border border-white/10 bg-[#201913] p-1 shadow-xl max-h-48 overflow-y-auto custom-scrollbar animate-fadeIn">
+            {options.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-[13px] font-medium transition-colors ${
+                  option === value
+                    ? "bg-[#e6c6b2] text-[#251f1b]"
+                    : "text-white/80 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <span>{option}</span>
+                {option === value && (
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const UploadBox = ({ label, preview, inputRef, onSelect }) => (
     <button
@@ -655,6 +862,22 @@ export default function CoupleWeddingVision() {
             </button>
           </div>
         )}
+
+        <div className="mt-4 pt-2 border-t border-white/5 flex justify-center flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => navigate("/couple/moodboard/wedding")}
+            className="inline-flex items-center gap-2 rounded-[12px] border border-[#e6c6b2]/30 bg-[#e6c6b2]/10 px-6 py-2.5 text-sm font-semibold text-[#e6c6b2] transition-all duration-200 hover:bg-[#e6c6b2]/20 hover:border-[#e6c6b2]/60 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            Move to Moodboard
+          </button>
+        </div>
       </div>
     );
   };
@@ -760,6 +983,7 @@ export default function CoupleWeddingVision() {
               <p className="text-[10px] text-white/70 uppercase tracking-widest mt-1">
                 See your unique wedding design come to life
               </p>
+
             </div>
 
             {error && (
@@ -826,7 +1050,7 @@ export default function CoupleWeddingVision() {
                   </FilterSection>
 
                   {/* Style toggle button options */}
-                  <FilterSection title="Style">
+                  <FilterSection title="Theme">
                     <div className="grid grid-cols-2 gap-1.5">
                       {["Modern", "Traditional"].map((option) => (
                         <button
@@ -845,7 +1069,7 @@ export default function CoupleWeddingVision() {
                     </div>
                   </FilterSection>
 
-                  <FilterSection title="Planning">
+                  <FilterSection title="Event Flow">
                     <SelectField value={planningType} onChange={setPlanningType} options={PLANNING_OPTIONS} />
                   </FilterSection>
 
@@ -853,13 +1077,6 @@ export default function CoupleWeddingVision() {
                     <SelectField value={venueType} onChange={setVenueType} options={VENUE_OPTIONS} />
                   </FilterSection>
 
-                  <FilterSection title="Theme">
-                    <SelectField value={theme} onChange={setTheme} options={THEME_OPTIONS} />
-                  </FilterSection>
-
-                  <FilterSection title="Atmosphere">
-                    <SelectField value={atmosphere} onChange={setAtmosphere} options={ATMOSPHERE_OPTIONS} />
-                  </FilterSection>
 
                   <FilterSection title="Timing">
                     <SelectField value={timing} onChange={setTiming} options={TIMING_OPTIONS} />

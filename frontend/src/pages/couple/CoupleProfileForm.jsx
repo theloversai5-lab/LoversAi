@@ -32,8 +32,61 @@ const budgetOptions = [
 
 const religionOptions = ["Hindu", "Muslim", "Christian", "Sikh", "Jain"];
 const guestOptions = ["0-100", "200-500", "500-1000", "1000+"];
-const sharedWeddingBackground = {
-  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+
+/** 6-col grid: 3 equal boxes top row, 2 centered equal boxes bottom row */
+const FIVE_ITEM_COL = ["", "", "", "col-start-2", "col-start-4"];
+
+const optionSelected =
+  "border-[#e6c6b2] bg-[#e6c6b2]/15 text-[#e6c6b2] shadow-md shadow-[#e6c6b2]/5";
+const optionDefault =
+  "border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10";
+
+const serif = { fontFamily: "'Cormorant Garamond', serif" };
+
+const s = {
+  /* ── shared typography (reference mockups) ── */
+  pageTitle:
+    "text-[36px] md:text-[46px] lg:text-[50px] font-semibold text-white tracking-wide leading-[1.08] mt-3 mb-0",
+  pageBrand:
+    "text-sm md:text-base tracking-[0.22em] text-white/55 font-semibold block leading-none uppercase font-sans",
+  stepPill:
+    "flex-shrink-0 bg-white/5 border border-white/20 rounded-full px-4 md:px-5 py-2 text-sm md:text-base text-white/90 font-medium font-sans",
+  stepBlock: "flex flex-col gap-4 md:gap-5 items-center text-center w-full",
+  kicker:
+    "text-sm md:text-base text-[#e6c6b2]/95 uppercase font-bold tracking-[0.22em] font-sans text-center",
+  stepTitle:
+    "text-[32px] md:text-[40px] lg:text-[44px] font-semibold text-white tracking-wide leading-[1.12] select-none text-center",
+  stepBody:
+    "text-lg md:text-xl text-white/82 font-sans leading-[1.65] max-w-3xl select-none text-center mx-auto",
+  inputLabel:
+    "text-white/80 text-base md:text-lg font-medium mb-2 block tracking-wide select-none text-center w-full",
+  textInput:
+    "w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-xl md:text-2xl font-medium text-white placeholder-white/35 focus:border-white/25 focus:bg-white/10 transition duration-300 outline-none text-center",
+  dateInput:
+    "w-full rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center text-xl md:text-2xl font-semibold text-white placeholder-white/35 focus:border-[#e6c6b2]/40 focus:bg-white/10 focus:text-[#e6c6b2] transition duration-300 outline-none",
+  optionGridFive: "grid grid-cols-6 gap-3 md:gap-3.5 w-full mx-auto max-w-3xl justify-center",
+  optionGridFour: "grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-3.5 w-full mx-auto max-w-3xl justify-center",
+  optionBox:
+    "col-span-2 w-full min-h-[60px] rounded-2xl border px-4 py-4 text-center text-lg md:text-xl font-semibold tracking-wide transition-all duration-300 active:scale-[0.98] cursor-pointer flex items-center justify-center",
+  optionBoxHalf:
+    "w-full min-h-[60px] rounded-2xl border px-4 py-4 text-center text-lg md:text-xl font-semibold tracking-wide transition-all duration-300 active:scale-[0.98] cursor-pointer flex items-center justify-center",
+  primaryBtn:
+    "inline-flex items-center justify-center rounded-full bg-[#dfb479] hover:bg-[#d4a568] py-4 px-9 text-lg md:text-xl font-bold text-[#1a0f08] transition-all duration-300 active:scale-95 font-sans shadow-[0_8px_24px_rgba(223,180,121,0.28)] hover:brightness-105 disabled:opacity-50",
+  secondaryBtn:
+    "rounded-full border border-white/20 bg-white/5 hover:bg-white/10 py-4 px-8 text-lg md:text-xl font-semibold text-white transition-all duration-300 active:scale-95",
+  actions: "flex flex-wrap justify-center gap-3 md:gap-4 mt-3 md:mt-4 select-none w-full",
+  formGrid:
+    "grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 w-full max-w-3xl mx-auto justify-center",
+  /* Step 1 welcome */
+  introShell:
+    "flex flex-col flex-1 justify-center items-center text-center w-full gap-8 md:gap-10 mt-6 md:mt-8",
+  introCopy: "flex flex-col items-center text-center gap-4 md:gap-5 w-full",
+  introTitle:
+    "text-[32px] md:text-[40px] lg:text-[44px] font-semibold text-white tracking-wide leading-[1.12] select-none text-center",
+  introBody:
+    "text-lg md:text-xl text-white/82 font-sans leading-[1.65] max-w-2xl select-none text-center mx-auto",
+  introBtn:
+    "px-14 py-4 w-full sm:w-auto min-w-[220px] inline-flex items-center justify-center rounded-full bg-[#dfb479] hover:bg-[#d4a568] text-lg md:text-xl font-bold text-[#1a0f08] transition-all duration-300 active:scale-[0.98] font-sans shadow-[0_10px_32px_rgba(223,180,121,0.28)] hover:brightness-105 cursor-pointer",
 };
 
 const stepVariants = {
@@ -211,38 +264,20 @@ export default function CoupleProfileForm() {
     /* ── COMPLETION ── */
     if (isComplete) {
       return (
-        <div className="step-panel completion-panel">
-          <p className="step-kicker">Vision Ready ✨</p>
-          <h2
-            style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "clamp(26px, 4vw, 42px)",
-              margin: "8px 0 16px",
-              color: "#fff6ea",
-            }}
-          >
+        <div className={s.stepBlock}>
+          <p className={s.kicker}>Vision Ready ✨</p>
+          <h2 style={serif} className={`${s.stepTitle} mt-0.5`}>
             Your wedding story is set
           </h2>
-          <p className="supporting-text">
-            Save your profile to the cloud so your vision loads everywhere you
-            sign in.
+          <p className={s.stepBody}>
+            Save your profile to the cloud so your vision loads everywhere you sign in.
           </p>
 
           {serverMessage && (
-            <div
-              style={{
-                marginTop: 16,
-                padding: "14px 20px",
-                borderRadius: 12,
-                background: "rgba(212,140,140,0.12)",
-                border: "1px solid rgba(212,140,140,0.3)",
-                color: "#D48C8C",
-                fontSize: 15,
-              }}
-            >
+            <div className="mt-4 p-5 rounded-2xl bg-[#89b86b]/10 border border-[#89b86b]/20 text-[#d8efc8] text-lg leading-relaxed">
               {serverMessage}
               <button
-                style={{ display: "block", marginTop: 16, ...primaryBtn }}
+                className={`mt-4 w-full ${s.primaryBtn}`}
                 onClick={() => navigate("/love-story")}
               >
                 Continue to GenAI Vision →
@@ -250,20 +285,12 @@ export default function CoupleProfileForm() {
             </div>
           )}
           {serverError && (
-            <p style={{ marginTop: 16, color: "#ff7b7b", fontSize: 14 }}>
+            <p className="mt-6 text-red-400 text-lg font-semibold">
               {serverError}
             </p>
           )}
 
-          <div
-            className="summary-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))",
-              gap: 14,
-              marginTop: 28,
-            }}
-          >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1 w-full max-w-3xl mx-auto">
             {[
               ["Bride", formData.brideName],
               ["Groom", formData.groomName],
@@ -279,25 +306,11 @@ export default function CoupleProfileForm() {
               ["City", formData.city],
               ["Dream Venue", formData.dreamVenue],
             ].map(([label, val]) => (
-              <div key={label} style={summaryCard}>
-                <span
-                  style={{
-                    fontSize: 11,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: "rgba(225,195,135,0.6)",
-                  }}
-                >
+              <div key={label} className="p-4 rounded-xl border border-white/10 bg-white/[0.03] flex flex-col justify-start">
+                <span className="text-sm md:text-base uppercase tracking-[0.12em] font-bold text-[#e6c6b2]/80">
                   {label}
                 </span>
-                <strong
-                  style={{
-                    fontSize: 16,
-                    color: "#fff6ea",
-                    marginTop: 4,
-                    display: "block",
-                  }}
-                >
+                <strong className="text-xl text-white font-semibold mt-1">
                   {val || "—"}
                 </strong>
               </div>
@@ -305,15 +318,15 @@ export default function CoupleProfileForm() {
           </div>
 
           {!serverMessage && (
-            <div className="step-actions" style={actionsRow}>
-              <button style={secondaryBtn} onClick={handleBack} type="button">
+            <div className={s.actions}>
+              <button onClick={handleBack} type="button" className={`flex-1 ${s.secondaryBtn}`}>
                 Back
               </button>
               <button
-                style={primaryBtn}
                 onClick={handleFinish}
                 type="button"
                 disabled={isSaving}
+                className={`flex-[2] ${s.primaryBtn}`}
               >
                 {isSaving ? "Saving..." : "Save & Start Your Journey"}
               </button>
@@ -326,42 +339,40 @@ export default function CoupleProfileForm() {
     /* ── STEP 1: Welcome ── */
     if (step === 1) {
       return (
-        <div className="step-panel intro-panel">
-          <p className="step-kicker">Welcome to your guided setup</p>
-          <h2 style={stepHeading}>Let's make your Love Story Official</h2>
-          <p className="supporting-text" style={supportingText}>
-            Build a wedding profile that feels intentional from day one. Lovers
-            AI will use these details to shape your planning, design, and venue
-            suggestions.
-          </p>
+        <div className={s.introShell}>
+          <div className={s.introCopy}>
+            <p className={s.kicker}>Welcome to your guided setup</p>
+            <h2 style={serif} className={s.introTitle}>
+              Let's make your Love Story Official
+            </h2>
+            <p className={`${s.introBody} mt-3 md:mt-5`}>
+              Build a wedding profile that feels intentional from day one. Lovers AI will use these details later to shape your planning, design, and venue suggestions.
+            </p>
+          </div>
           <button
-            style={primaryBtn}
             onClick={() => goToStep(2, 1)}
             type="button"
+            className={`${s.introBtn} mt-6 md:mt-8`}
           >
-            Let's Begin →
+            Start
           </button>
         </div>
       );
     }
 
-    /* ── STEP 2: Names ── */
+    /* ── STEP 2: Names (Tell us about the two of you) ── */
     if (step === 2) {
       return (
-        <div className="step-panel">
-          <p className="step-kicker">Couple Details</p>
-          <h2 style={stepHeading}>Tell us about the two of you</h2>
-          <p style={supportingText}>
-            Add names and ages so the experience starts to feel personal.
+        <div className={s.stepBlock}>
+          <p className={s.kicker}>Couple details</p>
+          <h2 style={serif} className={s.stepTitle}>
+            Tell us about the two of you
+          </h2>
+          <p className={s.stepBody}>
+            Add names and ages so the planning experience starts to feel personal.
           </p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 14,
-              marginTop: 24,
-            }}
-          >
+
+          <div className={s.formGrid}>
             {[
               {
                 label: "Bride Name",
@@ -376,34 +387,25 @@ export default function CoupleProfileForm() {
               },
               { label: "Groom Age", name: "groomAge", placeholder: "Age" },
             ].map((f) => (
-              <label key={f.name} style={fieldLabel}>
-                <span style={labelText}>{f.label}</span>
+              <label key={f.name} className="block text-center">
+                <span className={s.inputLabel}>{f.label}</span>
                 <input
                   name={f.name}
                   type="text"
                   placeholder={f.placeholder}
                   value={formData[f.name]}
                   onChange={handleTextChange}
-                  style={inputStyle}
+                  className={s.textInput}
                 />
               </label>
             ))}
           </div>
-          <div style={actionsRow}>
-            <button style={secondaryBtn} onClick={handleBack} type="button">
+
+          <div className={s.actions}>
+            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
               Back
             </button>
             <button
-              style={{
-                ...primaryBtn,
-                opacity:
-                  !formData.brideName.trim() ||
-                  !formData.groomName.trim() ||
-                  !formData.brideAge.trim() ||
-                  !formData.groomAge.trim()
-                    ? 0.45
-                    : 1,
-              }}
               onClick={handleNamesNext}
               type="button"
               disabled={
@@ -412,8 +414,9 @@ export default function CoupleProfileForm() {
                 !formData.brideAge.trim() ||
                 !formData.groomAge.trim()
               }
+              className={s.primaryBtn}
             >
-              Next →
+              Next
             </button>
           </div>
         </div>
@@ -423,33 +426,35 @@ export default function CoupleProfileForm() {
     /* ── STEP 3: Budget ── */
     if (step === 3) {
       return (
-        <div className="step-panel">
-          <p className="step-kicker">Budget</p>
-          <h2 style={stepHeading}>What budget are you planning around?</h2>
-          <p style={supportingText}>
-            Tap the range that feels closest. We'll save it and move ahead
-            instantly.
+        <div className={s.stepBlock}>
+          <p className={s.kicker}>Budget</p>
+          <h2 style={serif} className={s.stepTitle}>
+            What budget are you planning around?
+          </h2>
+          <p className={s.stepBody}>
+            Tap the range that feels closest. We'll save it and move ahead instantly.
           </p>
-          <div style={optionGrid}>
-            {budgetOptions.map((opt) => (
+
+          <div className={s.optionGridFive}>
+            {budgetOptions.map((opt, i) => (
               <button
                 key={opt}
-                style={{
-                  ...optionCard,
-                  ...(formData.budget === opt ? selectedCard : {}),
-                }}
                 onClick={() => {
                   handleOptionSelect("budget", opt);
                   goToStep(4, 1);
                 }}
                 type="button"
+                className={`${s.optionBox} ${FIVE_ITEM_COL[i]} ${
+                  formData.budget === opt ? optionSelected : optionDefault
+                }`}
               >
                 {opt}
               </button>
             ))}
           </div>
-          <div style={actionsRow}>
-            <button style={secondaryBtn} onClick={handleBack} type="button">
+
+          <div className={s.actions}>
+            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
               Back
             </button>
           </div>
@@ -460,34 +465,35 @@ export default function CoupleProfileForm() {
     /* ── STEP 4: Religion ── */
     if (step === 4) {
       return (
-        <div className="step-panel">
-          <p className="step-kicker">Tradition</p>
-          <h2 style={stepHeading}>
+        <div className={s.stepBlock}>
+          <p className={s.kicker}>Tradition</p>
+          <h2 style={serif} className={s.stepTitle}>
             Which ceremony tradition fits your celebration?
           </h2>
-          <p style={supportingText}>
-            This shapes rituals, styling, and planning recommendations.
+          <p className={s.stepBody}>
+            This helps shape rituals, styling, and planning recommendations later.
           </p>
-          <div style={optionGrid}>
-            {religionOptions.map((opt) => (
+
+          <div className={s.optionGridFive}>
+            {religionOptions.map((opt, i) => (
               <button
                 key={opt}
-                style={{
-                  ...optionCard,
-                  ...(formData.religion === opt ? selectedCard : {}),
-                }}
                 onClick={() => {
                   handleOptionSelect("religion", opt);
                   goToStep(5, 1);
                 }}
                 type="button"
+                className={`${s.optionBox} ${FIVE_ITEM_COL[i]} ${
+                  formData.religion === opt ? optionSelected : optionDefault
+                }`}
               >
                 {opt}
               </button>
             ))}
           </div>
-          <div style={actionsRow}>
-            <button style={secondaryBtn} onClick={handleBack} type="button">
+
+          <div className={s.actions}>
+            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
               Back
             </button>
           </div>
@@ -498,57 +504,51 @@ export default function CoupleProfileForm() {
     /* ── STEP 5: Date ── */
     if (step === 5) {
       return (
-        <div className="step-panel">
-          <p className="step-kicker">Wedding Date</p>
-          <h2 style={stepHeading}>The day our story becomes official...</h2>
-          <p style={supportingText}>
-            Add a tentative date, or skip if the plan is still open.
+        <div className={s.stepBlock}>
+          <p className={s.kicker}>Wedding date</p>
+          <h2 style={serif} className={s.stepTitle}>
+            The day our story becomes official...
+          </h2>
+          <p className={s.stepBody}>
+            Add a tentative date if you have one, or skip for now if the plan is still open.
           </p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 14,
-              marginTop: 24,
-            }}
-          >
+
+          <div className="grid grid-cols-3 gap-4 max-w-md md:max-w-lg mx-auto">
             {[
               { part: "dd", label: "DD", placeholder: "DD" },
               { part: "mm", label: "MM", placeholder: "MM" },
               { part: "yy", label: "YY", placeholder: "YY" },
             ].map((f) => (
-              <label key={f.part} style={fieldLabel}>
-                <span style={labelText}>{f.label}</span>
+              <label key={f.part} className="block text-center">
+                <span className={`${s.kicker} mb-1.5 block`}>{f.label}</span>
                 <input
                   type="text"
                   inputMode="numeric"
                   placeholder={f.placeholder}
                   value={dateInput[f.part]}
                   onChange={(e) => handleDatePartChange(f.part, e.target.value)}
-                  style={inputStyle}
+                  className={s.dateInput}
                 />
               </label>
             ))}
           </div>
-          <div style={actionsRow}>
-            <button style={secondaryBtn} onClick={handleBack} type="button">
+
+          <div className={s.actions}>
+            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
               Back
             </button>
             <button
-              style={secondaryBtn}
               onClick={handleDateUndecided}
               type="button"
+              className={`${s.secondaryBtn} text-[#e6c6b2]`}
             >
               Not decided yet
             </button>
             <button
-              style={{
-                ...primaryBtn,
-                opacity: !formData.weddingDate ? 0.45 : 1,
-              }}
               onClick={() => goToStep(6, 1)}
               type="button"
               disabled={!formData.weddingDate}
+              className={s.primaryBtn}
             >
               Next →
             </button>
@@ -560,34 +560,35 @@ export default function CoupleProfileForm() {
     /* ── STEP 6: Guest Count ── */
     if (step === 6) {
       return (
-        <div className="step-panel">
-          <p className="step-kicker">Guest Count</p>
-          <h2 style={stepHeading}>
+        <div className={s.stepBlock}>
+          <p className={s.kicker}>Guest count</p>
+          <h2 style={serif} className={s.stepTitle}>
             How many people do you imagine celebrating with you?
           </h2>
-          <p style={supportingText}>
+          <p className={s.stepBody}>
             Pick the range that best matches the scale of your day.
           </p>
-          <div style={optionGrid}>
+
+          <div className={s.optionGridFour}>
             {guestOptions.map((opt) => (
               <button
                 key={opt}
-                style={{
-                  ...optionCard,
-                  ...(formData.guestCount === opt ? selectedCard : {}),
-                }}
                 onClick={() => {
                   handleOptionSelect("guestCount", opt);
                   goToStep(7, 1);
                 }}
                 type="button"
+                className={`${s.optionBoxHalf} ${
+                  formData.guestCount === opt ? optionSelected : optionDefault
+                }`}
               >
                 {opt}
               </button>
             ))}
           </div>
-          <div style={actionsRow}>
-            <button style={secondaryBtn} onClick={handleBack} type="button">
+
+          <div className={s.actions}>
+            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
               Back
             </button>
           </div>
@@ -598,36 +599,36 @@ export default function CoupleProfileForm() {
     /* ── STEP 7: City ── */
     if (step === 7) {
       return (
-        <div className="step-panel">
-          <p className="step-kicker">City</p>
-          <h2 style={stepHeading}>Where love currently lives...</h2>
-          <p style={supportingText}>
-            Add the city or town you're planning from so location-based ideas
-            can follow.
+        <div className={s.stepBlock}>
+          <p className={s.kicker}>City</p>
+          <h2 style={serif} className={s.stepTitle}>
+            Where love currently lives...
+          </h2>
+          <p className={s.stepBody}>
+            Add the city or town you're planning from so location-based ideas can follow.
           </p>
-          <label style={{ ...fieldLabel, marginTop: 24, display: "block" }}>
-            <span style={labelText}>City or Town</span>
+
+          <label className="block text-center w-full max-w-2xl mx-auto">
+            <span className={s.inputLabel}>City or town</span>
             <input
               name="city"
               type="text"
               placeholder="Mumbai, Jaipur, Goa..."
               value={formData.city}
               onChange={handleTextChange}
-              style={inputStyle}
+              className={s.textInput}
             />
           </label>
-          <div style={actionsRow}>
-            <button style={secondaryBtn} onClick={handleBack} type="button">
+
+          <div className={s.actions}>
+            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
               Back
             </button>
             <button
-              style={{
-                ...primaryBtn,
-                opacity: !formData.city.trim() ? 0.45 : 1,
-              }}
               onClick={() => goToStep(8, 1)}
               type="button"
               disabled={!formData.city.trim()}
+              className={s.primaryBtn}
             >
               Next →
             </button>
@@ -638,32 +639,32 @@ export default function CoupleProfileForm() {
 
     /* ── STEP 8: Dream Venue ── */
     return (
-      <div className="step-panel">
-        <p className="step-kicker">Dream Venue</p>
-        <h2 style={stepHeading}>We dream of saying "I Do" in...</h2>
-        <p style={supportingText}>
+      <div className={s.stepBlock}>
+        <p className={s.kicker}>Dream venue</p>
+        <h2 style={serif} className={s.stepTitle}>
+          We dream of saying "I Do" in...
+        </h2>
+        <p className={s.stepBody}>
           Share the destination or city you imagine for the wedding setting.
         </p>
-        <label style={{ ...fieldLabel, marginTop: 24, display: "block" }}>
-          <span style={labelText}>Destination or City</span>
+
+        <label className="block text-center w-full max-w-2xl mx-auto">
+          <span className={s.inputLabel}>Destination or city</span>
           <input
             name="dreamVenue"
             type="text"
             placeholder="Udaipur, Lake Como, Tuscany..."
             value={formData.dreamVenue}
             onChange={handleTextChange}
-            style={inputStyle}
+            className={s.textInput}
           />
         </label>
-        <div style={actionsRow}>
-          <button style={secondaryBtn} onClick={handleBack} type="button">
+
+        <div className={s.actions}>
+          <button onClick={handleBack} type="button" className={s.secondaryBtn}>
             Back
           </button>
           <button
-            style={{
-              ...primaryBtn,
-              opacity: !formData.dreamVenue.trim() ? 0.45 : 1,
-            }}
             onClick={() => {
               setDirection(1);
               setIsComplete(true);
@@ -671,6 +672,7 @@ export default function CoupleProfileForm() {
             }}
             type="button"
             disabled={!formData.dreamVenue.trim()}
+            className={s.primaryBtn}
           >
             Review My Story →
           </button>
@@ -680,225 +682,67 @@ export default function CoupleProfileForm() {
   };
 
   return (
-    <main className="loverai-wedding-shell" style={shell}>
-      <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
-      <div className="loverai-wedding-overlay" />
-      <div className="loverai-wedding-glow loverai-wedding-glow-left" />
-      <div className="loverai-wedding-glow loverai-wedding-glow-right" />
+    <main className="min-h-screen w-screen relative px-1 md:px-2 pt-[10vh] pb-[8vh] text-white overflow-y-auto flex justify-center items-start">
+      {/* Background Pillars Mandap setup (fully bright and natural) */}
+      <div
+        className="fixed inset-0 bg-cover bg-center -z-20 scale-105 animate-scaleIn"
+        style={{
+          backgroundImage: 'url("/images/signup.png")',
+        }}
+      />
+      <div className="absolute inset-0 bg-black/10 -z-10" />
 
-      <section className="loverai-auth-panel" style={card}>
-        <header style={cardHeader}>
-          <div>
-            <img
-              src="/images/LogoLoversai.png"
-              alt="LoversAI"
-              style={{ height: 38, marginBottom: 8 }}
-            />
-            <h1
-              style={{
-                fontSize: 16,
-                fontWeight: 600,
-                color: "#D48C8C",
-                letterSpacing: "0.05em",
-                margin: 0,
-              }}
+      {/* Card: pillar-to-pillar width, flower-frame to carpet height */}
+      <motion.section
+        layout
+        transition={{ layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%)",
+          border: "1px solid rgba(255, 255, 255, 0.09)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+        }}
+        className="relative z-10 w-[60%] max-w-[1280px] min-h-[52vh] rounded-[28px] px-8 md:px-12 py-8 md:py-9 shadow-[0_24px_80px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.06)] overflow-y-auto animate-scaleIn flex flex-col"
+      >
+        <div className="w-full mx-auto flex flex-col flex-1 min-h-0">
+          <header className="relative select-none mb-8 md:mb-10 w-full">
+            <span className={`absolute top-0 right-0 ${s.stepPill}`}>
+              {isComplete ? "Ready ✨" : `Step ${step} of ${TOTAL_STEPS}`}
+            </span>
+            <div className="w-full text-center flex flex-col items-center px-12 md:px-20">
+              <span className={s.pageBrand}>LOVERS AI</span>
+              <h1 style={serif} className={s.pageTitle}>
+                Build your wedding profile
+              </h1>
+            </div>
+          </header>
+
+          {step > 1 && (
+            <div className="h-[2px] bg-white/5 rounded-full mb-4 md:mb-5 relative select-none animate-fadeIn">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#e6c6b2]/40 to-[#e6c6b2] transition-all duration-500 ease-out"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          )}
+
+          {/* Step Content Wrapper */}
+          <AnimatePresence mode="wait" initial={false} custom={direction}>
+            <motion.div
+              key={isComplete ? "complete" : `step-${step}`}
+              custom={direction}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={stepVariants}
+              className={`flex flex-col ${step === 1 && !isComplete ? "flex-1" : ""}`}
             >
-              Build Your Wedding Profile
-            </h1>
-          </div>
-          <span style={progressPill}>
-            {isComplete ? "Ready ✨" : `Step ${step} of ${TOTAL_STEPS}`}
-          </span>
-        </header>
-
-        {/* Progress bar */}
-        <div
-          style={{
-            height: 3,
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: 99,
-            margin: "0 0 28px",
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              borderRadius: 99,
-              width: `${progressPct}%`,
-              background: "linear-gradient(90deg,#C59854,#f0d196)",
-              transition: "width 0.5s ease",
-            }}
-          />
+              {renderStepContent()}
+            </motion.div>
+          </AnimatePresence>
         </div>
-
-        {/* Step body */}
-        <AnimatePresence mode="wait" initial={false} custom={direction}>
-          <motion.div
-            key={isComplete ? "complete" : `step-${step}`}
-            custom={direction}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={stepVariants}
-            style={{ minHeight: 340 }}
-          >
-            {renderStepContent()}
-          </motion.div>
-        </AnimatePresence>
-      </section>
+      </motion.section>
     </main>
   );
 }
-
-/* ─── Styles ─── */
-const shell = {
-  position: "relative",
-  minHeight: "100vh",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "40px 16px",
-  fontFamily: "'Poppins', sans-serif",
-  zIndex: 2,
-};
-
-const card = {
-  position: "relative",
-  zIndex: 10,
-  width: "100%",
-  maxWidth: 580,
-  borderRadius: 28,
-  padding: "36px 40px 44px",
-  boxShadow: "0 40px 120px rgba(0,0,0,0.55)",
-};
-
-const cardHeader = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  marginBottom: 20,
-};
-
-const progressPill = {
-  fontSize: 12,
-  letterSpacing: "0.12em",
-  textTransform: "uppercase",
-  color: "#D48C8C",
-  padding: "6px 14px",
-  borderRadius: 99,
-  border: "1px solid rgba(212,140,140,0.22)",
-  background: "rgba(212,140,140,0.06)",
-  whiteSpace: "nowrap",
-};
-
-const stepHeading = {
-  fontFamily: "'DM Serif Display', serif",
-  fontSize: "clamp(24px,4vw,38px)",
-  lineHeight: 1.15,
-  color: "#fff6ea",
-  margin: "8px 0 0",
-};
-
-const supportingText = {
-  fontSize: 14,
-  lineHeight: 1.7,
-  color: "rgba(249,247,245,0.6)",
-  marginTop: 10,
-  marginBottom: 0,
-};
-
-const actionsRow = {
-  display: "flex",
-  gap: 12,
-  marginTop: 30,
-  flexWrap: "wrap",
-};
-
-const primaryBtn = {
-  background: "linear-gradient(135deg, #f0d196, #C59854)",
-  color: "#1C1613",
-  padding: "13px 28px",
-  borderRadius: 12,
-  border: "none",
-  cursor: "pointer",
-  fontSize: 15,
-  fontWeight: 600,
-  fontFamily: "'Poppins', sans-serif",
-  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-  boxShadow: "0 10px 28px rgba(197,152,84,0.25)",
-};
-
-const secondaryBtn = {
-  background: "rgba(255,255,255,0.06)",
-  color: "#D48C8C",
-  padding: "13px 22px",
-  borderRadius: 12,
-  border: "1px solid rgba(212,140,140,0.22)",
-  cursor: "pointer",
-  fontSize: 14,
-  fontFamily: "'Poppins', sans-serif",
-  transition: "background 0.2s ease",
-};
-
-const fieldLabel = {
-  display: "block",
-};
-
-const labelText = {
-  fontSize: 12,
-  letterSpacing: "0.1em",
-  textTransform: "uppercase",
-  color: "rgba(249,247,245,0.55)",
-  marginBottom: 8,
-  display: "block",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px 16px",
-  borderRadius: 12,
-  border: "1px solid rgba(225,195,135,0.18)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#F9F7F5",
-  fontSize: 15,
-  fontFamily: "'Poppins', sans-serif",
-  outline: "none",
-  boxSizing: "border-box",
-  transition: "border-color 0.2s",
-};
-
-const optionGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-  gap: 12,
-  marginTop: 24,
-};
-
-const optionCard = {
-  padding: "16px 14px",
-  borderRadius: 14,
-  border: "1px solid rgba(225,195,135,0.18)",
-  background: "rgba(255,255,255,0.04)",
-  color: "#F9F7F5",
-  fontSize: 15,
-  cursor: "pointer",
-  fontFamily: "'Poppins', sans-serif",
-  transition: "all 0.2s ease",
-  textAlign: "center",
-};
-
-const selectedCard = {
-  background: "rgba(197,152,84,0.15)",
-  borderColor: "rgba(197,152,84,0.55)",
-  color: "#f0d196",
-  boxShadow: "0 4px 20px rgba(197,152,84,0.18)",
-};
-
-const summaryCard = {
-  padding: "14px 18px",
-  borderRadius: 12,
-  border: "1px solid rgba(225,195,135,0.12)",
-  background: "rgba(255,255,255,0.03)",
-  display: "flex",
-  flexDirection: "column",
-};

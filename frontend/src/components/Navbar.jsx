@@ -185,12 +185,12 @@ const Navbar = () => {
         {/* Logo - Desktop */}
         <Link
           to="/"
-          className="absolute left-3 md:left-[-22px] top-1 md:top-[-12px] pointer-events-auto hidden md:block z-50"
+          className="absolute left-4 md:left-6 top-2 md:top-3 pointer-events-auto hidden md:block z-50 p-2"
         >
           <img
             src="/images/logo copy.png"
             alt="Lovers AI logo"
-            className="h-[200px] w-auto object-contain transition-transform duration-300 hover:scale-105"
+            className="h-[160px] w-auto object-contain transition-transform duration-300 hover:scale-105"
           />
         </Link>
 
@@ -199,11 +199,11 @@ const Navbar = () => {
           {/* Mobile Layout */}
           <div className="md:hidden px-3 py-3">
             <div className="flex items-center justify-between">
-              <Link to="/" className="pointer-events-auto shrink-0">
+              <Link to="/" className="pointer-events-auto shrink-0 p-1">
                 <img
                   src="/images/logo copy.png"
                   alt="Lovers AI logo"
-                  className="h-[64px] w-auto object-contain transition-transform duration-300 hover:scale-105"
+                  className="h-[51px] w-auto object-contain transition-transform duration-300 hover:scale-105"
                 />
               </Link>
               <div className="flex items-center gap-3">
@@ -294,7 +294,15 @@ const Navbar = () => {
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-6 top-full mt-2 w-48 glass-card-strong rounded-xl shadow-2xl py-2 z-50 animate-fadeIn">
+                  <div 
+                    className="absolute right-6 top-full mt-2 w-56 rounded-xl py-2 px-1 shadow-2xl z-50 animate-fadeIn"
+                    style={{
+                      background: "linear-gradient(135deg, #1c120e 0%, #120c09 100%)",
+                      border: "1px solid rgba(230, 198, 178, 0.2)",
+                      backdropFilter: "blur(12px)",
+                      WebkitBackdropFilter: "blur(12px)",
+                    }}
+                  >
                     <div className="px-4 py-3 border-b border-white/10">
                       <p className="text-xs text-white/50">Signed in as</p>
                       <p className="text-sm font-medium text-white truncate">

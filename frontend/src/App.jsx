@@ -70,7 +70,9 @@ function AppContent() {
     location.pathname.startsWith("/vendor/") ||
     location.pathname === "/couple/onboarding" ||
     location.pathname === "/love-story" ||
-    location.pathname.startsWith("/couple/moodboard");
+    location.pathname.startsWith("/couple/moodboard") ||
+    location.pathname === "/couple/cart" ||
+    location.pathname === "/couple/bid-placed";
 
   return (
     <>

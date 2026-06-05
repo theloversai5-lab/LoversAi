@@ -152,10 +152,16 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Update login tracking
-    user.lastLoginAt = new Date();
-    user.loginCount = (user.loginCount || 0) + 1;
-    await user.save();
+    // Update login tracking in the background so response is not blocked by a write.
+    User.updateOne(
+      { _id: user._id },
+      {
+        $set: { lastLoginAt: new Date() },
+        $inc: { loginCount: 1 },
+      },
+    ).catch((updateErr) => {
+      console.warn("Login tracking update failed:", updateErr.message);
+    });
 
     const token = generateToken(user);
 
@@ -251,9 +257,19 @@ router.post("/google", async (req, res) => {
       if (picture && !user.avatar) {
         user.avatar = picture;
       }
-      user.lastLoginAt = new Date();
-      user.loginCount = (user.loginCount || 0) + 1;
-      await user.save();
+      User.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            ...(picture && !user.avatar ? { avatar: picture } : {}),
+            ...(!user.googleId ? { googleId, authProvider: "google" } : {}),
+            lastLoginAt: new Date(),
+          },
+          $inc: { loginCount: 1 },
+        },
+      ).catch((updateErr) => {
+        console.warn("Google login tracking update failed:", updateErr.message);
+      });
     } else {
       // New user via Google
       isNewUser = true;
@@ -365,16 +381,24 @@ router.post("/firebase-login", async (req, res) => {
         loginCount: 1,
       });
     } else {
-      if (!user.firebaseUid) user.firebaseUid = decoded.uid;
-      if (!user.googleId && decoded.firebase?.sign_in_provider === "google.com") {
-        user.googleId = decoded.uid;
-      }
-      if (!user.avatar && decoded.picture) user.avatar = decoded.picture;
-      if (!user.fullName && decoded.name) user.fullName = decoded.name;
-      if (!user.role) user.role = userRole;
-      user.lastLoginAt = new Date();
-      user.loginCount = (user.loginCount || 0) + 1;
-      await user.save();
+      User.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            ...(!user.firebaseUid ? { firebaseUid: decoded.uid } : {}),
+            ...(!user.googleId && decoded.firebase?.sign_in_provider === "google.com"
+              ? { googleId: decoded.uid }
+              : {}),
+            ...(!user.avatar && decoded.picture ? { avatar: decoded.picture } : {}),
+            ...(!user.fullName && decoded.name ? { fullName: decoded.name } : {}),
+            ...(!user.role ? { role: userRole } : {}),
+            lastLoginAt: new Date(),
+          },
+          $inc: { loginCount: 1 },
+        },
+      ).catch((updateErr) => {
+        console.warn("Firebase login tracking update failed:", updateErr.message);
+      });
     }
 
     if (user.isBlocked) {

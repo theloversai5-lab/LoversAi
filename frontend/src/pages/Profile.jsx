@@ -479,36 +479,36 @@ const Profile = () => {
                     </div>
 
                     {/* Available Plans */}
-                    <div>
+                    <div className="mt-8">
                       <h3 className="text-xl font-bold text-white mb-4">Available Plans</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Free Plan */}
                         <div style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(12px)", color: "#fff" }} className="border border-white/10 rounded-2xl p-6 flex flex-col h-full">
                           <h3 className="text-xl font-bold mb-2">Free Plan</h3>
                           <div className="text-3xl font-bold mb-1">₹ 0</div>
                           <div className="text-sm text-white/50 mb-6">/month</div>
                           <p className="text-sm text-white/60 mb-6">
-                            Perfect for getting started with AI creativity.
+                            Explore basic AI planning and vision tools for couples starting their journey.
                           </p>
 
                           <ul className="text-sm space-y-2 mb-8 flex-grow">
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Retexturizing
+                              <span className="text-green-600 mr-2">✔️</span> 1 AI Decor Vision (Small Event only)
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Image upscaling
+                              <span className="text-green-600 mr-2">✔️</span> 1 Active moodboard slot
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Image views
+                              <span className="text-green-600 mr-2">✔️</span> Browse wedding planner listings
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Standard quality output
+                              <span className="text-green-600 mr-2">✔️</span> Standard quality downloads
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Community support
+                              <span className="text-green-600 mr-2">✔️</span> Access to basic wedding profile
                             </li>
                           </ul>
-                          {subscription?.plan === 'free' && (
+                          {(!subscription || subscription?.plan === 'free') && (
                             <div className="w-full py-3 rounded-xl font-semibold bg-white/10 text-white text-center">
                               Current Plan
                             </div>
@@ -518,36 +518,27 @@ const Profile = () => {
                         {/* Basic Plan */}
                         <div style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(12px)", color: "#fff" }} className="border border-white/10 rounded-2xl p-6 flex flex-col h-full">
                           <h3 className="text-xl font-bold mb-2">Basic Plan</h3>
-                          <div className="text-3xl font-bold mb-1">₹ 4,349</div>
+                          <div className="text-3xl font-bold mb-1">₹ 1,499</div>
                           <div className="text-sm text-white/50 mb-6">/month</div>
                           <p className="text-sm text-white/60 mb-6">
-                            Great for individual creators and small projects.
+                            Great for couples looking for richer event inspiration and contact options.
                           </p>
 
                           <ul className="text-sm space-y-2 mb-8 flex-grow">
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Credits per month: 1,300
+                              <span className="text-green-600 mr-2">✔️</span> 15 AI Decor Visions (Small/Medium Events)
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Number of images: 130
+                              <span className="text-green-600 mr-2">✔️</span> 5 Active moodboard slots
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Storage: 5GB
+                              <span className="text-green-600 mr-2">✔️</span> Connect with up to 5 planners
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Retexturing
+                              <span className="text-green-600 mr-2">✔️</span> High resolution downloads
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Image views
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Image to video
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Generative editing
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> High quality output
+                              <span className="text-green-600 mr-2">✔️</span> Standard email support
                             </li>
                           </ul>
                           <button
@@ -567,36 +558,30 @@ const Profile = () => {
                         <div style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(12px)", color: "#fff" }} className="border border-[#e6c6b2]/40 shadow-[0_0_20px_rgba(230,198,178,0.15)] rounded-2xl p-6 flex flex-col h-full relative overflow-hidden">
                           <div className="absolute top-0 right-0 bg-gradient-to-r from-[#e6c6b2] to-[#c59854] text-[#1c1613] text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Most Popular</div>
                           <h3 className="text-xl font-bold mb-2">Premium Plan</h3>
-                          <div className="text-3xl font-bold mb-1">₹ 9,349</div>
+                          <div className="text-3xl font-bold mb-1">₹ 2,499</div>
                           <div className="text-sm text-white/50 mb-6">/month</div>
                           <p className="text-sm text-white/60 mb-6">
-                            Unlock full creative potential and advanced tools.
+                            Full access to complete wedding tools, custom theme generations, and unlimited listings.
                           </p>
 
                           <ul className="text-sm space-y-2 mb-8 flex-grow">
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Credits per month: 6,500
+                              <span className="text-green-600 mr-2">✔️</span> Unlimited AI Decor Visions (All Event Types)
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Number of images: 650
+                              <span className="text-green-600 mr-2">✔️</span> Unlimited moodboards & themes
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Storage: 15GB
+                              <span className="text-green-600 mr-2">✔️</span> Connect & chat with unlimited planners
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Retexturing
+                              <span className="text-green-600 mr-2">✔️</span> Ultra high-res downloads
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Image views
+                              <span className="text-green-600 mr-2">✔️</span> Custom generative theme tools
                             </li>
                             <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Image to video
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Generative editing
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> 4D quality output
+                              <span className="text-green-600 mr-2">✔️</span> Priority 24/7 dedicated support
                             </li>
                           </ul>
                           <button
@@ -609,43 +594,6 @@ const Profile = () => {
                             disabled={subscription?.plan === 'premium'}
                           >
                             {subscription?.plan === 'premium' ? 'Current Plan' : 'Upgrade Now'}
-                          </button>
-                        </div>
-
-                        {/* Enterprise */}
-                        <div style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(12px)", color: "#fff" }} className="border border-white/10 rounded-2xl p-6 flex flex-col h-full">
-                          <h3 className="text-xl font-bold mb-2">Enterprise</h3>
-                          <div className="text-3xl font-bold mb-1">Customisable</div>
-                          <div className="text-sm text-white/50 mb-6"></div>
-                          <p className="text-sm text-white/60 mb-6">
-                            Unlock full creative potential and advanced tools.
-                          </p>
-
-                          <ul className="text-sm space-y-2 mb-8 flex-grow">
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Custom credits
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Unlimited storage
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> All features
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Dedicated support
-                            </li>
-                            <li className="flex items-center">
-                              <span className="text-green-600 mr-2">✔️</span> Custom integrations
-                            </li>
-                          </ul>
-
-                          <button
-                            onClick={() => {
-                              alert('Please contact sales@loversai.com for Enterprise plans');
-                            }}
-                            className="w-2/3 mx-auto flex justify-center py-2 text-sm font-medium bg-[#D48C8C] text-white rounded-xl shadow-[0_4px_14px_0_rgba(212,140,140,0.39)] hover:shadow-[0_6px_20px_rgba(212,140,140,0.23)] hover:opacity-90 transition-all mt-4"
-                          >
-                            Contact Sales
                           </button>
                         </div>
                       </div>

@@ -135,7 +135,7 @@ const CoupleBidProgress = () => {
 
   return (
     <div className="min-h-screen loverai-page-bg pt-24 px-4 sm:px-8 pb-12">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto relative z-10">
         {/* Header */}
         <div className="flex items-center gap-4 py-6 border-b border-white/10 mb-8">
           <button 
@@ -145,7 +145,7 @@ const CoupleBidProgress = () => {
            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           </button>
           <div>
-            <h1 className="font-heading text-2xl md:text-3xl text-white">Bid Progress</h1>
+            <h1 className="font-heading text-2xl md:text-3xl text-loverai-gold">Bid Progress</h1>
             <p className="text-white/40 text-sm mt-1">ID: {quote._id}</p>
           </div>
         </div>

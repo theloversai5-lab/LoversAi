@@ -22,7 +22,12 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const data = await authAPI.getMe();
+        const data = await Promise.race([
+          authAPI.getMe(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Auth init timeout')), 12000)
+          ),
+        ]);
         if (data.success && data.user) {
           setCurrentUser(data.user);
           localStorage.setItem('user', JSON.stringify(data.user));

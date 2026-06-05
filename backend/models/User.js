@@ -199,7 +199,8 @@ userSchema.pre("save", async function () {
   // Only hash if password field is modified
   if (!this.isModified("password") || !this.password) return;
   try {
-    const salt = await bcrypt.genSalt(12);
+    // 10 rounds keeps strong security while reducing auth latency.
+    const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   } catch (err) {
     throw err;

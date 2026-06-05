@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -219,6 +219,7 @@ code {
   background-color: var(--loverai-bg-deep);
   position: relative;
   min-height: 100vh;
+  z-index: 0; /* Establishes a stacking context */
 }
 
 .loverai-page-bg::before {
@@ -230,7 +231,7 @@ code {
   bottom: 0;
   background: rgba(10, 6, 4, 0.85);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1; /* Renders behind children but above the background image */
 }
 
 .loverai-wedding-shell {
@@ -303,6 +304,7 @@ code {
 
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -310,12 +312,33 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(230, 198, 178, 0.15);
+  background: rgba(230, 198, 178, 0.65); /* #e6c6b2 (gold) at 65% opacity */
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(230, 198, 178, 0.25);
+  background: rgba(230, 198, 178, 0.85); /* #e6c6b2 (gold) at 85% opacity */
+}
+
+/* Custom scrollbar class for sidebars/panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(230, 198, 178, 0.75); /* #e6c6b2 (gold) at 75% opacity */
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 198, 178, 0.95); /* #e6c6b2 (gold) at 95% opacity */
 }
 
 /* ===========================
