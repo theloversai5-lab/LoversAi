@@ -5,19 +5,24 @@ import { useAuth } from "../../context/AuthContext";
 
 const carouselImages = [
   {
-    src: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1600&q=80",
+    src: "/images/1.png",
     title: "Moonlit Mandap Moments",
     copy: "Layered florals, candlelit aisles, and a setting that feels made for cinema.",
   },
   {
-    src: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1600&q=80",
+    src: "/images/2.png",
     title: "Golden Hour Vows",
     copy: "Soft sea light, sculpted decor, and a ceremony framed like a destination editorial.",
   },
   {
-    src: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1600&q=80",
+    src: "/images/3.png",
     title: "Reception Afterglow",
     copy: "Romantic tablescapes and an atmosphere designed to feel intimate, grand, and alive.",
+  },
+  {
+    src: "/images/4.png",
+    title: "Starlight Celebration",
+    copy: "A breathtaking reception designed to make every moment feel unforgettable.",
   },
 ];
 
@@ -82,35 +87,23 @@ function CoupleHome() {
         </h2>
 
         <div style={journeyGrid}>
-          <div
-            style={journeyCard}
-            onMouseEnter={handleEnter}
-            onMouseLeave={handleLeave}
-          >
-            <span style={cardText}>Sign Up & Create Your Profile</span>
-          </div>
-
-          <div
-            style={journeyCard}
-            onMouseEnter={handleEnter}
-            onMouseLeave={handleLeave}
-          >
-            <span style={cardText}>Edit & Personalize Everything</span>
-          </div>
-
-          <div
-            style={journeyCard}
-            onMouseEnter={handleEnter}
-            onMouseLeave={handleLeave}
-          >
-            <span style={cardText}>Choose & Order Anything Last Moment</span>
-          </div>
-        </div>
-
-        <div id="quote" style={quoteSection}>
-          <h3 style={quoteText}>
-            This won’t come again, with us or without us, make sure you live.
-          </h3>
+          {[
+            { step: "Step 1", text: "Sign Up & Create Your Profile" },
+            { step: "Step 2", text: "Edit & Personalize Everything" },
+            { step: "Step 3", text: "Choose & Order Anything Last Moment" },
+          ].map((item) => (
+            <div
+              key={item.step}
+              style={journeyCard}
+              onMouseEnter={handleEnter}
+              onMouseLeave={handleLeave}
+            >
+              <div style={cardInner}>
+                <span style={stepLabel}>{item.step}</span>
+                <span style={cardText}>{item.text}</span>
+              </div>
+            </div>
+          ))}
         </div>
 
         <section style={carouselSection}>
@@ -138,12 +131,6 @@ function CoupleHome() {
                     src={image.src}
                     style={carouselImage}
                   />
-                  <div style={carouselOverlay} />
-                  <div style={carouselCopy}>
-                    <p style={carouselSlideEyebrow}>Frame {index + 1}</p>
-                    <h3 style={carouselSlideTitle}>{image.title}</h3>
-                    <p style={carouselSlideText}>{image.copy}</p>
-                  </div>
                 </article>
               ))}
             </div>
@@ -190,6 +177,12 @@ function CoupleHome() {
             </div>
           </div>
         </section>
+
+        <div id="quote" style={quoteSection}>
+          <h3 style={quoteText}>
+            This won’t come again, with us or without us, make sure you live.
+          </h3>
+        </div>
       </div>
     </div>
   );
@@ -268,15 +261,32 @@ const journeyGrid = {
 const journeyCard = {
   height: "180px",
   borderRadius: "16px",
-  background: "linear-gradient(135deg, #33251c, #5c3c24)", // Adapted dark brown glassmorphism colors
+  background: "linear-gradient(135deg, #33251c, #5c3c24)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   textAlign: "center",
-  padding: "30px",
+  padding: "28px 24px",
   cursor: "pointer",
   transition: "all 0.4s ease",
   boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+};
+
+const cardInner = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "14px",
+};
+
+const stepLabel = {
+  fontSize: "13px",
+  letterSpacing: "0.22em",
+  textTransform: "uppercase",
+  color: "rgba(230, 198, 178, 0.95)",
+  fontWeight: 700,
+  fontFamily: "'Poppins', sans-serif",
 };
 
 /* CARD TEXT */
@@ -296,36 +306,41 @@ const quoteSection = {
 };
 
 const quoteText = {
-  fontSize: "clamp(28px, 3.2vw, 52px)",
+  fontSize: "48px",
   lineHeight: "1.1",
-  letterSpacing: "0.02em",
+  letterSpacing: "-0.02em",
   maxWidth: "none",
   margin: "0 auto",
-  fontFamily: "'Playfair Display', 'DM Serif Display', serif", // Replaced unavailable Burgues Script
-  fontStyle: "italic",
+  fontFamily: "'Dream Avenue', 'DM Serif Display', serif",
+  fontStyle: "normal",
+  fontWeight: 400,
   whiteSpace: "normal",
 };
 
 /* CAROUSEL */
 
 const carouselSection = {
-  marginTop: "44px",
+  marginTop: "56px",
   display: "grid",
-  gap: "24px",
+  gap: "20px",
 };
 
 const carouselHeading = {
   textAlign: "center",
   display: "grid",
-  gap: "10px",
+  gap: "8px",
+  padding: "12px 16px 8px",
+  margin: "0 auto",
 };
 
 const carouselEyebrow = {
-  fontSize: "13px",
+  fontSize: "10px",
   letterSpacing: "0.24em",
   textTransform: "uppercase",
   color: "rgba(249, 247, 245, 0.58)",
   fontFamily: "'Poppins', sans-serif",
+  margin: 0,
+  padding: "4px 0",
 };
 
 const carouselShell = {
@@ -335,7 +350,7 @@ const carouselShell = {
 
 const carouselViewport = {
   position: "relative",
-  minHeight: "min(68vh, 720px)",
+  minHeight: "min(75vh, 800px)",
   borderRadius: "28px",
   overflow: "hidden",
   background: "rgba(255,255,255,0.04)",

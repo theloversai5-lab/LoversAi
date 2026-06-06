@@ -4,8 +4,6 @@ import { useAuth } from "../context/AuthContext";
 
 function Home() {
   const [hovered, setHovered] = useState(null);
-  const [transitioning, setTransitioning] = useState(false);
-  const [transitionText, setTransitionText] = useState("");
   const navigate = useNavigate();
   const { currentUser, loading } = useAuth();
 
@@ -22,16 +20,8 @@ function Home() {
     }
   }, [currentUser, loading, navigate]);
 
-  const handleNavigate = (path, skipTransition = false) => {
-    if (skipTransition) {
-      navigate(path);
-    } else {
-      setTransitioning(true);
-      setTransitionText("Lovers AI");
-      setTimeout(() => {
-        navigate(path);
-      }, 1500);
-    }
+  const handleNavigate = (path) => {
+    navigate(path);
   };
 
   return (
@@ -74,30 +64,19 @@ function Home() {
         </div>
       )}
 
-      {/* Slide-up Transition */}
-      {transitioning && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center animate-slideUp"
-          style={{ background: "rgba(10,6,4,0.97)" }}
-        >
-          <div className="text-center">
-            <img
-              src="/images/LogoLoversai.png"
-              alt="LoversAI"
-              className="h-20 w-auto mx-auto mb-4 animate-float"
-            />
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading tracking-widest loverai-gradient-text">
-              {transitionText}
-            </h1>
-          </div>
-        </div>
-      )}
+
 
       {/* Hero Section Content */}
       <div
         className="relative z-0 w-full overflow-hidden min-h-screen md:min-h-[967px]"
         style={{ minHeight: "100vh" }}
       >
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> origin/Couples
         {/* Navigation Buttons - Only show for unauthenticated users */}
         {!loading && !currentUser && (
           <div className="absolute inset-x-0 z-20 bottom-8 flex flex-col items-stretch gap-4 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-8 md:bottom-[15%] md:px-16">
@@ -125,7 +104,7 @@ function Home() {
               className="relative cursor-pointer flex-1"
               onMouseEnter={() => setHovered("planner")}
               onMouseLeave={() => setHovered(null)}
-              onClick={() => handleNavigate("/planner", true)}
+              onClick={() => handleNavigate("/planner")}
             >
               <button
                 className={`w-full text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl ${
@@ -142,7 +121,7 @@ function Home() {
         )}
 
         {/* Explore Now - Only show for unauthenticated users */}
-        {!loading && !currentUser && !transitioning && hovered && (
+        {!loading && !currentUser && hovered && (
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-center text-white z-20 animate-fadeIn">
             <p className="text-sm text-loverai-gold/80 underline underline-offset-4">
               Explore now

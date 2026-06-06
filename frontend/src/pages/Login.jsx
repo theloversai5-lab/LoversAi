@@ -55,7 +55,7 @@ const Login = () => {
   const getCoupleNextPath = (user) => {
     const weddingProfile = user?.weddingProfile || {};
     return user?.profileCompleted || weddingProfile.completed
-      ? "/love-story"
+      ? "/couples"
       : "/couple/onboarding";
   };
 
