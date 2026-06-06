@@ -210,22 +210,13 @@ const Navbar = () => {
       >
         {/* Logo - Desktop */}
         <Link
-<<<<<<< HEAD
           to={logoTarget}
           className="absolute left-3 md:left-[15px] top-1 md:top-[18px] pointer-events-auto hidden md:block z-50"
-=======
-          to="/"
-          className="absolute left-4 md:left-6 top-2 md:top-3 pointer-events-auto hidden md:block z-50 p-2"
->>>>>>> origin/Couples
         >
           <img
             src="/images/logo copy.png"
             alt="Lovers AI logo"
-<<<<<<< HEAD
             className="h-[95px] w-auto object-contain transition-transform duration-300 hover:scale-105"
-=======
-            className="h-[160px] w-auto object-contain transition-transform duration-300 hover:scale-105"
->>>>>>> origin/Couples
           />
         </Link>
 
@@ -240,19 +231,11 @@ const Navbar = () => {
           {/* Mobile Layout */}
           <div className="md:hidden px-3 py-3">
             <div className="flex items-center justify-between">
-<<<<<<< HEAD
               <Link to={logoTarget} className="pointer-events-auto shrink-0">
                 <img
                   src="/images/logo copy.png"
                   alt="Lovers AI logo"
                   className="h-[75px] w-auto object-contain transition-transform duration-300 hover:scale-105"
-=======
-              <Link to="/" className="pointer-events-auto shrink-0 p-1">
-                <img
-                  src="/images/logo copy.png"
-                  alt="Lovers AI logo"
-                  className="h-[51px] w-auto object-contain transition-transform duration-300 hover:scale-105"
->>>>>>> origin/Couples
                 />
               </Link>
               <div className="flex items-center gap-3">
@@ -305,7 +288,6 @@ const Navbar = () => {
                     aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                     aria-expanded={mobileMenuOpen}
                   >
-<<<<<<< HEAD
                     <div className="flex flex-col gap-[4px]">
                       <span
                         className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""}`}
@@ -316,53 +298,6 @@ const Navbar = () => {
                       <span
                         className={`block h-[2px] w-5 bg-white transition-all duration-300 ${mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""}`}
                       />
-=======
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M9 20a1 1 0 1 0 0 2 1 1 0 1 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 1 0 0-2zM3 3h2l3.6 7.59-1.35 2.44A2 2 0 0 0 8.5 16H21v-2H8.5l1.1-2h7.45a2 2 0 0 0 1.9-1.4l2.5-9v-.1H5.21L4.27 2H1v2h2z" />
-                    </svg>
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-loverai-gold text-[10px] font-bold text-loverai-dark animate-pulse">
-                        {cartCount}
-                      </span>
-                    )}
-                  </button>
-                )}
-                <span className="text-white/80 text-[16px] max-w-[180px] truncate">
-                  {currentUser.displayName || currentUser.email?.split("@")[0]}
-                </span>
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="w-9 h-9 bg-gradient-to-br from-loverai-gold to-amber-700 rounded-full flex items-center justify-center text-loverai-dark font-semibold shadow-lg hover:scale-105 transition-transform duration-300"
-                  aria-label="User menu"
-                >
-                  {getUserInitials()}
-                </button>
-
-                {dropdownOpen && (
-                  <div 
-                    className="absolute right-6 top-full mt-2 w-56 rounded-xl py-2 px-1 shadow-2xl z-50 animate-fadeIn"
-                    style={{
-                      background: "linear-gradient(135deg, #1c120e 0%, #120c09 100%)",
-                      border: "1px solid rgba(230, 198, 178, 0.2)",
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                    }}
-                  >
-                    <div className="px-4 py-3 border-b border-white/10">
-                      <p className="text-xs text-white/50">Signed in as</p>
-                      <p className="text-sm font-medium text-white truncate">
-                        {currentUser.email}
-                      </p>
->>>>>>> origin/Couples
                     </div>
                   </button>
 
