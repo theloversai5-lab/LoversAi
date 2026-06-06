@@ -1,37 +1,13 @@
 // src/api/api.js — JWT-based API layer (Production-ready)
 import axios from 'axios';
 
-<<<<<<< HEAD
 const configuredApiBaseUrl = process.env.REACT_APP_API_BASE_URL?.trim();
 const normalizeApiBaseUrl = (value) => value.replace(/\/api\/?$/, '').replace(/\/$/, '');
 let apiBaseUrl = normalizeApiBaseUrl(configuredApiBaseUrl || 'http://localhost:5000');
-=======
-const normalizeBaseUrl = (url) => url.replace(/\/api\/?$/, '').replace(/\/$/, '');
-const isBrowser = typeof window !== 'undefined';
-const isLocalFrontend = isBrowser && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
-const isLocalApiUrl = (url) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalizeBaseUrl(url));
-const configuredApiBaseUrl = process.env.REACT_APP_API_BASE_URL;
-const LOCAL_API_PORTS = [5000, 5001, 5002, 5003, 5004];
-
-const buildLocalApiCandidates = () =>
-  LOCAL_API_PORTS.map((port) => `http://localhost:${port}`);
-
-const storedApiBaseUrl =
-  isBrowser && !configuredApiBaseUrl
-    ? localStorage.getItem('apiBaseUrl')
-    : null;
-
-let apiBaseUrl = normalizeBaseUrl(
-  configuredApiBaseUrl ||
-    storedApiBaseUrl ||
-    (isLocalFrontend ? buildLocalApiCandidates()[0] : 'http://localhost:5000')
-);
->>>>>>> origin/Couples
 
 const api = axios.create({
   baseURL: `${apiBaseUrl}/api`,
   headers: { 'Content-Type': 'application/json' },
-<<<<<<< HEAD
   timeout: 10000, // ⏳ 10-second timeout to prevent infinite hangs
 });
 
@@ -87,34 +63,6 @@ const resolveApiBaseUrl = async () => {
 
   return apiBaseUrlResolution;
 };
-=======
-  timeout: 15000,
-});
-
-const setApiBaseUrl = (nextBaseUrl) => {
-  apiBaseUrl = normalizeBaseUrl(nextBaseUrl);
-  api.defaults.baseURL = `${apiBaseUrl}/api`;
-  if (isBrowser && isLocalFrontend) {
-    localStorage.setItem('apiBaseUrl', apiBaseUrl);
-  }
-};
-
-const getFallbackCandidates = () => {
-  if (!isLocalFrontend) return [];
-  const current = normalizeBaseUrl(apiBaseUrl);
-  const localCandidates = buildLocalApiCandidates();
-
-  // If current API URL is already local, try other local ports.
-  if (isLocalApiUrl(current)) {
-    return localCandidates.filter((candidate) => normalizeBaseUrl(candidate) !== current);
-  }
-
-  // If current API URL is remote/misconfigured, try all local ports.
-  return localCandidates;
-};
-
-const isNetworkError = (error) => !error.response;
->>>>>>> origin/Couples
 
 // ─── JWT Token helpers ───
 export const getToken = () => localStorage.getItem('token');
@@ -160,40 +108,9 @@ api.interceptors.response.use(
 
 // ─── Generic fetcher ───
 export const apiFetch = async (endpoint, options = {}) => {
-<<<<<<< HEAD
   await resolveApiBaseUrl();
   const response = await api({ url: endpoint, ...options });
   return response.data;
-=======
-  try {
-    const response = await api({ url: endpoint, ...options });
-    return response.data;
-  } catch (error) {
-    const fallbackCandidates = getFallbackCandidates();
-    if (!isNetworkError(error) || fallbackCandidates.length === 0) {
-      throw error;
-    }
-
-    // Try known local backend ports in sequence and persist first working one.
-    for (const candidate of fallbackCandidates) {
-      try {
-        const response = await api({
-          ...options,
-          url: endpoint,
-          baseURL: `${candidate}/api`,
-        });
-        setApiBaseUrl(candidate);
-        return response.data;
-      } catch (candidateError) {
-        if (!isNetworkError(candidateError)) {
-          throw candidateError;
-        }
-      }
-    }
-
-    throw error;
-  }
->>>>>>> origin/Couples
 };
 
 // ─── Auth APIs ───

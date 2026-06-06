@@ -71,12 +71,6 @@ function Home() {
         className="relative z-0 w-full overflow-hidden min-h-screen md:min-h-[967px]"
         style={{ minHeight: "100vh" }}
       >
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> origin/Couples
         {/* Navigation Buttons - Only show for unauthenticated users */}
         {!loading && !currentUser && (
           <div className="absolute inset-x-0 z-20 bottom-8 flex flex-col items-stretch gap-4 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-8 md:bottom-[15%] md:px-16">

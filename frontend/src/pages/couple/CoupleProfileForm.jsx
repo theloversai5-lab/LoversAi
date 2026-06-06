@@ -694,7 +694,6 @@ export default function CoupleProfileForm() {
       />
       <div className="absolute inset-0 bg-black/10 -z-10" />
 
-<<<<<<< HEAD
       <section className="loverai-auth-panel" style={card}>
         <header style={cardHeader}>
           <div>
@@ -740,63 +739,11 @@ export default function CoupleProfileForm() {
               transition: "width 0.5s ease",
             }}
           />
-=======
-      {/* Card: pillar-to-pillar width, flower-frame to carpet height */}
-      <motion.section
-        layout
-        transition={{ layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%)",
-          border: "1px solid rgba(255, 255, 255, 0.09)",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
-        }}
-        className="relative z-10 w-[60%] max-w-[1280px] min-h-[52vh] rounded-[28px] px-8 md:px-12 py-8 md:py-9 shadow-[0_24px_80px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.06)] overflow-y-auto animate-scaleIn flex flex-col"
-      >
-        <div className="w-full mx-auto flex flex-col flex-1 min-h-0">
-          <header className="relative select-none mb-8 md:mb-10 w-full">
-            <span className={`absolute top-0 right-0 ${s.stepPill}`}>
-              {isComplete ? "Ready ✨" : `Step ${step} of ${TOTAL_STEPS}`}
-            </span>
-            <div className="w-full text-center flex flex-col items-center px-12 md:px-20">
-              <span className={s.pageBrand}>LOVERS AI</span>
-              <h1 style={serif} className={s.pageTitle}>
-                Build your wedding profile
-              </h1>
-            </div>
-          </header>
-
-          {step > 1 && (
-            <div className="h-[2px] bg-white/5 rounded-full mb-4 md:mb-5 relative select-none animate-fadeIn">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#e6c6b2]/40 to-[#e6c6b2] transition-all duration-500 ease-out"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-          )}
-
-          {/* Step Content Wrapper */}
-          <AnimatePresence mode="wait" initial={false} custom={direction}>
-            <motion.div
-              key={isComplete ? "complete" : `step-${step}`}
-              custom={direction}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              variants={stepVariants}
-              className={`flex flex-col ${step === 1 && !isComplete ? "flex-1" : ""}`}
-            >
-              {renderStepContent()}
-            </motion.div>
-          </AnimatePresence>
->>>>>>> origin/Couples
         </div>
-      </motion.section>
+      </section>
     </main>
   );
 }
-<<<<<<< HEAD
 
 /* ─── Styles ─── */
 const shell = {
@@ -976,5 +923,3 @@ const summaryCard = {
   display: "flex",
   flexDirection: "column",
 };
-=======
->>>>>>> origin/Couples

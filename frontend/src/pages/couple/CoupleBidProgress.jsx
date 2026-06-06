@@ -580,7 +580,6 @@ export default function CoupleBidProgress() {
   ];
 
   return (
-<<<<<<< HEAD
     <main className="min-h-screen bg-[#171311] text-white">
       <div className="flex min-h-screen flex-col lg:flex-row">
         <aside className="w-full border-b border-[#5d4421] bg-[#1b1512] lg:min-h-screen lg:w-[300px] lg:border-b-0 lg:border-r">
@@ -597,21 +596,6 @@ export default function CoupleBidProgress() {
               </p>
               <p className="mt-2 text-lg text-[#c9b38a]">Wedding CRM</p>
             </button>
-=======
-    <div className="min-h-screen loverai-page-bg pt-24 px-4 sm:px-8 pb-12">
-      <div className="max-w-3xl mx-auto relative z-10">
-        {/* Header */}
-        <div className="flex items-center gap-4 py-6 border-b border-white/10 mb-8">
-          <button 
-            onClick={() => navigate('/couple/profile')}
-            className="w-10 h-10 rounded-full glass-card hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-loverai-gold transition-colors"
-          >
-           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-          </button>
-          <div>
-            <h1 className="font-heading text-2xl md:text-3xl text-loverai-gold">Bid Progress</h1>
-            <p className="text-white/40 text-sm mt-1">ID: {quote._id}</p>
->>>>>>> origin/Couples
           </div>
 
           <div className="px-5 py-6">

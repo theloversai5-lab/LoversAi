@@ -67,7 +67,6 @@ function AppContent() {
   const location = useLocation();
   const [isAIToolOpen, setIsAIToolOpen] = useState(false);
 
-<<<<<<< HEAD
   // Reset active tool state when routing changes
   React.useEffect(() => {
     if (location.pathname !== "/planner-ai-tools") {
@@ -75,11 +74,8 @@ function AppContent() {
     }
   }, [location.pathname]);
 
-  const hideNavbar =
-=======
   // Hide navbar and footer on admin, planner, vendor dashboard, and couple AI tools pages
   const hideNavbarAndFooter =
->>>>>>> origin/Couples
     location.pathname.startsWith("/admin") ||
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
@@ -88,20 +84,16 @@ function AppContent() {
     location.pathname === "/planner-ai-tools" ||
     location.pathname.startsWith("/vendor/") ||
     location.pathname === "/couple/onboarding" ||
-<<<<<<< HEAD
-    location.pathname === "/user-form";
-
-  const hideFooter =
-    location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/vendor/") ||
-    location.pathname === "/couple/onboarding" ||
-    location.pathname === "/user-form";
-=======
     location.pathname === "/love-story" ||
     location.pathname.startsWith("/couple/moodboard") ||
     location.pathname === "/couple/cart" ||
     location.pathname === "/couple/bid-placed";
->>>>>>> origin/Couples
+
+  const hideNavbar =
+    hideNavbarAndFooter || location.pathname === "/user-form";
+
+  const hideFooter =
+    hideNavbarAndFooter || location.pathname === "/user-form";
 
   return (
     <>

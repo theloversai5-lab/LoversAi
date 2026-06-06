@@ -1,12 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-<<<<<<< HEAD
 import { apiFetch, quoteAPI } from "../../api/api";
 import { getCoupleDisplayName } from "../../utils/coupleProfile";
-=======
-import { apiFetch, quoteAPI, userAPI } from "../../api/api";
->>>>>>> origin/Couples
+import { userAPI } from "../../api/api";
 
 const normalizeTheme = (value = "") => {
   const text = String(value).toLowerCase();
@@ -33,13 +30,7 @@ export default function WeddingCart() {
   const [cartItems, setCartItems] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-<<<<<<< HEAD
-  const weddingProfile = currentUser?.weddingProfile || {};
   const coupleName = getCoupleDisplayName(currentUser);
-=======
-  const [success, setSuccess] = useState(false);
-  
->>>>>>> origin/Couples
   const [eventDetails, setEventDetails] = useState({
     budget: "",
     guestCount: "",
@@ -115,6 +106,22 @@ export default function WeddingCart() {
         }
       });
   }, [currentUser]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+      setProfileMenuOpen(false);
+    } catch (err) {
+      console.error("Failed to log out:", err);
+    }
+  };
+
+  const getUserInitials = () => {
+    if (!currentUser?.displayName && !currentUser?.email) return "U";
+    const name = currentUser.displayName || currentUser.email;
+    return name.charAt(0).toUpperCase();
+  };
 
   const groupedItems = useMemo(() => {
     const groups = emptySections.reduce((acc, section) => {
@@ -196,63 +203,6 @@ export default function WeddingCart() {
     }
   };
 
-<<<<<<< HEAD
-=======
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/");
-      setProfileMenuOpen(false);
-    } catch (err) {
-      console.error("Failed to log out:", err);
-    }
-  };
-
-  const getUserInitials = () => {
-    if (!currentUser?.displayName && !currentUser?.email) return "U";
-    const name = currentUser.displayName || currentUser.email;
-    return name.charAt(0).toUpperCase();
-  };
-
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-    return () => document.head.removeChild(link);
-  }, []);
-
-  if (success) {
-    return (
-      <main className="h-screen w-screen relative px-3 pb-3 pt-3 md:px-4 md:pb-4 md:pt-5 text-white overflow-hidden flex flex-col items-center justify-center">
-        <div
-          className="absolute inset-0 bg-cover bg-center -z-20"
-          style={{
-            backgroundImage: 'url("/images/signup.png")',
-            filter: "brightness(0.75) contrast(1.05)",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/45 to-[#0a0604] -z-10" />
-
-        <div className="w-full max-w-xl rounded-[24px] border border-[#5d4421]/30 bg-[#16100d]/90 backdrop-blur-2xl p-10 text-center shadow-[0_30px_70px_rgba(0,0,0,0.55)]">
-          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#3BFF47]/10 text-[#3BFF47] border border-[#3BFF47]/20 shadow-[0_12px_30px_rgba(59,255,71,0.15)] animate-pulse">
-            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif" }} className="text-[38px] font-semibold text-white tracking-wide">
-            Bid Submitted
-          </h2>
-          <p className="mt-3.5 text-xs text-white/50 max-w-xs mx-auto leading-relaxed">
-            Planners will review your vision board and send quotes soon. Returning to bid log...
-          </p>
-        </div>
-      </main>
-    );
-  }
-
->>>>>>> origin/Couples
   return (
     <main className="h-screen w-screen relative px-3 pb-3 pt-3 md:px-4 md:pb-4 md:pt-5 text-white overflow-hidden flex flex-col animate-fadeIn">
       {/* Background Image Setup */}
@@ -356,7 +306,6 @@ export default function WeddingCart() {
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif" }} className="text-2xl md:text-[30px] font-semibold text-[#ffffff] tracking-wide leading-none">
                 My Wedding Cart
               </h1>
-<<<<<<< HEAD
               <div className="mx-auto mt-3 flex max-w-[720px] flex-wrap items-center justify-center gap-2 rounded-[6px] border border-[#7b6140] bg-[#211914] px-4 py-3 text-[11px] text-white/75">
                 <span>{coupleName}</span>
                 <span>|</span>
@@ -370,30 +319,6 @@ export default function WeddingCart() {
                 <span>|</span>
                 <span>Guest: {eventDetails.guestCount || "500"}</span>
               </div>
-=======
-              
-              {/* Couple Info Metadata Strip - Dynamic from backend */}
-              {(weddingProfile.brideName || weddingProfile.groomName) && (
-                <div className="mx-auto mt-2 flex max-w-[760px] flex-wrap items-center justify-center gap-3.5 rounded-[12px] border border-[#e6c6b2]/10 bg-white/5 px-4 py-2 text-[10px] uppercase font-bold tracking-wider text-[#e6c6b2] shadow-sm select-none">
-                  <span>{[weddingProfile.brideName, weddingProfile.groomName].filter(Boolean).join(" & ")}</span>
-                  {weddingProfile.weddingDate && (
-                    <><span className="text-white/20">|</span><span>{formatWeddingDate(weddingProfile.weddingDate)}</span></>
-                  )}
-                  {weddingProfile.city && (
-                    <><span className="text-white/20">|</span><span>{weddingProfile.city}</span></>
-                  )}
-                  {weddingProfile.religion && (
-                    <><span className="text-white/20">|</span><span>{weddingProfile.religion}</span></>
-                  )}
-                  {weddingProfile.budget && (
-                    <><span className="text-white/20">|</span><span>Budget: {weddingProfile.budget}</span></>
-                  )}
-                  {weddingProfile.guestCount && (
-                    <><span className="text-white/20">|</span><span>Guest: {weddingProfile.guestCount}</span></>
-                  )}
-                </div>
-              )}
->>>>>>> origin/Couples
             </div>
 
             {error && (
