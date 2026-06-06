@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
 import { auth } from "../firebase/firebase";
+import { formatZodErrors, plannerSignupSchema } from "../utils/authValidation";
 
 const sharedWeddingBackground = {
   backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
@@ -79,28 +80,32 @@ export default function Signup() {
     e.preventDefault();
     setError("");
 
-    if (!name.trim() || !email.trim() || !password) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-    if (role === "Planner" && !companyName.trim()) {
-      setError("Please enter your company name.");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    const validation = plannerSignupSchema.safeParse({
+      role,
+      fullName: name,
+      companyName,
+      partnerName,
+      email,
+      password,
+    });
+
+    if (!validation.success) {
+      setError(formatZodErrors(validation.error));
       return;
     }
 
     setLoading(true);
     try {
+      const validated = validation.data;
       const data = await register({
-        email: email.trim(),
-        password,
-        fullName: name.trim(),
-        role: role.toLowerCase(),
-        partnerName: role === "Couple" ? partnerName.trim() : undefined,
-        companyName: role === "Planner" ? companyName.trim() : undefined,
+        email: validated.email,
+        password: validated.password,
+        fullName: validated.fullName,
+        role: validated.role.toLowerCase(),
+        partnerName:
+          validated.role === "Couple" ? validated.partnerName : undefined,
+        companyName:
+          validated.role === "Planner" ? validated.companyName : undefined,
       });
 
       if (data.success) {

@@ -759,7 +759,7 @@ const AngleChangeComponent = ({ onClose }) => {
                           <img
                             src={generatedResult.url}
                             alt="Generated angle view"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain bg-black/20"
                           />
                           <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded backdrop-blur-sm">
                             {generatedResult.transformation?.angleView?.name}

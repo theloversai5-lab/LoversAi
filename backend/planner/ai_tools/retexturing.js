@@ -1,27 +1,47 @@
 import express from "express";
 import multer from "multer";
 import fetch from "node-fetch";
+import Replicate from "replicate";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
-import {
-  isCloudinaryConfigured,
-  uploadRemoteToCloudinary,
-} from "../../utils/cloudinary.js";
 
 const router = express.Router();
 
-// AI configuration: prefer Gemini, optionally allow legacy FLUX when explicitly enabled
+const REPLICATE_MODEL = "black-forest-labs/flux-kontext-pro";
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN || undefined,
+});
+const GEMINI_API_BASE_URL =
+  process.env.GEMINI_API_BASE_URL ||
+  "https://generativelanguage.googleapis.com/v1beta";
+const GEMINI_IMAGE_MODEL =
+  process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image";
+const GEMINI_IMAGE_MODEL_FALLBACKS = [
+  "gemini-2.5-flash-image",
+  "gemini-3-pro-image-preview",
+];
 const LEGACY_FLUX_ENABLED = process.env.LEGACY_FLUX_ENABLED === "true";
-const isAIEnabled = () => {
-  return !!(
-    (process.env.GEMINI_API_KEY &&
-      process.env.GEMINI_API_KEY !== "your_gemini_api_key_here") ||
-    (process.env.BFL_API_KEY &&
-      process.env.BFL_API_KEY !== "your_bfl_api_key_here" &&
-      LEGACY_FLUX_ENABLED)
+
+const generatedImageCache = new Map();
+const GENERATED_IMAGE_CACHE_TTL_MS =
+  Number(process.env.GENERATED_IMAGE_CACHE_TTL_MS) || 60 * 60 * 1000;
+const GENERATED_IMAGE_CACHE_PREFIX = "/api/ai/cache";
+
+const isGeminiConfigured = () =>
+  !!(
+    process.env.GEMINI_API_KEY &&
+    process.env.GEMINI_API_KEY !== "your_gemini_api_key_here"
   );
-};
+
+const isLegacyFluxConfigured = () =>
+  !!(
+    process.env.REPLICATE_API_TOKEN &&
+    process.env.REPLICATE_API_TOKEN !== "your_replicate_api_token_here"
+  );
+
+const isAIEnabled = () =>
+  isGeminiConfigured() || (LEGACY_FLUX_ENABLED && isLegacyFluxConfigured());
 
 // Configure multer for file uploads - INCREASED FILE SIZE LIMIT
 const upload = multer({
@@ -90,227 +110,280 @@ const WEDDING_THEMES = {
   },
 };
 
-// FLUX API functions
-async function callFluxAPIFixed(
+function resolveReplicateOutputUrl(output) {
+  const firstOutput = Array.isArray(output) ? output[0] : output;
+
+  if (!firstOutput) {
+    return null;
+  }
+
+  if (typeof firstOutput === "string") {
+    return firstOutput;
+  }
+
+  if (typeof firstOutput.url === "function") {
+    return firstOutput.url();
+  }
+
+  if (typeof firstOutput.url === "string") {
+    return firstOutput.url;
+  }
+
+  return null;
+}
+
+function extractGeminiImageParts(responseData = {}) {
+  const parts =
+    responseData?.candidates?.flatMap(
+      (candidate) => candidate?.content?.parts || [],
+    ) || [];
+
+  return parts
+    .filter((part) => part?.inlineData?.data || part?.inline_data?.data)
+    .map((part, index) => {
+      const inlineData = part.inlineData || part.inline_data;
+      return {
+        buffer: Buffer.from(inlineData.data, "base64"),
+        contentType: inlineData.mimeType || inlineData.mime_type || "image/png",
+        seed: Date.now() + index,
+        generationId: `gem_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+      };
+    });
+}
+
+async function callGeminiImageAPI(
+  imageBuffer,
+  prompt,
+  negativePrompt = "",
+  mimeType = "image/jpeg",
+  modelType = GEMINI_IMAGE_MODEL,
+) {
+  const candidateModels = [
+    ...new Set([modelType, ...GEMINI_IMAGE_MODEL_FALLBACKS]),
+  ];
+
+  let lastError = null;
+
+  for (const candidateModel of candidateModels) {
+    try {
+      return await callGeminiImageAPIWithModel(
+        imageBuffer,
+        prompt,
+        negativePrompt,
+        mimeType,
+        candidateModel,
+      );
+    } catch (error) {
+      lastError = error;
+
+      if (/GEMINI_AUTH_ERROR/i.test(String(error?.message || ""))) {
+        throw error;
+      }
+
+      if (!/GEMINI_MODEL_ERROR/i.test(String(error?.message || ""))) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError || new Error("Gemini returned no image output");
+}
+
+async function callGeminiImageAPIWithModel(
+  imageBuffer,
+  prompt,
+  negativePrompt = "",
+  mimeType = "image/jpeg",
+  modelType = GEMINI_IMAGE_MODEL,
+) {
+  if (!isGeminiConfigured()) {
+    throw new Error(
+      "Gemini API key missing. Set GEMINI_API_KEY in environment variables.",
+    );
+  }
+
+  const fullPrompt = [prompt.trim(), negativePrompt ? `Avoid: ${negativePrompt.trim()}` : ""]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const response = await fetch(
+    `${GEMINI_API_BASE_URL}/models/${modelType}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": process.env.GEMINI_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: fullPrompt },
+              {
+                inline_data: {
+                  mime_type: mimeType || "image/jpeg",
+                  data: imageBuffer.toString("base64"),
+                },
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseModalities: ["TEXT", "IMAGE"],
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(
+        "GEMINI_AUTH_ERROR: Gemini API authentication failed. Restart the backend after setting GEMINI_API_KEY; if it still fails, the key is invalid or does not have image generation access.",
+      );
+    }
+
+    if ([400, 404, 422].includes(response.status)) {
+      throw new Error(
+        `GEMINI_MODEL_ERROR:${response.status}: Gemini model ${modelType} is unavailable or not supported. ${errorText.substring(0, 200)}`,
+      );
+    }
+
+    throw new Error(
+      `Gemini error ${response.status}: ${errorText.substring(0, 300)}`,
+    );
+  }
+
+  const result = await response.json();
+  const imageParts = extractGeminiImageParts(result);
+
+  if (!imageParts.length) {
+    const textParts = result?.candidates
+      ?.flatMap((candidate) => candidate?.content?.parts || [])
+      .filter((part) => part?.text)
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+
+    throw new Error(
+      `Gemini returned no image output.${textParts ? ` ${textParts}` : ""}`,
+    );
+  }
+
+  return imageParts[0];
+}
+
+async function generateRetexturedImagePayload(
+  imageBuffer,
+  prompt,
+  negativePrompt = "",
+  mimeType = "image/jpeg",
+) {
+  try {
+    const geminiResult = await callGeminiImageAPI(
+      imageBuffer,
+      prompt,
+      negativePrompt,
+      mimeType,
+    );
+
+    return {
+      ...geminiResult,
+      provider: "gemini",
+    };
+  } catch (geminiErr) {
+    console.warn(
+      "Gemini retexturing failed, falling back to legacy Replicate:",
+      geminiErr.message,
+    );
+
+    if (!LEGACY_FLUX_ENABLED) {
+      throw geminiErr;
+    }
+
+    const replicateResult = await callReplicateAPIFixed(
+      imageBuffer,
+      prompt,
+      negativePrompt,
+      REPLICATE_MODEL,
+      1,
+    );
+
+    return {
+      url: replicateResult.url,
+      seed: replicateResult.seed,
+      generationId: replicateResult.generationId,
+      provider: "replicate",
+      fallbackReason: geminiErr.message,
+    };
+  }
+}
+
+async function callReplicateAPIFixed(
   imageBuffer,
   prompt,
   negativePrompt,
-  modelType = "flux-kontext-pro",
+  modelType = REPLICATE_MODEL,
   imageCount = 1,
 ) {
   try {
-    if (!LEGACY_FLUX_ENABLED) {
+    if (!process.env.REPLICATE_API_TOKEN) {
       throw new Error(
-        "Legacy FLUX API is disabled. Set LEGACY_FLUX_ENABLED=true to enable legacy Flux or migrate to Gemini API.",
+        "Replicate API token missing. Set REPLICATE_API_TOKEN in environment variables.",
       );
     }
 
     console.log(
-      `🚀 Starting FLUX API call with model: ${modelType}, imageCount: ${imageCount}`,
+      `🚀 Starting Replicate API call with model: ${modelType}, imageCount: ${imageCount}`,
     );
 
-    const imageBase64 = imageBuffer.toString("base64");
-
-    // If multiple images requested, generate them sequentially
-    if (imageCount > 1) {
-      const results = [];
-
-      for (let i = 0; i < imageCount; i++) {
-        const singleResult = await callFluxAPIFixed(
-          imageBuffer,
-          prompt,
-          negativePrompt,
-          modelType,
-          1,
-        );
-        results.push(singleResult);
-
-        // Small delay between requests
-        if (i < imageCount - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-
-      return results[0];
-    }
-
-    // Base request parameters for single image
-    let requestBody = {
-      prompt: prompt.trim().substring(0, 500),
-      width: 1024,
-      height: 1024,
+    const input = {
+      prompt: prompt.trim().substring(0, 1000),
+      input_image: imageBuffer,
+      aspect_ratio: "match_input_image",
+      output_format: "png",
       safety_tolerance: 2,
+      prompt_upsampling: false,
     };
 
-    // Add negative prompt if provided
-    if (negativePrompt && negativePrompt.trim()) {
-      requestBody.negative_prompt = negativePrompt.trim().substring(0, 100);
+    const output = await replicate.run(modelType, { input });
+    const outputUrl = resolveReplicateOutputUrl(output);
+
+    if (!outputUrl) {
+      throw new Error("Replicate returned no output image");
     }
 
-    // Model-specific parameters
-    if (modelType === "flux-kontext-pro" || modelType === "flux-kontext-max") {
-      requestBody.input_image = imageBase64;
-    } else if (modelType === "flux-pro-1.1") {
-      // FLUX Pro 1.1: Pure generation mode
-    } else {
-      requestBody.input_image = imageBase64;
-    }
-
-    // Make API call
-    const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
-    if (!process.env.BFL_API_KEY)
-      throw new Error("BFL API key missing for legacy Flux calls");
-    const response = await fetch(`${baseUrl}/v1/${modelType}`, {
-      method: "POST",
-      headers: {
-        "x-key": process.env.BFL_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `❌ FLUX API Error ${response.status}:`,
-        errorText.substring(0, 200),
-      );
-
-      // Try fallback model if primary fails
-      if (response.status === 403 || response.status === 422) {
-        const fallbackModel =
-          modelType === "flux-kontext-pro"
-            ? "flux-kontext-max"
-            : "flux-kontext-pro";
-        console.log(`🔄 Trying fallback model: ${fallbackModel}`);
-
-        return await callFluxAPIFixed(
-          imageBuffer,
-          prompt,
-          negativePrompt,
-          fallbackModel,
-        );
-      }
-
-      throw new Error(
-        `FLUX API error: ${response.status} - ${errorText.substring(0, 100)}`,
-      );
-    }
-
-    const result = await response.json();
-
-    // Handle async response (task ID)
-    if (result.id) {
-      console.log(`📨 Task submitted (ID: ${result.id}), polling...`);
-      return await pollForResult(result.id, result.polling_url);
-    }
-
-    // Handle direct response
     return {
-      url: result.result?.sample || result.url,
-      seed:
-        result.result?.seed ||
-        result.seed ||
-        Math.floor(Math.random() * 1000000),
-      generationId: `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      url: outputUrl,
+      seed: Math.floor(Math.random() * 1000000),
+      generationId: `rep_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
     };
   } catch (error) {
-    console.error("❌ FLUX API Error:", error.message);
+    console.error("❌ Replicate API Error:", error.message);
     throw error;
   }
 }
 
-async function pollForResult(taskId, customPollingUrl = null) {
-  const maxAttempts = parseInt(process.env.MAX_POLL_ATTEMPTS) || 30;
-  const pollInterval = parseInt(process.env.POLL_INTERVAL) || 5000;
+setInterval(cleanupGeneratedImageCache, 5 * 60 * 1000).unref?.();
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      console.log(
-        `⏳ Polling attempt ${attempt + 1}/${maxAttempts} for task ${taskId}`,
-      );
+router.get("/cache/:cacheId", (req, res) => {
+  cleanupGeneratedImageCache();
 
-      const pollingUrl =
-        customPollingUrl ||
-        `${process.env.FLUX_POLLING_ENDPOINT || "https://api.bfl.ai/v1/get_result"}?id=${taskId}`;
-      if (!process.env.BFL_API_KEY)
-        throw new Error("BFL API key missing for legacy Flux polling");
-      const response = await fetch(pollingUrl, {
-        headers: {
-          "x-key": process.env.BFL_API_KEY,
-        },
-      });
+  const { cacheId } = req.params;
+  const cachedImage = generatedImageCache.get(cacheId);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log(
-          `⚠️ Poll attempt ${attempt + 1} - Status: ${response.status}`,
-        );
-        continue; // Try again instead of throwing
-      }
-
-      const result = await response.json();
-
-      if (result.status === "Ready") {
-        console.log(`✅ Generation complete for task ${taskId}`);
-        return {
-          url: result.result.sample,
-          seed: result.result.seed || Math.floor(Math.random() * 1000000),
-          generationId: `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        };
-      }
-
-      if (result.status === "Error") {
-        const errorDetails =
-          result.details || result.error || "API processing error";
-        console.log(`❌ Generation failed with error: ${errorDetails}`);
-        throw new Error(`Generation failed: ${errorDetails}`);
-      }
-
-      // Wait before next poll
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
-    } catch (error) {
-      console.error(`❌ Poll attempt ${attempt + 1} failed:`, error.message);
-
-      // If this is the last attempt, throw the error
-      if (attempt === maxAttempts - 1) {
-        throw new Error("Generation timeout - please try again");
-      }
-    }
+  if (!cachedImage) {
+    return res.status(404).json({
+      success: false,
+      error: "Cached image not found or expired",
+    });
   }
 
-  throw new Error("Generation timeout - please try again");
-}
-
-async function persistGeneratedImage(imageUrl, folder = "retexturing") {
-  if (!imageUrl) {
-    throw new Error("No generated image URL was returned");
-  }
-
-  if (!isCloudinaryConfigured) {
-    throw new Error(
-      "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
-    );
-  }
-
-  const safeFolder =
-    String(folder || "retexturing")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-      .slice(0, 40) || "retexturing";
-
-  const uploadResult = await uploadRemoteToCloudinary(imageUrl, {
-    folder: `loversai/generated-images/${safeFolder}`,
-    resource_type: "image",
-    public_id: `${Date.now()}-${safeFolder}`,
-  });
-
-  return {
-    url: uploadResult?.secure_url || imageUrl,
-    cloudinaryPublicId: uploadResult?.public_id || null,
-  };
-}
+  res.setHeader("Content-Type", cachedImage.contentType || "image/png");
+  res.setHeader("Cache-Control", "public, max-age=300");
+  res.send(cachedImage.buffer);
+});
 
 // AI Tools Routes
 
@@ -324,20 +397,27 @@ router.get("/health", (req, res) => {
     service: "Wedding Venue AI Retexturing",
     themes: Object.keys(WEDDING_THEMES).length,
     credit_system: creditSystemEnabled ? "active" : "disabled",
-    gemini_api_key: process.env.GEMINI_API_KEY
+    provider: isGeminiConfigured()
+      ? "gemini"
+      : LEGACY_FLUX_ENABLED && isLegacyFluxConfigured()
+        ? "legacy-flux"
+        : "unavailable",
+    gemini_api_key: isGeminiConfigured() ? "configured" : "not configured",
+    replicate_api_token: isLegacyFluxConfigured()
       ? "configured"
       : "not configured",
-    legacy_flux_enabled: LEGACY_FLUX_ENABLED ? "enabled" : "disabled",
     credit_costs: {
       standard_generation: "10 credits per image",
       premium_generation: "15 credits per image",
       angle_change: "15 credits per transformation",
     },
     message: isAIEnabled()
-      ? creditSystemEnabled
-        ? "Service is ready (credit-based)"
-        : "Service is ready (no credits required)"
-      : "Set GEMINI_API_KEY in environment variables to enable AI features (or enable legacy Flux with LEGACY_FLUX_ENABLED=true)",
+      ? isGeminiConfigured()
+        ? creditSystemEnabled
+          ? "Service is ready with Gemini (credit-based)"
+          : "Service is ready with Gemini (no credits required)"
+        : "Service is ready with legacy Flux"
+      : "Set GEMINI_API_KEY in environment variables to enable AI features",
   });
 });
 
@@ -414,6 +494,56 @@ router.post("/check-credits", protect, async (req, res) => {
   }
 });
 
+function cleanupGeneratedImageCache() {
+  const now = Date.now();
+  for (const [cacheId, entry] of generatedImageCache.entries()) {
+    if (!entry || entry.expiresAt <= now) {
+      generatedImageCache.delete(cacheId);
+    }
+  }
+}
+
+async function persistGeneratedImage(imageSource) {
+  let buffer = null;
+  let contentType = "image/png";
+
+  if (Buffer.isBuffer(imageSource?.buffer)) {
+    buffer = imageSource.buffer;
+    contentType = imageSource.contentType || contentType;
+  } else {
+    const imageUrl =
+      typeof imageSource === "string"
+        ? imageSource
+        : imageSource?.url || null;
+
+    if (!imageUrl) {
+      throw new Error("No generated image URL was returned");
+    }
+
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch generated image: ${response.status}`);
+    }
+
+    contentType = response.headers.get("content-type") || contentType;
+    buffer = Buffer.from(await response.arrayBuffer());
+  }
+
+  const cacheId = `ret_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+
+  generatedImageCache.set(cacheId, {
+    buffer,
+    contentType,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + GENERATED_IMAGE_CACHE_TTL_MS,
+  });
+
+  return {
+    url: `${GENERATED_IMAGE_CACHE_PREFIX}/${cacheId}`,
+    cacheId,
+  };
+}
+
 // Main generation endpoint - SIMPLIFIED VERSION
 router.post("/generate", protect, upload.single("image"), async (req, res) => {
   try {
@@ -422,17 +552,11 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
       return res.status(503).json({
         success: false,
         error:
-          "AI service is not configured. Please set BFL_API_KEY in environment variables.",
+          "Gemini is not configured. Please set GEMINI_API_KEY in environment variables.",
         instruction:
-          "Get your API key from https://api.bfl.ai and add it to your .env file as BFL_API_KEY=your_key_here",
-      });
-    }
-
-    if (!isCloudinaryConfigured) {
-      return res.status(503).json({
-        success: false,
-        error:
-          "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+          "Get your API key from Google AI Studio and add it to your .env file as GEMINI_API_KEY=your_token_here",
+        required_env: "GEMINI_API_KEY",
+        configured: false,
       });
     }
 
@@ -528,31 +652,29 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
     });
 
     try {
-      // Call FLUX API
-      const result = await callFluxAPIFixed(
+      // Call Gemini API first, with optional legacy fallback
+      const result = await generateRetexturedImagePayload(
         req.file.buffer,
         finalPrompt,
         negativePrompt,
-        modelType,
-        validImageCount,
+        req.file.mimetype || "image/jpeg",
       );
 
-      if (result && result.url) {
-        const persistedImage = await persistGeneratedImage(
-          result.url,
-          theme || "custom",
-        );
-        result.url = persistedImage.url;
-        result.cloudinaryPublicId = persistedImage.cloudinaryPublicId;
+      if (result && (result.buffer || result.url)) {
+        const persistedImage = await persistGeneratedImage(result);
+        result.url = `${req.protocol}://${req.get("host")}${persistedImage.url}`;
+        result.cacheId = persistedImage.cacheId;
 
-        console.log(`✅ Generation successful`);
+        console.log(`✅ Generation successful via ${result.provider || "gemini"}`);
 
         const responseData = {
           success: true,
           url: result.url,
-          cloudinaryPublicId: result.cloudinaryPublicId,
+          cacheId: result.cacheId || null,
           seed: result.seed,
           generationId: result.generationId,
+          generationProvider: result.provider || "gemini",
+          generationFallbackReason: result.fallbackReason || null,
           promptUsed: finalPrompt,
           transformation: {
             theme: theme ? WEDDING_THEMES[theme].name : null,
@@ -610,10 +732,10 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
 
         res.json(responseData);
       } else {
-        throw new Error("Invalid response from FLUX API");
+        throw new Error("Invalid response from image generation API");
       }
     } catch (apiError) {
-      console.error("❌ FLUX API Error in generation:", apiError);
+      console.error("❌ Image generation API Error in generation:", apiError);
       throw apiError;
     }
   } catch (error) {
@@ -636,6 +758,12 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
     } else if (error.message.includes("not configured")) {
       errorMessage =
         "AI service is not configured. Please contact administrator.";
+      statusCode = 503;
+    } else if (error.message.toLowerCase().includes("gemini")) {
+      errorMessage = error.message;
+      statusCode = 503;
+    } else if (error.message.toLowerCase().includes("replicate")) {
+      errorMessage = error.message;
       statusCode = 503;
     } else if (
       error.message.includes("Insufficient credits") ||
@@ -703,14 +831,47 @@ router.post("/download-image", async (req, res) => {
         .json({ success: false, error: "Invalid image URL" });
     }
 
-    // Validate that URL is from allowed domains (FLUX/BFL)
-    if (!imageUrl.includes("bfldelivery") && !imageUrl.includes("cdn")) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Invalid image source" });
+    const resolvedUrl = new URL(
+      imageUrl,
+      `${req.protocol}://${req.get("host")}`,
+    );
+
+    if (
+      resolvedUrl.pathname.startsWith("/api/ai/cache/") ||
+      resolvedUrl.pathname.startsWith("/api/ai/angle-cache/")
+    ) {
+      const response = await fetch(resolvedUrl.toString(), {
+        headers: {
+          "User-Agent": "LoversAI/1.0",
+        },
+      });
+
+      if (!response.ok) {
+        return res.status(response.status).json({
+          success: false,
+          error: "Cached image not found",
+        });
+      }
+
+      const contentType = response.headers.get("content-type") || "image/png";
+      const buffer = await response.buffer();
+
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Length", buffer.length);
+      res.setHeader("Cache-Control", "public, max-age=300");
+      return res.send(buffer);
     }
 
-    // Fetch image from external server
+    const isAllowedExternalImage =
+      imageUrl.includes("bfldelivery") || imageUrl.includes("cdn");
+
+    if (!isAllowedExternalImage) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid image source",
+      });
+    }
+
     const response = await fetch(imageUrl, {
       headers: {
         "User-Agent": "LoversAI/1.0",
@@ -719,9 +880,10 @@ router.post("/download-image", async (req, res) => {
 
     if (!response.ok) {
       console.error(`Failed to fetch image: ${response.status}`);
-      return res
-        .status(response.status)
-        .json({ success: false, error: "Failed to fetch image" });
+      return res.status(response.status).json({
+        success: false,
+        error: "Failed to fetch image",
+      });
     }
 
     // Get content type and stream the blob

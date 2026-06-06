@@ -48,7 +48,7 @@ router.get("/user-credits", protect, async (req, res) => {
  */
 router.post("/gift-credits", protect, async (req, res) => {
   try {
-    const { amount = 30, reason = "Gift" } = req.body;
+    const { amount = 101, reason = "Gift" } = req.body;
 
     if (typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({ 
@@ -98,12 +98,13 @@ router.post("/gift-credits", protect, async (req, res) => {
 });
 
 /**
- * 🔧 INITIALIZE CREDITS: Set initial 30 credits for users who have 0
+ * 🔧 INITIALIZE CREDITS: Set initial 101 credits for users who have 0
  * THIS IS FOR DEVELOPMENT/TESTING ONLY
  */
 router.post("/initialize-welcome-credits", protect, async (req, res) => {
   try {
     const user = req.user;
+    const initialCredits = 101;
 
     // Only initialize if user has 0 credits
     if (user.credits > 0) {
@@ -114,11 +115,11 @@ router.post("/initialize-welcome-credits", protect, async (req, res) => {
       });
     }
 
-    user.credits = 30;
+    user.credits = initialCredits;
     
     user.creditTransactions.push({
       type: 'credit',
-      amount: 30,
+      amount: initialCredits,
       description: 'Welcome credits initialization',
       remainingBalance: user.credits,
       reference: 'welcome',
@@ -131,7 +132,7 @@ router.post("/initialize-welcome-credits", protect, async (req, res) => {
 
     res.json({
       success: true,
-      message: '30 welcome credits initialized',
+      message: `${initialCredits} welcome credits initialized`,
       user: {
         id: user._id,
         email: user.email,

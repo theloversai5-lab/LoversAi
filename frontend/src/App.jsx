@@ -88,8 +88,6 @@ function AppContent() {
 
   const hideFooter =
     location.pathname.startsWith("/admin") ||
-    (location.pathname.startsWith("/planner/") &&
-      location.pathname !== "/planner/signup") ||
     location.pathname.startsWith("/vendor/") ||
     location.pathname === "/couple/onboarding" ||
     location.pathname === "/user-form";
@@ -134,11 +132,7 @@ function AppContent() {
         {/* AI Tools - PLANNER ACCESS ONLY */}
         <Route
           path="/planner-ai-tools"
-          element={
-            <ProtectedRoute requiredRole="planner">
-              <PlannerAITools onToggleTool={setIsAIToolOpen} />
-            </ProtectedRoute>
-          }
+          element={<PlannerAITools onToggleTool={setIsAIToolOpen} />}
         />
 
         {/* Pricing page - require authentication */}

@@ -4,19 +4,25 @@ import { useAuth } from '../context/AuthContext';
 import PortfolioSection from '../components/PortfolioSection';
 import PlannerQuickMenu from '../components/PlannerQuickMenu';
 
+const SafePortfolioSection =
+  typeof PortfolioSection === 'function' ? PortfolioSection : () => null;
+const SafePlannerQuickMenu =
+  typeof PlannerQuickMenu === 'function' ? PlannerQuickMenu : () => null;
+
 const PlannerPage = () => {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
 
   const handleNavigate = (path) => {
+    if (loading) {
+      return;
+    }
+
     if (!currentUser) {
-      // Not logged in - redirect to login with planner role
       navigate('/login?role=planner', { state: { from: path } });
     } else if (currentUser.role !== 'planner') {
-      // Logged in but wrong role
       navigate(`/login?role=planner&mismatch=true`, { state: { from: path } });
     } else {
-      // Correct role - navigate directly
       navigate(path);
     }
   };
@@ -32,7 +38,14 @@ const PlannerPage = () => {
     {
       title: "Pitch with AI",
       image: "/images/pitch with ai.gif",
-      onClick: () => handleNavigate('/planner-ai-tools'),
+      onClick: () => {
+        if (!currentUser) {
+          navigate('/planner-ai-tools');
+          return;
+        }
+
+        handleNavigate('/planner-ai-tools');
+      },
       badge: "AI Powered",
       badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
     },
@@ -62,7 +75,7 @@ const PlannerPage = () => {
         </button>
       </div>
 
-      <PlannerQuickMenu />
+      <SafePlannerQuickMenu />
 
       {/* Hero Section */}
       <div className="relative w-full overflow-hidden min-h-screen">
@@ -86,12 +99,14 @@ const PlannerPage = () => {
             Everything you need to win more clients and deliver exceptional weddings
           </p>
 
-          <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             {tools.map((tool, i) => (
-              <div
+              <button
+                type="button"
                 key={tool.title}
                 onClick={tool.onClick}
-                className={`cursor-pointer relative h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden group hover-lift animate-fadeInUp stagger-${i + 2}`}
+                aria-label={tool.title}
+                className={`relative h-64 sm:h-72 md:h-[350px] rounded-2xl overflow-hidden group hover-lift animate-fadeInUp stagger-${i + 2} text-left ${loading ? 'cursor-wait opacity-80' : 'cursor-pointer'}`}
               >
                 <img
                   src={tool.image}
@@ -108,15 +123,14 @@ const PlannerPage = () => {
                     {tool.badge}
                   </span>
                 </div>
-
-              </div>
+              </button>
             ))}
           </div>
         </div>
       </div>
 
       {/* Portfolio Section */}
-      <PortfolioSection />
+      <SafePortfolioSection />
     </>
   );
 };

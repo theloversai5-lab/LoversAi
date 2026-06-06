@@ -11,5 +11,7 @@ frontend/.env
 frontend/.env.production
 backend/.env.production
 .env.production
+backend-run*.log
+backend-start*.log
 
 

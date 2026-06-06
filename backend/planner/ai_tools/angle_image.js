@@ -1,26 +1,36 @@
 import express from "express";
 import multer from "multer";
 import fetch from "node-fetch";
+import Replicate from "replicate";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
-import {
-  isCloudinaryConfigured,
-  uploadRemoteToCloudinary,
-} from "../../utils/cloudinary.js";
 
 const router = express.Router();
 
 /* -------------------- HELPERS -------------------- */
+
+const REPLICATE_MODEL = "black-forest-labs/flux-kontext-pro";
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN || undefined,
+});
 const LEGACY_FLUX_ENABLED = process.env.LEGACY_FLUX_ENABLED === "true";
-const isAIEnabled = () =>
-  !!(
-    (process.env.GEMINI_API_KEY &&
-      process.env.GEMINI_API_KEY !== "your_gemini_api_key_here") ||
-    (process.env.BFL_API_KEY &&
-      process.env.BFL_API_KEY !== "your_bfl_api_key_here" &&
-      LEGACY_FLUX_ENABLED)
-  );
+
+const GENERATED_ANGLE_IMAGE_CACHE_TTL_MS =
+  Number(process.env.GENERATED_IMAGE_CACHE_TTL_MS) || 60 * 60 * 1000;
+const GENERATED_ANGLE_IMAGE_CACHE_PREFIX = "/api/ai/angle-cache";
+const GEMINI_API_BASE_URL =
+  process.env.GEMINI_API_BASE_URL ||
+  "https://generativelanguage.googleapis.com/v1beta";
+const ANGLE_GEMINI_IMAGE_MODEL =
+  process.env.ANGLE_GEMINI_IMAGE_MODEL ||
+  process.env.GEMINI_IMAGE_MODEL ||
+  "gemini-2.5-flash-image";
+const GEMINI_IMAGE_MODEL_FALLBACKS = [
+  "gemini-2.5-flash-image",
+  "gemini-3-pro-image-preview",
+];
+const generatedAngleImageCache = new Map();
 
 /* -------------------- MULTER -------------------- */
 const upload = multer({
@@ -108,156 +118,309 @@ const ANGLE_VIEWS = {
   },
 };
 
-/* -------------------- FLUX API (UPDATED) -------------------- */
-async function callFluxAPI(
-  imageBuffer,
-  prompt,
-  modelType = "flux-kontext-pro",
-  negativePrompt = "",
-) {
-  if (!LEGACY_FLUX_ENABLED) {
-    throw new Error(
-      "Legacy FLUX API is disabled. Set LEGACY_FLUX_ENABLED=true to enable legacy Flux or migrate to Gemini API.",
-    );
+async function resolveReplicateOutputUrl(output) {
+  const firstOutput = Array.isArray(output) ? output[0] : output;
+
+  if (!firstOutput) {
+    return null;
   }
 
-  if (
-    !process.env.BFL_API_KEY ||
-    process.env.BFL_API_KEY === "your_bfl_api_key_here"
-  ) {
-    throw new Error("BFL API key not configured for legacy Flux calls.");
+  if (typeof firstOutput === "string") {
+    return firstOutput;
   }
 
-  const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
-  const imageBase64 = imageBuffer.toString("base64");
-
-  const requestBody = {
-    prompt,
-    input_image: imageBase64,
-    width: 1024,
-    height: 1024,
-    safety_tolerance: 2,
-    num_images: 1,
-    guidance_scale: 3.5,
-    steps: 25,
-  };
-
-  // Add negative prompt if provided
-  if (negativePrompt) {
-    requestBody.negative_prompt = negativePrompt;
+  if (typeof firstOutput.url === "function") {
+    const maybeUrl = firstOutput.url();
+    return typeof maybeUrl?.then === "function" ? await maybeUrl : maybeUrl;
   }
 
-  const response = await fetch(`${baseUrl}/v1/${modelType}`, {
-    method: "POST",
-    headers: {
-      "x-key": process.env.BFL_API_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`FLUX error ${response.status}: ${text}`);
+  if (typeof firstOutput.url === "string") {
+    return firstOutput.url;
   }
 
-  const result = await response.json();
-
-  // Handle async task polling
-  if (result.id) {
-    return await pollForResult(result.id, result.polling_url);
-  }
-
-  // Handle direct response
-  if (result.result?.sample) {
-    return {
-      url: result.result.sample,
-      seed: result.result.seed || Math.floor(Math.random() * 1e9),
-    };
-  }
-
-  // Handle different response formats
-  if (result.result?.[0]?.url) {
-    return {
-      url: result.result[0].url,
-      seed: result.result[0].seed || Math.floor(Math.random() * 1e9),
-    };
-  }
-
-  if (result.url) {
-    return {
-      url: result.url,
-      seed: result.seed || Math.floor(Math.random() * 1e9),
-    };
-  }
-
-  throw new Error("Unexpected response format from FLUX API");
+  return null;
 }
 
-/* -------------------- POLLING -------------------- */
-async function pollForResult(taskId, pollingUrl) {
-  const maxAttempts = parseInt(process.env.MAX_POLL_ATTEMPTS) || 30;
-  const delay = parseInt(process.env.POLL_INTERVAL) || 5000;
+function isGeminiConfigured() {
+  return !!(
+    process.env.GEMINI_API_KEY &&
+    process.env.GEMINI_API_KEY !== "your_gemini_api_key_here"
+  );
+}
 
-  for (let i = 0; i < maxAttempts; i++) {
+function extractGeminiImageParts(responseData = {}) {
+  const parts =
+    responseData?.candidates?.flatMap(
+      (candidate) => candidate?.content?.parts || [],
+    ) || [];
+
+  return parts
+    .filter((part) => part?.inlineData?.data || part?.inline_data?.data)
+    .map((part, index) => {
+      const inlineData = part.inlineData || part.inline_data;
+      return {
+        buffer: Buffer.from(inlineData.data, "base64"),
+        contentType: inlineData.mimeType || inlineData.mime_type || "image/png",
+        seed: Date.now() + index,
+        generationId: `gem_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+      };
+    });
+}
+
+async function callGeminiImageAPI(
+  imageBuffer,
+  prompt,
+  negativePrompt = "",
+  mimeType = "image/jpeg",
+  modelType = ANGLE_GEMINI_IMAGE_MODEL,
+) {
+  const candidateModels = [
+    ...new Set([modelType, ...GEMINI_IMAGE_MODEL_FALLBACKS]),
+  ];
+
+  let lastError = null;
+
+  for (const candidateModel of candidateModels) {
     try {
-      if (!process.env.BFL_API_KEY)
-        throw new Error("BFL API key missing during polling");
-      const res = await fetch(pollingUrl, {
-        headers: { "x-key": process.env.BFL_API_KEY },
-      });
-
-      if (!res.ok) {
-        console.log(`Polling attempt ${i + 1}: ${res.status}`);
-        continue;
-      }
-
-      const data = await res.json();
-
-      if (data.status === "Ready") {
-        return {
-          url: data.result?.sample || data.result?.url || data.url,
-          seed: data.result?.seed || Math.floor(Math.random() * 1e9),
-        };
-      }
-
-      if (data.status === "Error") {
-        throw new Error(data.error || "FLUX processing failed");
-      }
-
-      if (data.status === "Pending") {
-        console.log(`Generation pending... (${i + 1}/${maxAttempts})`);
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
-      }
-
-      // If we get a direct result
-      if (data.result?.sample || data.result?.url) {
-        return {
-          url: data.result.sample || data.result.url,
-          seed: data.result.seed || Math.floor(Math.random() * 1e9),
-        };
-      }
-
-      await new Promise((r) => setTimeout(r, delay));
+      return await callGeminiImageAPIWithModel(
+        imageBuffer,
+        prompt,
+        negativePrompt,
+        mimeType,
+        candidateModel,
+      );
     } catch (error) {
-      console.error(`Polling error attempt ${i + 1}:`, error.message);
-      if (i === maxAttempts - 1) throw error;
+      lastError = error;
+
+      if (/GEMINI_AUTH_ERROR/i.test(String(error?.message || ""))) {
+        throw error;
+      }
+
+      if (!/GEMINI_MODEL_ERROR/i.test(String(error?.message || ""))) {
+        throw error;
+      }
     }
   }
 
-  throw new Error("FLUX generation timeout");
+  throw lastError || new Error("Gemini returned no image output");
 }
 
-async function persistGeneratedAngleImage(imageUrl, angle) {
-  if (!imageUrl) {
+async function callGeminiImageAPIWithModel(
+  imageBuffer,
+  prompt,
+  negativePrompt = "",
+  mimeType = "image/jpeg",
+  modelType = ANGLE_GEMINI_IMAGE_MODEL,
+) {
+  if (!isGeminiConfigured()) {
+    throw new Error("Gemini API key missing. Set GEMINI_API_KEY in environment variables.");
+  }
+
+  const fullPrompt = [
+    prompt.trim(),
+    negativePrompt ? `Avoid: ${negativePrompt.trim()}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const response = await fetch(
+    `${GEMINI_API_BASE_URL}/models/${modelType}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "x-goog-api-key": process.env.GEMINI_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: fullPrompt },
+              {
+                inline_data: {
+                  mime_type: mimeType || "image/jpeg",
+                  data: imageBuffer.toString("base64"),
+                },
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseModalities: ["TEXT", "IMAGE"],
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(
+        "GEMINI_AUTH_ERROR: Gemini API authentication failed. Restart the backend after setting GEMINI_API_KEY; if it still fails, the key is invalid or does not have image generation access.",
+      );
+    }
+
+    if ([400, 404, 422].includes(response.status)) {
+      throw new Error(
+        `GEMINI_MODEL_ERROR:${response.status}: Gemini model ${modelType} is unavailable or not supported. ${errorText.substring(0, 200)}`,
+      );
+    }
+
+    throw new Error(
+      `Gemini error ${response.status}: ${errorText.substring(0, 300)}`,
+    );
+  }
+
+  const result = await response.json();
+  const imageParts = extractGeminiImageParts(result);
+
+  if (!imageParts.length) {
+    const textParts = result?.candidates
+      ?.flatMap((candidate) => candidate?.content?.parts || [])
+      .filter((part) => part?.text)
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+
+    throw new Error(
+      `Gemini returned no image output.${textParts ? ` ${textParts}` : ""}`,
+    );
+  }
+
+  return imageParts[0];
+}
+
+async function resolveImagePayload(imageSource) {
+  if (!imageSource || typeof imageSource !== "string") {
     throw new Error("No generated image URL was returned");
   }
 
-  if (!isCloudinaryConfigured) {
+  if (imageSource.startsWith("data:")) {
+    const match = /^data:([^;]+);base64,(.+)$/i.exec(imageSource);
+    if (!match) {
+      throw new Error("Invalid generated image data URL");
+    }
+
+    return {
+      buffer: Buffer.from(match[2], "base64"),
+      contentType: match[1] || "image/png",
+    };
+  }
+
+  const response = await fetch(imageSource);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch generated image: ${response.status}`);
+  }
+
+  const contentType = response.headers.get("content-type") || "image/png";
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return { buffer, contentType };
+}
+
+function cleanupGeneratedAngleImageCache() {
+  const now = Date.now();
+
+  for (const [cacheId, entry] of generatedAngleImageCache.entries()) {
+    if (!entry || !Number.isFinite(entry.expiresAt) || entry.expiresAt > now) {
+      continue;
+    }
+
+    generatedAngleImageCache.delete(cacheId);
+  }
+}
+
+setInterval(cleanupGeneratedAngleImageCache, 5 * 60 * 1000).unref?.();
+
+/* -------------------- REPLICATE API -------------------- */
+async function callReplicateAPI(
+  imageBuffer,
+  prompt,
+  negativePrompt = "",
+) {
+  if (!process.env.REPLICATE_API_TOKEN) {
     throw new Error(
-      "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
+      "Replicate API token missing. Set REPLICATE_API_TOKEN in environment variables.",
     );
+  }
+
+  const input = {
+    prompt: prompt.trim().substring(0, 1000),
+    input_image: imageBuffer,
+    aspect_ratio: "match_input_image",
+    output_format: "png",
+    safety_tolerance: 2,
+    prompt_upsampling: false,
+  };
+
+  if (negativePrompt) {
+    input.negative_prompt = negativePrompt;
+  }
+
+  const output = await replicate.run(REPLICATE_MODEL, { input });
+  const outputUrl = await resolveReplicateOutputUrl(output);
+
+  if (!outputUrl) {
+    throw new Error("Replicate returned no output image");
+  }
+
+  return {
+    url: outputUrl,
+    seed: Math.floor(Math.random() * 1e9),
+  };
+}
+
+async function generateAngleImagePayload(
+  imageBuffer,
+  prompt,
+  negativePrompt = "",
+  mimeType = "image/jpeg",
+) {
+  try {
+    const geminiResult = await callGeminiImageAPI(
+      imageBuffer,
+      prompt,
+      negativePrompt,
+      mimeType,
+    );
+
+    return {
+      buffer: geminiResult.buffer,
+      contentType: geminiResult.contentType,
+      seed: geminiResult.seed,
+      provider: "gemini",
+    };
+  } catch (geminiErr) {
+    console.warn(
+      "Gemini angle generation failed, falling back to legacy Replicate:",
+      geminiErr.message,
+    );
+
+    if (!LEGACY_FLUX_ENABLED) {
+      throw geminiErr;
+    }
+
+    const replicateResult = await callReplicateAPI(
+      imageBuffer,
+      prompt,
+      negativePrompt,
+    );
+    const resolvedPayload = await resolveImagePayload(replicateResult.url);
+
+    return {
+      buffer: resolvedPayload.buffer,
+      contentType: resolvedPayload.contentType,
+      seed: replicateResult.seed,
+      provider: "replicate",
+      sourceUrl: replicateResult.url,
+      fallbackReason: geminiErr.message,
+    };
+  }
+}
+
+async function cacheGeneratedAngleImage(imagePayload, angle) {
+  if (!imagePayload?.buffer || !Buffer.isBuffer(imagePayload.buffer)) {
+    throw new Error("No generated image bytes were returned");
   }
 
   const safeAngle =
@@ -267,17 +430,51 @@ async function persistGeneratedAngleImage(imageUrl, angle) {
       .replace(/^-|-$/g, "")
       .slice(0, 40) || "angle";
 
-  const uploadResult = await uploadRemoteToCloudinary(imageUrl, {
-    folder: `loversai/generated-angle-images/${safeAngle}`,
-    resource_type: "image",
-    public_id: `${Date.now()}-${safeAngle}`,
+  const expiresAt = Date.now() + GENERATED_ANGLE_IMAGE_CACHE_TTL_MS;
+  const cacheId = `${safeAngle}-${expiresAt}-${Math.random()
+    .toString(36)
+    .slice(2, 10)}`;
+
+  generatedAngleImageCache.set(cacheId, {
+    buffer: imagePayload.buffer,
+    contentType: imagePayload.contentType || "image/png",
+    expiresAt,
+    angle: safeAngle,
+    createdAt: Date.now(),
   });
 
   return {
-    url: uploadResult?.secure_url || imageUrl,
-    cloudinaryPublicId: uploadResult?.public_id || null,
+    url: `${GENERATED_ANGLE_IMAGE_CACHE_PREFIX}/${cacheId}`,
+    cacheId,
+    cloudinaryPublicId: null,
   };
 }
+
+router.get("/angle-cache/:cacheId", (req, res) => {
+  cleanupGeneratedAngleImageCache();
+
+  const { cacheId } = req.params;
+  const cacheEntry = generatedAngleImageCache.get(cacheId);
+
+  if (!cacheEntry) {
+    return res.status(404).json({
+      success: false,
+      error: "Cached image not found or expired",
+    });
+  }
+
+  if (cacheEntry.expiresAt <= Date.now()) {
+    generatedAngleImageCache.delete(cacheId);
+    return res.status(404).json({
+      success: false,
+      error: "Cached image not found or expired",
+    });
+  }
+
+  res.setHeader("Content-Type", cacheEntry.contentType || "image/png");
+  res.setHeader("Cache-Control", "public, max-age=300");
+  return res.send(cacheEntry.buffer);
+});
 
 /* -------------------- ANGLE CHANGE ROUTE -------------------- */
 router.post(
@@ -290,14 +487,6 @@ router.post(
         return res
           .status(400)
           .json({ success: false, error: "Image required" });
-
-      if (!isCloudinaryConfigured) {
-        return res.status(503).json({
-          success: false,
-          error:
-            "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
-        });
-      }
 
       const { angle = "front", imageCount = 1 } = req.body;
 
@@ -333,19 +522,18 @@ router.post(
         });
       }
 
-      // Call FLUX API with specific angle prompt
-      const result = await callFluxAPI(
+      // Generate the transformed image with Gemini first; fall back to legacy Replicate only if enabled
+      const generatedImage = await generateAngleImagePayload(
         req.file.buffer,
         angleConfig.prompt,
-        "flux-kontext-pro",
         angleConfig.negativePrompt,
+        req.file.mimetype || "image/jpeg",
       );
-      const persistedImage = await persistGeneratedAngleImage(
-        result.url,
+      const cachedImage = await cacheGeneratedAngleImage(
+        generatedImage,
         angle,
       );
-      result.url = persistedImage.url;
-      result.cloudinaryPublicId = persistedImage.cloudinaryPublicId;
+      const cachedImageUrl = `${req.protocol}://${req.get("host")}${cachedImage.url}`;
 
       // Deduct credits after successful generation
       try {
@@ -371,9 +559,12 @@ router.post(
           angle: angle,
           angleName: angleConfig.name,
           angleDescription: angleConfig.description,
-          url: result.url,
-          cloudinaryPublicId: result.cloudinaryPublicId,
-          seed: result.seed,
+          url: cachedImageUrl,
+          cloudinaryPublicId: cachedImage.cloudinaryPublicId,
+          cacheId: cachedImage.cacheId || null,
+          seed: generatedImage.seed,
+          generationProvider: generatedImage.provider,
+          generationFallbackReason: generatedImage.fallbackReason || null,
           promptUsed: angleConfig.prompt.substring(0, 200) + "...",
           timestamp: new Date().toISOString(),
           creditInfo: {
@@ -390,9 +581,12 @@ router.post(
           angle: angle,
           angleName: angleConfig.name,
           angleDescription: angleConfig.description,
-          url: result.url,
-          cloudinaryPublicId: result.cloudinaryPublicId,
-          seed: result.seed,
+          url: cachedImageUrl,
+          cloudinaryPublicId: cachedImage.cloudinaryPublicId,
+          cacheId: cachedImage.cacheId || null,
+          seed: generatedImage.seed,
+          generationProvider: generatedImage.provider,
+          generationFallbackReason: generatedImage.fallbackReason || null,
           promptUsed: angleConfig.prompt.substring(0, 200) + "...",
           timestamp: new Date().toISOString(),
           creditWarning:
@@ -401,9 +595,24 @@ router.post(
       }
     } catch (err) {
       console.error("❌ Angle change error:", err);
-      res.status(500).json({
+      const isGeminiError = /gemini|GEMINI_AUTH_ERROR/i.test(
+        String(err?.message || ""),
+      );
+      const statusCode =
+        err?.response?.status === 402 ||
+        String(err?.message || "").includes("402 Payment Required")
+          ? 402
+          : isGeminiError
+            ? 503
+          : 500;
+      res.status(statusCode).json({
         success: false,
-        error: "Angle transformation failed",
+        error:
+          statusCode === 402
+            ? "Angle transformation failed because image generation credits are unavailable."
+            : isGeminiError
+              ? "Angle transformation failed because Gemini rejected the request or key."
+            : "Angle transformation failed",
         angle: req.body.angle || "unknown",
       });
     }
@@ -435,3 +644,4 @@ router.get("/available-angles", (req, res) => {
 });
 
 export default router;
+

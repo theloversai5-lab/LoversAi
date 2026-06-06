@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 
 const AdminLayout = () => {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: (
@@ -25,11 +26,33 @@ const AdminLayout = () => {
     )}
   ];
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       
       {/* Sidebar */}
-      <aside className="w-64 flex flex-col fixed inset-y-0 z-50 overflow-y-auto" style={{
+      <aside className={`w-64 flex flex-col fixed inset-y-0 z-50 overflow-y-auto transform transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`} style={{
         background: 'linear-gradient(152.97deg, rgba(0,0,0,0.95) 0%, rgba(20,20,30,0.95) 100%)',
         backdropFilter: 'blur(20px)',
         borderRight: '1px solid rgba(255,255,255,0.05)',
@@ -80,7 +103,24 @@ const AdminLayout = () => {
       </aside>
 
       {/* Main Content Pane */}
-      <main className="flex-1 ml-64 min-h-screen relative overflow-x-hidden">
+      <main className="flex-1 min-h-screen relative overflow-x-hidden lg:ml-64">
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-white/5 bg-gray-900/90 px-4 py-3 backdrop-blur-xl lg:hidden">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Admin Portal</p>
+            <p className="text-sm font-semibold text-white">Dashboard</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((prev) => !prev)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-amber-400"
+            aria-label={sidebarOpen ? "Close admin menu" : "Open admin menu"}
+            aria-expanded={sidebarOpen}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+            </svg>
+          </button>
+        </div>
         {/* Decorative Global Background Blurs */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen opacity-50"></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen opacity-50"></div>

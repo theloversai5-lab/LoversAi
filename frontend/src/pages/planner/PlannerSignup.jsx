@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
+import { formatZodErrors, plannerSignupSchema } from "../../utils/authValidation";
 
 export default function PlannerSignup() {
   const navigate = useNavigate();
@@ -42,24 +43,30 @@ export default function PlannerSignup() {
   const handleEmailSignup = async (e) => {
     e.preventDefault();
     setError("");
-    if (
-      !name.trim() ||
-      !companyName.trim() ||
-      !email.trim() ||
-      password.length < 6
-    ) {
-      setError("Please complete all fields and ensure password is >= 6 chars");
+
+    const validation = plannerSignupSchema.safeParse({
+      role: "Planner",
+      fullName: name,
+      companyName,
+      partnerName: "",
+      email,
+      password,
+    });
+
+    if (!validation.success) {
+      setError(formatZodErrors(validation.error));
       return;
     }
 
     try {
       setLoading(true);
+      const validated = validation.data;
       const data = await register({
-        email: email.trim(),
-        password,
-        fullName: name.trim(),
+        email: validated.email,
+        password: validated.password,
+        fullName: validated.fullName,
         role: "planner",
-        companyName: companyName.trim(),
+        companyName: validated.companyName,
       });
 
       if (data.success) {

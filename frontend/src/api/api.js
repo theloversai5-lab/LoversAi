@@ -1,14 +1,68 @@
 // src/api/api.js — JWT-based API layer (Production-ready)
 import axios from 'axios';
 
-const configuredApiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
-const apiBaseUrl = configuredApiBaseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
+const configuredApiBaseUrl = process.env.REACT_APP_API_BASE_URL?.trim();
+const normalizeApiBaseUrl = (value) => value.replace(/\/api\/?$/, '').replace(/\/$/, '');
+let apiBaseUrl = normalizeApiBaseUrl(configuredApiBaseUrl || 'http://localhost:5000');
 
 const api = axios.create({
   baseURL: `${apiBaseUrl}/api`,
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000, // ⏳ 10-second timeout to prevent infinite hangs
 });
+
+const updateApiBaseUrl = (baseUrl) => {
+  apiBaseUrl = normalizeApiBaseUrl(baseUrl);
+  api.defaults.baseURL = `${apiBaseUrl}/api`;
+  return apiBaseUrl;
+};
+
+let apiBaseUrlResolution = null;
+
+const getLocalApiCandidates = () => {
+  if (configuredApiBaseUrl) {
+    return [normalizeApiBaseUrl(configuredApiBaseUrl)];
+  }
+
+  if (typeof window === 'undefined') {
+    return [apiBaseUrl];
+  }
+
+  const origin = `${window.location.protocol}//${window.location.hostname}`;
+  return [5000, 5001, 5002, 5003, 5004, 5005].map((port) => `${origin}:${port}`);
+};
+
+const resolveApiBaseUrl = async () => {
+  if (configuredApiBaseUrl) {
+    return updateApiBaseUrl(configuredApiBaseUrl);
+  }
+
+  if (!apiBaseUrlResolution) {
+    apiBaseUrlResolution = (async () => {
+      const candidates = getLocalApiCandidates();
+
+      for (const candidate of candidates) {
+        try {
+          const response = await axios.get(`${candidate}/health`, {
+            timeout: 1200,
+          });
+
+          if (response.status >= 200 && response.status < 300) {
+            return updateApiBaseUrl(candidate);
+          }
+        } catch (error) {
+          // Try the next port candidate.
+        }
+      }
+
+      return updateApiBaseUrl(apiBaseUrl);
+    })().finally(() => {
+      apiBaseUrlResolution = null;
+    });
+  }
+
+  return apiBaseUrlResolution;
+};
 
 // ─── JWT Token helpers ───
 export const getToken = () => localStorage.getItem('token');
@@ -54,6 +108,7 @@ api.interceptors.response.use(
 
 // ─── Generic fetcher ───
 export const apiFetch = async (endpoint, options = {}) => {
+  await resolveApiBaseUrl();
   const response = await api({ url: endpoint, ...options });
   return response.data;
 };
@@ -171,6 +226,7 @@ export const chatAPI = {
 // ─── Upload APIs ───
 export const uploadAPI = {
   uploadImage: async (file, folder = 'misc') => {
+    await resolveApiBaseUrl();
     const formData = new FormData();
     formData.append('image', file);
     const token = getToken();
@@ -187,6 +243,7 @@ export const uploadAPI = {
     return response.data;
   },
   uploadImages: async (files, folder = 'misc') => {
+    await resolveApiBaseUrl();
     const formData = new FormData();
     files.forEach((file) => formData.append('images', file));
     const token = getToken();
@@ -203,6 +260,7 @@ export const uploadAPI = {
     return response.data;
   },
   uploadFile: async (file, folder = 'misc') => {
+    await resolveApiBaseUrl();
     const formData = new FormData();
     formData.append('file', file);
     const token = getToken();
@@ -228,79 +286,97 @@ export const aiAPI = {
   checkCredits: (data) =>
     apiFetch('/ai/check-credits', { method: 'POST', data }),
   generate: async (formData) => {
-    const token = getToken();
-    const response = await axios({
+    await resolveApiBaseUrl();
+    const response = await api({
       method: 'POST',
-      url: `${apiBaseUrl}/api/ai/generate`,
+      url: '/ai/generate',
       data: formData,
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
+      timeout: 300000,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
   changeAngle: async (formData) => {
-    const token = getToken();
-    const response = await axios({
+    await resolveApiBaseUrl();
+    const response = await api({
       method: 'POST',
-      url: `${apiBaseUrl}/api/ai/change-angle`,
+      url: '/ai/change-angle',
       data: formData,
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
+      timeout: 300000,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
   generateVideo: async (formData) => {
-    const token = getToken();
-    const response = await axios({
+    await resolveApiBaseUrl();
+    const response = await api({
       method: 'POST',
-      url: `${apiBaseUrl}/api/ai/generate-video`,
+      url: '/ai/generate-video',
       data: formData,
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
       timeout: 310000,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
   sendFeedback: (data) =>
     apiFetch('/ai/feedback', { method: 'POST', data }),
-  downloadImage: (data) =>
-    apiFetch('/ai/download-image', { method: 'POST', data }),
+  downloadImage: async (data) => {
+    await resolveApiBaseUrl();
+    const response = await api({
+      method: 'POST',
+      url: '/ai/download-image',
+      data,
+      responseType: 'arraybuffer',
+    });
+
+    return {
+      success: true,
+      imageData: response.data,
+      contentType: response.headers['content-type'],
+    };
+  },
 };
 
 // ─── Couple Moodboard AI APIs ───
 export const coupleMoodboardAPI = {
   checkHealth: () => apiFetch('/ai/couple-moodboard/health'),
   generate: async (formData) => {
-    const token = getToken();
-    const response = await axios({
+    await resolveApiBaseUrl();
+    const response = await api({
       method: 'POST',
-      url: `${apiBaseUrl}/api/ai/couple-moodboard/generate`,
+      url: '/ai/couple-moodboard/generate',
       data: formData,
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-      timeout: 300000, // 5 min timeout for vision + flux pipeline
+      timeout: 300000,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
   editImage: async (formData) => {
-    const token = getToken();
-    const response = await axios({
+    await resolveApiBaseUrl();
+    const response = await api({
       method: 'POST',
-      url: `${apiBaseUrl}/api/ai/couple-moodboard/edit-image`,
+      url: '/ai/couple-moodboard/edit-image',
       data: formData,
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
       timeout: 300000,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
-  downloadImage: (data) =>
-    apiFetch('/ai/couple-moodboard/download-image', { method: 'POST', data }),
+  downloadImage: async (data) => {
+    await resolveApiBaseUrl();
+    const response = await api({
+      method: 'POST',
+      url: '/ai/couple-moodboard/download-image',
+      data,
+      responseType: 'arraybuffer',
+    });
+
+    return {
+      success: true,
+      imageData: response.data,
+      contentType: response.headers['content-type'],
+    };
+  },
 };
 
 export default api;

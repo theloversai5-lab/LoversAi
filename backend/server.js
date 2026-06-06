@@ -29,7 +29,9 @@ import cartRoutes from "./routes/cartRoutes.js"; // ✅ Wedding Cart
 
 dotenv.config();
 
-// Load fallback .env.production if .env does not define MONGO_URI
+const isProduction = process.env.NODE_ENV === "production";
+
+// Load fallback .env.production only for production-like runs.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.join(__dirname, ".env");
@@ -40,12 +42,12 @@ if (!process.env.MONGO_URI) {
     dotenv.config({ path: envPath });
   }
 }
-if (!process.env.MONGO_URI && fs.existsSync(envProdPath)) {
+if (isProduction && !process.env.MONGO_URI && fs.existsSync(envProdPath)) {
   console.log("🔁 No MONGO_URI in .env; loading .env.production fallback");
   dotenv.config({ path: envProdPath });
 }
 
-if (!process.env.MONGO_URI) {
+if (isProduction && !process.env.MONGO_URI) {
   console.error(
     "❌ Missing MONGO_URI. Set it in .env or .env.production before running.",
   );

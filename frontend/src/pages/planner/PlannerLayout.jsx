@@ -66,6 +66,7 @@ export default function PlannerLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -88,6 +89,22 @@ export default function PlannerLayout() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
+
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -106,7 +123,18 @@ export default function PlannerLayout() {
         backgroundAttachment: "fixed",
       }}
     >
-      <aside className="fixed top-0 left-0 z-50 hidden h-full w-[220px] flex-col glass-sidebar lg:flex">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 z-50 flex h-full w-[220px] flex-col glass-sidebar transition-transform duration-300 lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         <div className="p-4 pb-2 pt-5">
           <Link to="/planner" className="group mb-6 flex items-center gap-2">
             <img
@@ -175,14 +203,32 @@ export default function PlannerLayout() {
 
       <div className="flex min-h-screen flex-1 flex-col lg:ml-[220px]">
         <header className="glass-topbar sticky top-0 z-30 flex h-14 items-center justify-between px-4 lg:px-6">
-          <div className="flex items-center gap-2">
-            <span className="text-[15px] font-semibold text-loverai-gold">
-              LoversAi
-            </span>
-            <span className="text-[13px] text-white/30">· Planner</span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-loverai-gold lg:hidden"
+              aria-label={sidebarOpen ? "Close planner menu" : "Open planner menu"}
+              aria-expanded={sidebarOpen}
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                />
+              </svg>
+            </button>
+            <div className="flex flex-col">
+              <span className="text-[15px] font-semibold text-loverai-gold">
+                LoversAi
+              </span>
+              <span className="text-[13px] text-white/30">· Planner</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               to="/planner/messages"
               className="relative cursor-pointer transition hover:text-white"
@@ -197,15 +243,15 @@ export default function PlannerLayout() {
               )}
             </Link>
 
-            <div className="hidden items-center gap-2 border-l border-white/5 pl-2 text-sm text-white/40 sm:flex">
+            <div className="hidden items-center gap-2 border-l border-white/5 pl-2 text-sm text-white/40 md:flex">
               <span>{userName}</span>
             </div>
 
-            <PlannerQuickMenu className="relative z-40" />
+            <PlannerQuickMenu className="relative z-40 right-0 top-0 sm:right-0 sm:top-0" />
           </div>
         </header>
 
-        <main className="relative z-10 flex-1 p-4 lg:p-6">
+        <main className="relative z-10 flex-1 p-3 sm:p-4 lg:p-6">
           <Outlet />
         </main>
       </div>

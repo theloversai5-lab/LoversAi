@@ -5,6 +5,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
 import { auth } from "../firebase/firebase";
 import PlannerQuickMenu from "../components/PlannerQuickMenu";
+import { authLoginSchema, formatZodErrors } from "../utils/authValidation";
 
 const sharedWeddingBackground = {
   backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
@@ -42,8 +43,6 @@ const Login = () => {
     (typeof sessionStorage.getItem("redirectAfterLogin") === "string" &&
       sessionStorage.getItem("redirectAfterLogin").startsWith("/planner"));
 
-  const isValidEmail = (value) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
   const from =
     location.state?.from || sessionStorage.getItem("redirectAfterLogin") || "/";
   const togglePassword = () => setShowPassword((v) => !v);
@@ -110,19 +109,16 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-    if (!isValidEmail(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    const validation = authLoginSchema.safeParse({ email, password });
 
-    if (!password) {
-      setError("Please enter your password.");
+    if (!validation.success) {
+      setError(formatZodErrors(validation.error));
       return;
     }
 
     setLoading(true);
     try {
-      const data = await login(email.trim(), password);
+      const data = await login(validation.data.email, validation.data.password);
 
       if (data.success) {
         sessionStorage.removeItem("redirectAfterLogin");

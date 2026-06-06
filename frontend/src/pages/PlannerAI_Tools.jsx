@@ -309,7 +309,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
     <>
       {!showImageToVideo && (
         <>
-          <div className="fixed left-6 top-6 z-30 sm:left-8 sm:top-8">
+          <div className="fixed left-4 top-4 z-30 sm:left-6 sm:top-6 lg:left-8 lg:top-8">
             <button
               type="button"
               onClick={() => navigate("/planner")}
@@ -324,13 +324,13 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
             </button>
           </div>
 
-          <SafePlannerQuickMenu className="fixed right-6 top-6 z-50 sm:right-8 sm:top-8" />
+          <SafePlannerQuickMenu className="fixed right-4 top-4 z-50 sm:right-6 sm:top-6 lg:right-8 lg:top-8" />
         </>
       )}
 
       {/* Hero Section */}
       {!showRetexturing && !showAngleChanger && !showImageToVideo && (
-        <div className="relative w-screen h-screen flex items-center justify-center text-white overflow-hidden">
+        <div className="relative w-full min-h-[100svh] flex items-center justify-center text-white overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center z-0"
             style={{
@@ -355,7 +355,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
             className={`w-full transition-all duration-300 ${
               showRetexturing
                 ? "max-w-[1550px] mx-auto px-2 md:px-4"
-                : "px-[6%] md:px-[10%]"
+                : "px-4 sm:px-[6%] md:px-[10%]"
             }`}
           >
             {!showRetexturing && (
@@ -365,7 +365,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     setShowRetexturing(!showRetexturing),
                   )
                 }
-                className="text-5xl font-light text-white mb-12 heading-font text-left cursor-pointer hover:text-rose-300 transition"
+                className="text-[clamp(2.1rem,5vw,4rem)] font-light text-white mb-12 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
                 Image Retexturing ->
               </h2>
@@ -379,7 +379,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                   handleToolClick("retexturing", () => setShowRetexturing(true))
                 }
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14">
                   <div className="relative rounded-[32px] overflow-hidden aspect-[4/3.4]">
                     <div className="absolute top-6 left-6 bg-black/60 border border-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium z-10">
                       Before
@@ -423,7 +423,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
             className={`w-full transition-all duration-300 ${
               showAngleChanger
                 ? "max-w-[1550px] mx-auto px-2 md:px-4"
-                : "px-[6%] md:px-[10%] mt-16"
+                : "px-4 sm:px-[6%] md:px-[10%] mt-16"
             }`}
           >
             {!showAngleChanger && (
@@ -433,7 +433,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     setShowAngleChanger(!showAngleChanger),
                   )
                 }
-                className="text-[64px] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
+                className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
                 Image Angle ->
               </h2>
@@ -449,36 +449,36 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                   )
                 }
               >
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-                  <div className="md:col-span-8 rounded-[32px] overflow-hidden h-[440px] md:h-[520px]">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-10">
+                  <div className="md:col-span-8 rounded-[32px] overflow-hidden h-[260px] sm:h-[340px] md:h-[520px]">
                     <img
                       src="./images/Picture1.png"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 1"
                     />
                   </div>
-                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[380px] md:h-[520px]">
+                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[300px] md:h-[520px]">
                     <img
                       src="./images/Picture2.png"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 2"
                     />
                   </div>
-                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[320px] md:h-[360px]">
+                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[260px] md:h-[360px]">
                     <img
                       src="./images/Picture3.png"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 3"
                     />
                   </div>
-                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[320px] md:h-[360px]">
+                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[260px] md:h-[360px]">
                     <img
                       src="./images/Picture4.png"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 4"
                     />
                   </div>
-                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[380px] md:h-[360px]">
+                  <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[300px] md:h-[360px]">
                     <img
                       src="./images/Picture5.png"
                       className="w-full h-full object-cover rounded-[32px]"
@@ -503,14 +503,14 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       {!showRetexturing && !showAngleChanger && !showImageToVideo && (
         <>
           <div className="bg-black py-20 px-4">
-            <div className="w-full px-[6%] md:px-[10%] mt-16 transition-all duration-300">
+            <div className="w-full px-4 sm:px-[6%] md:px-[10%] mt-16 transition-all duration-300">
               <h2
                 onClick={() =>
                   handleToolClick("image-to-video", () =>
                     setShowImageToVideo(true)
                   )
                 }
-                className="text-[64px] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
+                className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
                 Image to Video ->
               </h2>
@@ -522,7 +522,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                   )
                 }
               >
-                <div className="grid md:grid-cols-2 gap-14">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14">
                   <div className="relative">
                     <div className="absolute top-6 left-6 bg-black/60 border border-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium z-10">
                       Before
@@ -564,7 +564,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
           {/* Pricing Plans Section */}
           <div id="subscriptions-section" className="bg-black py-20 px-4">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-[64px] text-white text-center mb-8 heading-font">
+              <h2 className="text-[clamp(2.1rem,5vw,4rem)] text-white text-center mb-8 heading-font">
                 Choose Your Creative Plan
               </h2>
               <p className="text-gray-400 text-center max-w-3xl mx-auto mb-20">
@@ -573,7 +573,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               </p>
 
               {/* Pricing cards */}
-              <div className="grid gap-10 mb-16 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-6 mb-16 md:grid-cols-2 lg:grid-cols-4">
                 {pricingPlans.map((plan) => (
                   <div
                     key={plan.name}
@@ -676,13 +676,13 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               )}
 
               {/* Top-Up Pricing Section */}
-              <div className="w-full px-[6%] md:px-[10%] flex justify-center mb-20 transition-all duration-300">
+              <div className="w-full px-4 sm:px-[6%] md:px-[10%] flex justify-center mb-20 transition-all duration-300">
                 <div className="w-full max-w-[1200px]">
-                  <h2 className="text-[56px] text-white text-center mb-16 heading-font">
+                  <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] text-white text-center mb-16 heading-font">
                     Top-Up Pricing
                   </h2>
                   <div className="w-full max-w-[1200px] glass-card rounded-[40px] md:rounded-[48px] p-8 md:p-16 border border-white/10">
-                    <div className="grid grid-cols-3 text-center">
+                    <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-3 sm:gap-0">
                       <div className="text-[16px] md:text-[18px] font-semibold text-white pb-6 border-b border-white/10">
                         Current Plan
                       </div>
@@ -697,7 +697,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                       {topUpPricing.map((row, index) => (
                         <div
                           key={row.plan}
-                          className={`grid grid-cols-3 py-8 text-center text-[15px] text-white/80 md:text-[18px] ${
+                          className={`grid grid-cols-1 gap-2 py-6 text-center text-[15px] text-white/80 sm:grid-cols-3 sm:gap-0 sm:py-8 md:text-[18px] ${
                             index < topUpPricing.length - 1
                               ? "border-b border-white/5"
                               : ""
@@ -716,33 +716,33 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 </div>
               </div>
               {/* Features Comparison Table */}
-              <div className="w-full px-[6%] md:px-[10%] mt-32 transition-all duration-300">
-                <div className="w-full overflow-hidden rounded-[8px] border border-gray-600">
-                  <div className="grid grid-cols-5">
-                    <div className="bg-black p-6 text-[18px] font-medium text-white">
+              <div className="w-full px-4 sm:px-[6%] md:px-[10%] mt-32 transition-all duration-300">
+                <div className="w-full overflow-x-auto rounded-[8px] border border-gray-600">
+                  <div className="grid min-w-[760px] grid-cols-5">
+                    <div className="bg-black p-4 md:p-6 text-[16px] md:text-[18px] font-medium text-white">
                       Features
                     </div>
-                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
+                    <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
                       Free
                     </div>
-                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
+                    <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
                       Basic
                     </div>
-                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
+                    <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
                       Premium
                     </div>
-                    <div className="bg-black p-6 text-center text-[18px] font-medium text-white">
+                    <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
                       Enterprise
                     </div>
                     {featureComparisonRows.map((row) => (
                       <React.Fragment key={row.label}>
-                        <div className="border-t border-gray-700 p-6 text-[16px] text-white">
+                        <div className="border-t border-gray-700 p-4 md:p-6 text-[14px] md:text-[16px] text-white">
                           {row.label}
                         </div>
                         {row.plans.map((enabled, cellIndex) => (
                           <div
                             key={cellIndex}
-                            className="flex items-center justify-center border-t border-gray-700 p-6 text-center"
+                            className="flex items-center justify-center border-t border-gray-700 p-4 md:p-6 text-center"
                           >
                             <StatusIcon enabled={enabled} />
                           </div>

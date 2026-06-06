@@ -20,12 +20,13 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.1",
-    "firebase-admin": "^10.1.0",
+    "firebase-admin": "^13.10.0",
     "form-data": "^4.0.5",
     "google-auth-library": "^10.6.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.0.0",
+    "mongodb-memory-server": "^11.2.0",
     "mongoose": "^9.0.2",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^2.2.1",
@@ -33,9 +34,9 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "razorpay": "^2.9.6",
+    "replicate": "^1.4.0",
     "sharp": "^0.33.4",
-    "socket.io": "^4.8.3",
-    "mongodb-memory-server": "^8.12.3"
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

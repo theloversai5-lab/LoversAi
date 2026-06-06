@@ -36,7 +36,7 @@ function Home() {
 
   return (
     <div
-      className="relative w-full min-h-screen md:min-h-[967px]"
+      className="relative w-full min-h-[100svh] md:min-h-[967px]"
       style={{ minHeight: "100vh" }}
     >
       {/* Video Background - Scrolls with page */}
@@ -100,16 +100,16 @@ function Home() {
       >
         {/* Navigation Buttons - Only show for unauthenticated users */}
         {!loading && !currentUser && (
-          <div className="absolute w-full flex justify-between items-center z-20 px-8 sm:px-16 bottom-[15%] md:bottom-[20%]">
+          <div className="absolute inset-x-0 z-20 bottom-8 flex flex-col items-stretch gap-4 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-8 md:bottom-[15%] md:px-16">
             {/* Couples - Left Side */}
             <div
-              className="relative cursor-pointer"
+              className="relative cursor-pointer flex-1"
               onMouseEnter={() => setHovered("couples")}
               onMouseLeave={() => setHovered(null)}
               onClick={() => handleNavigate("/couples")}
             >
               <button
-                className={`text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl ${
+                className={`w-full text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl ${
                   hovered === "couples"
                     ? "glass-card-strong text-loverai-gold scale-105"
                     : "hover:text-loverai-gold/70"
@@ -122,13 +122,13 @@ function Home() {
 
             {/* Planners - Right Side */}
             <div
-              className="relative cursor-pointer"
+              className="relative cursor-pointer flex-1"
               onMouseEnter={() => setHovered("planner")}
               onMouseLeave={() => setHovered(null)}
               onClick={() => handleNavigate("/planner", true)}
             >
               <button
-                className={`text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl ${
+                className={`w-full text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl ${
                   hovered === "planner"
                     ? "glass-card-strong text-loverai-gold scale-105"
                     : "hover:text-loverai-gold/70"

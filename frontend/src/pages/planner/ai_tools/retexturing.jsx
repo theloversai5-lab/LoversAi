@@ -30,6 +30,7 @@ const RetexturingTool = ({ onClose }) => {
     creditsNeeded: 10,
     hasEnough: false,
   });
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
 
   const fileInputRef = useRef(null);
 
@@ -222,6 +223,18 @@ const RetexturingTool = ({ onClose }) => {
     event.preventDefault();
   };
 
+  useEffect(() => {
+    if (!selectedImage) {
+      setImagePreviewUrl("");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(selectedImage);
+    setImagePreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [selectedImage]);
+
   // Generation functions
   const handleGenerate = async () => {
     // Check authentication
@@ -346,12 +359,18 @@ const RetexturingTool = ({ onClose }) => {
     } catch (error) {
       console.error("Generation error:", error);
 
+      const serverError =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Generation failed. Please try again.";
+
       // Handle specific error messages
       if (
-        error.message.includes("credits") ||
-        error.message.includes("Insufficient")
+        serverError.includes("credits") ||
+        serverError.includes("Insufficient")
       ) {
-        toast.error(error.message, {
+        toast.error(serverError, {
           duration: 6000,
           action: {
             label: "Buy Credits",
@@ -364,12 +383,12 @@ const RetexturingTool = ({ onClose }) => {
             },
           },
         });
-      } else if (error.message.includes("timeout")) {
+      } else if (serverError.includes("timeout")) {
         toast.error("Generation timed out. Please try again.");
-      } else if (error.message.includes("busy")) {
+      } else if (serverError.includes("busy")) {
         toast.error("AI service is busy. Please wait a moment and try again.");
       } else {
-        toast.error(error.message || "Generation failed. Please try again.");
+        toast.error(serverError);
       }
     } finally {
       setIsGenerating(false);
@@ -409,12 +428,29 @@ const RetexturingTool = ({ onClose }) => {
 
   const downloadImage = async (url, filename) => {
     try {
-      // Use backend proxy to avoid CORS issues with external URLs
-      const data = await aiAPI.downloadImage({ imageUrl: url });
+      const response = await fetch(url);
+      if (!response.ok) {
+        const data = await aiAPI.downloadImage({ imageUrl: url });
+        if (!data.success) throw new Error(data.error || "Failed to download image");
 
-      if (!data.success) throw new Error("Failed to download image");
+        const fallbackBlob = new Blob([data.imageData], {
+          type: data.contentType || "image/jpeg",
+        });
+        const fallbackBlobUrl = URL.createObjectURL(fallbackBlob);
 
-      const blob = new Blob([data.imageData], { type: "image/jpeg" });
+        const fallbackLink = document.createElement("a");
+        fallbackLink.href = fallbackBlobUrl;
+        fallbackLink.download = filename || `venue-transformation-${Date.now()}.jpg`;
+        document.body.appendChild(fallbackLink);
+        fallbackLink.click();
+        document.body.removeChild(fallbackLink);
+
+        URL.revokeObjectURL(fallbackBlobUrl);
+        toast.success("Image downloaded successfully");
+        return;
+      }
+
+      const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
 
       const link = document.createElement("a");
@@ -573,9 +609,9 @@ const RetexturingTool = ({ onClose }) => {
                 <p className="text-[11px] text-white/50">Add your venue photo</p>
               </div>
 
-              <div className="flex-1 min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col">
+              <div className="flex-1 min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col overflow-hidden">
                 <div
-                  className={`flex-1 min-h-0 border border-dashed rounded-[18px] flex flex-col items-center justify-center p-4 md:p-5 text-center cursor-pointer transition-all duration-300 ${
+                  className={`flex-1 min-h-0 border border-dashed rounded-[18px] flex flex-col items-center justify-center p-4 md:p-5 text-center cursor-pointer transition-all duration-300 overflow-hidden ${
                     selectedImage
                       ? "border-loverai-gold bg-loverai-gold/5"
                       : "border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10"
@@ -594,22 +630,28 @@ const RetexturingTool = ({ onClose }) => {
                   />
 
                   {selectedImage ? (
-                    <div className="relative w-full h-full min-h-[220px] rounded-[16px] overflow-hidden group">
+                    <div className="relative w-full h-full min-h-[280px] lg:min-h-[330px] rounded-[20px] overflow-hidden group bg-black/20 border border-white/10">
                       <img
-                        src={URL.createObjectURL(selectedImage)}
+                        src={imagePreviewUrl}
                         alt="Selected venue"
-                        className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
+                        className="absolute inset-0 w-full h-full object-contain rounded-[20px] bg-black/30 p-3 md:p-4"
                       />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-[16px]">
-                        <div className="text-center text-white">
+                      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 rounded-[20px] bg-gradient-to-t from-black/75 via-black/30 to-transparent px-4 py-4 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
+                        <div className="text-left text-white">
                           <span className="text-2xl block mb-1">📷</span>
                           <p className="text-xs font-semibold">Change Image</p>
+                        </div>
+                        <div className="max-w-[45%] text-right text-[10px] text-white/70">
+                          <p className="truncate font-semibold text-white/90">
+                            {selectedImage.name}
+                          </p>
+                          <p>{Math.max(1, Math.round(selectedImage.size / 1024))} KB</p>
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div className="py-8 select-none">
-                      <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-xl mx-auto mb-3 border border-white/10">
+                      <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-xl mx-auto mb-3 border border-white/10">
                         📸
                       </div>
                       <p className="text-[13px] font-bold text-white mb-1">
@@ -650,13 +692,17 @@ const RetexturingTool = ({ onClose }) => {
                 <p className="text-[11px] text-white/50">Choose decor and settings</p>
               </div>
 
-              <div className="flex-1 min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col justify-between">
-                <div className="flex-grow flex flex-col gap-2.5 overflow-hidden">
+              <div className="flex-1 min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col justify-between overflow-hidden">
+                <div className="flex-grow flex flex-col gap-2.5 min-h-0 overflow-hidden">
                   
                   {/* Wedding Theme Selection */}
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold text-white/70 select-none">Wedding Theme Selection</span>
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-1.5 min-h-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[10px] font-bold text-white/70 select-none">Wedding Theme Selection</span>
+                      <span className="text-[10px] text-white/40 select-none">Scroll for more</span>
+                    </div>
+                    <div className="max-h-[320px] overflow-y-auto pr-1 scrollbar-visible">
+                      <div className="grid grid-cols-2 gap-2">
                       {UI_THEMES.map((theme) => {
                         const isSelected = selectedTheme === theme.key;
                         return (
@@ -726,6 +772,7 @@ const RetexturingTool = ({ onClose }) => {
                           </button>
                         );
                       })}
+                      </div>
                     </div>
                   </div>
 
@@ -881,11 +928,11 @@ const RetexturingTool = ({ onClose }) => {
                 ) : generatedImage ? (
                   /* Generated Results Display */
                   <div className="flex-1 flex flex-col justify-between h-full min-h-0">
-                    <div className="relative rounded-xl overflow-hidden bg-white/5 flex items-center justify-center mb-3 shadow-inner h-[220px] lg:h-[245px]">
+                    <div className="relative rounded-xl overflow-hidden bg-white/5 flex items-center justify-center mb-3 shadow-inner h-[280px] lg:h-[330px]">
                       <img
                         src={generatedImage.url}
                         alt="AI Transformation Result"
-                        className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                        className="absolute inset-0 w-full h-full object-contain rounded-xl bg-black/20"
                       />
                       <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded backdrop-blur-sm">
                         {themes[generatedImage.theme] || "Custom Theme"}
