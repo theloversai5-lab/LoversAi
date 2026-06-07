@@ -30,6 +30,7 @@ export default function WeddingCart() {
   const [cartItems, setCartItems] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const coupleName = getCoupleDisplayName(currentUser);
   const [eventDetails, setEventDetails] = useState({
     budget: "",
@@ -187,12 +188,15 @@ export default function WeddingCart() {
           console.error("Failed to clear cart:", clearErr);
         }
         const newQuoteId = data.quote?._id;
-        navigate(newQuoteId ? `/couple/bid-dashboard/${newQuoteId}` : "/couple/bid-placed", {
-          state: {
-            quoteId: newQuoteId || null,
-            justSubmitted: true,
-          },
-        });
+        setShowSuccessPopup(true);
+        setTimeout(() => {
+          navigate(newQuoteId ? `/couple/bid-dashboard/${newQuoteId}` : "/couple/bid-placed", {
+            state: {
+              quoteId: newQuoteId || null,
+              justSubmitted: true,
+            },
+          });
+        }, 3500);
       }
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.message || "Failed to submit. Please try again.";
@@ -487,6 +491,35 @@ export default function WeddingCart() {
           </div>
         </section>
       </div>
+      {showSuccessPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
+          <style>{`
+            @keyframes shrinkWidth {
+              from { width: 100%; }
+              to { width: 0%; }
+            }
+          `}</style>
+          <div className="w-full max-w-[420px] rounded-[32px] border-[3px] border-[#e6c6b2]/20 bg-[#16100d]/95 text-white shadow-2xl p-8 flex flex-col items-center text-center animate-scaleIn">
+            <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)] animate-pulse">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h2 className="font-['Cormorant_Garamond'] text-3xl font-semibold text-white tracking-wide mb-2">
+              Bid Placed Successfully!
+            </h2>
+            <p className="text-xs text-white/60 mb-6 leading-relaxed">
+              Your wedding request is live. Planners are being matched with your visions now. Redirecting you to the dashboard...
+            </p>
+            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#e6c6b2] to-[#d4a878]"
+                style={{ animation: 'shrinkWidth 3.5s linear forwards' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

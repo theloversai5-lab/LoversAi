@@ -33,61 +33,7 @@ const budgetOptions = [
 const religionOptions = ["Hindu", "Muslim", "Christian", "Sikh", "Jain"];
 const guestOptions = ["0-100", "200-500", "500-1000", "1000+"];
 
-/** 6-col grid: 3 equal boxes top row, 2 centered equal boxes bottom row */
-const FIVE_ITEM_COL = ["", "", "", "col-start-2", "col-start-4"];
-
-const optionSelected =
-  "border-[#e6c6b2] bg-[#e6c6b2]/15 text-[#e6c6b2] shadow-md shadow-[#e6c6b2]/5";
-const optionDefault =
-  "border-white/10 bg-white/5 text-white/80 hover:border-white/20 hover:bg-white/10";
-
 const serif = { fontFamily: "'Cormorant Garamond', serif" };
-
-const s = {
-  /* ── shared typography (reference mockups) ── */
-  pageTitle:
-    "text-[36px] md:text-[46px] lg:text-[50px] font-semibold text-white tracking-wide leading-[1.08] mt-3 mb-0",
-  pageBrand:
-    "text-sm md:text-base tracking-[0.22em] text-white/55 font-semibold block leading-none uppercase font-sans",
-  stepPill:
-    "flex-shrink-0 bg-white/5 border border-white/20 rounded-full px-4 md:px-5 py-2 text-sm md:text-base text-white/90 font-medium font-sans",
-  stepBlock: "flex flex-col gap-4 md:gap-5 items-center text-center w-full",
-  kicker:
-    "text-sm md:text-base text-[#e6c6b2]/95 uppercase font-bold tracking-[0.22em] font-sans text-center",
-  stepTitle:
-    "text-[32px] md:text-[40px] lg:text-[44px] font-semibold text-white tracking-wide leading-[1.12] select-none text-center",
-  stepBody:
-    "text-lg md:text-xl text-white/82 font-sans leading-[1.65] max-w-3xl select-none text-center mx-auto",
-  inputLabel:
-    "text-white/80 text-base md:text-lg font-medium mb-2 block tracking-wide select-none text-center w-full",
-  textInput:
-    "w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-xl md:text-2xl font-medium text-white placeholder-white/35 focus:border-white/25 focus:bg-white/10 transition duration-300 outline-none text-center",
-  dateInput:
-    "w-full rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center text-xl md:text-2xl font-semibold text-white placeholder-white/35 focus:border-[#e6c6b2]/40 focus:bg-white/10 focus:text-[#e6c6b2] transition duration-300 outline-none",
-  optionGridFive: "grid grid-cols-6 gap-3 md:gap-3.5 w-full mx-auto max-w-3xl justify-center",
-  optionGridFour: "grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-3.5 w-full mx-auto max-w-3xl justify-center",
-  optionBox:
-    "col-span-2 w-full min-h-[60px] rounded-2xl border px-4 py-4 text-center text-lg md:text-xl font-semibold tracking-wide transition-all duration-300 active:scale-[0.98] cursor-pointer flex items-center justify-center",
-  optionBoxHalf:
-    "w-full min-h-[60px] rounded-2xl border px-4 py-4 text-center text-lg md:text-xl font-semibold tracking-wide transition-all duration-300 active:scale-[0.98] cursor-pointer flex items-center justify-center",
-  primaryBtn:
-    "inline-flex items-center justify-center rounded-full bg-[#dfb479] hover:bg-[#d4a568] py-4 px-9 text-lg md:text-xl font-bold text-[#1a0f08] transition-all duration-300 active:scale-95 font-sans shadow-[0_8px_24px_rgba(223,180,121,0.28)] hover:brightness-105 disabled:opacity-50",
-  secondaryBtn:
-    "rounded-full border border-white/20 bg-white/5 hover:bg-white/10 py-4 px-8 text-lg md:text-xl font-semibold text-white transition-all duration-300 active:scale-95",
-  actions: "flex flex-wrap justify-center gap-3 md:gap-4 mt-3 md:mt-4 select-none w-full",
-  formGrid:
-    "grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 w-full max-w-3xl mx-auto justify-center",
-  /* Step 1 welcome */
-  introShell:
-    "flex flex-col flex-1 justify-center items-center text-center w-full gap-8 md:gap-10 mt-6 md:mt-8",
-  introCopy: "flex flex-col items-center text-center gap-4 md:gap-5 w-full",
-  introTitle:
-    "text-[32px] md:text-[40px] lg:text-[44px] font-semibold text-white tracking-wide leading-[1.12] select-none text-center",
-  introBody:
-    "text-lg md:text-xl text-white/82 font-sans leading-[1.65] max-w-2xl select-none text-center mx-auto",
-  introBtn:
-    "px-14 py-4 w-full sm:w-auto min-w-[220px] inline-flex items-center justify-center rounded-full bg-[#dfb479] hover:bg-[#d4a568] text-lg md:text-xl font-bold text-[#1a0f08] transition-all duration-300 active:scale-[0.98] font-sans shadow-[0_10px_32px_rgba(223,180,121,0.28)] hover:brightness-105 cursor-pointer",
-};
 
 const stepVariants = {
   initial: (direction) => ({
@@ -246,12 +192,22 @@ export default function CoupleProfileForm() {
       localStorage.removeItem(PROFILE_STORAGE_KEY);
       localStorage.removeItem(PROFILE_STEP_KEY);
       localStorage.removeItem("isNewUser");
-      setServerMessage("Your wedding profile has been saved successfully! ✨");
       navigate("/love-story");
     } catch (error) {
-      setServerError(
-        error?.message || "We couldn't save your profile. Please try again.",
-      );
+      const status = error?.response?.status;
+      if (status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setServerError(
+          "Your session expired. Please log in again to save your profile. Your progress is saved locally."
+        );
+      } else {
+        setServerError(
+          error?.response?.data?.error ||
+          error?.message ||
+          "We couldn't save your profile. Please try again."
+        );
+      }
     } finally {
       setIsSaving(false);
     }
@@ -265,33 +221,51 @@ export default function CoupleProfileForm() {
     /* ── COMPLETION ── */
     if (isComplete) {
       return (
-        <div className={s.stepBlock}>
-          <p className={s.kicker}>Vision Ready ✨</p>
-          <h2 style={serif} className={`${s.stepTitle} mt-0.5`}>
+        <div className="flex flex-col items-center justify-center text-center w-full py-6 md:py-10">
+          <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-4">
+            VISION READY ✨
+          </span>
+          <h2 style={serif} className="text-3xl md:text-4xl lg:text-[40px] font-light text-white leading-tight mb-6">
             Your wedding story is set
           </h2>
-          <p className={s.stepBody}>
+          <p className="text-white/65 text-base md:text-lg max-w-md mx-auto leading-relaxed mb-10">
             Save your profile to the cloud so your vision loads everywhere you sign in.
           </p>
 
           {serverMessage && (
-            <div className="mt-4 p-5 rounded-2xl bg-[#89b86b]/10 border border-[#89b86b]/20 text-[#d8efc8] text-lg leading-relaxed">
+            <div className="my-6 p-5 rounded-2xl bg-white/5 border border-white/10 text-white text-base leading-relaxed w-full max-w-md backdrop-blur-md">
               {serverMessage}
               <button
-                className={`mt-4 w-full ${s.primaryBtn}`}
+                className="mt-4 w-full py-4 rounded-2xl text-base font-bold uppercase tracking-widest bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#1c1613] hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95 cursor-pointer"
                 onClick={() => navigate("/love-story")}
               >
-                Continue to GenAI Vision →
+                Continue to GenAI Vision
               </button>
             </div>
           )}
           {serverError && (
-            <p className="mt-6 text-red-400 text-lg font-semibold">
-              {serverError}
-            </p>
+            <div className="my-6 flex flex-col gap-3 w-full max-w-md mx-auto">
+              <p className="text-red-400 text-sm font-semibold text-center rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3">
+                {serverError}
+              </p>
+              {serverError.includes("session expired") && (
+                <button
+                  style={{
+                    background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+                    color: "#1c1613",
+                  }}
+                  className="w-full py-4 rounded-2xl text-base font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95 cursor-pointer"
+                  onClick={() =>
+                    navigate("/login", { state: { from: "/couple/onboarding" } })
+                  }
+                >
+                  Log In Again
+                </button>
+              )}
+            </div>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-1 w-full max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl mx-auto mb-8">
             {[
               ["Bride", formData.brideName],
               ["Groom", formData.groomName],
@@ -307,11 +281,11 @@ export default function CoupleProfileForm() {
               ["City", formData.city],
               ["Dream Venue", formData.dreamVenue],
             ].map(([label, val]) => (
-              <div key={label} className="p-4 rounded-xl border border-white/10 bg-white/[0.03] flex flex-col justify-start">
-                <span className="text-sm md:text-base uppercase tracking-[0.12em] font-bold text-[#e6c6b2]/80">
+              <div key={label} className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md flex flex-col justify-start text-left">
+                <span className="text-[13px] uppercase tracking-wider font-semibold text-[#e6c6b2]/70">
                   {label}
                 </span>
-                <strong className="text-xl text-white font-semibold mt-1">
+                <strong className="text-lg text-white font-medium mt-1 truncate">
                   {val || "—"}
                 </strong>
               </div>
@@ -319,17 +293,25 @@ export default function CoupleProfileForm() {
           </div>
 
           {!serverMessage && (
-            <div className={s.actions}>
-              <button onClick={handleBack} type="button" className={`flex-1 ${s.secondaryBtn}`}>
+            <div className="flex justify-center gap-4 w-full max-w-md mx-auto">
+              <button
+                onClick={handleBack}
+                type="button"
+                className="px-8 py-4 rounded-2xl text-base font-bold uppercase tracking-widest bg-transparent hover:bg-white/5 border border-white/20 text-white transition-all active:scale-95 flex-1 backdrop-blur-md cursor-pointer"
+              >
                 Back
               </button>
               <button
                 onClick={handleFinish}
                 type="button"
                 disabled={isSaving}
-                className={`flex-[2] ${s.primaryBtn}`}
+                style={{
+                  background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+                  color: "#1c1613",
+                }}
+                className="px-8 py-4 rounded-2xl text-base font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95 flex-[2] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                {isSaving ? "Saving..." : "Save & Start Your Journey"}
+                {isSaving ? "Saving..." : "Save Profile"}
               </button>
             </div>
           )}
@@ -340,20 +322,24 @@ export default function CoupleProfileForm() {
     /* ── STEP 1: Welcome ── */
     if (step === 1) {
       return (
-        <div className={s.introShell}>
-          <div className={s.introCopy}>
-            <p className={s.kicker}>Welcome to your guided setup</p>
-            <h2 style={serif} className={s.introTitle}>
-              Let's make your Love Story Official
-            </h2>
-            <p className={`${s.introBody} mt-3 md:mt-5`}>
-              Build a wedding profile that feels intentional from day one. Lovers AI will use these details later to shape your planning, design, and venue suggestions.
-            </p>
-          </div>
+        <div className="flex flex-col items-center justify-center text-center py-10 md:py-16 w-full">
+          <span className="text-[14px] md:text-[16px] text-[#e6c6b2]/80 font-semibold uppercase tracking-[0.3em] mb-6">
+            WELCOME TO YOUR GUIDED SETUP
+          </span>
+          <h2 style={serif} className="text-4xl md:text-5xl lg:text-[56px] font-light text-white leading-tight mb-8">
+            Build your wedding profile
+          </h2>
+          <p className="text-white/80 text-lg md:text-xl lg:text-[22px] max-w-2xl mx-auto leading-relaxed mb-14 font-light">
+            Build a wedding profile that feels intentional from day one. Lovers AI will use these details later to shape your planning, design, and venue suggestions.
+          </p>
           <button
             onClick={() => goToStep(2, 1)}
             type="button"
-            className={`${s.introBtn} mt-6 md:mt-8`}
+            style={{
+              background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+              color: "#1c1613",
+            }}
+            className="px-14 py-4 rounded-2xl text-base font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/15 transition-all active:scale-95 cursor-pointer"
           >
             Start
           </button>
@@ -364,46 +350,71 @@ export default function CoupleProfileForm() {
     /* ── STEP 2: Names (Tell us about the two of you) ── */
     if (step === 2) {
       return (
-        <div className={s.stepBlock}>
-          <p className={s.kicker}>Couple details</p>
-          <h2 style={serif} className={s.stepTitle}>
+        <div className="flex flex-col items-center w-full py-2 md:py-3">
+          <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-2">
+            COUPLE DETAILS
+          </span>
+          <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-1.5 text-center">
             Tell us about the two of you
           </h2>
-          <p className={s.stepBody}>
+          <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-5 text-center">
             Add names and ages so the planning experience starts to feel personal.
           </p>
 
-          <div className={s.formGrid}>
-            {[
-              {
-                label: "Bride Name",
-                name: "brideName",
-                placeholder: "Bride's name",
-              },
-              { label: "Bride Age", name: "brideAge", placeholder: "Age" },
-              {
-                label: "Groom Name",
-                name: "groomName",
-                placeholder: "Groom's name",
-              },
-              { label: "Groom Age", name: "groomAge", placeholder: "Age" },
-            ].map((f) => (
-              <label key={f.name} className="block text-center">
-                <span className={s.inputLabel}>{f.label}</span>
-                <input
-                  name={f.name}
-                  type="text"
-                  placeholder={f.placeholder}
-                  value={formData[f.name]}
-                  onChange={handleTextChange}
-                  className={s.textInput}
-                />
-              </label>
-            ))}
+          {/* Inputs Grid */}
+          <div className="grid grid-cols-3 gap-x-6 gap-y-4 w-full max-w-xl mx-auto mb-6">
+            <div className="col-span-2 text-left">
+              <span className="text-[12px] uppercase tracking-wider text-white/50 mb-1 block font-semibold">Bride Name</span>
+              <input
+                name="brideName"
+                type="text"
+                placeholder="Bride's name"
+                value={formData.brideName}
+                onChange={handleTextChange}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none"
+              />
+            </div>
+            <div className="col-span-1 text-left">
+              <span className="text-[12px] uppercase tracking-wider text-white/50 mb-1 block font-semibold">Bride Age</span>
+              <input
+                name="brideAge"
+                type="text"
+                placeholder="Age"
+                value={formData.brideAge}
+                onChange={handleTextChange}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none text-center"
+              />
+            </div>
+            <div className="col-span-2 text-left">
+              <span className="text-[12px] uppercase tracking-wider text-white/50 mb-1 block font-semibold">Groom Name</span>
+              <input
+                name="groomName"
+                type="text"
+                placeholder="Groom's name"
+                value={formData.groomName}
+                onChange={handleTextChange}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none"
+              />
+            </div>
+            <div className="col-span-1 text-left">
+              <span className="text-[12px] uppercase tracking-wider text-white/50 mb-1 block font-semibold">Groom Age</span>
+              <input
+                name="groomAge"
+                type="text"
+                placeholder="Age"
+                value={formData.groomAge}
+                onChange={handleTextChange}
+                className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none text-center"
+              />
+            </div>
           </div>
 
-          <div className={s.actions}>
-            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
+          <div className="flex justify-center gap-4 w-full max-w-sm mx-auto">
+            <button
+              onClick={handleBack}
+              type="button"
+              className="px-8 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 transition-all flex-1 cursor-pointer"
+            >
               Back
             </button>
             <button
@@ -415,7 +426,22 @@ export default function CoupleProfileForm() {
                 !formData.brideAge.trim() ||
                 !formData.groomAge.trim()
               }
-              className={s.primaryBtn}
+              style={
+                formData.brideName.trim() &&
+                formData.groomName.trim() &&
+                formData.brideAge.trim() &&
+                formData.groomAge.trim()
+                  ? { background: "linear-gradient(90deg, #e6c6b2, #d4a878)", color: "#1c1613" }
+                  : {}
+              }
+              className={`px-8 py-4 rounded-2xl text-base font-bold tracking-wider transition-all active:scale-95 flex-1 ${
+                formData.brideName.trim() &&
+                formData.groomName.trim() &&
+                formData.brideAge.trim() &&
+                formData.groomAge.trim()
+                  ? "hover:brightness-110 shadow-lg shadow-[#d4a878]/10 cursor-pointer"
+                  : "border border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+              }`}
             >
               Next
             </button>
@@ -427,39 +453,66 @@ export default function CoupleProfileForm() {
     /* ── STEP 3: Budget ── */
     if (step === 3) {
       return (
-        <div className={s.stepBlock}>
-          <p className={s.kicker}>Budget</p>
-          <h2 style={serif} className={s.stepTitle}>
+        <div className="flex flex-col items-center w-full py-4 md:py-6">
+          <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-3">
+            BUDGET
+          </span>
+          <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-2 text-center">
             What budget are you planning around?
           </h2>
-          <p className={s.stepBody}>
+          <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-8 text-center">
             Tap the range that feels closest. We'll save it and move ahead instantly.
           </p>
 
-          <div className={s.optionGridFive}>
-            {budgetOptions.map((opt, i) => (
-              <button
-                key={opt}
-                onClick={() => {
-                  handleOptionSelect("budget", opt);
-                  goToStep(4, 1);
-                }}
-                type="button"
-                className={`${s.optionBox} ${FIVE_ITEM_COL[i]} ${
-                  formData.budget === opt ? optionSelected : optionDefault
-                }`}
-              >
-                <span style={optionTitle}>{opt}</span>
-                <span style={optionHint}>Select this range</span>
-              </button>
-            ))}
+          {/* Options Grid (3-2 layout matching the mockup) */}
+          <div className="flex flex-col gap-4 w-full max-w-3xl mx-auto mb-10">
+            <div className="grid grid-cols-3 gap-4">
+              {budgetOptions.slice(0, 3).map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => {
+                    handleOptionSelect("budget", opt);
+                    goToStep(4, 1);
+                  }}
+                  type="button"
+                  className={`py-4 px-4 rounded-2xl border text-base font-semibold tracking-wide transition-all active:scale-[0.98] cursor-pointer text-center backdrop-blur-md ${
+                    formData.budget === opt
+                      ? "border-[#e6c6b2] bg-[#e6c6b2]/20 text-white shadow-lg shadow-[#e6c6b2]/10"
+                      : "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-center gap-4">
+              {budgetOptions.slice(3).map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => {
+                    handleOptionSelect("budget", opt);
+                    goToStep(4, 1);
+                  }}
+                  type="button"
+                  className={`w-[calc(33.33%-11px)] py-4 px-4 rounded-2xl border text-base font-semibold tracking-wide transition-all active:scale-[0.98] cursor-pointer text-center backdrop-blur-md ${
+                    formData.budget === opt
+                      ? "border-[#e6c6b2] bg-[#e6c6b2]/20 text-white shadow-lg shadow-[#e6c6b2]/10"
+                      : "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className={s.actions}>
-            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
-              Back
-            </button>
-          </div>
+          <button
+            onClick={handleBack}
+            type="button"
+            className="px-10 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+          >
+            Back
+          </button>
         </div>
       );
     }
@@ -467,38 +520,66 @@ export default function CoupleProfileForm() {
     /* ── STEP 4: Religion ── */
     if (step === 4) {
       return (
-        <div className={s.stepBlock}>
-          <p className={s.kicker}>Tradition</p>
-          <h2 style={serif} className={s.stepTitle}>
+        <div className="flex flex-col items-center w-full py-4 md:py-6">
+          <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-3">
+            TRADITION
+          </span>
+          <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-2 text-center">
             Which ceremony tradition fits your celebration?
           </h2>
-          <p className={s.stepBody}>
+          <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-8 text-center">
             This helps shape rituals, styling, and planning recommendations later.
           </p>
 
-          <div className={s.optionGridFive}>
-            {religionOptions.map((opt, i) => (
-              <button
-                key={opt}
-                onClick={() => {
-                  handleOptionSelect("religion", opt);
-                  goToStep(5, 1);
-                }}
-                type="button"
-                className={`${s.optionBox} ${FIVE_ITEM_COL[i]} ${
-                  formData.religion === opt ? optionSelected : optionDefault
-                }`}
-              >
-                {opt}
-              </button>
-            ))}
+          {/* Options Grid (3-2 layout matching the budget layout) */}
+          <div className="flex flex-col gap-4 w-full max-w-3xl mx-auto mb-10">
+            <div className="grid grid-cols-3 gap-4">
+              {religionOptions.slice(0, 3).map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => {
+                    handleOptionSelect("religion", opt);
+                    goToStep(5, 1);
+                  }}
+                  type="button"
+                  className={`py-4 px-4 rounded-2xl border text-base font-semibold tracking-wide transition-all active:scale-[0.98] cursor-pointer text-center backdrop-blur-md ${
+                    formData.religion === opt
+                      ? "border-[#e6c6b2] bg-[#e6c6b2]/20 text-white shadow-lg shadow-[#e6c6b2]/10"
+                      : "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-center gap-4">
+              {religionOptions.slice(3).map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => {
+                    handleOptionSelect("religion", opt);
+                    goToStep(5, 1);
+                  }}
+                  type="button"
+                  className={`w-[calc(33.33%-11px)] py-4 px-4 rounded-2xl border text-base font-semibold tracking-wide transition-all active:scale-[0.98] cursor-pointer text-center backdrop-blur-md ${
+                    formData.religion === opt
+                      ? "border-[#e6c6b2] bg-[#e6c6b2]/20 text-white shadow-lg shadow-[#e6c6b2]/10"
+                      : "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className={s.actions}>
-            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
-              Back
-            </button>
-          </div>
+          <button
+            onClick={handleBack}
+            type="button"
+            className="px-10 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+          >
+            Back
+          </button>
         </div>
       );
     }
@@ -506,53 +587,68 @@ export default function CoupleProfileForm() {
     /* ── STEP 5: Date ── */
     if (step === 5) {
       return (
-        <div className={s.stepBlock}>
-          <p className={s.kicker}>Wedding date</p>
-          <h2 style={serif} className={s.stepTitle}>
+        <div className="flex flex-col items-center w-full py-4 md:py-6">
+          <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-3">
+            WEDDING DATE
+          </span>
+          <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-2 text-center">
             The day our story becomes official...
           </h2>
-          <p className={s.stepBody}>
+          <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-8 text-center">
             Add a tentative date if you have one, or skip for now if the plan is still open.
           </p>
 
-          <div className="grid grid-cols-3 gap-4 max-w-md md:max-w-lg mx-auto">
+          <div className="grid grid-cols-3 gap-4 max-w-xs mx-auto mb-10">
             {[
               { part: "dd", label: "DD", placeholder: "DD" },
               { part: "mm", label: "MM", placeholder: "MM" },
               { part: "yy", label: "YY", placeholder: "YY" },
             ].map((f) => (
-              <label key={f.part} className="block text-center">
-                <span className={`${s.kicker} mb-1.5 block`}>{f.label}</span>
+              <div key={f.part} className="text-center">
+                <span className="text-[13px] uppercase tracking-wider text-white/40 mb-1.5 block font-semibold">{f.label}</span>
                 <input
                   type="text"
                   inputMode="numeric"
                   placeholder={f.placeholder}
                   value={dateInput[f.part]}
                   onChange={(e) => handleDatePartChange(f.part, e.target.value)}
-                  className={s.dateInput}
+                  className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-4 text-base font-semibold text-center text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none shadow-inner"
                 />
-              </label>
+              </div>
             ))}
           </div>
 
-          <div className={s.actions}>
-            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
+          <div className="flex justify-center gap-4 w-full max-w-md mx-auto">
+            <button
+              onClick={handleBack}
+              type="button"
+              className="px-8 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 flex-1 cursor-pointer"
+            >
               Back
             </button>
             <button
               onClick={handleDateUndecided}
               type="button"
-              className={`${s.secondaryBtn} text-[#e6c6b2]`}
+              className="px-8 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-[#e6c6b2] hover:bg-white/5 active:scale-95 flex-1 cursor-pointer"
             >
-              Not decided yet
+              Not Decided
             </button>
             <button
               onClick={() => goToStep(6, 1)}
               type="button"
               disabled={!formData.weddingDate}
-              className={s.primaryBtn}
+              style={
+                formData.weddingDate
+                  ? { background: "linear-gradient(90deg, #e6c6b2, #d4a878)", color: "#1c1613" }
+                  : {}
+              }
+              className={`px-8 py-4 rounded-2xl text-base font-bold tracking-wider transition-all active:scale-95 flex-1 ${
+                formData.weddingDate
+                  ? "hover:brightness-110 shadow-lg shadow-[#d4a878]/10 cursor-pointer"
+                  : "border border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+              }`}
             >
-              Next →
+              Next
             </button>
           </div>
         </div>
@@ -562,16 +658,18 @@ export default function CoupleProfileForm() {
     /* ── STEP 6: Guest Count ── */
     if (step === 6) {
       return (
-        <div className={s.stepBlock}>
-          <p className={s.kicker}>Guest count</p>
-          <h2 style={serif} className={s.stepTitle}>
+        <div className="flex flex-col items-center w-full py-4 md:py-6">
+          <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-3">
+            GUEST COUNT
+          </span>
+          <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-2 text-center">
             How many people do you imagine celebrating with you?
           </h2>
-          <p className={s.stepBody}>
+          <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-8 text-center">
             Pick the range that best matches the scale of your day.
           </p>
 
-          <div className={s.optionGridFour}>
+          <div className="grid grid-cols-2 gap-4 max-w-xl mx-auto mb-10 w-full">
             {guestOptions.map((opt) => (
               <button
                 key={opt}
@@ -580,8 +678,10 @@ export default function CoupleProfileForm() {
                   goToStep(7, 1);
                 }}
                 type="button"
-                className={`${s.optionBoxHalf} ${
-                  formData.guestCount === opt ? optionSelected : optionDefault
+                className={`py-4 px-4 rounded-2xl border text-base font-semibold tracking-wide transition-all active:scale-[0.98] cursor-pointer text-center backdrop-blur-md ${
+                  formData.guestCount === opt
+                    ? "border-[#e6c6b2] bg-[#e6c6b2]/20 text-white shadow-lg shadow-[#e6c6b2]/10"
+                    : "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
                 }`}
               >
                 {opt}
@@ -589,11 +689,13 @@ export default function CoupleProfileForm() {
             ))}
           </div>
 
-          <div className={s.actions}>
-            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
-              Back
-            </button>
-          </div>
+          <button
+            onClick={handleBack}
+            type="button"
+            className="px-10 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+          >
+            Back
+          </button>
         </div>
       );
     }
@@ -601,38 +703,53 @@ export default function CoupleProfileForm() {
     /* ── STEP 7: City ── */
     if (step === 7) {
       return (
-        <div className={s.stepBlock}>
-          <p className={s.kicker}>City</p>
-          <h2 style={serif} className={s.stepTitle}>
+        <div className="flex flex-col items-center w-full py-4 md:py-6">
+          <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-3">
+            CITY
+          </span>
+          <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-2 text-center">
             Where love currently lives...
           </h2>
-          <p className={s.stepBody}>
+          <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-8 text-center">
             Add the city or town you're planning from so location-based ideas can follow.
           </p>
 
-          <label className="block text-center w-full max-w-2xl mx-auto">
-            <span className={s.inputLabel}>City or town</span>
+          <div className="w-full max-w-sm mx-auto text-left mb-10">
+            <span className="text-[13px] uppercase tracking-wider text-white/40 mb-1.5 block font-semibold text-center">City or town</span>
             <input
               name="city"
               type="text"
               placeholder="Mumbai, Jaipur, Goa..."
               value={formData.city}
               onChange={handleTextChange}
-              className={s.textInput}
+              className="w-full rounded-2xl border border-white/15 bg-white/5 px-5 py-4 text-base text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none text-center shadow-inner"
             />
-          </label>
+          </div>
 
-          <div className={s.actions}>
-            <button onClick={handleBack} type="button" className={s.secondaryBtn}>
+          <div className="flex justify-center gap-4 w-full max-w-sm mx-auto">
+            <button
+              onClick={handleBack}
+              type="button"
+              className="px-8 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 flex-1 cursor-pointer"
+            >
               Back
             </button>
             <button
               onClick={() => goToStep(8, 1)}
               type="button"
               disabled={!formData.city.trim()}
-              className={s.primaryBtn}
+              style={
+                formData.city.trim()
+                  ? { background: "linear-gradient(90deg, #e6c6b2, #d4a878)", color: "#1c1613" }
+                  : {}
+              }
+              className={`px-8 py-4 rounded-2xl text-base font-bold tracking-wider transition-all active:scale-95 flex-1 ${
+                formData.city.trim()
+                  ? "hover:brightness-110 shadow-lg shadow-[#d4a878]/10 cursor-pointer"
+                  : "border border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+              }`}
             >
-              Next →
+              Next
             </button>
           </div>
         </div>
@@ -641,29 +758,35 @@ export default function CoupleProfileForm() {
 
     /* ── STEP 8: Dream Venue ── */
     return (
-      <div className={s.stepBlock}>
-        <p className={s.kicker}>Dream venue</p>
-        <h2 style={serif} className={s.stepTitle}>
+      <div className="flex flex-col items-center w-full py-4 md:py-6">
+        <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-3">
+          DREAM VENUE
+        </span>
+        <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-2 text-center">
           We dream of saying "I Do" in...
         </h2>
-        <p className={s.stepBody}>
+        <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-8 text-center">
           Share the destination or city you imagine for the wedding setting.
         </p>
 
-        <label className="block text-center w-full max-w-2xl mx-auto">
-          <span className={s.inputLabel}>Destination or city</span>
+        <div className="w-full max-w-sm mx-auto text-left mb-10">
+          <span className="text-[13px] uppercase tracking-wider text-white/40 mb-1.5 block font-semibold text-center">Destination or city</span>
           <input
             name="dreamVenue"
             type="text"
             placeholder="Udaipur, Lake Como, Tuscany..."
             value={formData.dreamVenue}
             onChange={handleTextChange}
-            className={s.textInput}
+            className="w-full rounded-2xl border border-white/15 bg-white/5 px-5 py-4 text-base text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none text-center shadow-inner"
           />
-        </label>
+        </div>
 
-        <div className={s.actions}>
-          <button onClick={handleBack} type="button" className={s.secondaryBtn}>
+        <div className="flex justify-center gap-4 w-full max-w-sm mx-auto">
+          <button
+            onClick={handleBack}
+            type="button"
+            className="px-8 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 transition-all flex-1 cursor-pointer"
+          >
             Back
           </button>
           <button
@@ -674,9 +797,18 @@ export default function CoupleProfileForm() {
             }}
             type="button"
             disabled={!formData.dreamVenue.trim()}
-            className={s.primaryBtn}
+            style={
+              formData.dreamVenue.trim()
+                ? { background: "linear-gradient(90deg, #e6c6b2, #d4a878)", color: "#1c1613" }
+                : {}
+            }
+            className={`px-8 py-4 rounded-2xl text-base font-bold tracking-wider transition-all active:scale-95 flex-[2] ${
+              formData.dreamVenue.trim()
+                ? "hover:brightness-110 shadow-lg shadow-[#d4a878]/10 cursor-pointer"
+                : "border border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+            }`}
           >
-            Review My Story →
+            Review Story
           </button>
         </div>
       </div>
@@ -684,242 +816,66 @@ export default function CoupleProfileForm() {
   };
 
   return (
-    <main className="min-h-screen w-screen relative px-1 md:px-2 pt-[10vh] pb-[8vh] text-white overflow-y-auto flex justify-center items-start">
-      {/* Background Pillars Mandap setup (fully bright and natural) */}
+    <main className="min-h-screen w-screen relative px-4 text-white overflow-y-auto flex justify-center items-center">
+      {/* Background */}
       <div
         className="fixed inset-0 bg-cover bg-center -z-20 scale-105 animate-scaleIn"
         style={{
-          backgroundImage: 'url("/images/signup.png")',
+          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%), url('/images/signup.png')",
+          backgroundAttachment: "fixed",
         }}
       />
-      <div className="absolute inset-0 bg-black/10 -z-10" />
 
-      <section className="loverai-auth-panel" style={card}>
-        <header style={cardHeader}>
-          <div>
-            <img
-              src="/images/LogoLoversai.png"
-              alt="LoversAI"
-              style={{ height: 38, marginBottom: 8 }}
-            />
-            <h1
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "rgba(255,245,234,0.85)",
-                letterSpacing: "0.28em",
-                margin: "0 0 6px",
-                textTransform: "uppercase",
-              }}
-            >
-              Lovers AI
-            </h1>
-            <p style={heroHeading}>Build your wedding profile</p>
+      <section
+        style={{
+          boxShadow: "0 24px 80px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.15)",
+        }}
+        className="relative z-10 w-full max-w-[880px] h-[90vh] max-h-[640px] rounded-[32px] bg-white/[0.01] backdrop-blur-[6px] border border-white/10 p-6 md:p-10 flex flex-col justify-between text-center overflow-y-auto"
+      >
+        {/* Header - only show on steps 2 to 8 */}
+        {step > 1 && !isComplete && (
+          <div className="w-full flex flex-col items-center relative mb-6">
+            <span className="text-[13px] text-white/50 uppercase tracking-[0.3em] font-medium mb-1">
+              LOVERS AI
+            </span>
+            <h2 className="text-2xl md:text-3xl font-light leading-tight text-white text-center" style={serif}>
+              Build your wedding profile
+            </h2>
+            
+            <span className="absolute top-0 right-0 border border-white/10 bg-white/5 text-white/75 text-[12px] tracking-wide px-3.5 py-1.5 rounded-full font-medium">
+              Step {step - 1} of {TOTAL_STEPS - 1}
+            </span>
+
+            {/* Progress bar line */}
+            <div className="w-full h-[1.5px] bg-white/10 mt-6 relative">
+              <div
+                style={{
+                  width: `${((step - 2) / (TOTAL_STEPS - 1)) * 100}%`,
+                  transition: "width 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
+                }}
+                className="absolute top-0 left-0 h-full bg-[#e6c6b2]"
+              />
+            </div>
           </div>
-          <span style={progressPill}>
-            {isComplete ? "Ready ✨" : `Step ${step} of ${TOTAL_STEPS}`}
-          </span>
-        </header>
+        )}
 
-        {/* Progress bar */}
-        <div
-          style={{
-            height: 3,
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: 99,
-            margin: "0 0 28px",
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              borderRadius: 99,
-              width: `${progressPct}%`,
-              background: "linear-gradient(90deg,#C59854,#f0d196)",
-              transition: "width 0.5s ease",
-            }}
-          />
+        {/* Step content with slide animation */}
+        <div className="overflow-y-auto md:overflow-visible flex-1 flex flex-col justify-center py-2">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={isComplete ? "complete" : step}
+              custom={direction}
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="w-full flex flex-col justify-center items-center"
+            >
+              {renderStepContent()}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </section>
     </main>
   );
 }
-
-/* ─── Styles ─── */
-const shell = {
-  position: "relative",
-  minHeight: "100vh",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "40px 16px",
-  fontFamily: "'Poppins', sans-serif",
-  zIndex: 2,
-};
-
-const card = {
-  position: "relative",
-  zIndex: 10,
-  width: "100%",
-  maxWidth: 720,
-  borderRadius: 32,
-  padding: "34px 34px 40px",
-  boxShadow: "0 40px 120px rgba(0,0,0,0.55)",
-};
-
-const cardHeader = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  marginBottom: 20,
-};
-
-const progressPill = {
-  fontSize: 12,
-  letterSpacing: "0.08em",
-  textTransform: "none",
-  color: "#fff2e1",
-  padding: "8px 15px",
-  borderRadius: 99,
-  border: "1px solid rgba(255,255,255,0.1)",
-  background: "rgba(255,255,255,0.08)",
-  whiteSpace: "nowrap",
-};
-
-const heroHeading = {
-  fontFamily: "'DM Serif Display', serif",
-  fontSize: "clamp(34px, 5vw, 56px)",
-  lineHeight: 0.95,
-  color: "#fff6ea",
-  margin: 0,
-};
-
-const stepHeading = {
-  fontFamily: "'DM Serif Display', serif",
-  fontSize: "clamp(24px,4vw,38px)",
-  lineHeight: 1.15,
-  color: "#fff6ea",
-  margin: "8px 0 0",
-};
-
-const supportingText = {
-  fontSize: 14,
-  lineHeight: 1.7,
-  color: "rgba(249,247,245,0.6)",
-  marginTop: 10,
-  marginBottom: 0,
-};
-
-const actionsRow = {
-  display: "flex",
-  gap: 12,
-  marginTop: 34,
-  flexWrap: "wrap",
-};
-
-const primaryBtn = {
-  background: "linear-gradient(135deg, #f0d196, #C59854)",
-  color: "#1C1613",
-  padding: "15px 30px",
-  borderRadius: 18,
-  border: "none",
-  cursor: "pointer",
-  fontSize: 15,
-  fontWeight: 600,
-  fontFamily: "'Poppins', sans-serif",
-  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-  boxShadow: "0 10px 28px rgba(197,152,84,0.25)",
-};
-
-const secondaryBtn = {
-  background: "rgba(255,255,255,0.06)",
-  color: "#D48C8C",
-  padding: "15px 24px",
-  borderRadius: 18,
-  border: "1px solid rgba(212,140,140,0.22)",
-  cursor: "pointer",
-  fontSize: 14,
-  fontFamily: "'Poppins', sans-serif",
-  transition: "background 0.2s ease",
-};
-
-const fieldLabel = {
-  display: "block",
-};
-
-const labelText = {
-  fontSize: 12,
-  letterSpacing: "0.1em",
-  textTransform: "uppercase",
-  color: "rgba(249,247,245,0.55)",
-  marginBottom: 8,
-  display: "block",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px 16px",
-  borderRadius: 12,
-  border: "1px solid rgba(225,195,135,0.18)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#F9F7F5",
-  fontSize: 15,
-  fontFamily: "'Poppins', sans-serif",
-  outline: "none",
-  boxSizing: "border-box",
-  transition: "border-color 0.2s",
-};
-
-const optionGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 14,
-  marginTop: 28,
-};
-
-const optionCard = {
-  minHeight: 116,
-  padding: "22px 18px",
-  borderRadius: 22,
-  border: "1px solid rgba(225,195,135,0.18)",
-  background: "rgba(255,255,255,0.04)",
-  color: "#F9F7F5",
-  fontSize: 15,
-  cursor: "pointer",
-  fontFamily: "'Poppins', sans-serif",
-  transition: "all 0.2s ease",
-  textAlign: "left",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-};
-
-const selectedCard = {
-  background: "rgba(197,152,84,0.15)",
-  borderColor: "rgba(197,152,84,0.55)",
-  color: "#f0d196",
-  boxShadow: "0 4px 20px rgba(197,152,84,0.18)",
-};
-
-const optionTitle = {
-  fontSize: 24,
-  lineHeight: 1.05,
-  fontFamily: "'DM Serif Display', serif",
-  color: "inherit",
-};
-
-const optionHint = {
-  fontSize: 12,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  color: "rgba(249,247,245,0.5)",
-};
-
-const summaryCard = {
-  padding: "14px 18px",
-  borderRadius: 12,
-  border: "1px solid rgba(225,195,135,0.12)",
-  background: "rgba(255,255,255,0.03)",
-  display: "flex",
-  flexDirection: "column",
-};

@@ -247,7 +247,7 @@ code {
   z-index: 0;
   background-size: cover;
   background-position: center;
-  filter: brightness(0.52) saturate(1) contrast(1.02);
+  filter: brightness(0.75) contrast(1.05) !important;
   transform: scale(1.02);
 }
 
@@ -255,9 +255,7 @@ code {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    radial-gradient(circle at top center, rgba(255, 233, 214, 0.1), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(12, 8, 6, 0.14) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.45) 50%, #0a0604 100%) !important;
 }
 
 .loverai-wedding-glow {
@@ -1391,3 +1389,181 @@ select option {
     display: none !important;
   }
 }
+
+/* ==========================================
+   LOVERAI WEDDING VISION REDESIGN UTILITIES
+   ========================================== */
+
+.loverai-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(230, 198, 178, 0.65) rgba(255, 255, 255, 0.03) !important;
+}
+
+.loverai-scrollbar::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.loverai-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 99px !important;
+}
+
+.loverai-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(230, 198, 178, 0.65) !important; /* more visible gold-toned scrollbar thumb */
+  border-radius: 99px !important;
+}
+
+.loverai-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 198, 178, 0.9) !important;
+}
+
+/* Card color schema overrides to match reference mockup precisely */
+.loverai-bg-container {
+  background-color: #1a1411 !important; /* Dark solid brown container background */
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.loverai-bg-sidebar {
+  background-color: #271f1b !important; /* Sidebar card solid brown background */
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.loverai-bg-card {
+  background-color: #3b322a !important; /* Grid card solid brown background */
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.loverai-bg-input {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.loverai-range-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 999px;
+  outline: none;
+}
+
+.loverai-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ebd8c7; /* Warm peach */
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.loverai-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  background: #f4d8c6;
+}
+
+.loverai-range-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: #ebd8c7;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.loverai-range-slider::-moz-range-thumb:hover {
+  transform: scale(1.25);
+  background: #f4d8c6;
+}
+
+.loverai-select-peach {
+  appearance: none;
+  background-color: #ebd8c7 !important;
+  color: #1d1714 !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 6px 28px 6px 12px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231d1714' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  outline: none;
+  cursor: pointer;
+  font-size: 11px;
+  border: none;
+}
+
+.loverai-select-peach option {
+  background-color: #201913;
+  color: #ffffff;
+}
+
+/* ==========================================
+   LOVERAI GLASSMORPHISM PREMIUM ADDITIONS
+   ========================================== */
+
+.loverai-glass-panel {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.loverai-glass-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.loverai-btn-accent {
+  background: #e6c6b2 !important;
+  color: #3d1b2d !important;
+  font-weight: 600 !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+}
+
+.loverai-btn-accent:hover {
+  background: #ebd0be !important;
+}
+
+.loverai-select-peach-new {
+  appearance: none;
+  background-color: #f2dad0 !important;
+  color: #251f1b !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 6px 28px 6px 12px;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23251f1b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  outline: none;
+  cursor: pointer;
+  font-size: 11px;
+  border: none;
+}
+
+.loverai-select-peach-new option {
+  background-color: #f2dad0;
+  color: #251f1b;
+}
+
+.loverai-btn-moodboard {
+  border: 1px solid rgba(230, 198, 178, 0.3) !important;
+  background-color: rgba(230, 198, 178, 0.1) !important;
+  color: #e6c6b2 !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.loverai-btn-moodboard:hover {
+  background-color: rgba(230, 198, 178, 0.18) !important;
+  border-color: rgba(230, 198, 178, 0.5) !important;
+}
+
+
+

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { apiFetch, coupleMoodboardAPI, uploadAPI } from "../../api/api";
+import { apiFetch, coupleMoodboardAPI, uploadAPI, moodboardAPI } from "../../api/api";
 
 const STORAGE_KEY = "loversai_theme_moodboards";
 
@@ -54,16 +54,11 @@ const normalizeTheme = (value = "") => {
   return "wedding";
 };
 
-const formatBudgetLabel = (budget) => {
-  if (budget >= 100) return "1 Cr";
-  return `${budget} L`;
-};
-
-const SparkIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z" />
-    <path d="M19 16v5" />
-    <path d="M21.5 18.5h-5" />
+const SparklesIcon = () => (
+  <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 3L14.5 9L21 11.5L14.5 14L12 20L9.5 14L3 11.5L9.5 9L12 3Z" fill="currentColor" />
+    <path d="M5 3L6 5.5L9 6L6 6.5L5 9L4 6.5L1 6L4 5.5L5 3Z" fill="currentColor" className="opacity-70" />
+    <path d="M19 15L19.75 17L22 17.5L19.75 18L19 20L18.25 18L16 17.5L18.25 17L19 15Z" fill="currentColor" className="opacity-70" />
   </svg>
 );
 
@@ -127,7 +122,6 @@ const writeBoards = (boards) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(compactBoards));
     } catch (err) {
-      // Log storage failure but don't let it crash the app
       console.error(
         `Failed to write compacted boards to localStorage key=${STORAGE_KEY}:`,
         err,
@@ -152,6 +146,21 @@ export function saveThemeMoodboard(entry) {
 
   boards[theme] = [nextEntry, ...(boards[theme] || [])].slice(0, 12);
   writeBoards(boards);
+
+  // Sync to database if available
+  moodboardAPI.saveMoodboard({
+    boardId: nextEntry.id,
+    theme,
+    title: nextEntry.title,
+    style: nextEntry.style,
+    functionType: nextEntry.functionType,
+    prompt: nextEntry.prompt,
+    images: nextEntry.images,
+    details: nextEntry.details
+  }).catch((err) => {
+    console.error("Error syncing saveThemeMoodboard to backend:", err);
+  });
+
   return theme;
 }
 
@@ -181,7 +190,6 @@ export default function CoupleThemeMoodboard() {
   const { currentUser, logout } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
-  const [, setAddedBoardId] = useState(null);
 
   const activeTheme = normalizeTheme(theme || "");
   const [boardsState, setBoardsState] = useState(() => readBoards());
@@ -204,13 +212,79 @@ export default function CoupleThemeMoodboard() {
   const activeBoard = selectedBoards[activeIndex] || null;
   const groupedImages = activeBoard?.images || [];
 
+  // Fetch moodboards from backend when component mounts
+  useEffect(() => {
+    const fetchBackendMoodboards = async () => {
+      try {
+        const response = await moodboardAPI.getMoodboards();
+        if (response?.success && response?.moodboards) {
+          const grouped = {};
+          THEMES.forEach((theme) => {
+            grouped[theme.key] = [];
+          });
+          response.moodboards.forEach((board) => {
+            const themeKey = board.theme;
+            if (grouped[themeKey]) {
+              grouped[themeKey].push({
+                id: board.boardId,
+                theme: board.theme,
+                title: board.title,
+                style: board.style,
+                functionType: board.functionType,
+                prompt: board.prompt,
+                images: board.images || [],
+                createdAt: board.createdAt || new Date().toISOString(),
+                details: board.details,
+              });
+            }
+          });
+
+          // Sort each theme's boards by date (newest first)
+          Object.keys(grouped).forEach((key) => {
+            grouped[key].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          });
+
+          setBoardsState(grouped);
+          writeBoards(grouped);
+        }
+      } catch (err) {
+        console.error("Failed to load moodboards from backend, using local storage:", err);
+      }
+    };
+
+    if (currentUser) {
+      fetchBackendMoodboards();
+    }
+  }, [currentUser]);
+
   useEffect(() => {
     setActiveIndex(0);
   }, [selectedTheme.key]);
 
-  const persistBoards = (nextBoards) => {
+  const persistBoards = async (nextBoards) => {
     setBoardsState(nextBoards);
     writeBoards(nextBoards);
+
+    // Sync to backend if logged in
+    if (currentUser) {
+      try {
+        const currentThemeBoards = nextBoards[selectedTheme.key] || [];
+        for (const board of currentThemeBoards) {
+          await moodboardAPI.saveMoodboard({
+            boardId: board.id,
+            theme: selectedTheme.key,
+            title: board.title,
+            style: board.style,
+            functionType: board.functionType,
+            prompt: board.prompt,
+            images: board.images,
+            details: board.details
+          });
+        }
+      } catch (err) {
+        console.error("Failed to sync moodboard to backend:", err);
+      }
+    }
   };
 
   const openTheme = (nextTheme) => navigate(`/couple/moodboard/${nextTheme}`);
@@ -303,7 +377,7 @@ export default function CoupleThemeMoodboard() {
     }
   };
 
-  const handleImageRemove = (imageId) => {
+  const handleImageRemove = async (imageId) => {
     if (!activeBoard) return;
     const nextBoards = updateBoard(
       boardsState,
@@ -314,9 +388,34 @@ export default function CoupleThemeMoodboard() {
         images: (board.images || []).filter((img) => img.id !== imageId),
       }),
     );
-    persistBoards(nextBoards);
+    await persistBoards(nextBoards);
     if (editTarget?.id === imageId) {
       setEditTarget(null);
+    }
+  };
+
+  const handleDeleteBoard = async () => {
+    if (!activeBoard) return;
+    if (!window.confirm("Are you sure you want to delete this moodboard?")) return;
+
+    const updatedThemeBoards = (boardsState[selectedTheme.key] || []).filter(
+      (board) => board.id !== activeBoard.id
+    );
+    const nextBoards = {
+      ...boardsState,
+      [selectedTheme.key]: updatedThemeBoards,
+    };
+
+    setBoardsState(nextBoards);
+    writeBoards(nextBoards);
+    setActiveIndex(0);
+
+    if (currentUser) {
+      try {
+        await moodboardAPI.deleteMoodboard(activeBoard.id);
+      } catch (err) {
+        console.error("Failed to delete moodboard on backend:", err);
+      }
     }
   };
 
@@ -356,9 +455,7 @@ export default function CoupleThemeMoodboard() {
         throw new Error(result.error || "Failed to edit image");
       }
 
-      // Obtain the latest boards from storage to avoid overwriting concurrent edits
       const latestBoards = readBoards();
-      // Determine target board id: prefer activeBoard.id, otherwise search for the board containing the image
       let targetBoardId = activeBoard?.id;
       if (!targetBoardId) {
         const themeBoards = latestBoards[selectedTheme.key] || [];
@@ -440,73 +537,162 @@ export default function CoupleThemeMoodboard() {
   const renderImageCard = (img, extraClass = "") => (
     <div
       key={img.id || img.url}
-      className={`group relative overflow-hidden bg-[#c3c3c3] ${extraClass}`}
+      className={`group relative overflow-hidden bg-black/40 rounded-[14px] border border-white/10 transition-all duration-300 hover:border-white/20 hover:shadow-lg ${extraClass}`}
     >
       <img
         src={img.url}
         alt={img.label || "Moodboard image"}
-        className="h-full w-full object-cover"
+        className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
       />
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 transition group-hover:opacity-100">
-        <span className="truncate text-[10px] font-semibold text-white/80">
-          {img.label || "Photo"}
-        </span>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => {
-              setEditTarget(img);
-              setEditPrompt(img.editMeta?.editPrompt || "");
-              setColorTone(img.editMeta?.colorTone || COLOR_TONES[0]);
-              setLighting(img.editMeta?.lighting || LIGHTING_OPTIONS[0]);
-            }}
-            className="rounded bg-[#f4f0ea] px-2 py-1 text-[10px] font-semibold text-[#1d1714]"
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={() => handleImageRemove(img.id)}
-            className="rounded bg-black/70 px-2 py-1 text-[10px] font-semibold text-white"
-          >
-            Remove
-          </button>
+      
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-between p-4">
+        
+        {/* Top actions */}
+        <div className="flex justify-between items-start w-full">
+          <span className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-0.5 text-[10px] font-medium text-white/80">
+            {img.source === "upload" ? "Uploaded" : "Generated"}
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setEditTarget(img);
+                setEditPrompt(img.editMeta?.editPrompt || "");
+                setColorTone(img.editMeta?.colorTone || COLOR_TONES[0]);
+                setLighting(img.editMeta?.lighting || LIGHTING_OPTIONS[0]);
+              }}
+              className="w-8 h-8 rounded-full bg-white text-[#201913] hover:bg-[#e6c6b2] flex items-center justify-center transition duration-200 hover:scale-110"
+              title="Edit Image"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleImageRemove(img.id)}
+              className="w-8 h-8 rounded-full bg-black/60 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white flex items-center justify-center transition duration-200 hover:scale-110"
+              title="Remove Image"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom label */}
+        <div className="w-full">
+          <p className="truncate text-xs font-semibold text-white tracking-wide">
+            {img.label || "Moodboard photo"}
+          </p>
         </div>
       </div>
     </div>
   );
 
-  const handleAddToCart = async () => {
-    if (!activeBoard || addingToCart) return;
-    setAddingToCart(true);
-    try {
-      const images = activeBoard.images || [];
-      const primaryUrl = images[0]?.url || "";
-      await apiFetch("/cart/add", {
-        method: "POST",
-        data: {
-          type: "vision",
-          url: primaryUrl,
-          moodboard: images.map((img) => img.url),
-          label: activeBoard.title || `${activeBoard.style || ""} ${activeBoard.functionType || selectedTheme.name} Moodboard`,
-          prompt: activeBoard.prompt || "",
-          details: {
-            functionType: activeBoard.functionType || selectedTheme.name,
-            style: activeBoard.style || "",
-            atmosphere: activeBoard.atmosphere || "",
-            timing: activeBoard.timing || "",
-            planningType: activeBoard.details?.planningType || "",
-            venueType: activeBoard.details?.venueType || "",
-            theme: activeBoard.details?.theme || "",
-          },
-        },
-      });
-      setAddedBoardId(activeBoard.id);
-    } catch (err) {
-      console.error("Failed to add to cart:", err);
-    } finally {
-      setAddingToCart(false);
-    }
+  const renderMoodboardCard = (title, description, imgIndex, heightClass) => {
+    const img = groupedImages[imgIndex] || null;
+    const hasImage = !!img?.url;
+
+    return (
+      <div className={`relative rounded-[14px] overflow-hidden group transition-all duration-300 ${heightClass} ${
+        hasImage 
+          ? 'border border-white/10 bg-black/40' 
+          : 'border border-dashed border-white/15 bg-white/[0.02] flex flex-col items-center justify-center text-center p-4'
+      }`}>
+        {hasImage ? (
+          <>
+            <img
+              src={img.url}
+              alt={title}
+              className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+            />
+            {/* Hover overlay with actions */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/45 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-between p-4">
+              
+              {/* Top actions */}
+              <div className="flex justify-between items-start w-full">
+                <span className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-0.5 text-[10px] font-medium text-white/80">
+                  {img.source === "upload" ? "Uploaded" : "Generated"}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditTarget(img);
+                      setEditPrompt(img.editMeta?.editPrompt || "");
+                      setColorTone(img.editMeta?.colorTone || COLOR_TONES[0]);
+                      setLighting(img.editMeta?.lighting || LIGHTING_OPTIONS[0]);
+                    }}
+                    className="w-8 h-8 rounded-full bg-white text-[#201913] hover:bg-[#eed7c5] flex items-center justify-center transition duration-200 hover:scale-110"
+                    title="Edit Image"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleImageRemove(img.id)}
+                    className="w-8 h-8 rounded-full bg-black/60 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white flex items-center justify-center transition duration-200 hover:scale-110"
+                    title="Remove Image"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18" />
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Bottom labels */}
+              <div className="w-full text-left">
+                <p className="font-['Cormorant_Garamond'] text-lg md:text-[20px] font-semibold text-[#f4e3c1] leading-tight truncate">
+                  {title}
+                </p>
+                <p className="text-xs md:text-[13px] text-white/60 mt-0.5 truncate">
+                  {description}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Static labels visible when not hovered */}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-4 flex flex-col justify-end transition-opacity duration-300 group-hover:opacity-0 text-left">
+              <p className="font-['Cormorant_Garamond'] text-lg md:text-[20px] font-semibold text-[#f4e3c1] leading-tight truncate">
+                {title}
+              </p>
+              <p className="text-xs md:text-[13px] text-white/60 mt-0.5 truncate">
+                {description}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center bg-white/5 mb-3 text-white/50">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </div>
+            <p className="font-['Cormorant_Garamond'] text-base md:text-lg font-medium text-[#f4e3c1]">
+              {title}
+            </p>
+            <p className="text-xs md:text-[12px] text-white/40 mt-1 max-w-[80%] mx-auto leading-normal">
+              {description}
+            </p>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const handleLogout = async () => {
@@ -523,6 +709,14 @@ export default function CoupleThemeMoodboard() {
     if (!currentUser?.displayName && !currentUser?.email) return "U";
     const name = currentUser.displayName || currentUser.email;
     return name.charAt(0).toUpperCase();
+  };
+
+  const getThemeCount = (themeKey) => {
+    const themeBoards = boardsState[themeKey] || [];
+    if (themeKey === selectedTheme.key) {
+      return activeBoard ? (activeBoard.images || []).length : 0;
+    }
+    return themeBoards[0] ? (themeBoards[0].images || []).length : 0;
   };
 
   useEffect(() => {
@@ -549,29 +743,39 @@ export default function CoupleThemeMoodboard() {
       <div className="mx-auto w-full max-w-[1380px] relative z-10 flex flex-col flex-1 min-h-0">
         
         {/* Elegant Top Controls Row */}
-        <div className="mb-2.5 flex items-center justify-between text-sm flex-shrink-0">
+        <div className="mb-4 flex items-center justify-between text-sm flex-shrink-0 relative">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded-xl border border-white/15 bg-white/5 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-white/10"
+              className="rounded-xl border border-white/15 bg-white/5 backdrop-blur-md px-4 py-2 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 hover:border-white/30 active:scale-95 duration-200"
             >
               ← Back
             </button>
             <button
               type="button"
               onClick={() => navigate("/love-story")}
-              className="rounded-xl border border-white/15 bg-white/5 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-white/10"
+              className="rounded-xl border border-white/15 bg-white/5 backdrop-blur-md px-4 py-2 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 hover:border-white/30 active:scale-95 duration-200"
             >
               Create
             </button>
             <button
               type="button"
               onClick={() => navigate("/couple/cart")}
-              className="rounded-xl border border-white/15 bg-white/5 backdrop-blur-md px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white transition hover:bg-white/10"
+              className="rounded-xl border border-white/15 bg-white/5 backdrop-blur-md px-4 py-2 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/10 hover:border-white/30 active:scale-95 duration-200"
             >
               Cart
             </button>
+          </div>
+
+          {/* Centered H1 Header Section (Inline with Back/Create/Cart and Hamburger dropdown) */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none hidden md:block">
+            <h1 className="font-['Cormorant_Garamond'] text-2xl lg:text-3xl font-semibold text-white tracking-wide leading-none">
+              Your Dream Moodboard
+            </h1>
+            <p className="text-[8px] lg:text-[9px] uppercase tracking-[0.18em] text-[#b89f79] font-medium mt-1">
+              CURATE AND ORGANIZE YOUR THEMED WEDDING VISIONS
+            </p>
           </div>
 
           {/* Premium Hamburger Menu Dropdown Trigger */}
@@ -635,315 +839,307 @@ export default function CoupleThemeMoodboard() {
           </div>
         </div>
 
-        <section className="rounded-[10px] border border-[#5d4421] bg-[#1b1512] p-3 shadow-[0_0_0_1px_rgba(199,155,45,0.06)]">
-          <div className="border border-[#4e3920] bg-[#181310] px-4 py-4">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-[#b89f79]">
-                  Moodboard
-                </p>
-                <h1 className="font-['Cormorant_Garamond'] text-[30px] font-semibold text-[#f7e7c7]">
-                  Your Dream Moodboard
-                </h1>
-              </div>
-              <div className="flex items-center gap-2">
+        {/* Mobile Header (only visible on small screen sizes) */}
+        <div className="text-center mb-4 flex-shrink-0 block md:hidden">
+          <h1 className="font-['Cormorant_Garamond'] text-2xl font-semibold text-white tracking-wide">
+            Your Dream Moodboard
+          </h1>
+          <p className="text-[9px] uppercase tracking-[0.15em] text-[#b89f79] font-medium mt-0.5">
+            CURATE AND ORGANIZE YOUR THEMED WEDDING VISIONS
+          </p>
+        </div>
+
+        {/* Glassmorphic main panel layout */}
+        <section className="flex-1 min-h-0 flex flex-col rounded-[24px] border border-white/15 bg-white/5 backdrop-blur-2xl p-4 md:p-5 shadow-[0_30px_70px_rgba(0,0,0,0.45)] overflow-y-auto">
+
+          <input
+            ref={uploadRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => handleUploadPhotos(e.target.files)}
+          />
+
+          {/* Premium Theme Selection Tabs Grid */}
+          <div className="mb-6 grid gap-4 grid-cols-2 lg:grid-cols-4 flex-shrink-0">
+            {THEMES.map((item) => {
+              const isActive = item.key === selectedTheme.key;
+              const count = getThemeCount(item.key);
+              return (
                 <button
+                  key={item.key}
                   type="button"
-                  onClick={() => uploadRef.current?.click()}
-                  disabled={uploading}
-                  className="rounded border border-white/10 px-3 py-1.5 text-xs text-white/70 transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => openTheme(item.key)}
+                  className={`rounded-[16px] border p-4 text-left transition-all duration-300 flex flex-col justify-between backdrop-blur-md ${
+                    isActive
+                      ? "border-[#e6c6b2] bg-white/10 shadow-[0_0_20px_rgba(230,198,178,0.15)]"
+                      : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/15"
+                  }`}
                 >
-                  {uploading ? "Uploading..." : "Add Photos"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAddOccasionToCart}
-                  className="rounded bg-[#f4f0ea] px-3 py-1.5 text-xs font-semibold text-[#1d1714] transition hover:bg-white"
-                >
-                  Add Occasion To Cart
-                </button>
-              </div>
-              <input
-                ref={uploadRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => handleUploadPhotos(e.target.files)}
-              />
-            </div>
-
-            {/* Premium Theme Selection Tabs Grid */}
-            <div className="mb-5 grid gap-3.5 grid-cols-2 lg:grid-cols-4 flex-shrink-0">
-              {THEMES.map((item) => {
-                const isActive = item.key === selectedTheme.key;
-                const count = (boardsState[item.key] || []).length;
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => openTheme(item.key)}
-                    className={`rounded-[8px] border px-3 py-3 text-left transition ${isActive ? "border-[#c79b2d] bg-[#2b2118]" : "border-white/10 bg-[#211914] hover:border-white/25"}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="font-['Cormorant_Garamond'] text-[22px] font-semibold text-white">
-                        {item.name}
-                      </p>
-                      <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-semibold text-white/70">
-                        {count}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-[11px] leading-5 text-white/45">
-                      {item.tone}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {error && (
-              <div className="mb-4 rounded-[6px] border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-                {error}
-              </div>
-            )}
-
-            {!activeBoard ? (
-              /* High-End Glassmorphic Empty Placeholder State */
-              <div className="flex-1 rounded-[20px] border border-dashed border-white/15 bg-white/5 backdrop-blur-md p-10 text-center flex flex-col items-center justify-center min-h-0 overflow-y-auto">
-                <div className="rounded-full border border-white/[0.08] bg-white/[0.04] p-5 text-[#e6c6b2] mb-4 animate-pulse shadow-[0_0_20px_rgba(230,198,178,0.1)]">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                </div>
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif" }} className="text-[26px] md:text-[32px] font-semibold text-white tracking-wide leading-none">
-                  No {selectedTheme.name} board yet
-                </h2>
-                <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/48">
-                  Generate a function vision first, or add photos directly into
-                  this event moodboard.
-                </p>
-                <div className="mt-6 flex items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/love-story")}
-                    className="rounded-[6px] bg-[#f4f0ea] px-5 py-2.5 text-sm font-semibold text-[#1d1714] transition hover:bg-white"
-                  >
-                    Create Vision
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => uploadRef.current?.click()}
-                    disabled={uploading}
-                    className="rounded-[6px] border border-white/10 px-5 py-2.5 text-sm font-semibold text-white/80 transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {uploading ? "Uploading..." : "Add Photos"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <article className="mx-auto max-w-[860px] rounded-[8px] border border-[#7b6140] bg-[#211914] p-3">
-                <div className="mb-3 flex items-center justify-between">
-                  <div>
-                    <p className="rounded-[4px] bg-[#f1ede7] px-2 py-1 text-[11px] font-semibold text-[#1d1714]">
-                      {activeBoard.functionType || selectedTheme.name} Decor
-                    </p>
-                    <p className="mt-2 text-[11px] text-white/45">
-                      {activeBoard.style} / {activeBoard.functionType}
+                  <div className="flex items-center justify-between w-full">
+                    <p className="font-['Cormorant_Garamond'] text-xl md:text-2xl font-semibold text-white">
+                      {item.name}
                     </p>
                   </div>
-                  <span className="text-[10px] font-black tracking-widest text-[#e6c6b2] bg-white/[0.04] border border-white/10 rounded-full px-3 py-1 font-sans">
+                  <p className="mt-2 text-[11px] leading-relaxed text-white/40 font-medium">
+                    {item.tone}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {error && (
+            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-200 flex-shrink-0">
+              {error}
+            </div>
+          )}
+
+          {/* Display State: Check if board exists and contains images */}
+          {!activeBoard || groupedImages.length === 0 ? (
+            /* High-End Glassmorphic Empty Placeholder State matching mockup exactly */
+            <div className="flex-1 w-full rounded-[20px] border border-dashed border-white/15 bg-white/[0.02] p-10 text-center flex flex-col items-center justify-center min-h-[400px]">
+              <div className="w-24 h-24 rounded-full border border-white/10 bg-white/[0.02] flex items-center justify-center mb-6 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-white/60">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              </div>
+              <h2 className="font-['Cormorant_Garamond'] text-[32px] md:text-[38px] font-semibold text-white tracking-wide leading-none">
+                No {selectedTheme.name} board yet
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/50">
+                Generate a function vision first. Once you add it, it will appear here in the themed moodboard flow.
+              </p>
+              <div className="mt-8 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/love-story")}
+                  className="flex items-center justify-center rounded-xl bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] px-6 py-3 text-sm font-semibold text-[#3D1B2D] transition-all duration-300 hover:brightness-105 hover:scale-105 active:scale-95 shadow-[0_4px_25px_rgba(230,198,178,0.15)]"
+                >
+                  <SparklesIcon />
+                  Create Vision
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Collage Visual Layout */
+            <article className="mx-auto w-full max-w-[1200px] flex-1 min-h-0 rounded-[20px] border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur-md flex flex-col">
+              <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 pb-3 flex-shrink-0">
+                <div>
+                  <span className="rounded-full bg-[#e6c6b2]/10 border border-[#e6c6b2]/20 px-3.5 py-1 text-[11px] font-bold text-[#e6c6b2] uppercase tracking-wider">
+                    {activeBoard.functionType || selectedTheme.name} Decor
+                  </span>
+                  <p className="mt-1 text-[11px] text-white/40 font-medium">
+                    {activeBoard.style} Style / {activeBoard.functionType}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleDeleteBoard}
+                    className="rounded-xl border border-red-500/25 bg-red-500/10 hover:bg-red-500 hover:text-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-red-400 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    Delete Board
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddOccasionToCart}
+                    className="rounded-xl bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#3D1B2D] transition-all duration-200 hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    Add To Cart
+                  </button>
+                  <span className="text-[11px] font-bold tracking-widest text-white/60 bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2">
                     {activeIndex + 1} OF {selectedBoards.length}
                   </span>
                 </div>
+              </div>
 
-                <div className="grid min-h-[430px] grid-cols-1 gap-1.5 md:grid-cols-[1fr_1.2fr]">
-                  {groupedImages[0] ? (
-                    renderImageCard(groupedImages[0], "md:min-h-[430px]")
-                  ) : (
-                    <div className="bg-[#c3c3c3]" />
-                  )}
-                  <div className="grid gap-1.5">
-                    {groupedImages[1] ? (
-                      renderImageCard(groupedImages[1], "min-h-[210px]")
-                    ) : (
-                      <div className="min-h-[210px] bg-[#c3c3c3]" />
+              {/* Scrollable area restricted inside bento wrapper */}
+              <div className="flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-4 custom-scrollbar">
+                
+                {/* Bento Grid matching CoupleWeddingVision layout */}
+                <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-4 flex-1 min-h-0 flex-shrink-0">
+                  {/* Column 1 (Wider) */}
+                  <div className="flex flex-col gap-4 min-h-0 justify-between flex-1">
+                    {renderMoodboardCard(
+                      "Primary Wedding Scene",
+                      "Key generated vision scene",
+                      0,
+                      "flex-[1.2] min-h-0"
                     )}
-                    {groupedImages[2] ? (
-                      renderImageCard(groupedImages[2], "min-h-[210px]")
-                    ) : (
-                      <div className="min-h-[210px] bg-[#c3c3c3]" />
+                    {renderMoodboardCard(
+                      "Ceremony & Theme Detail",
+                      "Specific ritual & ceremonial setup",
+                      2,
+                      "flex-[0.8] min-h-0"
+                    )}
+                  </div>
+                  
+                  {/* Column 2 */}
+                  <div className="flex flex-col gap-4 min-h-0 justify-between flex-1">
+                    {renderMoodboardCard(
+                      "Decor & Detailing",
+                      "Table settings & floral design",
+                      1,
+                      "flex-[0.75] min-h-0"
+                    )}
+                    {renderMoodboardCard(
+                      "Venue Atmosphere",
+                      "Atmospheric lighting & scale",
+                      3,
+                      "flex-[1.25] min-h-0"
                     )}
                   </div>
                 </div>
 
-                <div className="mt-1.5 grid min-h-[220px] grid-cols-1 gap-1.5 md:grid-cols-[1.3fr_0.7fr]">
-                  {groupedImages[3] ? (
-                    renderImageCard(groupedImages[3], "min-h-[220px]")
-                  ) : (
-                    <div className="min-h-[220px] bg-[#c3c3c3]" />
-                  )}
-                  <div className="relative min-h-[220px] overflow-hidden bg-[#c3c3c3]">
-                    {groupedImages[4] &&
-                      renderImageCard(groupedImages[4], "h-full")}
-                    <button
-                      type="button"
-                      className="absolute bottom-3 right-3 rounded-[4px] bg-[#1d1714] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black"
-                    >
-                      Create Video
-                    </button>
-                  </div>
-                </div>
-
-                {groupedImages.length > 5 && (
-                  <div className="mt-3 grid gap-1.5 sm:grid-cols-3">
+                {/* Extra Uploaded/Generated Images */}
+                {groupedImages.length > 4 && (
+                  <div className="grid gap-4 sm:grid-cols-4 flex-shrink-0 mt-2">
                     {groupedImages
-                      .slice(5)
-                      .map((img) => renderImageCard(img, "min-h-[170px]"))}
+                      .slice(4)
+                      .map((img) => renderImageCard(img, "min-h-[150px] aspect-[4/3]"))}
                   </div>
                 )}
+              </div>
 
-                <div className="mt-3 flex items-center justify-between text-[11px] text-white/45">
-                  <p>{new Date(activeBoard.createdAt).toLocaleDateString()}</p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setActiveIndex((prev) => Math.max(0, prev - 1))
-                      }
-                      disabled={activeIndex === 0}
-                      className="rounded bg-black/55 px-2 py-1 text-white/80 transition hover:bg-black/70 disabled:opacity-35"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setActiveIndex((prev) =>
-                          Math.min(selectedBoards.length - 1, prev + 1),
-                        )
-                      }
-                      disabled={activeIndex >= selectedBoards.length - 1}
-                      className="rounded bg-black/55 px-2 py-1 text-white/80 transition hover:bg-black/70 disabled:opacity-35"
-                    >
-                      ›
-                    </button>
-                  </div>
+              {/* Bottom Pagination Controls */}
+              <div className="mt-4 flex items-center justify-between text-xs text-white/40 border-t border-white/5 pt-3 flex-shrink-0">
+                <p>Created: {new Date(activeBoard.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveIndex((prev) => Math.max(0, prev - 1))
+                    }
+                    disabled={activeIndex === 0}
+                    className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white transition hover:bg-white/10 disabled:opacity-35 disabled:cursor-not-allowed"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveIndex((prev) =>
+                        Math.min(selectedBoards.length - 1, prev + 1),
+                      )
+                    }
+                    disabled={activeIndex >= selectedBoards.length - 1}
+                    className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white transition hover:bg-white/10 disabled:opacity-35 disabled:cursor-not-allowed"
+                  >
+                    ›
+                  </button>
                 </div>
-              </article>
-            )}
-          </div>
+              </div>
+            </article>
+          )}
         </section>
       </div>
 
       {editTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-[780px] rounded-[10px] border border-[#5d4421] bg-[#1b1512] p-3">
-            <div className="border border-[#4e3920] bg-[#181310] px-4 py-4">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#b89f79]">
-                    Edit
-                  </p>
-                  <h2 className="font-['Cormorant_Garamond'] text-[28px] font-semibold text-[#f7e7c7]">
-                    Love lies in the details, Let's Edit them
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditTarget(null)}
-                  className="rounded border border-white/10 px-3 py-1 text-xs text-white/70"
-                >
-                  Close
-                </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
+          {/* Square form popup modal with thick white border */}
+          <div className="w-full max-w-[650px] aspect-square rounded-[32px] border-[6px] border-white bg-black/95 text-white shadow-2xl p-6 md:p-8 flex flex-col justify-between overflow-y-auto">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#b89f79] font-medium">
+                  IMAGE CUSTOMIZATION
+                </p>
+                <h2 className="font-['Cormorant_Garamond'] text-3xl font-semibold text-white mt-1 leading-tight">
+                  Refine Decor Details
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditTarget(null)}
+                className="w-8 h-8 rounded-full border border-white/20 bg-white/5 flex items-center justify-center hover:bg-white hover:text-black transition duration-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 flex-1 my-6 min-h-0">
+              
+              {/* Image Preview */}
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/[0.02] flex items-center justify-center h-full min-h-[180px]">
+                <img
+                  src={editTarget.url}
+                  alt={editTarget.label || "Editable moodboard image"}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
-              <div className="grid gap-3 lg:grid-cols-[180px_1fr]">
-                <div className="space-y-2">
-                  <select
-                    value={colorTone}
-                    onChange={(e) => setColorTone(e.target.value)}
-                    className="w-full rounded-[6px] border border-white/10 bg-[#201913] px-2 py-2 text-[11px] text-white outline-none"
-                  >
-                    {COLOR_TONES.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={lighting}
-                    onChange={(e) => setLighting(e.target.value)}
-                    className="w-full rounded-[6px] border border-white/10 bg-[#201913] px-2 py-2 text-[11px] text-white outline-none"
-                  >
-                    {LIGHTING_OPTIONS.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={selectedTheme.name}
-                    disabled
-                    className="w-full rounded-[6px] border border-white/10 bg-[#201913] px-2 py-2 text-[11px] text-white/70 outline-none"
-                  >
-                    <option>{selectedTheme.name}</option>
-                  </select>
-                </div>
+              {/* Edit Controls */}
+              <div className="flex flex-col justify-between gap-4">
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wider text-white/50 block mb-1">Color Tone</label>
+                    <select
+                      value={colorTone}
+                      onChange={(e) => setColorTone(e.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs text-white outline-none focus:border-[#e6c6b2] transition"
+                    >
+                      {COLOR_TONES.map((item) => (
+                        <option key={item} value={item} className="bg-[#1c120e]">
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div>
-                  <textarea
-                    value={editPrompt}
-                    onChange={(e) => setEditPrompt(e.target.value)}
-                    placeholder="Refine every detail..."
-                    className="mb-3 min-h-[90px] w-full rounded-[8px] border border-[#7b6140] bg-[#221b16] px-3 py-3 text-sm text-white outline-none placeholder:text-white/30"
-                  />
-                  <div className="overflow-hidden rounded-[8px] border border-[#7b6140] bg-[#2f2f2f]">
-                    <img
-                      src={editTarget.url}
-                      alt={editTarget.label || "Editable moodboard image"}
-                      className="h-[320px] w-full object-cover"
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wider text-white/50 block mb-1">Lighting</label>
+                    <select
+                      value={lighting}
+                      onChange={(e) => setLighting(e.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs text-white outline-none focus:border-[#e6c6b2] transition"
+                    >
+                      {LIGHTING_OPTIONS.map((item) => (
+                        <option key={item} value={item} className="bg-[#1c120e]">
+                          {item}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wider text-white/50 block mb-1">Prompts / Instructions</label>
+                    <textarea
+                      value={editPrompt}
+                      onChange={(e) => setEditPrompt(e.target.value)}
+                      placeholder="Add flowers, change colors, adjust styling details..."
+                      className="w-full h-24 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs text-white outline-none focus:border-[#e6c6b2] transition resize-none placeholder:text-white/20"
                     />
                   </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleEditImage}
-                      disabled={editing}
-                      className="rounded-[6px] bg-[#f4f0ea] px-4 py-2 text-sm font-semibold text-[#1d1714] disabled:opacity-60"
-                    >
-                      {editing ? "Editing..." : "Add"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleImageRemove(editTarget.id)}
-                      className="rounded-[6px] border border-white/10 px-4 py-2 text-sm font-semibold text-white/80"
-                    >
-                      Remove
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditPrompt("");
-                        setColorTone(COLOR_TONES[0]);
-                        setLighting(LIGHTING_OPTIONS[0]);
-                      }}
-                      className="rounded-[6px] border border-white/10 px-4 py-2 text-sm font-semibold text-white/80"
-                    >
-                      Reset
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => window.open(editTarget.url, "_blank")}
-                      className="rounded-[6px] border border-white/10 px-4 py-2 text-sm font-semibold text-white/80"
-                    >
-                      Compare
-                    </button>
-                  </div>
                 </div>
               </div>
+
             </div>
+
+            {/* Modal Footer Actions */}
+            <div className="flex items-center gap-3 border-t border-white/10 pt-4">
+              <button
+                type="button"
+                onClick={handleEditImage}
+                disabled={editing}
+                className="flex-1 py-3 rounded-xl bg-[#e6c6b2] text-[#201913] text-xs font-semibold hover:bg-[#eed7c5] transition-all duration-300 disabled:opacity-50"
+              >
+                {editing ? "Regenerating..." : "Apply AI Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleImageRemove(editTarget.id)}
+                className="px-4 py-3 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 text-xs font-semibold hover:bg-red-500 hover:text-white transition-all duration-300"
+              >
+                Delete
+              </button>
+            </div>
+
           </div>
         </div>
       )}

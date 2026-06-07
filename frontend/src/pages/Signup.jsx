@@ -50,10 +50,7 @@ export default function Signup() {
   const togglePassword = () => setShowPassword((v) => !v);
 
   const getCoupleNextPath = (user) => {
-    const weddingProfile = user?.weddingProfile || {};
-    return user?.profileCompleted || weddingProfile.completed
-      ? "/love-story"
-      : "/couple/onboarding";
+    return "/couples";
   };
 
   const handleGoogleSignupRedirect = (user, isNewUser) => {
@@ -67,7 +64,7 @@ export default function Signup() {
     }
 
     if (resolvedRole === "couple") {
-      navigate(isNewUser ? "/couple/onboarding" : getCoupleNextPath(user), {
+      navigate("/couples", {
         replace: true,
       });
       return;
@@ -121,7 +118,7 @@ export default function Signup() {
             }),
           );
           localStorage.setItem("lovers-ai-couple-profile-step", "1");
-          navigate("/couple/onboarding");
+          navigate("/couples");
         } else {
           navigate("/");
         }

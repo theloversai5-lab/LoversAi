@@ -23,8 +23,8 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
 // Fixed Plans & Credit Packages
 const PLANS = {
   // Subscription Plans
-  pro: { name: 'Pro Plan', price: 999, currency: 'INR', type: 'subscription', credits: 100 },
-  premium: { name: 'Premium Plan', price: 1999, currency: 'INR', type: 'subscription', credits: 300 },
+  basic: { name: 'Basic Plan', price: 1499, currency: 'INR', type: 'subscription', credits: 15 },
+  premium: { name: 'Premium Plan', price: 2499, currency: 'INR', type: 'subscription', credits: 9999 },
   
   // Credit Top-ups
   credits_10: { name: '10 AI Credits', price: 99, currency: 'INR', type: 'credits', credits: 10 },

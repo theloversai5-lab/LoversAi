@@ -94,7 +94,7 @@ router.post("/save-form", protect, async (req, res) => {
 /* ================================================================
    POST /api/users/save-wedding-profile — Save couple wedding details
 ================================================================ */
-router.post("/save-wedding-profile", protect, authorize("couple"), async (req, res) => {
+router.post("/save-wedding-profile", protect, async (req, res) => {
   try {
     const {
       partnerName1, partnerName2, weddingDate,

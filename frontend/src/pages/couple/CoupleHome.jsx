@@ -49,14 +49,23 @@ function CoupleHome() {
     return () => window.clearInterval(intervalId);
   }, []);
 
+  const hasCompletedWeddingProfile =
+    currentUser?.role === "couple" && currentUser?.weddingProfile?.completed === true;
+
   const handleStartYourStory = () => {
     if (currentUser) {
       // Check if user is actually a couple
-      if (currentUser.role === 'couple') {
-        navigate("/couple/onboarding");
+      if (currentUser.role === "couple") {
+        if (hasCompletedWeddingProfile) {
+          navigate("/love-story");
+        } else {
+          navigate("/couple/onboarding");
+        }
       } else {
         // User is logged in but with wrong role (vendor/planner)
-        navigate(`/login?role=couple&mismatch=true`, { state: { from: "/couple/onboarding" } });
+        navigate(`/login?role=couple&mismatch=true`, {
+          state: { from: "/couple/onboarding" },
+        });
       }
       return;
     }
@@ -76,7 +85,7 @@ function CoupleHome() {
         {/* Primary CTA and supporting content below the animated hero. */}
         <div id="journey" style={buttonWrapper}>
           <button style={button} onClick={handleStartYourStory}>
-            Start Your Story
+            {hasCompletedWeddingProfile ? "Continue Your Journey" : "Start Your Story"}
           </button>
         </div>
 
