@@ -39,7 +39,6 @@ export default function PlannerQuickMenu({
   const guestLinks = [
     { label: "Planner Home", to: "/planner" },
     { label: "Pitch with AI", to: "/planner-ai-tools" },
-    { label: "Planner Signup", to: "/planner/signup" },
     { label: "Login", to: "/login?role=planner" },
   ];
 

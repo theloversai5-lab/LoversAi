@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PortfolioSection from '../components/PortfolioSection';
 import PlannerQuickMenu from '../components/PlannerQuickMenu';
+import Footer from '../components/Footer';
 
 const SafePortfolioSection =
   typeof PortfolioSection === 'function' ? PortfolioSection : () => null;
@@ -131,6 +132,9 @@ const PlannerPage = () => {
 
       {/* Portfolio Section */}
       <SafePortfolioSection />
+
+      {/* Planner Footer */}
+      <Footer />
     </>
   );
 };

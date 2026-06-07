@@ -330,7 +330,12 @@ export default function Signup() {
             <span>or</span>
           </div>
 
-          <button className="planner-auth-google" type="button">
+          <button
+            className="planner-auth-google"
+            type="button"
+            onClick={handleGoogleSignup}
+            disabled={loading}
+          >
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"

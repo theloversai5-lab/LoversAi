@@ -156,9 +156,9 @@ const Footer = ({ navigateTo, openContactPopup }) => {
     "--footer-bg-image": "url('/images/footer.png')",
   };
   const plannerFooterOuterClass =
-    "relative z-10 mx-auto w-full max-w-[1400px] rounded-[42px] border border-white/14 bg-[linear-gradient(135deg,rgba(231,200,184,0.36),rgba(78,62,57,0.34))] p-0.5 shadow-[0_24px_90px_rgba(0,0,0,0.24)] backdrop-blur-[28px] sm:p-1 lg:p-2";
+    "relative z-10 mx-auto w-full max-w-[1400px] rounded-[36px] bg-[linear-gradient(135deg,rgba(231,200,184,0.22),rgba(78,62,57,0.28))] p-0.5 shadow-[0_24px_90px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[28px]";
   const plannerHomeFooterOuterClass =
-    "relative z-10 mx-auto w-full max-w-[1650px] rounded-[48px] border border-white/18 bg-[linear-gradient(135deg,rgba(231,200,184,0.3),rgba(68,54,49,0.4))] p-1 shadow-[0_24px_90px_rgba(0,0,0,0.22)] backdrop-blur-[28px]";
+    "relative z-10 mx-auto w-full max-w-[1650px] rounded-[36px] bg-[linear-gradient(135deg,rgba(231,200,184,0.18),rgba(68,54,49,0.34))] p-0.5 shadow-[0_24px_90px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[28px]";
 
   return (
     <>
@@ -181,21 +181,21 @@ const Footer = ({ navigateTo, openContactPopup }) => {
         >
           {isPlannerHomeFooter ? (
             <div className="grid gap-0 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:items-stretch">
-              <div className="flex min-h-[380px] flex-col px-5 py-5 text-center lg:px-10 lg:py-6 xl:px-12">
+              <div className="flex min-h-[180px] flex-col px-3 py-3 text-center lg:px-6 lg:py-4 xl:px-8">
                 <div className="flex justify-center lg:justify-start">
-                  <span className="footer-text-font inline-flex w-fit rounded-full border border-white/20 bg-white/10 px-5 py-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-[#f8ece6]">
+                  <span className="footer-text-font inline-flex w-fit rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-[7px] font-semibold uppercase tracking-[0.2em] text-[#f8ece6]">
                     For Wedding Planners
                   </span>
                 </div>
 
-                <div className="flex flex-1 items-center justify-center px-2 py-4 lg:px-0">
-                  <h2 className="footer-heading-font max-w-[760px] text-center text-[clamp(28px,2.8vw,44px)] leading-[0.94] text-white lg:text-left">
+                <div className="flex flex-1 items-center justify-center px-2 py-2 lg:px-0">
+                  <h2 className="footer-heading-font max-w-[760px] text-center text-[clamp(18px,2vw,28px)] leading-[0.95] text-white lg:text-left">
                     Built to help planners win better weddings.
                   </h2>
                 </div>
 
-                <div className="mt-auto space-y-4">
-                  <div className="flex flex-wrap items-center justify-center gap-2.5 lg:justify-start">
+                <div className="mt-auto space-y-2">
+                  <div className="hidden flex-wrap items-center justify-center gap-2 lg:flex lg:justify-start">
                     {[
                       "Qualified couple leads",
                       "AI-powered pitch support",
@@ -203,20 +203,20 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                     ].map((item) => (
                       <div
                         key={item}
-                        className="rounded-full border border-white/18 bg-white/[0.06] px-4 py-2 text-[10px] font-medium text-[#f8ede8]/92 backdrop-blur-md"
+                        className="rounded-full border border-white/18 bg-white/[0.06] px-3 py-0.75 text-[8px] font-medium text-[#f8ede8]/92 backdrop-blur-md sm:px-3.5"
                       >
                         {item}
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex flex-col items-center gap-2 lg:flex-row lg:items-end lg:gap-3 lg:justify-start">
+                  <div className="flex flex-col items-center gap-1.5 lg:flex-row lg:items-end lg:gap-3 lg:justify-start">
                     <img
-                      src="/images/logo copy.png"
+                      src="/images/LogoLoversai.png"
                       alt="Lovers AI Logo"
-                      className="h-[42px] w-auto object-contain sm:h-[48px]"
+                      className="h-[56px] w-auto max-w-[150px] object-contain sm:h-[72px] sm:max-w-[180px]"
                     />
-                    <p className="footer-text-font text-center text-[9px] font-medium text-[#f5e8e1]/78 lg:text-left">
+                    <p className="footer-text-font text-center text-[8px] font-medium text-[#f5e8e1]/78 lg:text-left">
                       &copy;2025 LoversAI. Planner growth, simplified.
                     </p>
                   </div>
@@ -224,36 +224,36 @@ const Footer = ({ navigateTo, openContactPopup }) => {
               </div>
 
               <div className="border-t border-white/14 lg:border-l lg:border-t-0">
-                <div className="px-5 py-5 sm:px-8 lg:px-10 lg:py-6 xl:px-12">
+                <div className="px-4 py-4 sm:px-8 lg:px-10 lg:py-5 xl:px-12">
                   <div className="max-w-[760px]">
-                    <h3 className="footer-heading-font text-[clamp(24px,2.2vw,34px)] leading-[1.02] text-white">
+                    <h3 className="footer-heading-font text-[clamp(18px,1.7vw,24px)] leading-[1.02] text-white">
                       Book a planner growth call
                     </h3>
-                    <p className="footer-text-font mt-3 max-w-[560px] text-[12px] leading-5 text-[#f5e8e1]/72">
+                    <p className="footer-text-font mt-1.5 max-w-[560px] text-[10px] leading-4 text-[#f5e8e1]/72">
                       Leave your email and phone number and we will help you set
                       up the planner side properly.
                     </p>
                   </div>
 
-                  <div className="mt-5 grid gap-3">
-                    <label className="footer-text-font grid gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f5e8e1]/86">
+                  <div className="mt-3 grid gap-2 pb-2 sm:pb-3">
+                    <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/86">
                       Email Address
                       <input
                         type="email"
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
                         placeholder="Enter your work email"
-                        className="h-10 w-full rounded-[18px] border border-white/16 bg-white/[0.07] px-4 text-[12px] text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1]"
+                        className="h-7 w-full rounded-[14px] border border-white/16 bg-white/[0.07] px-3 text-[10px] text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1]"
                       />
                     </label>
 
-                    <div className="grid gap-3 md:grid-cols-[120px_1fr]">
-                      <label className="footer-text-font grid gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f5e8e1]/86">
+                    <div className="grid gap-2 md:grid-cols-[86px_1fr]">
+                      <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/86">
                         Country
                         <select
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
-                          className="h-10 w-full rounded-[18px] border border-white/16 bg-white/[0.07] px-4 text-[12px] text-white focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1] cursor-pointer"
+                          className="h-7 w-full rounded-[14px] border border-white/16 bg-white/[0.07] px-2 text-[10px] text-white focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1] cursor-pointer"
                         >
                           <option
                             value="+91"
@@ -288,7 +288,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                         </select>
                       </label>
 
-                      <label className="footer-text-font grid gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f5e8e1]/86">
+                      <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/86">
                         Phone Number
                         <input
                           type="tel"
@@ -299,34 +299,34 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                               e.target.value
                                 .replace(/[^\d]/g, "")
                                 .slice(0, requiredDigits),
-                            )
+                          )
                           }
                           placeholder={`Enter your ${phonePlaceholder}`}
-                          className="h-10 w-full rounded-[18px] border border-white/16 bg-white/[0.07] px-4 text-[12px] text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1]"
+                          className="h-7 w-full rounded-[14px] border border-white/16 bg-white/[0.07] px-3 text-[10px] text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1]"
                         />
                       </label>
                     </div>
 
-                    <div className="pt-1">
+                    <div className="pt-1 pr-2 sm:pr-4 lg:pr-6 xl:pr-8">
                       <button
                         type="button"
                         onClick={handleBookCall}
-                        className="h-10 w-full rounded-full bg-[#d8b8a9] px-6 text-[12px] font-semibold text-[#1f1411] transition-all duration-300 hover:brightness-105 active:scale-[0.98] shadow-lg shadow-black/10 hover:shadow-xl flex items-center justify-center cursor-pointer"
+                        className="h-9 w-full max-w-[640px] rounded-full bg-[#d8b8a9] px-5 text-[11px] font-semibold text-[#1f1411] transition-all duration-300 hover:brightness-105 active:scale-[0.98] shadow-[0_10px_22px_rgba(0,0,0,0.14)] hover:shadow-[0_14px_26px_rgba(0,0,0,0.18)] flex items-center justify-center cursor-pointer"
                       >
                         {saving ? "Saving..." : "Book a Free Call"}
                       </button>
                     </div>
                   </div>
 
-                  <div className="mt-6 border-t border-white/12 pt-5">
-                    <div className="grid gap-y-4 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10">
+                  <div className="mt-5 hidden border-t border-white/12 pt-4 sm:block">
+                    <div className="grid gap-y-3 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10">
                       {Object.keys(footerLinks).map((category) => (
                         <div key={category} className="min-w-0">
-                          <h4 className="footer-heading-font mb-2.5 text-[12px] text-[#f5e8e1]">
+                          <h4 className="footer-heading-font mb-2 text-[11px] text-[#f5e8e1]">
                             {category}
                           </h4>
 
-                          <ul className="space-y-2">
+                          <ul className="space-y-1">
                             {footerLinks[category].map((item) => (
                               <li key={item.label}>
                                 {item.page || item.action ? (
@@ -349,15 +349,15 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                                         );
                                     }
                                   }}
-                                    className="footer-text-font text-left text-[11px] font-normal leading-5 text-white/80 transition-colors duration-200 hover:text-loverai-gold"
-                                  >
-                                    {item.label}
-                                  </button>
-                                ) : (
-                                  <span className="footer-text-font text-[11px] font-normal text-white/35">
-                                    {item.label}
-                                  </span>
-                                )}
+                                className="footer-text-font text-left text-[10px] font-light text-[#f2dfd8]/72 transition-colors duration-200 hover:text-loverai-gold"
+                              >
+                                {item.label}
+                              </button>
+                            ) : (
+                              <span className="footer-text-font text-[10px] font-light text-[#f2dfd8]/42">
+                                {item.label}
+                              </span>
+                            )}
                               </li>
                             ))}
                           </ul>
@@ -370,15 +370,15 @@ const Footer = ({ navigateTo, openContactPopup }) => {
             </div>
           ) : isPlannerFooter ? (
             <div className="grid gap-0 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-stretch">
-              <div className="flex min-h-[220px] flex-col items-center justify-between px-2 py-3 text-center lg:px-3 lg:py-4">
+              <div className="flex min-h-[140px] flex-col items-center justify-between px-2 py-1 text-center lg:px-3 lg:py-2">
                 <div className="pt-0.5">
-                  <span className="footer-text-font inline-flex w-fit rounded-full border border-white/14 bg-white/10 px-3.5 py-1 text-[8px] font-semibold uppercase tracking-[0.24em] text-[#f8ece6]">
+                  <span className="footer-text-font inline-flex w-fit rounded-full border border-white/14 bg-white/10 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.22em] text-[#f8ece6]">
                     For Wedding Planners
                   </span>
                 </div>
 
                 <div className="flex flex-1 flex-col items-center justify-center py-1.5">
-                  <h2 className="footer-heading-font max-w-xl text-[clamp(24px,2.8vw,34px)] leading-[0.92] text-white">
+                  <h2 className="footer-heading-font max-w-xl text-[clamp(22px,2.4vw,30px)] leading-[0.92] text-white">
                     Built to help planners win better weddings.
                   </h2>
                 </div>
@@ -392,7 +392,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                     ].map((item) => (
                       <div
                         key={item}
-                        className="rounded-[14px] border border-white/12 bg-white/[0.06] px-3 py-1.5 text-[10px] sm:text-[11px] text-[#f8ede8]/88 backdrop-blur-md"
+                        className="rounded-[14px] border border-white/12 bg-white/[0.06] px-3 py-1 text-[10px] sm:text-[11px] text-[#f8ede8]/88 backdrop-blur-md"
                       >
                         {item}
                       </div>
@@ -401,9 +401,9 @@ const Footer = ({ navigateTo, openContactPopup }) => {
 
                   <div className="flex items-center justify-center gap-2.5 pt-0.25">
                     <img
-                      src="/images/logo copy.png"
+                      src="/images/LogoLoversai.png"
                       alt="Lovers AI Logo"
-                      className="h-[52px] w-auto object-contain sm:h-[62px]"
+                      className="h-[58px] w-auto max-w-[160px] object-contain sm:h-[68px] sm:max-w-[190px]"
                     />
                     <p className="footer-text-font text-[9px] sm:text-[10px] text-[#f5e8e1]/64">
                       &copy;2025 LoversAI. Planner growth, simplified.
@@ -413,18 +413,18 @@ const Footer = ({ navigateTo, openContactPopup }) => {
               </div>
 
               <div className="border-t border-white/12 lg:border-l lg:border-t-0">
-                <div className="space-y-2.5 px-10 py-6 sm:px-14 sm:py-6 lg:px-28 lg:py-6 xl:pl-40">
-                  <div className="mb-4">
-                    <h3 className="footer-heading-font text-[19px] font-light text-white sm:text-[22px]">
+                <div className="space-y-2.5 px-8 py-4 sm:px-10 sm:py-4 lg:px-16 lg:py-5 xl:pl-24">
+                  <div className="mb-2">
+                    <h3 className="footer-heading-font text-[17px] font-light text-white sm:text-[19px]">
                       Book a planner growth call
                     </h3>
-                    <p className="footer-text-font mt-1 max-w-xl text-[10px] leading-4.5 text-[#f5e8e1]/70">
+                    <p className="footer-text-font mt-1 max-w-xl text-[10px] leading-4 text-[#f5e8e1]/70">
                       Leave your email and phone number and we will help you set
                       up the planner side properly.
                     </p>
                   </div>
 
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5 pb-4">
                     <label className="footer-text-font grid gap-1 text-[8px] font-medium uppercase tracking-[0.18em] text-[#f5e8e1]/62">
                       Email Address
                       <input
@@ -432,7 +432,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                         value={newsletterEmail}
                         onChange={(e) => setNewsletterEmail(e.target.value)}
                         placeholder="Enter your work email"
-                        className="h-9 w-full rounded-[18px] border border-white/12 bg-white/[0.08] px-3.5 text-[11px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.12]"
+                        className="h-8 w-full rounded-[16px] border border-white/12 bg-white/[0.08] px-3.5 text-[11px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.12]"
                       />
                     </label>
 
@@ -442,7 +442,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                         <select
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
-                          className="h-9 w-full rounded-[18px] border border-white/12 bg-white/[0.08] px-2.5 text-[11px] text-white focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.12] cursor-pointer"
+                          className="h-8 w-full rounded-[16px] border border-white/12 bg-white/[0.08] px-2.5 text-[11px] text-white focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.12] cursor-pointer"
                         >
                           <option
                             value="+91"
@@ -491,16 +491,16 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                             )
                           }
                           placeholder={`Enter your ${phonePlaceholder}`}
-                          className="h-9 w-full rounded-[18px] border border-white/12 bg-white/[0.08] px-3.5 text-[11px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.12]"
+                          className="h-8 w-full rounded-[16px] border border-white/12 bg-white/[0.08] px-3.5 text-[11px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.12]"
                         />
                       </label>
                     </div>
 
-                    <div className="mt-4 pt-2 px-1">
+                    <div className="mt-3 pt-1 px-1">
                       <button
                         type="button"
                         onClick={handleBookCall}
-                        className="h-9 w-full rounded-[18px] bg-[#d8b8a9] px-6 text-[11px] font-semibold text-[#1f1411] transition-all duration-300 hover:brightness-105 active:scale-[0.98] shadow-lg shadow-black/10 hover:shadow-xl flex items-center justify-center cursor-pointer"
+                        className="h-8 w-full rounded-[16px] bg-[#d8b8a9] px-5 text-[11px] font-semibold text-[#1f1411] transition-all duration-300 hover:brightness-105 active:scale-[0.98] shadow-lg shadow-black/10 hover:shadow-xl flex items-center justify-center cursor-pointer"
                       >
                         {saving ? "Saving..." : "Book a Free Call"}
                       </button>
@@ -508,8 +508,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                   </div>
                 </div>
 
-                <div className="grid gap-x-12 gap-y-3 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-16
-">
+                <div className="grid gap-x-12 gap-y-3 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-16">
                   {Object.keys(footerLinks).map((category) => (
                     <div key={category} className="min-w-0">
                       <h4 className="footer-heading-font mb-2 text-[13px] text-[#f5e8e1]">
