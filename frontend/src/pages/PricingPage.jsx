@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
@@ -10,152 +10,76 @@ const planCards = [
   {
     name: "Free Plan",
     price: "0",
-    description: "Perfect for getting started with AI creativity.",
+    period: "FREE FOREVER",
+    description: "Explore basic AI planning and vision tools for couples starting their journey.",
     features: [
-      "Retexturizing",
-      "Image upscaling",
-      "Image views",
-      "Standard quality output",
-      "Community support",
+      { bold: "1 AI Decor Vision ", regular: "(Small Event only)" },
+      { bold: "1 Active moodboard slot", regular: "" },
+      { bold: "", regular: "Browse wedding planner listings" },
+      { bold: "", regular: "Standard resolution downloads" },
+      { bold: "", regular: "Access to basic wedding profile dashboard" }
     ],
+    buttonText: "DEFAULT PLAN",
+    key: "free"
   },
   {
     name: "Basic Plan",
-    key: "basic",
-    price: "4,349",
-    description: "Great for individual creators and small projects.",
+    price: "1,499",
+    period: "PER MONTH",
+    description: "Great for couples looking for richer event inspiration and contact options.",
     features: [
-      "Credits per month: 1,300",
-      "Number of images: 130",
-      "Storage: 5GB",
-      "Retexturing",
-      "Image views",
-      "Image to video conversion",
-      "Generative image and video editing",
-      "High quality output",
+      { bold: "15 AI Decor Visions ", regular: "(Small/Medium Events)" },
+      { bold: "5 Active moodboard slots", regular: "" },
+      { bold: "", regular: "Connect with up to 5 wedding planners" },
+      { bold: "", regular: "High resolution downloads" },
+      { bold: "", regular: "Standard email customer support" }
     ],
+    buttonText: "UPGRADE NOW",
+    key: "basic"
   },
   {
     name: "Premium Plan",
+    price: "2,499",
+    period: "PER MONTH",
+    description: "Full access to complete wedding tools, custom theme generations, and unlimited listings.",
+    features: [
+      { bold: "Unlimited AI Decor Visions ", regular: "(All Event Types)" },
+      { bold: "Unlimited moodboard slots & themes", regular: "" },
+      { bold: "", regular: "Connect & chat with unlimited planners" },
+      { bold: "", regular: "Ultra high-res (Watermark-free) downloads" },
+      { bold: "", regular: "Access to custom generative theme tools" },
+      { bold: "", regular: "Priority 24/7 dedicated support & chat" }
+    ],
+    buttonText: "BUY PREMIUM",
     key: "premium",
-    price: "9,349",
-    description: "Unlock full creative potential and advanced tools.",
-    features: [
-      "Credits per month: 6,500",
-      "Number of images: 650",
-      "Storage: 15GB",
-      "Retexturing",
-      "Image views",
-      "Image to video conversion",
-      "Generative image and video editing",
-      "4D quality output",
-      "Priority email support",
-      "Community support",
-    ],
-    featured: true,
-  },
-  {
-    name: "Enterprise",
-    price: "Customisable",
-    description: "Unlock full creative potential and advanced tools.",
-    features: [
-      "Custom credits",
-      "Unlimited storage",
-      "All features",
-      "Dedicated support",
-      "Custom integrations",
-    ],
-    cta: "Contact Sales",
-  },
-];
-
-const topUpRows = [
-  { plan: "Free", credits: "10", pricePerCredit: "17.00" },
-  { plan: "Basic", credits: "10", pricePerCredit: "13.60" },
-  { plan: "Premium", credits: "10", pricePerCredit: "8.50" },
-];
-
-const featureRows = [
-  { label: "Image Retexturing", plans: [true, true, true, true] },
-  { label: "Image Views", plans: [true, true, true, true] },
-  { label: "Image to Video Conversions", plans: [false, true, true, true] },
-  {
-    label: "Generative Image and Video Editing",
-    plans: [false, true, true, true],
-  },
-  { label: "Standard Quality Output", plans: [true, false, false, false] },
-  { label: "High Quality Output", plans: [false, true, false, false] },
-  { label: "HD Quality Output", plans: [false, false, true, true] },
-  { label: "Community Support", plans: [true, true, true, false] },
-  { label: "Priority Email Support", plans: [false, false, true, true] },
-  { label: "Custom AI Models", plans: [false, false, false, true] },
-];
-
-function StatusIcon({ enabled }) {
-  if (enabled) {
-    return (
-      <span
-        aria-label="Included"
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/12 text-emerald-400"
-      >
-        <svg
-          className="h-4 w-4"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M3.5 8.5l3 3 6-7" />
-        </svg>
-      </span>
-    );
+    featured: true
   }
-
-  return (
-    <span
-      aria-label="Not included"
-      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-orange-500/12 text-orange-400"
-    >
-      <svg
-        className="h-4 w-4"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      >
-        <path d="M4 8h8" />
-      </svg>
-    </span>
-  );
-}
-
-function PriceValue({ value }) {
-  const isNumericPrice = /^\d[\d,]*([.]\d+)?$/.test(value);
-
-  if (!isNumericPrice) {
-    return (
-      <div className="mb-1 text-3xl font-bold tracking-tight text-loverai-gold sm:text-4xl">
-        {value}
-      </div>
-    );
-  }
-
-  return (
-    <div className="mb-1 flex items-baseline gap-2 text-loverai-gold">
-      <span className="text-2xl font-semibold sm:text-3xl">{RUPEE}</span>
-      <span className="text-4xl font-bold tracking-tight tabular-nums sm:text-5xl">
-        {value}
-      </span>
-    </div>
-  );
-}
+];
 
 const PricingPage = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const [currentPlan, setCurrentPlan] = useState("free");
+  const [loadingPlan, setLoadingPlan] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      const fetchPlan = async () => {
+        try {
+          setLoadingPlan(true);
+          const response = await paymentAPI.getPaymentStatus();
+          if (response.success && response.plan) {
+            setCurrentPlan(response.plan);
+          }
+        } catch (err) {
+          console.error("Error fetching subscription status:", err);
+        } finally {
+          setLoadingPlan(false);
+        }
+      };
+      fetchPlan();
+    }
+  }, [currentUser]);
 
   const loadRazorpay = () =>
     new Promise((resolve) => {
@@ -188,7 +112,7 @@ const PricingPage = () => {
       }
 
       toast.loading("Initializing payment...", { id: "payment" });
-      const orderData = await paymentAPI.createOrder({ plan });
+      const orderData = await paymentAPI.createOrder({ planId: plan });
 
       if (!orderData || !orderData.orderId) {
         toast.error("Server error: Could not create order", { id: "payment" });
@@ -198,7 +122,7 @@ const PricingPage = () => {
       toast.dismiss("payment");
 
       const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_replace_me",
+        key: orderData.keyId || "rzp_test_replace_me",
         amount: orderData.amount,
         currency: orderData.currency,
         name: "LoversAI Platform",
@@ -211,12 +135,14 @@ const PricingPage = () => {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
+              planId: plan,
             });
 
             if (verifyRes.success) {
-              toast.success("Payment successful! Credits added.", {
+              toast.success("Payment successful! Subscription activated.", {
                 id: "verify",
               });
+              setCurrentPlan(plan);
               setTimeout(() => {
                 navigate("/profile");
               }, 2000);
@@ -241,7 +167,7 @@ const PricingPage = () => {
             "user@loversai.com",
         },
         theme: {
-          color: "#9B5370",
+          color: "#b89f79",
         },
       };
 
@@ -264,172 +190,115 @@ const PricingPage = () => {
   const serif = { fontFamily: "'Cormorant Garamond', serif" };
   const pageStyle = {
     minHeight: "100vh",
-    background:
-      "radial-gradient(circle at top, rgba(230, 198, 178, 0.12), transparent 40%), linear-gradient(180deg, #17110f 0%, #0d0908 100%)",
+    backgroundImage: "linear-gradient(to bottom, rgba(20, 12, 10, 0.65) 0%, rgba(10, 5, 4, 0.85) 100%), url('/images/signup.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
   };
 
   return (
-    <div style={pageStyle} className="px-4 pb-20">
+    <div style={pageStyle} className="px-4 pb-24">
       <div className="mx-auto max-w-7xl">
         <div className="pt-32" />
 
-        <h2 className="mb-8 text-center text-5xl font-light text-white heading-font">
-          Choose Your Creative Plan
+        <h2 className="mb-4 text-center text-4xl md:text-5xl lg:text-[56px] font-light text-white" style={serif}>
+          Choose Your Wedding Planning Plan
         </h2>
-        <p className="mx-auto mb-16 max-w-3xl text-center text-white/40">
-          Unlock the full potential of AI-powered content creation with plans
-          designed for every creator, from hobbyists to enterprises.
+        <p className="mx-auto mb-16 max-w-2xl text-center text-white/70 text-sm md:text-base leading-relaxed font-light">
+          Unlock the full potential of AI-powered moodboards, designer decor visions, and direct planner proposals custom tailored for your special day.
         </p>
 
-        <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {planCards.map((plan) => (
-            <div
-              key={plan.name}
-              style={{
-                backgroundColor: "rgba(0,0,0,0.4)",
-                backdropFilter: "blur(12px)",
-                color: "#fff",
-              }}
-              className={`relative flex h-full flex-col rounded-2xl border p-6 ${
-                plan.featured
-                  ? "border-[#e6c6b2]/40 shadow-[0_0_20px_rgba(230,198,178,0.15)]"
-                  : "border-white/10"
-              }`}
-            >
-              {plan.featured && (
-                <div className="absolute right-0 top-0 rounded-bl-lg bg-gradient-to-r from-[#e6c6b2] to-[#c59854] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#1c1613]">
-                  Most Popular
-                </div>
-              )}
-
-              <h3 className="mb-2 text-xl font-bold">{plan.name}</h3>
-              <PriceValue value={plan.price} />
-              <div className="mb-6 text-sm text-white/50">
-                {plan.key ? "/month" : plan.price === "0" ? "/month" : ""}
-              </div>
-              <p className="mb-6 text-sm text-white/60">{plan.description}</p>
-
-              <ul className="mb-8 flex-grow space-y-3 text-sm text-white/90">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3">
-                    <StatusIcon enabled />
-                    <span className="leading-6">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {plan.key && (
-                <button
-                  onClick={() => handlePurchase(plan.key)}
-                  style={{
-                    background: "linear-gradient(135deg, #e6c6b2, #c59854)",
-                    color: "#1c1613",
-                  }}
-                  className="mx-auto mt-4 flex w-2/3 justify-center rounded-xl py-2.5 text-sm font-bold uppercase tracking-wide transition-all hover:brightness-110 shadow-[0_4px_15px_rgba(225,195,135,0.3)]"
-                >
-                  {currentUser ? "Buy Now" : "Login to Purchase"}
-                </button>
-              )}
-
-              {plan.cta && (
-                <button
-                  onClick={() => {
-                    toast.info(
-                      "Please contact sales@loversai.com for Enterprise plans",
-                    );
-                  }}
-                  style={{
-                    background: "linear-gradient(135deg, #e6c6b2, #c59854)",
-                    color: "#1c1613",
-                  }}
-                  className="mx-auto mt-4 flex w-2/3 justify-center rounded-xl py-2.5 text-sm font-bold uppercase tracking-wide transition-all hover:brightness-110 shadow-[0_4px_15px_rgba(225,195,135,0.3)]"
-                >
-                  {plan.cta}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="mx-auto mb-16 max-w-4xl">
-          <h3 className="mb-8 text-center text-3xl font-light text-white heading-font">
-            Top-Up Pricing
-          </h3>
-          <div
-            style={{
-              backgroundColor: "rgba(0,0,0,0.4)",
-              backdropFilter: "blur(12px)",
-              color: "#fff",
-            }}
-            className="rounded-2xl border border-white/10 p-8"
-          >
-            <div className="grid grid-cols-3 gap-4 text-white">
-              <div className="text-center font-semibold">Current Plan</div>
-              <div className="text-center font-semibold">Number of Credits</div>
-              <div className="text-center font-semibold">Price per Credit</div>
-            </div>
-            <hr className="my-4 border-gray-300/20" />
-            <div className="space-y-4">
-              {topUpRows.map((row) => (
-                <div
-                  key={row.plan}
-                  className="grid grid-cols-3 gap-4 text-white/70"
-                >
-                  <div className="text-center">{row.plan}</div>
-                  <div className="text-center tabular-nums">{row.credits}</div>
-                  <div className="text-center font-medium text-loverai-gold tabular-nums">
-                    {RUPEE}
-                    {row.pricePerCredit}
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 max-w-6xl mx-auto items-stretch">
+          {planCards.map((plan) => {
+            const isCurrent = currentPlan === plan.key;
+            return (
+              <div
+                key={plan.name}
+                style={{
+                  backgroundColor: "rgba(20, 15, 12, 0.65)",
+                  backdropFilter: "blur(20px)",
+                  borderColor: plan.featured ? "rgba(230, 198, 178, 0.25)" : "rgba(255, 255, 255, 0.08)",
+                  boxShadow: plan.featured ? "0 0 25px rgba(230, 198, 178, 0.12)" : "none",
+                }}
+                className={`relative flex flex-col rounded-[28px] border p-8 md:p-10 text-white transition-all hover:scale-[1.01] hover:border-white/15`}
+              >
+                {plan.featured && (
+                  <div className="absolute -top-3.5 right-8 bg-[#d4a878] text-[#201913] px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-md">
+                    Most Popular
                   </div>
+                )}
+
+                <h3 className="mb-3 text-3xl font-light" style={serif}>
+                  {plan.name}
+                </h3>
+                
+                <div className="mb-1 flex items-baseline gap-1 text-white" style={serif}>
+                  <span className="text-[28px] font-medium mr-1">{RUPEE}</span>
+                  <span className="text-[54px] font-bold tracking-tight">{plan.price}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                
+                <div className="mb-6 text-[11px] font-medium tracking-[0.15em] text-white/50 uppercase">
+                  {plan.period}
+                </div>
+                
+                <p className="mb-8 text-[14px] text-white/60 leading-relaxed font-light">
+                  {plan.description}
+                </p>
 
-        <div className="mx-auto mb-16 max-w-6xl">
-          <div
-            style={{
-              backgroundColor: "rgba(0,0,0,0.4)",
-              backdropFilter: "blur(12px)",
-              color: "#fff",
-            }}
-            className="overflow-hidden rounded-2xl border border-white/10"
-          >
-            <div className="grid grid-cols-5 gap-0">
-              <div className="bg-white/10 p-4 font-semibold text-white">
-                Features
-              </div>
-              <div className="bg-white/10 p-4 text-center font-semibold text-white">
-                Free
-              </div>
-              <div className="bg-white/10 p-4 text-center font-semibold text-white">
-                Basic
-              </div>
-              <div className="bg-white/10 p-4 text-center font-semibold text-white">
-                Premium
-              </div>
-              <div className="bg-white/10 p-4 text-center font-semibold text-white">
-                Enterprise
-              </div>
-
-              {featureRows.map((row) => (
-                <React.Fragment key={row.label}>
-                  <div className="border-t border-white/10 p-4 text-white">
-                    {row.label}
-                  </div>
-                  {row.plans.map((enabled, index) => (
-                    <div
-                      key={`${row.label}-${index}`}
-                      className="flex items-center justify-center border-t border-white/10 p-4 text-center"
-                    >
-                      <StatusIcon enabled={enabled} />
-                    </div>
+                <ul className="mb-10 flex-grow space-y-4 text-[14px]">
+                  {plan.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <svg
+                        className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M4.5 10l3.5 3.5L15.5 6" />
+                      </svg>
+                      <span className="leading-5 text-white/80">
+                        {feature.bold && <strong className="font-semibold text-white/95">{feature.bold}</strong>}
+                        {feature.regular}
+                      </span>
+                    </li>
                   ))}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
+                </ul>
+
+                {plan.key === "free" ? (
+                  <button
+                    disabled
+                    className="w-full py-3.5 rounded-full text-[13px] font-bold uppercase tracking-widest bg-white/10 text-white/80 border border-white/5 cursor-not-allowed"
+                  >
+                    DEFAULT PLAN
+                  </button>
+                ) : isCurrent ? (
+                  <button
+                    disabled
+                    className="w-full py-3.5 rounded-full text-[13px] font-bold uppercase tracking-widest bg-white/5 text-white/40 border border-white/5 cursor-not-allowed"
+                  >
+                    CURRENT PLAN
+                  </button>
+                ) : plan.key === "premium" ? (
+                  <button
+                    onClick={() => handlePurchase("premium")}
+                    className="w-full py-3.5 rounded-full text-[13px] font-extrabold uppercase tracking-widest bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95"
+                  >
+                    BUY PREMIUM
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handlePurchase("basic")}
+                    className="w-full py-3.5 rounded-full text-[13px] font-bold uppercase tracking-widest bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-all active:scale-95"
+                  >
+                    UPGRADE NOW
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

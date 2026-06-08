@@ -181,13 +181,21 @@ const CoupleProfile = () => {
           <div className="flex gap-3 shrink-0 mt-4 md:mt-0">
             <button
               onClick={() => navigate("/pricing")}
-              className="px-5 py-2.5 rounded-lg border border-[#e6c6b2]/40 text-[#e6c6b2] text-xs font-semibold hover:bg-[#e6c6b2]/10 transition-colors uppercase tracking-widest"
+              style={{
+                background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+                color: "#1c1613",
+              }}
+              className="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95"
             >
               👑 Subscriptions
             </button>
             <button
               onClick={() => navigate("/user-form")}
-              className="px-5 py-2.5 rounded-lg border border-white/20 text-white text-xs font-semibold hover:bg-white/5 transition-colors uppercase tracking-widest"
+              style={{
+                background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+                color: "#1c1613",
+              }}
+              className="px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95"
             >
               Edit Profile
             </button>
@@ -218,7 +226,7 @@ const CoupleProfile = () => {
         {activeTab === "overview" && (
           <div className="space-y-6">
             {/* Credits Row */}
-            <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 flex items-center justify-between text-white">
+            <div className="bg-black/45 backdrop-blur-xl rounded-[24px] border border-white/10 p-6 flex items-center justify-between text-white">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-[#e6c6b2]/20 flex items-center justify-center text-[#e6c6b2]">
                   ✨
@@ -238,10 +246,10 @@ const CoupleProfile = () => {
               <button
                 onClick={() => navigate("/pricing")}
                 style={{
-                  background: "linear-gradient(135deg, #e6c6b2, #c59854)",
+                  background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
                   color: "#1c1613",
                 }}
-                className="px-5 py-2 text-xs font-bold rounded-lg hover:brightness-110 transition-all uppercase tracking-wide"
+                className="px-6 py-2.5 rounded-full text-xs font-extrabold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95"
               >
                 Manage Plan
               </button>
@@ -250,7 +258,7 @@ const CoupleProfile = () => {
             {/* Grid: Bids & Messages */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Bid Summary */}
-              <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 flex flex-col text-white">
+              <div className="bg-black/45 backdrop-blur-xl rounded-[24px] border border-white/10 p-6 flex flex-col text-white">
                 <h3 className="font-heading text-xl text-[#F9F7F5] mb-6 tracking-wide">
                   Bid Summary
                 </h3>
@@ -289,14 +297,14 @@ const CoupleProfile = () => {
               </div>
 
               {/* Recent Messages */}
-              <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-white/[0.08] p-6 flex flex-col text-white">
+              <div className="bg-black/45 backdrop-blur-xl rounded-[24px] border border-white/10 p-6 flex flex-col text-white">
                 <h3 className="font-heading text-xl text-[#F9F7F5] mb-6 tracking-wide">
                   Recent Messages
                 </h3>
                 <div className="space-y-5 flex-1">
                   {messages.slice(0, 3).map((msg, i) => (
                     <div key={i} className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs text-loverai-gold shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs text-[#e6c6b2] shrink-0">
                         {msg.avatar ? (
                           <img
                             src={msg.avatar}
@@ -311,7 +319,7 @@ const CoupleProfile = () => {
                         <div className="flex justify-between items-center mb-0.5">
                           <p className="text-sm font-medium text-white truncate">
                             {msg.sender}{" "}
-                            <span className="w-1.5 h-1.5 rounded-full bg-loverai-gold inline-block ml-1"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#e6c6b2] inline-block ml-1"></span>
                           </p>
                           <p className="text-[10px] text-white/30">
                             {msg.timestamp
@@ -333,7 +341,7 @@ const CoupleProfile = () => {
                 </div>
                 <button
                   onClick={() => setActiveTab("messages")}
-                  className="mt-4 text-loverai-gold text-sm font-medium hover:underline flex items-center justify-between w-full"
+                  className="mt-4 text-[#e6c6b2] text-sm font-medium hover:underline flex items-center justify-between w-full"
                 >
                   View all messages <span>›</span>
                 </button>
@@ -348,31 +356,43 @@ const CoupleProfile = () => {
               <div className="flex flex-wrap gap-4">
                 <button
                   onClick={() => navigate("/couples")}
-                  className="px-5 py-2.5 rounded-xl border border-[#e6c6b2]/40 text-[#e6c6b2] text-sm hover:bg-[#e6c6b2]/10 transition flex items-center gap-2"
+                  style={{
+                    background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+                    color: "#1c1613",
+                  }}
+                  className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95 flex items-center gap-2"
                 >
                   👤 Dashboard
                 </button>
                 <button
                   onClick={() => navigate("/love-story")}
-                  className="px-5 py-2.5 rounded-xl border border-[#e6c6b2]/40 text-[#e6c6b2] text-sm hover:bg-[#e6c6b2]/10 transition flex items-center gap-2"
+                  style={{
+                    background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+                    color: "#1c1613",
+                  }}
+                  className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95 flex items-center gap-2"
                 >
-                  🎨 GenAI Vision →
+                  🎨 GenAI Vision
                 </button>
                 <button
                   onClick={() => navigate("/couple/cart")}
-                  className="px-5 py-2.5 rounded-xl border border-[#e6c6b2]/40 text-[#e6c6b2] text-sm hover:bg-[#e6c6b2]/10 transition flex items-center gap-2"
+                  style={{
+                    background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
+                    color: "#1c1613",
+                  }}
+                  className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95 flex items-center gap-2"
                 >
-                  🛒 My Cart →
+                  🛒 My Cart
                 </button>
                 <button
                   onClick={() => setActiveTab("bids")}
                   style={{
-                    background: "linear-gradient(135deg, #e6c6b2, #c59854)",
+                    background: "linear-gradient(90deg, #e6c6b2, #d4a878)",
                     color: "#1c1613",
                   }}
-                  className="px-5 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-[0_4px_15px_rgba(225,195,135,0.3)] font-semibold"
+                  className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:brightness-110 shadow-lg shadow-[#d4a878]/10 transition-all active:scale-95 flex items-center gap-2"
                 >
-                  📍 Track Bids →
+                  📍 Track Bids
                 </button>
               </div>
             </div>
@@ -392,7 +412,7 @@ const CoupleProfile = () => {
                 <div
                   key={q._id}
                   onClick={() => navigate(`/couple/bid-dashboard/${q._id}`)}
-                  className="bg-[#18130f] border border-white/5 rounded-xl p-5 hover:bg-[#1e1713] transition cursor-pointer flex justify-between items-center"
+                  className="bg-black/45 border border-white/10 rounded-2xl p-5 hover:bg-white/[0.03] transition cursor-pointer flex justify-between items-center"
                 >
                   <div className="flex items-center gap-4">
                     {q.images?.[0]?.url && (
@@ -449,10 +469,10 @@ const CoupleProfile = () => {
                   }
                   role={msg.quoteId ? "button" : undefined}
                   tabIndex={msg.quoteId ? 0 : -1}
-                  className={`bg-[#18130f] border border-white/5 rounded-xl p-5 transition flex justify-between items-center ${msg.quoteId ? "hover:bg-[#1e1713] cursor-pointer" : "cursor-default"}`}
+                  className={`bg-black/45 border border-white/10 rounded-2xl p-5 transition flex justify-between items-center ${msg.quoteId ? "hover:bg-white/[0.03] cursor-pointer" : "cursor-default"}`}
                 >
                   <div className="flex gap-4 items-center">
-                    <div className="w-12 h-12 rounded-full border border-loverai-gold/30 flex items-center justify-center text-loverai-gold overflow-hidden">
+                    <div className="w-12 h-12 rounded-full border border-[#e6c6b2]/30 flex items-center justify-center text-[#e6c6b2] overflow-hidden">
                       {msg.avatar ? (
                         <img
                           src={msg.avatar}
@@ -464,7 +484,7 @@ const CoupleProfile = () => {
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-loverai-gold">
+                      <p className="text-sm font-medium text-[#e6c6b2]">
                         {msg.sender}
                       </p>
                       <p className="text-xs text-white/60 truncate max-w-md mt-1">

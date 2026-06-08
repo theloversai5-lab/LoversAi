@@ -144,7 +144,7 @@ export default function UserForm() {
         } else if (userRole === "vendor") {
           navigate("/vendor/dashboard"); // Vendors go to their dashboard
         } else {
-          navigate("/couple/onboarding"); // Couples continue with wedding details form
+          navigate("/couples"); // Couples go to main couples page
         }
       } else {
         throw new Error(data.error || "Failed to save profile");

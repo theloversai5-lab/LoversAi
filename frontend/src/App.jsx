@@ -87,7 +87,9 @@ function AppContent() {
     location.pathname === "/love-story" ||
     location.pathname.startsWith("/couple/moodboard") ||
     location.pathname === "/couple/cart" ||
-    location.pathname === "/couple/bid-placed";
+    location.pathname === "/couple/bid-placed" ||
+    location.pathname.startsWith("/couple/bid-dashboard") ||
+    location.pathname.startsWith("/couple/quote");
 
   const hideNavbar =
     hideNavbarAndFooter || location.pathname === "/user-form";

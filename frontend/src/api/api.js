@@ -379,4 +379,11 @@ export const coupleMoodboardAPI = {
   },
 };
 
+// ─── Moodboard Database APIs ───
+export const moodboardAPI = {
+  getMoodboards: () => apiFetch('/moodboard'),
+  saveMoodboard: (data) => apiFetch('/moodboard', { method: 'POST', data }),
+  deleteMoodboard: (boardId) => apiFetch(`/moodboard/${boardId}`, { method: 'DELETE' }),
+};
+
 export default api;

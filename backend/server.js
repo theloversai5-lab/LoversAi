@@ -26,6 +26,7 @@ import bidRoutes from "./routes/bidRoutes.js"; // ✅ Bid System
 import chatRoutes from "./routes/chatRoutes.js"; // ✅ Real-time Chat
 import uploadRoutes from "./routes/uploadRoutes.js"; // ✅ Cloudinary Uploads
 import cartRoutes from "./routes/cartRoutes.js"; // ✅ Wedding Cart
+import moodboardRoutes from "./routes/moodboardRoutes.js"; // ✅ Couple Moodboard
 
 dotenv.config();
 
@@ -405,6 +406,7 @@ async function startServer() {
     app.use("/api/chat", chatRoutes); // 💬 Real-time Chat
     app.use("/api/upload", uploadRoutes); // 📤 Cloudinary Uploads
     app.use("/api/cart", cartRoutes); // 🛒 Wedding Cart
+    app.use("/api/moodboard", moodboardRoutes); // ✅ Couple Moodboard
     app.use("/api/debug", debugRoutes); // 🔍 Debug endpoints - REMOVE IN PRODUCTION
     app.use("/api/admin", adminRoutes); // 🔒 Admin panel backend APIs
 

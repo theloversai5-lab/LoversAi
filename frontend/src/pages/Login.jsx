@@ -53,11 +53,9 @@ const Login = () => {
   }
 
   const getCoupleNextPath = (user) => {
-    const weddingProfile = user?.weddingProfile || {};
-    return user?.profileCompleted || weddingProfile.completed
-      ? "/couples"
-      : "/couple/onboarding";
+    return "/couples";
   };
+
 
   const getPlannerNextPath = () => {
     if (
