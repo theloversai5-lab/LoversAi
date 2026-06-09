@@ -18,7 +18,8 @@ const Navbar = () => {
   const mobilePanelRef = useRef(null);
   const isPlannerLanding = location.pathname === "/planner";
   const isMainLanding = location.pathname === "/";
-  const isHamburgerLanding = isPlannerLanding || isMainLanding;
+  const isCouplesLanding = location.pathname === "/couples";
+  const isHamburgerLanding = isPlannerLanding || isMainLanding || isCouplesLanding;
   const shouldShowHamburgerSignIn = !currentUser && !isMainLanding;
 
   const handleLogout = async () => {
@@ -199,6 +200,10 @@ const Navbar = () => {
     localStorage.getItem("userRole") === "planner" ||
     location.pathname.startsWith("/planner")
       ? "/planner"
+      : localStorage.getItem("userRole") === "couple" ||
+        location.pathname.startsWith("/couples") ||
+        location.pathname.startsWith("/couple")
+      ? "/couples"
       : "/";
 
   return (
