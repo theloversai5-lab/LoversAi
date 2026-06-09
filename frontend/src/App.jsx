@@ -95,7 +95,11 @@ function AppContent() {
     hideNavbarAndFooter || location.pathname === "/user-form";
 
   const hideFooter =
-    hideNavbarAndFooter || location.pathname === "/user-form";
+    (hideNavbarAndFooter &&
+      location.pathname !== "/love-story" &&
+      !location.pathname.startsWith("/couple/moodboard") &&
+      location.pathname !== "/couple/cart") ||
+    location.pathname === "/user-form";
 
   return (
     <>

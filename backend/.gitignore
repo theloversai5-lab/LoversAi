@@ -1,6 +1,4 @@
 firebase-service-account.json
 .env
-backend/.env
-backend/.env.production
-frontend/.env
-frontend/.env.production
+.env.production
+*.log

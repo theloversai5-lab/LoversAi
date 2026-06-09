@@ -7,8 +7,12 @@ import { auth } from "../firebase/firebase";
 import PlannerQuickMenu from "../components/PlannerQuickMenu";
 import { authLoginSchema, formatZodErrors } from "../utils/authValidation";
 
-const sharedWeddingBackground = {
+const plannerWeddingBackground = {
   backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+};
+
+const coupleWeddingBackground = {
+  backgroundImage: 'url("/images/signup.png")',
 };
 
 const Login = () => {
@@ -533,7 +537,7 @@ const Login = () => {
       </div>
     ) : (
     <div className="loverai-wedding-shell w-full min-h-screen flex items-center justify-center">
-      <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
+      <div className="loverai-wedding-bg" style={isCoupleExperience ? coupleWeddingBackground : plannerWeddingBackground} />
       <div className="loverai-wedding-overlay" />
       <div className="loverai-wedding-glow loverai-wedding-glow-left" />
       <div className="loverai-wedding-glow loverai-wedding-glow-right" />

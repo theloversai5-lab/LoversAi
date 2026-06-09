@@ -5,8 +5,12 @@ import { useAuth } from "../context/AuthContext";
 import { auth } from "../firebase/firebase";
 import { formatZodErrors, plannerSignupSchema } from "../utils/authValidation";
 
-const sharedWeddingBackground = {
+const plannerWeddingBackground = {
   backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+};
+
+const coupleWeddingBackground = {
+  backgroundImage: 'url("/images/signup.png")',
 };
 
 export default function Signup() {
@@ -380,346 +384,358 @@ export default function Signup() {
         </div>
       </div>
     ) : (
-    <div className="loverai-wedding-shell min-h-screen flex items-center justify-center">
-      <div className="loverai-wedding-bg" style={sharedWeddingBackground} />
+    <div className="loverai-wedding-shell w-full min-h-screen flex items-center justify-center">
+      <div className="loverai-wedding-bg" style={role === "Couple" ? coupleWeddingBackground : plannerWeddingBackground} />
       <div className="loverai-wedding-overlay" />
       <div className="loverai-wedding-glow loverai-wedding-glow-left" />
       <div className="loverai-wedding-glow loverai-wedding-glow-right" />
 
-      <div className="relative z-20 w-full max-w-[460px] px-4 py-10 animate-fadeInUp">
-        <div className="glass-card-strong loverai-auth-panel rounded-3xl p-8">
-          {/* Logo */}
-          <div className="flex justify-center mb-5">
-            <img
-              src="/images/LogoLoversai.png"
-              alt="LoversAI"
-              className="h-14 w-auto object-contain"
-            />
-          </div>
-
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-heading loverai-gradient-text tracking-wide mb-2">
-              Join LoversAi
-            </h1>
-            <p className="text-white/40 text-sm">Create your account</p>
-          </div>
-
-          {mismatch && (
-            <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-sm text-center animate-pulse">
-              <p className="font-semibold mb-1">Role Access Denied</p>
-              Please create or log into a{" "}
-              <span className="text-loverai-gold font-bold">
-                {initialRole}
-              </span>{" "}
-              account to access that dashboard.
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
-              {error}
-            </div>
-          )}
-
-          {isLoggedIn ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center">
-                <p className="text-blue-200 text-sm mb-2">
-                  You are already logged in. To create an account as a different
-                  role, please logout first.
+      <div className="relative z-20 w-full px-4 md:px-6 py-8 animate-fadeInUp max-w-6xl">
+        <div className="glass-card-strong loverai-auth-panel overflow-hidden rounded-[34px]">
+          <div className="grid min-h-[620px] md:grid-cols-[1.1fr_0.92fr]">
+            {/* Left side text / visual */}
+            <div className="relative flex flex-col justify-end p-8 md:p-10 lg:p-12 border-b md:border-b-0 md:border-r border-white/10">
+              <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/15 to-transparent pointer-events-none" />
+              <div className="relative z-10 max-w-xl">
+                <p className="text-[11px] uppercase tracking-[0.38em] text-white/60 mb-5">
+                  Lovers AI
                 </p>
-                <p className="text-white/60 text-xs mb-4">
-                  Current role:{" "}
-                  <span className="text-loverai-gold font-semibold capitalize">
-                    {localStorage.getItem("userRole")}
-                  </span>
+                <h1 className="font-heading text-[42px] leading-[0.95] md:text-[56px] text-[#fff5ea]">
+                  Start your wedding story here
+                </h1>
+                <p className="mt-5 text-base md:text-lg text-white/65 max-w-md leading-7">
+                  Create an account to begin planning your wedding celebration with AI-powered customization, customized moodboards, and tools.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    navigate("/", { replace: true });
-                  }}
-                  className="w-full loverai-btn-primary text-sm"
-                >
-                  Logout and Return to Home
-                </button>
               </div>
             </div>
-          ) : (
-            <>
-              {/* Role Selector */}
-              <div className={`grid gap-3 mb-8 ${roleOptions.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-                {roleOptions.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => {
-                      setRole(r);
-                      setError("");
-                    }}
-                    className={`flex-1 flex flex-col items-center justify-center py-4 rounded-xl transition-all duration-300 ${
-                      role === r
-                        ? "glass-card border-loverai-gold/30 shadow-lg"
-                        : "glass-card-subtle hover:bg-white/[0.06]"
-                    }`}
-                  >
-                    <div
-                      className={`mb-2 transition-colors ${role === r ? "text-loverai-gold" : "text-white/40"}`}
-                    >
-                      {roleConfig[r].icon}
-                    </div>
-                    <span
-                      className={`text-[13px] font-semibold transition-colors ${role === r ? "text-loverai-gold" : "text-white/50"}`}
-                    >
-                      {r}
-                    </span>
-                    <span
-                      className={`text-[10px] mt-0.5 transition-colors ${role === r ? "text-white/50" : "text-white/25"}`}
-                    >
-                      {roleConfig[r].desc}
-                    </span>
-                  </button>
-                ))}
-              </div>
 
-              <form onSubmit={handleSignup} className="space-y-5">
-                <div>
-                  <label className="block text-white/60 text-[13px] font-medium mb-1.5">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <svg
-                        className="w-5 h-5 text-white/25"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Your name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm"
-                    />
+            {/* Right side form */}
+            <div className="p-8 md:p-10 lg:p-12 flex items-center">
+              <div className="w-full">
+                <div className="flex items-center gap-3 mb-6">
+                  <img
+                    src="/images/LogoLoversai.png"
+                    alt="LoversAI"
+                    className="h-12 w-auto object-contain"
+                  />
+                  <div>
+                    <p className="text-white/85 font-medium">Create Account</p>
+                    <p className="text-xs text-white/45">Join the LoversAi experience</p>
                   </div>
                 </div>
 
-                {role === "Couple" && (
-                  <div className="animate-fadeIn">
-                    <label className="block text-white/60 text-[13px] font-medium mb-1.5">
-                      Partner's Name
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg
-                          className="w-5 h-5 text-white/25"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                          />
-                        </svg>
+                {mismatch && (
+                  <div className="mb-5 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-sm text-center animate-pulse">
+                    <p className="font-semibold mb-1">Role Access Denied</p>
+                    Please create or log into a{" "}
+                    <span className="text-loverai-gold font-bold">
+                      {initialRole}
+                    </span>{" "}
+                    account to access that dashboard.
+                  </div>
+                )}
+
+                {error && (
+                  <div className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+                    {error}
+                  </div>
+                )}
+
+                {isLoggedIn ? (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center">
+                      <p className="text-blue-200 text-sm mb-2">
+                        You are already logged in. To create an account as a different
+                        role, please logout first.
+                      </p>
+                      <p className="text-white/60 text-xs mb-3">
+                        Current role:{" "}
+                        <span className="text-loverai-gold font-semibold capitalize">
+                          {localStorage.getItem("userRole")}
+                        </span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          logout();
+                          navigate("/", { replace: true });
+                        }}
+                        className="w-full loverai-btn-primary text-sm"
+                      >
+                        Logout and Return to Home
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Role Selector - Only shown if not locked (more than 1 option) */}
+                    {roleOptions.length > 1 && (
+                      <div className="grid grid-cols-2 gap-2.5 mb-5">
+                        {roleOptions.map((r) => (
+                          <button
+                            key={r}
+                            type="button"
+                            onClick={() => {
+                              setRole(r);
+                              setError("");
+                            }}
+                            className={`flex items-center justify-center py-2.5 rounded-xl transition-all duration-300 ${
+                              role === r
+                                ? "glass-card border-loverai-gold/30 shadow-lg text-loverai-gold"
+                                : "glass-card-subtle hover:bg-white/[0.06] text-white/50"
+                            }`}
+                          >
+                            <div className="mr-2 scale-75">
+                              {roleConfig[r].icon}
+                            </div>
+                            <span className="text-[13px] font-semibold">
+                              {r}
+                            </span>
+                          </button>
+                        ))}
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Partner's name"
-                        value={partnerName}
-                        onChange={(e) => setPartnerName(e.target.value)}
-                        className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm"
-                      />
-                    </div>
-                  </div>
-                )}
+                    )}
 
-                {role === "Planner" && (
-                  <div className="animate-fadeIn">
-                    <label className="block text-white/60 text-[13px] font-medium mb-1.5">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={`Your ${role.toLowerCase()} company`}
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full glass-input rounded-xl px-4 py-3.5 text-sm"
-                    />
-                  </div>
-                )}
+                    <form onSubmit={handleSignup} className="space-y-4">
+                      <div>
+                        <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+                          Full Name
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg
+                              className="w-5 h-5 text-white/25"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              />
+                            </svg>
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Your name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/35"
+                          />
+                        </div>
+                      </div>
 
-                <div>
-                  <label className="block text-white/60 text-[13px] font-medium mb-1.5">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <svg
-                        className="w-5 h-5 text-white/25"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      {role === "Couple" && (
+                        <div className="animate-fadeIn">
+                          <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+                            Partner's Name
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                              <svg
+                                className="w-5 h-5 text-white/25"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                />
+                              </svg>
+                            </div>
+                            <input
+                              type="text"
+                              placeholder="Partner's name"
+                              value={partnerName}
+                              onChange={(e) => setPartnerName(e.target.value)}
+                              className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/35"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {role === "Planner" && (
+                        <div className="animate-fadeIn">
+                          <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+                            Company Name
+                          </label>
+                          <input
+                            type="text"
+                            placeholder={`Your ${role.toLowerCase()} company`}
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                            className="w-full glass-input rounded-xl px-4 py-3.5 text-sm placeholder-white/35"
+                          />
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+                          Email
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg
+                              className="w-5 h-5 text-white/25"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              />
+                            </svg>
+                          </div>
+                          <input
+                            type="email"
+                            placeholder="email@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/35"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg
+                              className="w-5 h-5 text-white/25"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                              />
+                            </svg>
+                          </div>
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full glass-input rounded-xl pl-11 pr-12 py-3.5 text-sm tracking-widest placeholder-white/35"
+                          />
+                          <button
+                            type="button"
+                            onClick={togglePassword}
+                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white/60 transition"
+                          >
+                            {showPassword ? (
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full loverai-btn-primary !rounded-xl text-[15px] disabled:opacity-50"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    <input
-                      type="email"
-                      placeholder="email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm"
-                    />
-                  </div>
-                </div>
+                        {loading ? "Creating..." : "Create Account"}
+                      </button>
+                    </form>
 
-                <div>
-                  <label className="block text-white/60 text-[13px] font-medium mb-1.5">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <svg
-                        className="w-5 h-5 text-white/25"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        />
-                      </svg>
+                    <div className="relative my-6">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-white/10"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-3 bg-transparent text-white/40">Or continue with</span>
+                      </div>
                     </div>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full glass-input rounded-xl pl-11 pr-12 py-3.5 text-sm tracking-widest"
-                    />
+
                     <button
                       type="button"
-                      onClick={togglePassword}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white/60 transition"
+                      onClick={handleGoogleSignup}
+                      disabled={loading}
+                      className="w-full py-3 px-4 glass-card text-white font-medium hover:bg-white/10 transition-all duration-200 flex items-center justify-center gap-3 text-sm rounded-xl"
                     >
-                      {showPassword ? (
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                          />
-                        </svg>
-                      )}
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                      Sign up with Google
                     </button>
-                  </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full loverai-btn-primary !rounded-xl text-[15px] disabled:opacity-50"
-                >
-                  {loading ? "Creating..." : "Create Account"}
-                </button>
-              </form>
-
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-3 bg-transparent text-white/40">Or continue with</span>
-                </div>
+                    <div className="text-center mt-6">
+                      <p className="text-sm text-white/40">
+                        Already have an account?{" "}
+                        <Link
+                          to={`/login${mismatch ? `?role=${initialRole}&mismatch=true` : ""}`}
+                          className="text-loverai-gold hover:text-loverai-gold-bright font-medium transition-colors"
+                        >
+                          Log in
+                        </Link>
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={handleGoogleSignup}
-                disabled={loading}
-                className="w-full py-3 px-4 glass-card text-white font-medium hover:bg-white/10 transition-all duration-200 flex items-center justify-center gap-3 text-sm rounded-xl"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
-                Sign up with Google
-              </button>
-
-              <div className="text-center mt-6">
-                <p className="text-sm text-white/40">
-                  Already have an account?{" "}
-                  <Link
-                    to={`/login${mismatch ? `?role=${initialRole}&mismatch=true` : ""}`}
-                    className="text-loverai-gold hover:text-loverai-gold-bright font-medium transition-colors"
-                  >
-                    Log in
-                  </Link>
-                </p>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

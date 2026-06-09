@@ -3,12 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { coupleMoodboardAPI } from "../../api/api";
 
 const FUNCTION_OPTIONS = [
-  "Pre-wedding (Haldi/Mehendi)",
+  "Pre-wedding (Haldi/Mehndi)",
   "Wedding Ceremony",
   "Reception",
   "Sangeet",
-  "Engagement",
-  "Nikah",
+  "Small Function (Birthday, Engagement)",
 ];
 
 const ATMOSPHERE_OPTIONS = [

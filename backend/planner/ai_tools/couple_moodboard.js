@@ -510,6 +510,8 @@ const SIDE_PANEL_RULES = {
   functionType: {
     "Pre-wedding (Haldi/Mehendi)":
       "focal area is a central seating platform or gaddi with turmeric-yellow theme, marigold dominance, brass vessels",
+    "Pre-wedding (Haldi/Mehndi)":
+      "focal area is a central seating platform or gaddi with turmeric-yellow theme, marigold dominance, brass vessels",
     "Wedding Ceremony":
       "focal area is a grand mandap or ceremonial arch with sacred fire pit area, heavy floral canopy, ceremonial seating",
     Reception:
@@ -520,6 +522,8 @@ const SIDE_PANEL_RULES = {
       "focal area is an intimate ceremony arch or backdrop with romantic floral framing, ring ceremony area",
     Nikah:
       "focal area is a pristine white-and-green ceremony area with Islamic geometric patterns, elegant simplicity",
+    "Small Function (Birthday, Engagement)":
+      "focal area is a cozy intimate celebration setup, small stage or photobooth backdrop, warm lighting, elegant seating or dining table",
   },
   atmosphere: {
     "Warm & Festive":
@@ -552,11 +556,13 @@ const SIDE_PANEL_RULES = {
 // ─── Moodboard Title Generation ───
 const MOODBOARD_TITLES = {
   "Pre-wedding (Haldi/Mehendi)": "Golden Dreams of Haldi",
+  "Pre-wedding (Haldi/Mehndi)": "Henna Garden Reverie",
   "Wedding Ceremony": "Eternal Sacred Vows",
   Reception: "A Night to Remember",
   Sangeet: "Rhythms of Celebration",
   Engagement: "Promise of Forever",
   Nikah: "Blessings of Nikkah",
+  "Small Function (Birthday, Engagement)": "Intimate Celebration of Love",
 };
 
 // ─── Build user message for Groq vision ───
@@ -1060,6 +1066,8 @@ function buildFallbackPrompt(
   const eventStyles = {
     "Pre-wedding (Haldi/Mehendi)":
       "an Indian Haldi and Mehendi pre-wedding celebration with vibrant turmeric yellows, marigold oranges, traditional brass elements, cascading flower petals, intricate mehndi patterns, and joyful festive energy. Guests wear bright yellow and orange traditional attire with gold jewelry and fresh flower accessories",
+    "Pre-wedding (Haldi/Mehndi)":
+      "an Indian Haldi and Mehndi pre-wedding celebration with vibrant turmeric yellows, marigold oranges, traditional brass elements, cascading flower petals, intricate mehndi patterns, and joyful festive energy. Guests wear bright yellow and orange traditional attire with gold jewelry and fresh flower accessories",
     "Wedding Ceremony":
       "a grand Indian wedding ceremony with rich crimson reds, burnished golds, ivory whites. An ornate mandap with carved pillars and silk canopy, sacred fire, fresh red roses and white jasmine garlands, elaborate bridal lehenga in red and gold, groom in embroidered sherwani. Regal, sacred atmosphere",
     Reception:
@@ -1070,6 +1078,8 @@ function buildFallbackPrompt(
       "a romantic Indian engagement ceremony with soft pastel pink, ivory, rose gold tones. A floral arch of blush roses and white peonies, the couple elegantly dressed exchanging rings, floating candles, intimate warm lighting, tender romantic moments",
     Nikah:
       "an elegant Nikah ceremony with pristine white, emerald green, and burnished gold palette. Islamic geometric patterns in gold filigree, white roses and green ferns, the bride in ornate bridal hijab with intricate embroidery, the groom in classic sherwani. Sacred, graceful atmosphere",
+    "Small Function (Birthday, Engagement)":
+      "an intimate and cozy celebration, such as a birthday or engagement party. The decoration features a warm, inviting atmosphere with fairy lights, floral accents, elegant balloons or small arches, comfortable lounge seating, and personalized details. It feels personal, joyous, and stylish",
   };
 
   const baseScene =

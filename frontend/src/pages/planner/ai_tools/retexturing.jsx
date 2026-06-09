@@ -36,7 +36,7 @@ const RetexturingTool = ({ onClose }) => {
 
   const themes = {
     haldi: "Haldi Ceremony",
-    mehendi: "Mehendi Ceremony",
+    mehndi: "Mehndi Ceremony",
     sangeet: "Sangeet Night",
     wedding: "Wedding Ceremony",
     reception: "Reception Party",
@@ -47,7 +47,7 @@ const RetexturingTool = ({ onClose }) => {
   const UI_THEMES = [
     { key: "", label: "Custom Only", icon: null, dots: [] },
     { key: "haldi", label: "Haldi", icon: "sun", dots: ["bg-yellow-400", "bg-amber-500", "bg-orange-400"] },
-    { key: "mehendi", label: "Mehendi", icon: "hash", dots: ["bg-green-600", "bg-emerald-800", "bg-orange-400"] },
+    { key: "mehndi", label: "Mehndi", icon: "hash", dots: ["bg-green-600", "bg-emerald-800", "bg-orange-400"] },
     { key: "sangeet", label: "Sangeet", icon: "music", dots: ["bg-red-500", "bg-yellow-400", "bg-red-800"] },
     { key: "wedding", label: "Wedding", icon: "heart", dots: ["bg-red-600", "bg-yellow-500", "bg-gray-100"] },
     { key: "reception", label: "Reception", icon: "lock", dots: ["bg-blue-900", "bg-slate-400", "bg-sky-400"] },

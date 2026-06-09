@@ -12,8 +12,8 @@ const THEMES = [
     tone: "Turmeric yellows, marigold florals, warm daylight",
   },
   {
-    key: "mehendi",
-    name: "Mehendi",
+    key: "mehndi",
+    name: "Mehndi",
     tone: "Henna greens, intimate lounges, floral detailing",
   },
   {
@@ -49,7 +49,7 @@ const isDataUrl = (value = "") => /^data:/i.test(value);
 const normalizeTheme = (value = "") => {
   const text = value.toLowerCase();
   if (text.includes("haldi")) return "haldi";
-  if (text.includes("mehendi") || text.includes("mehandi")) return "mehendi";
+  if (text.includes("mehndi") || text.includes("mehendi") || text.includes("mehandi")) return "mehndi";
   if (text.includes("sangeet")) return "sangeet";
   return "wedding";
 };
@@ -729,7 +729,7 @@ export default function CoupleThemeMoodboard() {
   }, []);
 
   return (
-    <main className="h-screen w-screen relative px-3 pb-3 pt-3 md:px-4 md:pb-4 md:pt-5 text-white overflow-hidden flex flex-col">
+    <main className="min-h-screen w-full relative px-3 py-4 text-white overflow-visible flex flex-col items-center justify-center">
       {/* Background Image Setup matching the Dashboard exactly */}
       <div
         className="absolute inset-0 bg-cover bg-center -z-20 animate-scaleIn"
@@ -740,7 +740,7 @@ export default function CoupleThemeMoodboard() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/45 to-[#0a0604] -z-10" />
 
-      <div className="mx-auto w-full max-w-[1380px] relative z-10 flex flex-col flex-1 min-h-0">
+      <div className="mx-auto w-full max-w-[1380px] relative z-10 flex flex-col h-[calc(100vh-32px)] max-h-[960px]">
         
         {/* Elegant Top Controls Row */}
         <div className="mb-4 flex items-center justify-between text-sm flex-shrink-0 relative">
