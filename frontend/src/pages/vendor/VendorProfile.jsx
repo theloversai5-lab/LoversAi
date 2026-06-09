@@ -144,7 +144,7 @@ export default function VendorProfile() {
                 <option value="Catering">Catering</option>
                 <option value="Photography">Photography</option>
                 <option value="Entertainment">Entertainment</option>
-                <option value="Mehendi">Mehendi</option>
+                <option value="Mehndi">Mehndi</option>
                 <option value="Makeup">Makeup</option>
                 <option value="Venue">Venue</option>
               </select>

@@ -8,12 +8,12 @@ import { userAPI } from "../../api/api";
 const normalizeTheme = (value = "") => {
   const text = String(value).toLowerCase();
   if (text.includes("haldi")) return "Haldi";
-  if (text.includes("mehendi") || text.includes("mehandi")) return "Mahendi";
+  if (text.includes("mehndi") || text.includes("mehendi") || text.includes("mehandi")) return "Mehndi";
   if (text.includes("sangeet")) return "Sangeet";
   return "Wedding";
 };
 
-const emptySections = ["Haldi", "Mahendi", "Sangeet", "Wedding"];
+const emptySections = ["Haldi", "Mehndi", "Sangeet", "Wedding"];
 
 const SparkIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -208,7 +208,7 @@ export default function WeddingCart() {
   };
 
   return (
-    <main className="h-screen w-screen relative px-3 pb-3 pt-3 md:px-4 md:pb-4 md:pt-5 text-white overflow-hidden flex flex-col animate-fadeIn">
+    <main className="min-h-screen w-full relative px-3 py-4 text-white overflow-visible flex flex-col items-center justify-center animate-fadeIn">
       {/* Background Image Setup */}
       <div
         className="absolute inset-0 bg-cover bg-center -z-20"
@@ -219,7 +219,7 @@ export default function WeddingCart() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/45 to-[#0a0604] -z-10" />
 
-      <div className="mx-auto w-full max-w-[1380px] relative z-10 flex flex-col flex-1 min-h-0">
+      <div className="mx-auto w-full max-w-[1380px] relative z-10 flex flex-col h-[calc(100vh-32px)] max-h-[960px]">
         
         {/* Navigation Bar */}
         <div className="mb-2.5 flex items-center justify-between text-sm flex-shrink-0">

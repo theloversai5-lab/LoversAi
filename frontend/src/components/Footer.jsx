@@ -160,11 +160,17 @@ const Footer = ({ navigateTo, openContactPopup }) => {
   const plannerHomeFooterOuterClass =
     "relative z-10 mx-auto w-full max-w-[1650px] rounded-[48px] border border-white/18 bg-[linear-gradient(135deg,rgba(231,200,184,0.3),rgba(68,54,49,0.4))] p-1 shadow-[0_24px_90px_rgba(0,0,0,0.22)] backdrop-blur-[28px]";
 
+  const isRelativeFooterPath =
+    location.pathname === "/love-story" ||
+    location.pathname === "/couple/cart" ||
+    location.pathname.startsWith("/couple/moodboard");
+  const isRelativeFooter = isPlannerFooter || isRelativeFooterPath;
+
   return (
     <>
       <footer
         className={
-          isPlannerFooter
+          isRelativeFooter
             ? "relative overflow-hidden bg-transparent px-4 pb-10 pt-16 footer-blurred-bg sm:px-8 lg:px-12 z-40"
             : "fixed bottom-0 left-0 right-0 z-40 overflow-hidden bg-transparent px-6 py-16 footer-blurred-bg sm:px-10 md:px-16 lg:px-24"
         }

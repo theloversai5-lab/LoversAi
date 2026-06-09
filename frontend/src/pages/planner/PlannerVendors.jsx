@@ -5,14 +5,14 @@ const mockVendors = [
   { id: 1, name: 'Bloom & Petal Decor', category: 'Decor', location: 'Mumbai', rating: 4.8, reviews: 124, phone: '+91 98765 00001', bio: 'Premium wedding decor specialists with 10+ years of luxury floral arrangements.', priceRange: '₹2L – ₹8L', portfolio: 42, traditions: ['Hindu', 'Christian', 'Fusion'] },
   { id: 2, name: 'Royal Feast Caterers', category: 'Catering', location: 'Delhi', rating: 4.6, reviews: 89, phone: '+91 98765 00002', bio: 'Multi-cuisine catering for grand celebrations. North Indian, Mughlai, Continental.', priceRange: '₹1.5L – ₹6L', portfolio: 28, traditions: ['Hindu', 'Muslim', 'Sikh'] },
   { id: 3, name: 'Shutter Stories', category: 'Photography', location: 'Jaipur', rating: 4.9, reviews: 210, phone: '+91 98765 00003', bio: 'Award-winning wedding photography and cinematic videography.', priceRange: '₹1L – ₹5L', portfolio: 156, traditions: ['All'] },
-  { id: 4, name: 'Melody Makers Band', category: 'Entertainment', location: 'Mumbai', rating: 4.5, reviews: 67, phone: '+91 98765 00004', bio: 'Live band and DJ services for sangeet, mehendi, and reception.', priceRange: '₹80K – ₹3L', portfolio: 15, traditions: ['Hindu', 'Fusion'] },
-  { id: 5, name: 'Henna by Priya', category: 'Mehendi', location: 'Udaipur', rating: 4.7, reviews: 156, phone: '+91 98765 00005', bio: 'Intricate bridal mehendi artistry. Arabic, Rajasthani, contemporary.', priceRange: '₹15K – ₹60K', portfolio: 89, traditions: ['Hindu', 'Muslim'] },
+  { id: 4, name: 'Melody Makers Band', category: 'Entertainment', location: 'Mumbai', rating: 4.5, reviews: 67, phone: '+91 98765 00004', bio: 'Live band and DJ services for sangeet, mehndi, and reception.', priceRange: '₹80K – ₹3L', portfolio: 15, traditions: ['Hindu', 'Fusion'] },
+  { id: 5, name: 'Henna by Priya', category: 'Mehndi', location: 'Udaipur', rating: 4.7, reviews: 156, phone: '+91 98765 00005', bio: 'Intricate bridal mehndi artistry. Arabic, Rajasthani, contemporary.', priceRange: '₹15K – ₹60K', portfolio: 89, traditions: ['Hindu', 'Muslim'] },
   { id: 6, name: 'Stage Craft Studios', category: 'Decor', location: 'Goa', rating: 4.4, reviews: 45, phone: '+91 98765 00006', bio: 'Beachside and destination wedding decor. Rustic, bohemian, tropical.', priceRange: '₹3L – ₹12L', portfolio: 33, traditions: ['Christian', 'Hindu', 'Fusion'] },
   { id: 7, name: 'Glamour by Nisha', category: 'Makeup', location: 'Delhi', rating: 4.8, reviews: 198, phone: '+91 98765 00007', bio: 'Celebrity makeup artist. Airbrush, HD, and traditional techniques.', priceRange: '₹50K – ₹2L', portfolio: 74, traditions: ['Hindu', 'Sikh', 'Muslim'] },
   { id: 8, name: 'The Grand Marquee', category: 'Venue', location: 'Udaipur', rating: 4.9, reviews: 310, phone: '+91 98765 00009', bio: 'Lakeside palace venue with royal heritage. 200–2000 guests.', priceRange: '₹10L – ₹50L', portfolio: 48, traditions: ['All'] },
 ];
 
-const categories = ['All', 'Decor', 'Catering', 'Photography', 'Entertainment', 'Mehendi', 'Makeup', 'Venue'];
+const categories = ['All', 'Decor', 'Catering', 'Photography', 'Entertainment', 'Mehndi', 'Makeup', 'Venue'];
 const locations = ['All', 'Mumbai', 'Delhi', 'Jaipur', 'Udaipur', 'Goa'];
 
 export default function PlannerVendors() {

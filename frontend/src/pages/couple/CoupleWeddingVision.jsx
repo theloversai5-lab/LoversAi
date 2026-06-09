@@ -6,12 +6,11 @@ import { useAuth } from "../../context/AuthContext";
 
 const FUNCTION_OPTIONS = [
   "Haldi",
-  "Mehendi",
+  "Mehndi",
   "Sangeet",
   "Wedding Ceremony",
   "Reception",
-  "Engagement",
-  "Nikah",
+  "Small Function (Birthday, Engagement)",
 ];
 
 const ATMOSPHERE_OPTIONS = [
@@ -37,18 +36,19 @@ const THEME_OPTIONS = ["Carnival", "Royal", "Pastel", "Garden", "Minimal Luxe"];
 
 const TITLE_MAP = {
   Haldi: "Golden Dreams of Haldi",
-  Mehendi: "Henna Garden Reverie",
+  Mehndi: "Henna Garden Reverie",
   "Wedding Ceremony": "Eternal Sacred Vows",
   Reception: "A Night to Remember",
   Sangeet: "Rhythms of Celebration",
   Engagement: "Promise of Forever",
   Nikah: "Blessings of Nikkah",
+  "Small Function (Birthday, Engagement)": "Intimate Celebration of Love",
 };
 
 const getThemeFromFunction = (value = "") => {
   const text = value.toLowerCase();
   if (text.includes("haldi")) return "haldi";
-  if (text.includes("mehendi") || text.includes("mehandi")) return "mehendi";
+  if (text.includes("mehndi") || text.includes("mehendi") || text.includes("mehandi")) return "mehndi";
   if (text.includes("sangeet")) return "sangeet";
   return "wedding";
 };
@@ -794,7 +794,7 @@ export default function CoupleWeddingVision() {
   };
 
   return (
-    <main className="loverai-wedding-shell h-screen max-h-screen overflow-hidden py-4 text-white px-3 md:px-6 flex items-center justify-center">
+    <main className="loverai-wedding-shell min-h-screen text-white px-3 md:px-6 flex flex-col items-center justify-center overflow-visible py-4">
       <div
         className="loverai-wedding-bg"
         style={{ backgroundImage: 'url("/images/signup.png")' }}
