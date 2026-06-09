@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import { WELCOME_CREDITS } from "../constants/credits.js";
 
 export const syncUser = async (req, res) => {
   const { uid, email, name, phone } = req.user;
@@ -11,9 +12,9 @@ export const syncUser = async (req, res) => {
       email,
       fullName: name,
       phone,
-      credits: 30, // 🎁 Assign 30 welcome credits to new users
+      credits: WELCOME_CREDITS, // 🎁 Assign welcome credits to new users
     });
-    console.log(`✅ New user created with 30 welcome credits: ${email}`);
+    console.log(`✅ New user created with ${WELCOME_CREDITS} welcome credits: ${email}`);
   }
 
   res.json({ user });

@@ -1,5 +1,6 @@
 // utils/userUtils.js
 import User from "../models/User.js";
+import { WELCOME_CREDITS } from "../constants/credits.js";
 
 /**
  * Ensure user exists with welcome credits
@@ -16,9 +17,9 @@ export async function ensureUserExists(uid, email, name = "") {
       firebaseUid: uid,
       email: email,
       fullName: name || "",
-      credits: 30, // 🎁 Assign 30 welcome credits to new users
+      credits: WELCOME_CREDITS, // 🎁 Assign welcome credits to new users
     });
-    console.log(`✅ New user created with 30 welcome credits: ${email}`);
+    console.log(`✅ New user created with ${WELCOME_CREDITS} welcome credits: ${email}`);
   }
 
   return user;

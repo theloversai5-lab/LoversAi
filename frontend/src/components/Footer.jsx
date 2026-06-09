@@ -158,14 +158,14 @@ const Footer = ({ navigateTo, openContactPopup }) => {
   const plannerFooterOuterClass =
     "relative z-10 mx-auto w-full max-w-[1400px] rounded-[36px] bg-[linear-gradient(135deg,rgba(231,200,184,0.22),rgba(78,62,57,0.28))] p-0.5 shadow-[0_24px_90px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[28px]";
   const plannerHomeFooterOuterClass =
-    "relative z-10 mx-auto w-full max-w-[1650px] rounded-[36px] bg-[linear-gradient(135deg,rgba(231,200,184,0.18),rgba(68,54,49,0.34))] p-0.5 shadow-[0_24px_90px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[28px]";
+    "relative z-10 mx-auto w-full max-w-[1650px] overflow-hidden rounded-[36px] border border-transparent bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02))] p-[1px] shadow-[0_30px_120px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-[40px]";
 
   return (
     <>
       <footer
         className={
           isPlannerFooter
-            ? "relative overflow-hidden bg-transparent px-4 pb-10 pt-16 footer-blurred-bg sm:px-8 lg:px-12 z-40"
+            ? "relative overflow-hidden bg-transparent px-4 pb-6 pt-8 footer-blurred-bg sm:px-8 lg:px-12 z-40"
             : "fixed bottom-0 left-0 right-0 z-40 overflow-hidden bg-transparent px-6 py-16 footer-blurred-bg sm:px-10 md:px-16 lg:px-24"
         }
         style={footerBackgroundStyle}
@@ -180,189 +180,188 @@ const Footer = ({ navigateTo, openContactPopup }) => {
           }
         >
           {isPlannerHomeFooter ? (
-            <div className="grid gap-0 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:items-stretch">
-              <div className="flex min-h-[180px] flex-col px-3 py-3 text-center lg:px-6 lg:py-4 xl:px-8">
-                <div className="flex justify-center lg:justify-start">
-                  <span className="footer-text-font inline-flex w-fit rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-[7px] font-semibold uppercase tracking-[0.2em] text-[#f8ece6]">
-                    For Wedding Planners
-                  </span>
-                </div>
-
-                <div className="flex flex-1 items-center justify-center px-2 py-2 lg:px-0">
-                  <h2 className="footer-heading-font max-w-[760px] text-center text-[clamp(18px,2vw,28px)] leading-[0.95] text-white lg:text-left">
-                    Built to help planners win better weddings.
-                  </h2>
-                </div>
-
-                <div className="mt-auto space-y-2">
-                  <div className="hidden flex-wrap items-center justify-center gap-2 lg:flex lg:justify-start">
-                    {[
-                      "Qualified couple leads",
-                      "AI-powered pitch support",
-                      "Vendor-ready coordination",
-                    ].map((item) => (
-                      <div
-                        key={item}
-                        className="rounded-full border border-white/18 bg-white/[0.06] px-3 py-0.75 text-[8px] font-medium text-[#f8ede8]/92 backdrop-blur-md sm:px-3.5"
-                      >
-                        {item}
-                      </div>
-                    ))}
+            <div className="overflow-hidden rounded-[34px] bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] backdrop-blur-[30px]">
+              <div className="grid gap-0 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:items-stretch">
+                <div className="flex min-h-[120px] flex-col px-5 py-4 text-center sm:px-7 sm:py-5 lg:px-10 lg:py-6 xl:px-12">
+                  <div className="flex justify-center lg:justify-start">
+                    <span className="footer-text-font inline-flex w-fit rounded-full border border-white/14 bg-white/[0.05] px-4 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-[#f8ece6]/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+                      For Wedding Planners
+                    </span>
                   </div>
 
-                  <div className="flex flex-col items-center gap-1.5 lg:flex-row lg:items-end lg:gap-3 lg:justify-start">
+                  <div className="flex flex-1 items-start justify-center py-1 lg:justify-start lg:py-2">
+                    <h2 className="footer-heading-font max-w-[640px] text-center text-[clamp(22px,2.3vw,44px)] leading-[0.95] tracking-[-0.02em] text-[#f8efeb]/96 lg:text-left">
+                      Built to help planners win better weddings.
+                    </h2>
+                  </div>
+
+                  <div className="mt-1 flex flex-col items-center gap-1 lg:items-start">
+                    <div className="hidden w-full max-w-[320px] flex-col gap-2 lg:flex">
+                      {[
+                        "Qualified couple leads",
+                        "AI-powered pitch support",
+                        "Vendor-ready coordination",
+                      ].map((item) => (
+                        <div
+                          key={item}
+                          className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-1.5 text-[10px] font-medium text-[#f8ede8]/84 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-lg"
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 flex flex-row items-center gap-3 lg:justify-start">
                     <img
                       src="/images/LogoLoversai.png"
                       alt="Lovers AI Logo"
-                      className="h-[56px] w-auto max-w-[150px] object-contain sm:h-[72px] sm:max-w-[180px]"
+                      className="h-[48px] w-auto max-w-[140px] object-contain sm:h-[56px] sm:max-w-[160px]"
                     />
-                    <p className="footer-text-font text-center text-[8px] font-medium text-[#f5e8e1]/78 lg:text-left">
-                      &copy;2025 LoversAI. Planner growth, simplified.
-                    </p>
+                      <p className="footer-text-font text-left text-[8px] font-medium leading-[1.15] text-[#f5e8e1]/58 sm:text-[9px]">
+                        &copy;2025 LoversAI. Planner growth, simplified.
+                      </p>
+                  </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="border-t border-white/14 lg:border-l lg:border-t-0">
-                <div className="px-4 py-4 sm:px-8 lg:px-10 lg:py-5 xl:px-12">
-                  <div className="max-w-[760px]">
-                    <h3 className="footer-heading-font text-[clamp(18px,1.7vw,24px)] leading-[1.02] text-white">
-                      Book a planner growth call
-                    </h3>
-                    <p className="footer-text-font mt-1.5 max-w-[560px] text-[10px] leading-4 text-[#f5e8e1]/72">
-                      Leave your email and phone number and we will help you set
-                      up the planner side properly.
-                    </p>
-                  </div>
+                <div className="bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.018))]">
+                  <div className="flex h-full flex-col px-5 py-4 sm:px-7 sm:py-5 lg:px-10 lg:py-6 xl:px-12">
+                    <div className="max-w-[620px]">
+                      <h3 className="footer-heading-font text-[clamp(18px,1.6vw,28px)] leading-[1.02] tracking-[-0.02em] text-[#f8efeb]/96">
+                        Book a planner growth call
+                      </h3>
+                      <p className="footer-text-font mt-1.5 max-w-[560px] text-[10px] leading-4 text-[#f5e8e1]/60 sm:text-[11px]">
+                        Leave your email and phone number and we will help you set
+                        up the planner side properly.
+                      </p>
+                    </div>
 
-                  <div className="mt-3 grid gap-2 pb-2 sm:pb-3">
-                    <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/86">
-                      Email Address
-                      <input
-                        type="email"
-                        value={newsletterEmail}
-                        onChange={(e) => setNewsletterEmail(e.target.value)}
-                        placeholder="Enter your work email"
-                        className="h-7 w-full rounded-[14px] border border-white/16 bg-white/[0.07] px-3 text-[10px] text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1]"
-                      />
-                    </label>
-
-                    <div className="grid gap-2 md:grid-cols-[86px_1fr]">
-                      <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/86">
-                        Country
-                        <select
-                          value={countryCode}
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          className="h-7 w-full rounded-[14px] border border-white/16 bg-white/[0.07] px-2 text-[10px] text-white focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1] cursor-pointer"
-                        >
-                          <option
-                            value="+91"
-                            className="bg-[#3a2b28] text-white"
-                          >
-                            +91 IN
-                          </option>
-                          <option
-                            value="+1"
-                            className="bg-[#3a2b28] text-white"
-                          >
-                            +1 US
-                          </option>
-                          <option
-                            value="+44"
-                            className="bg-[#3a2b28] text-white"
-                          >
-                            +44 UK
-                          </option>
-                          <option
-                            value="+61"
-                            className="bg-[#3a2b28] text-white"
-                          >
-                            +61 AU
-                          </option>
-                          <option
-                            value="+971"
-                            className="bg-[#3a2b28] text-white"
-                          >
-                            +971 UAE
-                          </option>
-                        </select>
-                      </label>
-
-                      <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/86">
-                        Phone Number
+                    <div className="mt-4 grid gap-2.5">
+                      <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/80">
+                        Email Address
                         <input
-                          type="tel"
-                          name="book_call_phone"
-                          value={phone}
-                          onChange={(e) =>
-                            setPhone(
-                              e.target.value
-                                .replace(/[^\d]/g, "")
-                                .slice(0, requiredDigits),
-                          )
-                          }
-                          placeholder={`Enter your ${phonePlaceholder}`}
-                          className="h-7 w-full rounded-[14px] border border-white/16 bg-white/[0.07] px-3 text-[10px] text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#e1bfb0] transition-all duration-300 focus:bg-white/[0.1]"
+                          type="email"
+                          value={newsletterEmail}
+                          onChange={(e) => setNewsletterEmail(e.target.value)}
+                          placeholder="Enter your work email"
+                          className="h-10 w-full rounded-[18px] border border-white/12 bg-white/[0.05] px-4 text-[10px] text-white placeholder:text-white/30 transition-all duration-300 focus:border-white/20 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white/10"
                         />
                       </label>
+
+                      <div className="grid gap-2.5 md:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]">
+                        <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/80">
+                          Country
+                          <select
+                            value={countryCode}
+                            onChange={(e) => setCountryCode(e.target.value)}
+                            className="h-10 w-full cursor-pointer rounded-[18px] border border-white/12 bg-white/[0.05] px-4 text-[10px] text-white transition-all duration-300 focus:border-white/20 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white/10"
+                          >
+                            <option
+                              value="+91"
+                              className="bg-[#3a2b28] text-white"
+                            >
+                              +91 IN
+                            </option>
+                            <option
+                              value="+1"
+                              className="bg-[#3a2b28] text-white"
+                            >
+                              +1 US
+                            </option>
+                            <option
+                              value="+44"
+                              className="bg-[#3a2b28] text-white"
+                            >
+                              +44 UK
+                            </option>
+                            <option
+                              value="+61"
+                              className="bg-[#3a2b28] text-white"
+                            >
+                              +61 AU
+                            </option>
+                            <option
+                              value="+971"
+                              className="bg-[#3a2b28] text-white"
+                            >
+                              +971 UAE
+                            </option>
+                          </select>
+                        </label>
+
+                        <label className="footer-text-font grid gap-1 text-[8px] font-semibold uppercase tracking-[0.16em] text-[#f5e8e1]/80">
+                          Phone Number
+                          <input
+                            type="tel"
+                            name="book_call_phone"
+                            value={phone}
+                            onChange={(e) =>
+                              setPhone(
+                                e.target.value
+                                  .replace(/[^\d]/g, "")
+                                  .slice(0, requiredDigits),
+                              )
+                            }
+                            placeholder={`Enter your ${phonePlaceholder}`}
+                            className="h-10 w-full rounded-[18px] border border-white/12 bg-white/[0.05] px-4 text-[10px] text-white placeholder:text-white/30 transition-all duration-300 focus:border-white/20 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-white/10"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="pt-1.5">
+                        <button
+                          type="button"
+                          onClick={handleBookCall}
+                          className="flex h-10 w-full items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(230,198,178,0.92),rgba(255,224,209,0.82))] px-5 text-[11px] font-semibold text-[#1f1411] shadow-[0_12px_24px_rgba(0,0,0,0.14)] transition-all duration-300 hover:brightness-105 hover:shadow-[0_16px_28px_rgba(0,0,0,0.18)] active:scale-[0.98] cursor-pointer"
+                        >
+                          {saving ? "Saving..." : "Book a Free Call"}
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="pt-1 pr-2 sm:pr-4 lg:pr-6 xl:pr-8">
-                      <button
-                        type="button"
-                        onClick={handleBookCall}
-                        className="h-9 w-full max-w-[640px] rounded-full bg-[#d8b8a9] px-5 text-[11px] font-semibold text-[#1f1411] transition-all duration-300 hover:brightness-105 active:scale-[0.98] shadow-[0_10px_22px_rgba(0,0,0,0.14)] hover:shadow-[0_14px_26px_rgba(0,0,0,0.18)] flex items-center justify-center cursor-pointer"
-                      >
-                        {saving ? "Saving..." : "Book a Free Call"}
-                      </button>
-                    </div>
-                  </div>
+                    <div className="mt-auto pt-4 sm:pt-5">
+                      <div className="grid gap-x-10 gap-y-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-14 xl:gap-x-18">
+                        {Object.keys(footerLinks).map((category) => (
+                          <div key={category} className="min-w-0">
+                            <h4 className="footer-heading-font mb-2 text-[12px] font-semibold tracking-[-0.01em] text-[#f5e8e1]/88 sm:text-[13px]">
+                              {category}
+                            </h4>
 
-                  <div className="mt-5 hidden border-t border-white/12 pt-4 sm:block">
-                    <div className="grid gap-y-3 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10">
-                      {Object.keys(footerLinks).map((category) => (
-                        <div key={category} className="min-w-0">
-                          <h4 className="footer-heading-font mb-2 text-[11px] text-[#f5e8e1]">
-                            {category}
-                          </h4>
-
-                          <ul className="space-y-1">
-                            {footerLinks[category].map((item) => (
-                              <li key={item.label}>
-                                {item.page || item.action ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (item.action === "contact") {
-                                        if (
-                                          typeof openContactPopup ===
-                                          "function"
-                                        ) {
-                                          openContactPopup(fullPhone);
+                            <ul className="space-y-1.5">
+                              {footerLinks[category].map((item) => (
+                                <li key={item.label}>
+                                  {item.page || item.action ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (item.action === "contact") {
+                                          if (typeof openContactPopup === "function") {
+                                            openContactPopup(fullPhone);
+                                          } else {
+                                            setShowLocalContactPopup(true);
+                                          }
                                         } else {
-                                          setShowLocalContactPopup(true);
+                                          handleFooterNavigation(
+                                            item.page,
+                                            item.target,
+                                          );
                                         }
-                                      } else {
-                                        handleFooterNavigation(
-                                          item.page,
-                                          item.target,
-                                        );
-                                    }
-                                  }}
-                                className="footer-text-font text-left text-[10px] font-light text-[#f2dfd8]/72 transition-colors duration-200 hover:text-loverai-gold"
-                              >
-                                {item.label}
-                              </button>
-                            ) : (
-                              <span className="footer-text-font text-[10px] font-light text-[#f2dfd8]/42">
-                                {item.label}
-                              </span>
-                            )}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                                      }}
+                                      className="footer-text-font text-left text-[10px] font-normal tracking-[-0.01em] text-[#f2dfd8]/68 transition-colors duration-200 hover:text-loverai-gold sm:text-[11px]"
+                                    >
+                                      {item.label}
+                                    </button>
+                                  ) : (
+                                    <span className="footer-text-font text-[10px] font-normal tracking-[-0.01em] text-[#f2dfd8]/34 sm:text-[11px]">
+                                      {item.label}
+                                    </span>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -585,17 +584,17 @@ const Footer = ({ navigateTo, openContactPopup }) => {
 
               <div>
                 <div className="mb-8">
-                  <h3 className="footer-heading-font mb-4 text-2xl md:text-[28px] font-light text-white">
+                  <h3 className="footer-heading-font mb-4 text-[clamp(28px,2.8vw,54px)] leading-[0.98] font-light text-white">
                     Join our newsletter
                   </h3>
 
-                  <div className="space-y-4">
+                    <div className="space-y-4 pb-2 sm:pb-4">
                     <input
                       type="email"
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                       placeholder="Enter your email"
-                      className="footer-text-font w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-3.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 text-sm transition-all duration-300"
+                      className="footer-text-font w-full rounded-[22px] border border-white/10 bg-white/5 px-6 py-4 text-[14px] text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all duration-300"
                     />
 
                     <div className="flex flex-col gap-3 sm:flex-row items-stretch">
@@ -603,7 +602,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                         <select
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
-                          className="footer-text-font w-[110px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 text-sm transition-all cursor-pointer"
+                          className="footer-text-font w-[164px] rounded-[22px] border border-white/10 bg-white/5 px-5 py-4 text-[14px] text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all cursor-pointer"
                         >
                           <option
                             value="+91"
@@ -646,24 +645,26 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                             )
                           }
                           placeholder={`Enter your ${phonePlaceholder}`}
-                          className="footer-text-font flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-3.5 text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 text-sm transition-all"
+                          className="footer-text-font flex-1 rounded-[22px] border border-white/10 bg-white/5 px-5 py-4 text-[14px] text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all"
                         />
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={handleBookCall}
-                        className="mt-2 rounded-full px-8 py-3.5 text-sm font-semibold text-black transition-all duration-300 active:scale-95 shadow-md shadow-black/10 hover:shadow-lg flex items-center justify-center shrink-0 cursor-pointer"
-                        style={{ backgroundColor: "#D0B1A4" }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.filter = "brightness(1.08)")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.filter = "none")
-                        }
-                      >
-                        {saving ? "Saving..." : "Book a Free Call"}
-                      </button>
+                      <div className="w-full sm:pr-4 lg:pr-8">
+                        <button
+                          type="button"
+                          onClick={handleBookCall}
+                          className="mt-2 mb-4 rounded-full px-8 py-3.5 text-sm font-semibold text-black transition-all duration-300 active:scale-95 shadow-md shadow-black/10 hover:shadow-lg flex items-center justify-center shrink-0 cursor-pointer sm:mb-6"
+                          style={{ backgroundColor: "#D0B1A4" }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.filter = "brightness(1.08)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.filter = "none")
+                          }
+                        >
+                          {saving ? "Saving..." : "Book a Free Call"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

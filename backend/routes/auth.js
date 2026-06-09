@@ -2,6 +2,7 @@
 import express from "express";
 import admin from "../firebaseAdmin.js";
 import User from "../models/User.js";
+import { WELCOME_CREDITS } from "../constants/credits.js";
 
 const router = express.Router();
 
@@ -30,9 +31,9 @@ router.post("/firebase-login", async (req, res) => {
         email: decoded.email,
         fullName: decoded.name || "",
         profileCompleted: false,
-        credits: 30, // 🎁 Assign 30 welcome credits to new users
+        credits: WELCOME_CREDITS, // 🎁 Assign welcome credits to new users
       });
-      console.log(`✅ New user created with 30 welcome credits: ${decoded.email}`);
+      console.log(`✅ New user created with ${WELCOME_CREDITS} welcome credits: ${decoded.email}`);
     }
     
     // Return user data

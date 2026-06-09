@@ -206,8 +206,8 @@ code {
   inset: 0;
   background-image: var(--footer-bg-image);
   background-repeat: no-repeat;
-  background-size: 92% auto;
-  background-position: center;
+  background-size: 110% auto;
+  background-position: center top;
   filter: blur(8px);
   z-index: -1;
 }
@@ -1369,7 +1369,7 @@ select option {
   .footer-blurred-bg::before {
     position: absolute;
     inset: 0;
-    background-size: 78% auto;
+    background-size: 100% auto;
   }
 
   .glass-sidebar {

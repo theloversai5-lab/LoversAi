@@ -3,6 +3,7 @@ import express from "express";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import { generateToken, protect } from "../middleware/auth.js";
+import { WELCOME_CREDITS } from "../constants/credits.js";
 
 const router = express.Router();
 
@@ -54,7 +55,7 @@ router.post("/register", async (req, res) => {
       fullName: fullName?.trim() || "",
       role: userRole,
       authProvider: "local",
-      credits: 30, // 🎁 Welcome credits
+      credits: WELCOME_CREDITS, // 🎁 Welcome credits
     };
 
     // Role-specific fields
@@ -68,7 +69,7 @@ router.post("/register", async (req, res) => {
     const user = await User.create(userData);
     const token = generateToken(user);
 
-    console.log(`✅ New user registered: ${user.email} (${user.role}) — 30 welcome credits`);
+    console.log(`✅ New user registered: ${user.email} (${user.role}) — ${WELCOME_CREDITS} welcome credits`);
 
     res.status(201).json({
       success: true,
@@ -283,12 +284,12 @@ router.post("/google", async (req, res) => {
         authProvider: "google",
         avatar: picture,
         role: userRole,
-        credits: 30, // 🎁 Welcome credits
+        credits: WELCOME_CREDITS, // 🎁 Welcome credits
         lastLoginAt: new Date(),
         loginCount: 1,
       });
 
-      console.log(`✅ New Google user: ${email} (${userRole}) — 30 welcome credits`);
+      console.log(`✅ New Google user: ${email} (${userRole}) — ${WELCOME_CREDITS} welcome credits`);
     }
 
     // Check if blocked
@@ -376,7 +377,7 @@ router.post("/firebase-login", async (req, res) => {
         avatar: decoded.picture,
         authProvider: "google",
         role: userRole,
-        credits: 30,
+        credits: WELCOME_CREDITS,
         lastLoginAt: new Date(),
         loginCount: 1,
       });

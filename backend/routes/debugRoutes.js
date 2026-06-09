@@ -2,6 +2,7 @@
 import express from "express";
 import User from "../models/User.js";
 import { protect } from "../middleware/auth.js";
+import { WELCOME_CREDITS } from "../constants/credits.js";
 
 const router = express.Router();
 
@@ -104,7 +105,7 @@ router.post("/gift-credits", protect, async (req, res) => {
 router.post("/initialize-welcome-credits", protect, async (req, res) => {
   try {
     const user = req.user;
-    const initialCredits = 101;
+    const initialCredits = WELCOME_CREDITS;
 
     // Only initialize if user has 0 credits
     if (user.credits > 0) {
