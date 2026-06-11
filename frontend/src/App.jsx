@@ -50,6 +50,7 @@ import PlannerDeals from "./pages/planner/PlannerDeals";
 import PlannerVendors from "./pages/planner/PlannerVendors";
 import PlannerProfile from "./pages/planner/PlannerProfile";
 import PlannerBuildQuote from "./pages/planner/PlannerBuildQuote";
+import PlannerVenueAI from "./pages/planner/PlannerVenueAI";
 import PlannerSignup from "./pages/planner/PlannerSignup";
 import PlannerOnboarding from "./pages/planner/PlannerOnboarding";
 
@@ -187,6 +188,7 @@ function AppContent() {
           <Route path="/planner/quotes" element={<PlannerQuotes />} />
           <Route path="/planner/messages" element={<PlannerMessages />} />
           <Route path="/planner/deals" element={<PlannerDeals />} />
+          <Route path="/planner/venue-ai" element={<PlannerVenueAI />} />
           <Route path="/planner/vendors" element={<PlannerVendors />} />
           <Route path="/planner/profile" element={<PlannerProfile />} />
           <Route
