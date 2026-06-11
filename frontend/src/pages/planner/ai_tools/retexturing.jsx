@@ -19,13 +19,12 @@ const RetexturingTool = ({ onClose }) => {
   const [imageCount, setImageCount] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState(null);
-  const [generationHistory, setGenerationHistory] = useState([]);
   const [apiStatus, setApiStatus] = useState("checking");
   const [, setAvailableThemes] = useState({});
   const [userCredits, setUserCredits] = useState(0);
   const [loadingCredits, setLoadingCredits] = useState(true);
   const [, setCreditCheckResult] = useState(null);
-  const [creditInfo, setCreditInfo] = useState({
+  const [, setCreditInfo] = useState({
     currentCredits: 0,
     creditsNeeded: 10,
     hasEnough: false,
@@ -43,6 +42,15 @@ const RetexturingTool = ({ onClose }) => {
     engagement: "Engagement Ceremony",
     cocktail: "Cocktail Party",
   };
+
+  const THEME_PRESET_IMAGE_URLS = {
+    haldi: "/images/ai_tools_img/haldi.png",
+    mehndi: "/images/ai_tools_img/mehendi.png.png",
+    wedding: "/images/ai_tools_img/corridor1.jpg",
+  };
+
+  const isPresetTheme = (themeKey) =>
+    Boolean(themeKey && THEME_PRESET_IMAGE_URLS[themeKey]);
 
   const UI_THEMES = [
     { key: "", label: "Custom Only", icon: null, dots: [] },
@@ -143,7 +151,27 @@ const RetexturingTool = ({ onClose }) => {
     if (!currentUser || !selectedImage) return;
 
     try {
-      const creditsNeeded = calculateCreditCost(imageCount, modelType);
+      if (isPresetTheme(selectedTheme)) {
+        setCreditCheckResult({
+          success: true,
+          currentCredits: userCredits,
+          requiredCredits: 0,
+          hasEnoughCredits: true,
+        });
+
+        setCreditInfo({
+          currentCredits: userCredits,
+          creditsNeeded: 0,
+          hasEnough: true,
+        });
+        return;
+      }
+
+      const creditsNeeded = calculateCreditCost(
+        imageCount,
+        modelType,
+        selectedTheme,
+      );
 
       const data = await aiAPI.checkCredits({
         operation: "generate",
@@ -167,7 +195,15 @@ const RetexturingTool = ({ onClose }) => {
     }
   };
 
-  const calculateCreditCost = (count = 1, model = "flux-kontext-pro") => {
+  const calculateCreditCost = (
+    count = 1,
+    model = "flux-kontext-pro",
+    theme = "",
+  ) => {
+    if (isPresetTheme(theme)) {
+      return 0;
+    }
+
     const baseCost = 10;
     let totalCost = baseCost * count;
 
@@ -246,7 +282,7 @@ const RetexturingTool = ({ onClose }) => {
     }
 
     // Validate API connection
-    if (apiStatus === "error") {
+    if (apiStatus === "error" && !isPresetTheme(selectedTheme)) {
       toast.error("Cannot connect to backend server");
       return;
     }
@@ -277,6 +313,35 @@ const RetexturingTool = ({ onClose }) => {
     setIsGenerating(true);
 
     try {
+      const presetImageUrl = THEME_PRESET_IMAGE_URLS[selectedTheme];
+
+      if (presetImageUrl) {
+        const loadingToast = toast.loading(
+          "Applying your selected theme preview...",
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 250));
+
+        const newGeneration = {
+          id: Date.now(),
+          url: presetImageUrl,
+          theme: selectedTheme,
+          customPrompt: customPrompt,
+          modelType: modelType,
+          timestamp: new Date().toISOString(),
+          promptUsed: `Static preset image for ${themes[selectedTheme] || selectedTheme}`,
+          seed: null,
+        };
+
+        setGeneratedImage(newGeneration);
+
+        toast.dismiss(loadingToast);
+        toast.success(
+          `${themes[selectedTheme] || "Selected"} preview generated successfully!`,
+        );
+        return;
+      }
+
       const loadingToast = toast.loading(
         "Transforming your venue... This may take 30-60 seconds.",
       );
@@ -327,7 +392,6 @@ const RetexturingTool = ({ onClose }) => {
         };
 
         setGeneratedImage(newGeneration);
-        setGenerationHistory((prev) => [newGeneration, ...prev.slice(0, 9)]);
 
         // // Update local credit balance
         // if (result.creditInfo) {
@@ -403,7 +467,7 @@ const RetexturingTool = ({ onClose }) => {
         theme: selectedTheme,
         customPrompt: customPrompt,
         modelType: modelType,
-        creditCost: calculateCreditCost(imageCount, modelType),
+        creditCost: calculateCreditCost(imageCount, modelType, selectedTheme),
         userId: currentUser.uid,
       });
 
@@ -411,19 +475,6 @@ const RetexturingTool = ({ onClose }) => {
     } catch (error) {
       console.log(`Feedback ${feedbackType} for generation ${generationId}`);
     }
-  };
-
-  const handleClearHistory = () => {
-    setGenerationHistory([]);
-    toast.success("History cleared");
-  };
-
-  const handleDeleteGeneration = (id) => {
-    setGenerationHistory((prev) => prev.filter((item) => item.id !== id));
-    if (generatedImage?.id === id) {
-      setGeneratedImage(null);
-    }
-    toast.success("Generation deleted");
   };
 
   const downloadImage = async (url, filename) => {
@@ -478,12 +529,15 @@ const RetexturingTool = ({ onClose }) => {
     setSelectedTheme("");
     setCustomPrompt("");
     setGeneratedImage(null);
-    setGenerationHistory([]);
     onClose();
   };
 
   // Calculate credit cost for current settings
-  const currentCreditCost = calculateCreditCost(imageCount, modelType);
+  const currentCreditCost = calculateCreditCost(
+    imageCount,
+    modelType,
+    selectedTheme,
+  );
 
   return (
     <>
@@ -855,9 +909,17 @@ const RetexturingTool = ({ onClose }) => {
                 <div className="mt-3 pt-2.5 border-t border-white/10">
                   <button
                     onClick={handleGenerate}
-                    disabled={!selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost}
+                    disabled={
+                      !selectedImage ||
+                      isGenerating ||
+                      (apiStatus === "error" && !isPresetTheme(selectedTheme)) ||
+                      userCredits < currentCreditCost
+                    }
                     className={`w-full py-2 px-4 rounded-xl font-bold text-[12px] transition-all duration-300 cursor-pointer block text-center shadow-md ${
-                      !selectedImage || isGenerating || apiStatus === "error" || userCredits < currentCreditCost
+                      !selectedImage ||
+                      isGenerating ||
+                      (apiStatus === "error" && !isPresetTheme(selectedTheme)) ||
+                      userCredits < currentCreditCost
                         ? "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed shadow-none"
                         : "bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark hover:brightness-110 shadow-lg hover:shadow-loverai-gold/20 transform active:scale-95"
                     }`}
@@ -996,76 +1058,6 @@ const RetexturingTool = ({ onClose }) => {
           </div>
         </main>
 
-        {/* Previous Transformations Grid */}
-        {generationHistory.length > 0 && (
-          <section className="max-w-[1400px] mx-auto w-full shrink-0 mt-3 border-t border-white/10 pt-3 mb-0">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-3">
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <span>📚</span>
-                  Previous Concepts
-                </h3>
-                <p className="text-[11px] text-gray-400">View and download your previous design concepts</p>
-              </div>
-              <button
-                className="text-[11px] font-bold px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 text-gray-300 transition-all flex items-center gap-1"
-                onClick={handleClearHistory}
-              >
-                <span>🗑️</span> Clear History
-              </button>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto overflow-y-hidden pb-1 scrollbar-hidden">
-              {generationHistory.map((item) => (
-                <div
-                  key={item.id}
-                  className="relative group rounded-[18px] overflow-hidden shadow-lg border border-white/5 bg-white/5 flex-none w-[140px] h-[92px] transition-all duration-300 hover:scale-[1.02]"
-                >
-                  <img
-                    src={item.url}
-                    alt="Transformation"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-                    <button
-                      className="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center shadow-lg text-[10px] font-bold hover:bg-gray-100 transition-all"
-                      onClick={() => {
-                        setGeneratedImage(item);
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                      title="Quick View"
-                    >
-                      👁️
-                    </button>
-                    <button
-                      className="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center shadow-lg text-[10px] font-bold hover:bg-gray-100 transition-all"
-                      onClick={() => downloadImage(item.url, `concept-${item.id}.jpg`)}
-                      title="Download"
-                    >
-                      📥
-                    </button>
-                    <button
-                      className="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg text-[10px] font-bold hover:bg-red-600 transition-all"
-                      onClick={() => handleDeleteGeneration(item.id)}
-                      title="Delete"
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-[9px] text-gray-300 flex justify-between items-center select-none">
-                    <span className="font-bold truncate max-w-[80px]">
-                      {themes[item.theme] || "Custom Theme"}
-                    </span>
-                    <span className="bg-yellow-400/20 text-yellow-300 px-1.5 py-0.5 rounded font-bold">
-                      {item.creditsUsed || 10} pts
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
       </div>
     </>
