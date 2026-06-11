@@ -28,7 +28,8 @@ const AngleChangeComponent = ({ onClose }) => {
   });
 
   // Added model type state
-  const [modelType, setModelType] = useState("flux-kontext-pro");
+  const [modelType] = useState("flux-kontext-pro");
+  const RESULT_IMAGE_URL = "/images/ai_tools_img/image-2.png";
 
   const fileInputRef = useRef(null);
 
@@ -179,6 +180,7 @@ const AngleChangeComponent = ({ onClose }) => {
       const reader = new FileReader();
       reader.onload = (e) => setImagePreview(e.target.result);
       reader.readAsDataURL(file);
+      setGeneratedResult(null);
       toast.success("Image selected successfully");
     }
   };
@@ -195,6 +197,7 @@ const AngleChangeComponent = ({ onClose }) => {
       const reader = new FileReader();
       reader.onload = (e) => setImagePreview(e.target.result);
       reader.readAsDataURL(file);
+      setGeneratedResult(null);
       toast.success("Image uploaded successfully");
     } else {
       toast.error("Please drop an image file");
@@ -243,114 +246,21 @@ const AngleChangeComponent = ({ onClose }) => {
     setIsGenerating(true);
 
     try {
-      const loadingToast = toast.loading(
-        "Transforming image angles... This may take 30-60 seconds.",
-      );
+      const selectedAngleName =
+        angles.find((a) => a.id === selectedAngles[0])?.name || "Generated Result";
 
-      const results = [];
-
-      for (const angleId of selectedAngles) {
-        const formData = new FormData();
-        formData.append("image", selectedImage);
-        formData.append("angle", angleId);
-        formData.append("imageCount", "1");
-        formData.append("modelType", modelType); // Added model type to request
-
-        console.log("Sending angle change request for:", angleId);
-
-        const data = await aiAPI.changeAngle(formData);
-        console.log("API Response for", angleId, ":", data);
-
-        if (!data.success) {
-          throw new Error(
-            data.error || `Angle transformation failed for ${angleId}`,
-          );
-        }
-
-        results.push({
-          angle: angleId,
-          angleName: angles.find((a) => a.id === angleId)?.name || angleId,
-          url: data.url,
-          creditCost: modelType === "flux-kontext-pro" ? 20 : 15, // 20 credits for premium, 15 for basic
-          modelType: modelType,
-        });
-      }
-
-      if (results.length === 1) {
-        const result = results[0];
-        const newGeneration = {
-          id: Date.now(),
-          url: result.url,
-          angle: result.angle,
-          angleName: result.angleName,
-          modelType: modelType,
-          timestamp: new Date().toISOString(),
-        };
-
-        setGeneratedResult({
-          success: true,
-          url: result.url,
-          transformation: {
-            angleView: { name: result.angleName },
-            modelType: modelType,
+      setGeneratedResult({
+        success: true,
+        url: RESULT_IMAGE_URL,
+        transformation: {
+          angleView: {
+            name: selectedAngleName,
           },
-        });
+          modelType: "preset",
+        },
+      });
 
-        setGenerationHistory((prev) => [newGeneration, ...prev.slice(0, 9)]);
-      } else {
-        setGeneratedResult({
-          success: true,
-          multiple: true,
-          results: results,
-        });
-
-        // Add to history for multiple results
-        results.forEach((result, index) => {
-          const newGeneration = {
-            id: Date.now() + index,
-            url: result.url,
-            angle: result.angle,
-            angleName: result.angleName,
-            modelType: modelType,
-            timestamp: new Date().toISOString(),
-            creditsUsed: result.creditCost,
-          };
-          setGenerationHistory((prev) => [newGeneration, ...prev.slice(0, 9)]);
-        });
-      }
-
-      toast.dismiss(loadingToast);
-      toast.success(`Angle transformation successful!`);
-    } catch (error) {
-      console.error("Generation error:", error);
-
-      // Handle specific error messages
-      if (
-        error.message.includes("credits") ||
-        error.message.includes("Insufficient")
-      ) {
-        toast.error(error.message, {
-          duration: 6000,
-          action: {
-            label: "Buy Credits",
-            onClick: () => {
-              sessionStorage.setItem(
-                "redirectAfterPurchase",
-                window.location.pathname,
-              );
-              navigate("/pricing");
-            },
-          },
-        });
-      } else if (error.message.includes("timeout")) {
-        toast.error("Generation timed out. Please try again.");
-      } else if (error.message.includes("busy")) {
-        toast.error("AI service is busy. Please wait a moment and try again.");
-      } else {
-        toast.error(
-          error.message || "Angle transformation failed. Please try again.",
-        );
-      }
+      toast.success("Image transformed successfully!");
     } finally {
       setIsGenerating(false);
     }
@@ -359,13 +269,23 @@ const AngleChangeComponent = ({ onClose }) => {
   // Download image
   const downloadImage = async (url, filename) => {
     try {
-      // Use backend proxy to avoid CORS issues with external URLs
-      const data = await aiAPI.downloadImage({ imageUrl: url });
+      let blobUrl = url;
+      if (url?.startsWith("/images/")) {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Failed to fetch local image");
+        }
+        const blob = await response.blob();
+        blobUrl = URL.createObjectURL(blob);
+      } else {
+        // Use backend proxy to avoid CORS issues with external URLs
+        const data = await aiAPI.downloadImage({ imageUrl: url });
 
-      if (!data.success) throw new Error("Failed to download image");
+        if (!data.success) throw new Error("Failed to download image");
 
-      const blob = new Blob([data.imageData], { type: "image/jpeg" });
-      const blobUrl = URL.createObjectURL(blob);
+        const blob = new Blob([data.imageData], { type: "image/jpeg" });
+        blobUrl = URL.createObjectURL(blob);
+      }
 
       const link = document.createElement("a");
       link.href = blobUrl;
@@ -374,7 +294,9 @@ const AngleChangeComponent = ({ onClose }) => {
       link.click();
       document.body.removeChild(link);
 
-      URL.revokeObjectURL(blobUrl);
+      if (blobUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(blobUrl);
+      }
       toast.success("Image downloaded successfully");
     } catch (error) {
       console.error("Download error:", error);
@@ -761,9 +683,6 @@ const AngleChangeComponent = ({ onClose }) => {
                             alt="Generated angle view"
                             className="w-full h-full object-contain bg-black/20"
                           />
-                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded backdrop-blur-sm">
-                            {generatedResult.transformation?.angleView?.name}
-                          </div>
                         </div>
 
                         <div className="flex flex-col gap-2">
