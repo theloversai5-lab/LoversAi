@@ -24,6 +24,10 @@ const GEMINI_API_BASE_URL =
   "https://generativelanguage.googleapis.com/v1beta";
 const GEMINI_IMAGE_MODEL =
   process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-image-preview";
+const GEMINI_IMAGE_MODEL_FALLBACKS = [
+  "gemini-2.5-flash-image",
+  "gemini-3-pro-image-preview",
+];
 
 const LEGACY_FLUX_ENABLED = process.env.LEGACY_FLUX_ENABLED === "true";
 const isAIEnabled = () =>
@@ -1152,6 +1156,39 @@ async function callGeminiImageAPI(
   modelType = GEMINI_IMAGE_MODEL,
   dimensions = null,
 ) {
+  const candidateModels = [...new Set([modelType, ...GEMINI_IMAGE_MODEL_FALLBACKS])];
+  let lastError = null;
+
+  for (const candidateModel of candidateModels) {
+    try {
+      return await callGeminiImageAPIWithModel(
+        imageBuffer,
+        prompt,
+        candidateModel,
+        dimensions,
+      );
+    } catch (error) {
+      lastError = error;
+
+      if (/GEMINI_AUTH_ERROR/i.test(String(error?.message || ""))) {
+        throw error;
+      }
+
+      if (!/GEMINI_MODEL_ERROR/i.test(String(error?.message || ""))) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError || new Error("Gemini returned no image output");
+}
+
+async function callGeminiImageAPIWithModel(
+  imageBuffer,
+  prompt,
+  modelType = GEMINI_IMAGE_MODEL,
+  dimensions = null,
+) {
   if (!isAIEnabled()) {
     throw new Error("AI service not configured — set GEMINI_API_KEY");
   }
@@ -1199,6 +1236,13 @@ async function callGeminiImageAPI(
         "GEMINI_AUTH_ERROR: Gemini API authentication failed. Restart the backend after setting GEMINI_API_KEY; if it still fails, the key is invalid or does not have image generation access.",
       );
     }
+
+    if ([400, 404, 422].includes(response.status)) {
+      throw new Error(
+        `GEMINI_MODEL_ERROR:${response.status}: Gemini model ${modelType} is unavailable or not supported. ${errorText.substring(0, 200)}`,
+      );
+    }
+
     throw new Error(
       `Gemini error ${response.status}: ${errorText.substring(0, 300)}`,
     );
@@ -1425,7 +1469,27 @@ router.post(
             pipelineTimings: timer.getTimings(),
           });
         }
-        throw new Error("All 4 image generations failed. Please try again.");
+
+        if (
+          imageResults.some((r) =>
+            /GEMINI_MODEL_ERROR|Gemini error 4\d\d/i.test(String(r.error || "")),
+          )
+        ) {
+          return res.status(503).json({
+            success: false,
+            error:
+              "The configured Gemini image model is unavailable. Falling back to a supported model failed, so please try again later or update GEMINI_IMAGE_MODEL.",
+            details: firstError,
+            pipelineTimings: timer.getTimings(),
+          });
+        }
+
+        return res.status(503).json({
+          success: false,
+          error: "All 4 image generations failed. Please try again.",
+          details: firstError,
+          pipelineTimings: timer.getTimings(),
+        });
       }
 
       let generatedImages = rawGeneratedImages;
