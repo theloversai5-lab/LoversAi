@@ -4,6 +4,7 @@ import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import { generateToken, protect } from "../middleware/auth.js";
 import { WELCOME_CREDITS } from "../constants/credits.js";
+import { syncPlannerUserFromAuth } from "../utils/syncPlannerUser.js";
 
 const router = express.Router();
 
@@ -67,6 +68,7 @@ router.post("/register", async (req, res) => {
     }
 
     const user = await User.create(userData);
+    await syncPlannerUserFromAuth(user, "signup");
     const token = generateToken(user);
 
     console.log(`✅ New user registered: ${user.email} (${user.role}) — ${WELCOME_CREDITS} welcome credits`);
@@ -165,6 +167,7 @@ router.post("/login", async (req, res) => {
     });
 
     const token = generateToken(user);
+    await syncPlannerUserFromAuth(user, "signin");
 
     res.json({
       success: true,
@@ -271,6 +274,7 @@ router.post("/google", async (req, res) => {
       ).catch((updateErr) => {
         console.warn("Google login tracking update failed:", updateErr.message);
       });
+      await syncPlannerUserFromAuth(user, "signin");
     } else {
       // New user via Google
       isNewUser = true;
@@ -288,6 +292,8 @@ router.post("/google", async (req, res) => {
         lastLoginAt: new Date(),
         loginCount: 1,
       });
+
+      await syncPlannerUserFromAuth(user, "signup");
 
       console.log(`✅ New Google user: ${email} (${userRole}) — ${WELCOME_CREDITS} welcome credits`);
     }
@@ -381,6 +387,8 @@ router.post("/firebase-login", async (req, res) => {
         lastLoginAt: new Date(),
         loginCount: 1,
       });
+
+      await syncPlannerUserFromAuth(user, "signup");
     } else {
       User.updateOne(
         { _id: user._id },
@@ -400,6 +408,8 @@ router.post("/firebase-login", async (req, res) => {
       ).catch((updateErr) => {
         console.warn("Firebase login tracking update failed:", updateErr.message);
       });
+
+      await syncPlannerUserFromAuth(user, "signin");
     }
 
     if (user.isBlocked) {
