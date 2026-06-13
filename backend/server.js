@@ -134,12 +134,28 @@ const corsOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (corsOrigins.includes(origin)) return true;
+  // Dynamically allow Vercel previews for lovers-ai
+  if (origin.endsWith(".vercel.app") && origin.includes("lovers-ai")) {
+    return true;
+  }
+  return false;
+};
+
 /* ============================================================
    Socket.io Initialization
 ============================================================ */
 const io = new SocketIOServer(server, {
   cors: {
-    origin: corsOrigins,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        callback(null, origin);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -196,7 +212,13 @@ io.on("connection", (socket) => {
 ============================================================ */
 app.use(
   cors({
-    origin: corsOrigins,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
