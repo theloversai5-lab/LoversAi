@@ -128,25 +128,39 @@ const corsOrigins = [
   "http://localhost:3002",
   "http://localhost:3003",
   "http://127.0.0.1:3000",
-  "http://127.0.0.1:3001",
-  "http://127.0.0.1:3002",
-  "http://127.0.0.1:3003",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true;
   if (corsOrigins.includes(origin)) return true;
-  // Dynamically allow Vercel previews for lovers-ai
-  if (origin.endsWith(".vercel.app") && origin.includes("lovers-ai")) {
+
+  const lowerOrigin = origin.toLowerCase();
+
+  // Dynamically allow domains containing 'loversai' or 'lovers-ai'
+  // (e.g., loversai.vercel.app, lovers-ai.vercel.app, loversai.onrender.com, etc.)
+  if (
+    (lowerOrigin.includes("loversai") || lowerOrigin.includes("lovers-ai")) &&
+    (lowerOrigin.endsWith(".vercel.app") ||
+      lowerOrigin.endsWith(".onrender.app") ||
+      lowerOrigin.endsWith(".onrender.com") ||
+      lowerOrigin.endsWith(".netlify.app"))
+  ) {
     return true;
   }
+
+  // Fallback for custom domains
+  if (lowerOrigin.includes("theloversai.co.in")) {
+    return true;
+  }
+
+  console.warn(`⚠️ CORS blocked request from unauthorized origin: ${origin}`);
   return false;
 };
 
 /* ============================================================
    Socket.io Initialization
-============================================================ */
+ ============================================================ */
 const io = new SocketIOServer(server, {
   cors: {
     origin: (origin, callback) => {
@@ -209,14 +223,14 @@ io.on("connection", (socket) => {
 
 /* ============================================================
    CORS Configuration
-============================================================ */
+ ============================================================ */
 app.use(
   cors({
     origin: (origin, callback) => {
       if (isOriginAllowed(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(null, false);
       }
     },
     credentials: true,
