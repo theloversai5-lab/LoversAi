@@ -71,7 +71,7 @@ const PlannerPage = () => {
           <img
             src="/images/LogoLoversai.png"
             alt="Lovers AI"
-            className="h-20 w-auto object-contain sm:h-24"
+            className="h-24 w-auto object-contain sm:h-28"
           />
         </button>
       </div>

@@ -819,9 +819,9 @@ export default function CoupleProfileForm() {
     <main className="min-h-screen w-screen relative px-4 text-white overflow-y-auto flex justify-center items-center">
       {/* Background */}
       <div
-        className="fixed inset-0 bg-cover bg-center -z-20 scale-105 animate-scaleIn"
+        className="fixed inset-0 bg-cover bg-center -z-20"
         style={{
-          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%), url('/images/signup.png')",
+          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%), url('/images/footer.png')",
           backgroundAttachment: "fixed",
         }}
       />

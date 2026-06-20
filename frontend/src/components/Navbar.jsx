@@ -210,7 +210,7 @@ const Navbar = () => {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 flex px-2 md:px-4 pt-3 md:pt-[30px] pointer-events-none animate-fadeInDown ${
-          isHamburgerLanding ? "justify-end" : "justify-center"
+          isHamburgerLanding ? "justify-between md:justify-end" : "justify-center"
         }`}
       >
         {/* Logo - Desktop */}
@@ -227,10 +227,10 @@ const Navbar = () => {
 
         {/* Main Navbar Container — Glassmorphism */}
         <div
-          className={`pointer-events-auto relative transition-all duration-300 ${
+          className={`pointer-events-auto relative transition-all duration-300 w-full ${
             isHamburgerLanding
-              ? "w-auto max-w-none rounded-none bg-transparent shadow-none backdrop-blur-0"
-              : "w-full max-w-[900px] rounded-[28px] md:rounded-full glass-card-strong"
+              ? "md:w-auto max-w-none rounded-none bg-transparent shadow-none backdrop-blur-0 border-none"
+              : "max-w-[900px] rounded-[28px] md:rounded-full glass-card-strong"
           }`}
         >
           {/* Mobile Layout */}

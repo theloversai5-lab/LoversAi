@@ -30,8 +30,21 @@ const connectDB = async () => {
     await mongoose.connect(mongoUri);
     console.log("✅ MongoDB Connected");
   } catch (err) {
-    console.error("❌ MongoDB Error:", err.message);
-    process.exit(1);
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("⚠️ Failed to connect to MongoDB Atlas. Falling back to in-memory MongoDB...");
+      try {
+        memoryServer = await MongoMemoryServer.create();
+        mongoUri = memoryServer.getUri();
+        await mongoose.connect(mongoUri);
+        console.log("🧪 In-memory MongoDB started and connected as fallback");
+      } catch (memErr) {
+        console.error("❌ Failed to start in-memory MongoDB fallback:", memErr.message);
+        process.exit(1);
+      }
+    } else {
+      console.error("❌ MongoDB Error:", err.message);
+      process.exit(1);
+    }
   }
 
   // Return memoryServer instance in case caller wants to stop it later

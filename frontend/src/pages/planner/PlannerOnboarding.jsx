@@ -9,24 +9,22 @@ const TOTAL_STEPS = 5;
 const STORAGE_KEY = "lovers-ai-planner-onboarding";
 const STEP_KEY = "lovers-ai-planner-onboarding-step";
 
-const plannerBackdrop = {
-  backgroundImage: 'url("/images/footer.png")',
-};
+const serif = { fontFamily: "'Cormorant Garamond', serif" };
 
 const stepVariants = {
   initial: (direction) => ({
     opacity: 0,
-    y: direction >= 0 ? 22 : -22,
+    x: direction >= 0 ? 48 : -48,
   }),
   animate: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+    x: 0,
+    transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
   },
   exit: (direction) => ({
     opacity: 0,
-    y: direction >= 0 ? -18 : 18,
-    transition: { duration: 0.2, ease: [0.4, 0, 1, 1] },
+    x: direction >= 0 ? -48 : 48,
+    transition: { duration: 0.3, ease: [0.4, 0, 1, 1] },
   }),
 };
 
@@ -43,28 +41,38 @@ const stepConfig = [
   {
     key: "company_name",
     prompt: "What is your company or brand name?",
-    placeholder: "Type your answer here...",
+    placeholder: "Type your company name here...",
+    subLabel: "COMPANY DETAILS",
+    description: "This will be displayed on your profile and quotes sent to couples.",
   },
   {
     key: "fullName",
     prompt: "What should we call you as the lead planner?",
-    placeholder: "Type your answer here...",
+    placeholder: "Type your name here...",
+    subLabel: "PERSONAL DETAILS",
+    description: "Add your full name so communication feels personal.",
   },
   {
     key: "location",
     prompt: "Which city are you primarily planning from?",
-    placeholder: "Type your answer here...",
+    placeholder: "Type your city here...",
+    subLabel: "LOCATION",
+    description: "We'll use this to match you with couples looking for planners in your area.",
   },
   {
     key: "phone",
-    prompt: "What phone number should couples or our team reach you on?",
+    prompt: "What phone number should couples reach you on?",
     placeholder: "Enter your phone number...",
     inputMode: "tel",
+    subLabel: "CONTACT INFORMATION",
+    description: "This is required for verification and client notifications.",
   },
   {
     key: "interest",
     prompt: "What kind of weddings do you focus on most?",
-    placeholder: "Type your answer here...",
+    placeholder: "Type your focus here...",
+    subLabel: "WEDDING FOCUS",
+    description: "E.g., luxury destination, intimate traditional, modern outdoor, etc.",
   },
 ];
 
@@ -170,106 +178,143 @@ export default function PlannerOnboarding() {
     }
   };
 
-  return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0b0706] text-white">
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={plannerBackdrop}
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,9,8,0.28),rgba(13,9,8,0.5))]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,236,223,0.08),transparent_36%)]" />
+  const renderStepContent = () => {
+    return (
+      <div className="flex flex-col items-center w-full py-4 md:py-6">
+        <span className="text-[13px] text-[#e6c6b2]/70 font-semibold uppercase tracking-[0.25em] mb-3">
+          {activeStep.subLabel}
+        </span>
+        <h2 style={serif} className="text-3xl md:text-4xl font-light text-white mb-2 text-center leading-tight">
+          {activeStep.prompt}
+        </h2>
+        <p className="text-white/60 text-base max-w-md mx-auto leading-relaxed mb-8 text-center">
+          {activeStep.description}
+        </p>
 
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
-        <div className="absolute left-6 top-6 z-20 sm:left-10 sm:top-8">
-          <button
-            type="button"
-            onClick={() => navigate("/planner")}
-            aria-label="Lovers AI home"
-            className="transition hover:opacity-90"
-          >
-            <img
-              src="/images/LogoLoversai.png"
-              alt="Lovers AI"
-              className="h-20 w-auto object-contain sm:h-24"
-            />
-          </button>
+        <div className="w-full max-w-sm mx-auto text-left mb-10">
+          <input
+            type={activeStep.inputMode === "tel" ? "tel" : "text"}
+            inputMode={activeStep.inputMode}
+            value={activeValue}
+            onChange={handleChange}
+            placeholder={activeStep.placeholder}
+            className="w-full rounded-2xl border border-white/15 bg-white/5 px-5 py-4 text-base text-white placeholder-white/25 focus:border-[#e6c6b2] focus:bg-white/10 transition outline-none text-center shadow-inner"
+          />
         </div>
 
-        <PlannerQuickMenu className="absolute right-6 top-6 z-20 sm:right-10 sm:top-8" />
+        {serverError && (
+          <p className="mb-4 text-sm text-red-400 text-center font-semibold rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-2">
+            {serverError}
+          </p>
+        )}
 
-        <section className="w-full max-w-6xl overflow-hidden">
-          <div className="flex flex-col gap-10 p-7 sm:p-10 lg:p-14">
-            <div className="flex justify-end">
-              <div className="rounded-full border border-white/14 bg-white/10 px-5 py-3 text-[13px] font-medium tracking-[0.08em] text-white/85">
-                {`Step ${step} of ${TOTAL_STEPS}`}
-              </div>
-            </div>
-
-            <div className="h-[4px] w-full rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,#C59854,#f0d196)] transition-all duration-300"
-                style={{ width: `${((step - 1) / TOTAL_STEPS) * 100}%` }}
-              />
-            </div>
-
-            <AnimatePresence mode="wait" initial={false} custom={direction}>
-              <motion.section
-                key={activeStep.key}
-                custom={direction}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={stepVariants}
-                className="mx-auto flex w-full max-w-5xl flex-col items-start justify-center gap-8 py-2 lg:min-h-[360px] lg:px-10"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-md bg-white px-2 text-sm font-semibold text-[#806d66] shadow-sm">
-                    {step}
-                  </span>
-                  <h2 className="font-heading text-[clamp(28px,3vw,42px)] leading-[1.15] text-white">
-                    {activeStep.prompt}
-                  </h2>
-                </div>
-
-                <div className="mt-8 w-full max-w-[980px]">
-                  <input
-                    type={activeStep.inputMode === "tel" ? "tel" : "text"}
-                    inputMode={activeStep.inputMode}
-                    value={activeValue}
-                    onChange={handleChange}
-                    placeholder={activeStep.placeholder}
-                    className="w-full border-0 border-b-[3px] border-white/95 bg-transparent px-0 pb-4 pt-1 font-heading text-[clamp(32px,3.6vw,52px)] leading-none text-[#d4b0a4] placeholder:text-[#b08d81] focus:outline-none"
-                  />
-                </div>
-
-                {serverError && (
-                  <p className="mt-1 text-sm text-red-200/90">{serverError}</p>
-                )}
-
-                <div className="mt-6 flex flex-wrap items-center gap-4">
-                  {step > 1 && (
-                    <button
-                      type="button"
-                      onClick={goBack}
-                      className="rounded-2xl border border-white/16 bg-white/10 px-7 py-3 text-lg font-semibold text-white/92 transition hover:bg-white/15"
-                    >
-                      Back
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={goNext}
-                    disabled={!canContinue || isSaving}
-                    className="rounded-2xl bg-[#b8a198] px-8 py-3 text-[22px] font-semibold text-white shadow-[0_8px_18px_rgba(0,0,0,0.12)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-45"
-                  >
-                    {isSaving ? "Saving..." : step === TOTAL_STEPS ? "Finish" : "OK"}
-                  </button>
-                </div>
-              </motion.section>
-            </AnimatePresence>
-          </div>
-        </section>
+        <div className="flex justify-center gap-4 w-full max-w-sm mx-auto">
+          {step > 1 && (
+            <button
+              onClick={goBack}
+              type="button"
+              className="px-8 py-4 rounded-2xl text-base font-bold tracking-wider bg-transparent border border-white/20 text-white hover:bg-white/5 active:scale-95 transition-all flex-1 cursor-pointer"
+            >
+              Back
+            </button>
+          )}
+          <button
+            onClick={goNext}
+            type="button"
+            disabled={!canContinue || isSaving}
+            style={
+              canContinue && !isSaving
+                ? { background: "linear-gradient(90deg, #e6c6b2, #d4a878)", color: "#1c1613" }
+                : {}
+            }
+            className={`px-8 py-4 rounded-2xl text-base font-bold tracking-wider transition-all active:scale-95 flex-1 ${
+              canContinue && !isSaving
+                ? "hover:brightness-110 shadow-lg shadow-[#d4a878]/10 cursor-pointer"
+                : "border border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+            }`}
+          >
+            {isSaving ? "Saving..." : step === TOTAL_STEPS ? "Finish" : "Next"}
+          </button>
+        </div>
       </div>
+    );
+  };
+
+  return (
+    <main className="min-h-screen w-screen relative px-4 text-white overflow-y-auto flex justify-center items-center">
+      {/* Background */}
+      <div
+        className="fixed inset-0 bg-cover bg-center -z-20"
+        style={{
+          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%), url('/images/footer.png')",
+          backgroundAttachment: "fixed",
+        }}
+      />
+
+      <PlannerQuickMenu className="absolute right-6 top-6 z-20 sm:right-10 sm:top-8" />
+
+      {/* Card Container */}
+      <section
+        style={{
+          boxShadow: "0 24px 80px rgba(0,0,0,0.85), inset 0 1px 1px rgba(255,255,255,0.15)",
+        }}
+        className="relative z-10 w-full max-w-[880px] h-[90vh] max-h-[640px] rounded-[32px] bg-white/[0.01] backdrop-blur-[6px] border border-white/10 p-6 md:p-10 flex flex-col justify-between text-center overflow-y-auto"
+      >
+        {/* Header */}
+        <div className="w-full flex flex-col items-center relative mb-6">
+          {/* Logo on the left inside the card */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2">
+            <button
+              type="button"
+              onClick={() => navigate("/planner")}
+              aria-label="Lovers AI home"
+              className="transition hover:opacity-90"
+            >
+              <img
+                src="/images/LogoLoversai.png"
+                alt="Lovers AI"
+                className="h-12 md:h-14 w-auto object-contain"
+              />
+            </button>
+          </div>
+
+          <h2 className="text-2xl md:text-3xl font-light leading-tight text-white text-center px-16 md:px-24" style={serif}>
+            Build your planner profile
+          </h2>
+
+          <span className="absolute top-1/2 right-0 -translate-y-1/2 border border-white/10 bg-white/5 text-white/75 text-[12px] tracking-wide px-3.5 py-1.5 rounded-full font-medium">
+            Step {step} of {TOTAL_STEPS}
+          </span>
+
+          {/* Progress bar line */}
+          <div className="w-full h-[1.5px] bg-white/10 mt-6 relative">
+            <div
+              style={{
+                width: `${((step - 1) / (TOTAL_STEPS - 1)) * 100}%`,
+                transition: "width 0.4s cubic-bezier(0.25, 1, 0.5, 1)",
+              }}
+              className="absolute top-0 left-0 h-full bg-[#e6c6b2]"
+            />
+          </div>
+        </div>
+
+        {/* Step content with slide animation */}
+        <div className="overflow-y-auto md:overflow-visible flex-1 flex flex-col justify-center py-2">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={step}
+              custom={direction}
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="w-full flex flex-col justify-center items-center"
+            >
+              {renderStepContent()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </section>
     </main>
   );
 }
