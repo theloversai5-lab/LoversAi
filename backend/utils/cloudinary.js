@@ -1,4 +1,5 @@
 // utils/cloudinary.js — Cloudinary configuration and upload utility
+import "dotenv/config";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import multerStorageCloudinary from "multer-storage-cloudinary";
