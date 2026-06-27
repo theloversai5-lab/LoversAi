@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { chatAPI } from '../../api/api';
+import { chatAPI, getApiBaseUrl } from '../../api/api';
 import io from 'socket.io-client';
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
 export default function VendorMessages() {
   const { currentUser } = useAuth();
@@ -17,7 +15,7 @@ export default function VendorMessages() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    const socket = io(API_BASE, { transports: ['websocket', 'polling'] });
+    const socket = io(getApiBaseUrl(), { transports: ['websocket', 'polling'] });
     socketRef.current = socket;
     if (currentUser?._id) socket.emit('join', currentUser._id);
     socket.on('new_message', ({ roomId, message }) => {

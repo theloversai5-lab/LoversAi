@@ -2,15 +2,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
-import { chatAPI } from '../api/api';
-
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { chatAPI, getApiBaseUrl } from '../api/api';
 
 let socket = null;
 
 function getSocket() {
   if (!socket) {
-    socket = io(apiBaseUrl, { transports: ['websocket', 'polling'], autoConnect: false });
+    socket = io(getApiBaseUrl(), { transports: ['websocket', 'polling'], autoConnect: false });
   }
   return socket;
 }

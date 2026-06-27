@@ -20,23 +20,35 @@ const updateApiBaseUrl = (baseUrl) => {
 let apiBaseUrlResolution = null;
 
 const getLocalApiCandidates = () => {
+  const candidates = [];
   if (configuredApiBaseUrl) {
-    return [normalizeApiBaseUrl(configuredApiBaseUrl)];
+    candidates.push(normalizeApiBaseUrl(configuredApiBaseUrl));
   }
 
-  if (typeof window === 'undefined') {
-    return [apiBaseUrl];
+  if (typeof window !== 'undefined') {
+    const origin = `${window.location.protocol}//${window.location.hostname}`;
+    if (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.startsWith('192.168.') ||
+      window.location.hostname.startsWith('10.')
+    ) {
+      [5000, 5001, 5002, 5003, 5004, 5005].forEach((port) => {
+        const url = `${origin}:${port}`;
+        if (!candidates.includes(url)) {
+          candidates.push(url);
+        }
+      });
+    }
   }
 
-  const origin = `${window.location.protocol}//${window.location.hostname}`;
-  return [5000, 5001, 5002, 5003, 5004, 5005].map((port) => `${origin}:${port}`);
+  if (candidates.length === 0) {
+    candidates.push(apiBaseUrl);
+  }
+  return candidates;
 };
 
 const resolveApiBaseUrl = async () => {
-  if (configuredApiBaseUrl) {
-    return updateApiBaseUrl(configuredApiBaseUrl);
-  }
-
   if (!apiBaseUrlResolution) {
     apiBaseUrlResolution = (async () => {
       const candidates = getLocalApiCandidates();
@@ -169,6 +181,10 @@ export const paymentAPI = {
   getPlans: () => apiFetch('/payment/plans'),
   getHistory: () => apiFetch('/payment/payment-history'),
   getPaymentStatus: () => apiFetch('/payment/payment-status'),
+  createLibraryOrder: (data) =>
+    apiFetch('/payment/library/create-order', { method: 'POST', data }),
+  verifyLibraryPayment: (data) =>
+    apiFetch('/payment/library/verify', { method: 'POST', data }),
 };
 
 // ─── Admin APIs ───
@@ -385,5 +401,7 @@ export const moodboardAPI = {
   saveMoodboard: (data) => apiFetch('/moodboard', { method: 'POST', data }),
   deleteMoodboard: (boardId) => apiFetch(`/moodboard/${boardId}`, { method: 'DELETE' }),
 };
+
+export const getApiBaseUrl = () => apiBaseUrl;
 
 export default api;

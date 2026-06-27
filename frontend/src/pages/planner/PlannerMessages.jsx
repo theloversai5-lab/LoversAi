@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { chatAPI, uploadAPI } from "../../api/api";
+import { chatAPI, uploadAPI, getApiBaseUrl } from "../../api/api";
 import io from "socket.io-client";
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const normalizeId = (value) => {
   if (!value) return "";
@@ -92,7 +90,7 @@ export default function PlannerMessages() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    const socket = io(API_BASE, { transports: ["websocket", "polling"] });
+    const socket = io(getApiBaseUrl(), { transports: ["websocket", "polling"] });
     socketRef.current = socket;
     if (currentUserId) socket.emit("join", currentUserId);
 

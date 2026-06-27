@@ -39,6 +39,7 @@ import AdminSubscriptions from "./admin/AdminSubscriptions";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./context/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 // Planner Pages
 import PlannerLayout from "./pages/planner/PlannerLayout";
@@ -53,6 +54,7 @@ import PlannerBuildQuote from "./pages/planner/PlannerBuildQuote";
 import PlannerVenueAI from "./pages/planner/PlannerVenueAI";
 import PlannerSignup from "./pages/planner/PlannerSignup";
 import PlannerOnboarding from "./pages/planner/PlannerOnboarding";
+import PlannerLibrary from "./pages/planner/PlannerLibrary";
 
 // Vendor Pages
 import VendorLayout from "./pages/vendor/VendorLayout";
@@ -104,6 +106,7 @@ function AppContent() {
 
   return (
     <>
+      <Toaster position="top-center" reverseOrder={false} />
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Dashboard />} />
@@ -191,6 +194,7 @@ function AppContent() {
           <Route path="/planner/venue-ai" element={<PlannerVenueAI />} />
           <Route path="/planner/vendors" element={<PlannerVendors />} />
           <Route path="/planner/profile" element={<PlannerProfile />} />
+          <Route path="/planner/library" element={<PlannerLibrary />} />
           <Route
             path="/planner/build-quote/:bidId"
             element={<PlannerBuildQuote />}

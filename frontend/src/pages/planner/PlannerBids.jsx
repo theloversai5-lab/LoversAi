@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import { quoteAPI } from "../../api/api";
-
-const apiBaseUrl =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+import { quoteAPI, getApiBaseUrl } from "../../api/api";
 
 const statusColor = {
   pending: "badge-pending",
@@ -58,7 +55,7 @@ export default function PlannerBids() {
 
     fetchBids();
 
-    const socket = io(apiBaseUrl, { transports: ["websocket", "polling"] });
+    const socket = io(getApiBaseUrl(), { transports: ["websocket", "polling"] });
     socket.on("new_bid", fetchBids);
     socket.on("quote_update", fetchBids);
 

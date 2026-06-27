@@ -14,4 +14,7 @@ backend/.env.production
 backend-run*.log
 backend-start*.log
 
+# Large PPTX templates
+frontend/public/*.pptx
+
 

@@ -7,11 +7,8 @@ import React, {
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import { chatAPI, quoteAPI, uploadAPI } from "../../api/api";
+import { chatAPI, quoteAPI, uploadAPI, getApiBaseUrl } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
-
-const apiBaseUrl =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const normalizeId = (value) => {
   if (!value) return "";
@@ -264,7 +261,7 @@ export default function CoupleBidProgress() {
   useEffect(() => {
     if (!currentUserId) return undefined;
 
-    const socket = io(apiBaseUrl, { transports: ["polling", "websocket"] });
+    const socket = io(getApiBaseUrl(), { transports: ["polling", "websocket"] });
     socketRef.current = socket;
     socket.emit("join", currentUserId);
 

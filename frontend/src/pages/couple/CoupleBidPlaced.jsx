@@ -1,11 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import { quoteAPI } from "../../api/api";
+import { quoteAPI, getApiBaseUrl } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
-
-const apiBaseUrl =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const stepsMap = [
   {
@@ -111,7 +108,7 @@ const CoupleBidPlaced = () => {
   useEffect(() => {
     if (!currentUserId || !quote?._id) return undefined;
 
-    const socket = io(apiBaseUrl, { transports: ["websocket", "polling"] });
+    const socket = io(getApiBaseUrl(), { transports: ["websocket", "polling"] });
     socket.emit("join", currentUserId);
 
     socket.on("quote_update", (data) => {

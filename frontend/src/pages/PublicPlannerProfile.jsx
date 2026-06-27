@@ -15,10 +15,7 @@ const PublicPlannerProfile = () => {
     // For now, we fetch a minimal profile or mock it if unauthorized.
     const fetchPlanner = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/admin/users/${id}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
+        const data = await adminAPI.getUser(id);
         if (data.success) {
           setPlanner(data.user);
         }

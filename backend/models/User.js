@@ -178,6 +178,9 @@ const userSchema = new mongoose.Schema(
     totalPayments: { type: Number, default: 0 },
     totalSpent: { type: Number, default: 0 },
 
+    // ─── Library Purchased Templates ───
+    purchasedTemplates: { type: [String], default: [] },
+
     // ─── Security ───
     lastLoginAt: Date,
     loginCount: { type: Number, default: 0 },
