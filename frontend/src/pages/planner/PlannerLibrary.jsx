@@ -8,73 +8,139 @@ const defaultTemplates = {
   Mehndi: [
     {
       id: 'ppt-m1',
-      title: 'Mehndi Luxury Pitch Deck',
+      title: 'Mehndi Pitch Deck 1',
       description: 'Elegant custom mehndi stage setups, warm floral backdrops, and traditional henna lounge slide templates.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Library/Mehndi-1.png',
-        '/images/Library/Mehndi-2.png',
-        '/images/Library/Mehndi-3.png',
-        '/images/Library/Mehndi-4.png',
+        '/images/mehndi cp-1.png'
       ],
-      fileName: 'mehndi_luxury_pitch_deck.pptx',
-      downloadUrl: '/MEHENDI .pptx',
-      slideCount: 32
+      fileName: 'Mehndi docs-1.pptx',
+      downloadUrl: '/Mehndi docs-1.pptx',
+      slideCount: 10
+    },
+    {
+      id: 'ppt-m2',
+      title: 'Mehndi Pitch Deck 2',
+      description: 'Vibrant marigold pathways, traditional seating decor, and intricate stage design templates.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/images/mehndi cp-2.png'
+      ],
+      fileName: 'Mehndi docs-2.pptx',
+      downloadUrl: '/Mehndi docs-2.pptx',
+      slideCount: 13
+    },
+    {
+      id: 'ppt-m3',
+      title: 'Mehndi Pitch Deck 3',
+      description: 'Modern fusion Mehndi themes, lounge layout blueprints, and colorful festive design slides.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/images/mehndi cp-3.png'
+      ],
+      fileName: 'Mehndi docs-3.pptx',
+      downloadUrl: '/Mehndi docs-3.pptx',
+      slideCount: 9
     }
   ],
   Sangeet: [
     {
       id: 'ppt-s1',
-      title: 'Sangeet Starlit Pitch Deck',
+      title: 'Sangeet Pitch Deck 1',
       description: 'Concert-style stages, neon lighting arrangements, and high-energy starlit dance floor slide templates.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Library/Sangeet-1.png',
-        '/images/Library/Sangeet-2.png',
-        '/images/Library/Sangeet-3.png',
-        '/images/Library/Sangeet-4.png',
+        '/images/Sangeet cp-1.png'
       ],
-      fileName: 'sangeet_starlit_pitch_deck.pptx',
-      downloadUrl: '/NEON SANGEET.pptx',
-      slideCount: 25
+      fileName: 'Sangeet docs-1.pptx',
+      downloadUrl: '/Sangeet docs-1.pptx',
+      slideCount: 9
+    },
+    {
+      id: 'ppt-s2',
+      title: 'Sangeet Pitch Deck 2',
+      description: 'Modern disco backdrops, glamorous entrance designs, and DJ booth layout proposals.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/images/Sangeet cp-2.png'
+      ],
+      fileName: 'Sangeet docs-2.pptx',
+      downloadUrl: '/Sangeet docs-2.pptx',
+      slideCount: 7
+    },
+    {
+      id: 'ppt-s3',
+      title: 'Sangeet Pitch Deck 3',
+      description: 'Traditional and contemporary fusion stage decor, acoustic lounge designs, and seating grids.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/images/Sangeet cp-3.png'
+      ],
+      fileName: 'Sangeet docs-3.pptx',
+      downloadUrl: '/Sangeet docs-3.pptx',
+      slideCount: 9
     }
   ],
   Haldi: [
     {
       id: 'ppt-h1',
-      title: 'Haldi Sunshine Pitch Deck',
+      title: 'Haldi Pitch Deck 1',
       description: 'Bright marigold canopies, classic seating setups, and organic yellow color palette presentation themes.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Library/Haldi-1.png',
-        '/images/Library/Haldi-2.png',
-        '/images/Library/Haldi-3.png',
-        '/images/Library/Haldi-4.png',
+        '/images/Haldi cp-1.png'
       ],
-      fileName: 'haldi_sunshine_pitch_deck.pptx',
-      downloadUrl: '/haldi.pptx',
-      slideCount: 26
+      fileName: 'Haldi docs-1.pptx',
+      downloadUrl: '/Haldi docs-1.pptx',
+      slideCount: 7
+    },
+    {
+      id: 'ppt-h2',
+      title: 'Haldi Pitch Deck 2',
+      description: 'Traditional decor elements, custom mustard fabric backdrops, and festive Haldi layout designs.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/images/Haldi cp-2.png'
+      ],
+      fileName: 'Haldi docs-2.pptx',
+      downloadUrl: '/Haldi docs-2.pptx',
+      slideCount: 19
     }
   ],
   Shaadi: [
     {
       id: 'ppt-sh1',
-      title: 'Shaadi Royal Mandap Pitch Deck',
+      title: 'Wedding Pitch Deck 1',
       description: 'Imperial mandap configurations, entrance layouts, and traditional red-and-gold luxury slide motifs.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Library/Wedding-1.png',
-        '/images/Library/Wedding-2.png',
-        '/images/Library/Wedding-3.png',
-        '/images/Library/Wedding-4.png',
+        '/images/wedding cp-1.png'
       ],
-      fileName: 'shaadi_royal_pitch_deck.pptx',
-      downloadUrl: '/wedding.pptx',
-      slideCount: 39
+      fileName: 'Wedding docs-1.pptx',
+      downloadUrl: '/Wedding docs-1.pptx',
+      slideCount: 14
+    },
+    {
+      id: 'ppt-sh2',
+      title: 'Wedding Pitch Deck 2',
+      description: 'Pastel floral mandap setups, royal aisle decorations, and premium banquet lounge slide designs.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/images/wedding cp-2.png'
+      ],
+      fileName: 'wedding docs-2.pptx',
+      downloadUrl: '/wedding docs-2.pptx',
+      slideCount: 25
     }
   ],
 };
@@ -493,7 +559,7 @@ export default function PlannerLibrary({ onClose }) {
                         PPT Deck
                       </span>
                       <span className="text-[11px] text-white/35">
-                        {asset.slideCount ? `${asset.slideCount} Slides (4 Previewed)` : '4 Slides Preview'}
+                        {asset.slideCount ? `${asset.slideCount} Slides (${asset.slides.length} Previewed)` : `${asset.slides.length} Slide Preview`}
                       </span>
                     </div>
                     <h3 className={`text-white font-medium group-hover:text-loverai-gold transition-colors font-heading ${isSingle ? 'text-xl md:text-2xl' : 'text-base line-clamp-1'}`} style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
@@ -556,7 +622,7 @@ export default function PlannerLibrary({ onClose }) {
           {/* Top Bar */}
           <div className="w-full max-w-6xl mx-auto flex items-center justify-between mb-4 px-4 z-50">
             <div className="text-white/80 font-heading text-lg">
-              {selectedTemplate.title} <span className="text-white/30 text-xs font-light">(Slide {previewSlideIndex + 1}/4)</span>
+              {selectedTemplate.title} {selectedTemplate.slides.length > 1 && <span className="text-white/30 text-xs font-light">(Slide {previewSlideIndex + 1}/{selectedTemplate.slides.length})</span>}
             </div>
             
             <button 
@@ -580,15 +646,17 @@ export default function PlannerLibrary({ onClose }) {
             <div className="flex flex-col gap-4">
               <div className="relative aspect-[4/3] bg-black/40 border border-white/5 rounded-2xl overflow-hidden flex items-center justify-center">
                 {/* Prev Arrow */}
-                <button
-                  type="button"
-                  onClick={() => setPreviewSlideIndex(p => (p - 1 + 4) % 4)}
-                  className="absolute left-3 z-20 w-10 h-10 rounded-full border border-white/10 bg-black/50 hover:bg-black/75 text-white flex items-center justify-center transition active:scale-95"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
+                {selectedTemplate.slides.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSlideIndex(p => (p - 1 + selectedTemplate.slides.length) % selectedTemplate.slides.length)}
+                    className="absolute left-3 z-20 w-10 h-10 rounded-full border border-white/10 bg-black/50 hover:bg-black/75 text-white flex items-center justify-center transition active:scale-95"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                )}
 
                 {/* Selected Slide */}
                 <img
@@ -598,30 +666,34 @@ export default function PlannerLibrary({ onClose }) {
                 />
 
                 {/* Next Arrow */}
-                <button
-                  type="button"
-                  onClick={() => setPreviewSlideIndex(p => (p + 1) % 4)}
-                  className="absolute right-3 z-20 w-10 h-10 rounded-full border border-white/10 bg-black/50 hover:bg-black/75 text-white flex items-center justify-center transition active:scale-95"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                {selectedTemplate.slides.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSlideIndex(p => (p + 1) % selectedTemplate.slides.length)}
+                    className="absolute right-3 z-20 w-10 h-10 rounded-full border border-white/10 bg-black/50 hover:bg-black/75 text-white flex items-center justify-center transition active:scale-95"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                )}
               </div>
 
               {/* Dots / Thumbnails row */}
-              <div className="flex justify-center gap-2">
-                {[0, 1, 2, 3].map((idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setPreviewSlideIndex(idx)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      previewSlideIndex === idx ? 'bg-loverai-gold scale-110 w-6' : 'bg-white/20'
-                    }`}
-                  />
-                ))}
-              </div>
+              {selectedTemplate.slides.length > 1 && (
+                <div className="flex justify-center gap-2">
+                  {selectedTemplate.slides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setPreviewSlideIndex(idx)}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        previewSlideIndex === idx ? 'bg-loverai-gold scale-110 w-6' : 'bg-white/20'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Template Side Purchase Panel */}
@@ -645,7 +717,7 @@ export default function PlannerLibrary({ onClose }) {
                   <ul className="space-y-1.5 text-xs text-white/50">
                     <li className="flex items-center gap-2">
                       <span className="w-1 h-1 rounded-full bg-loverai-gold" />
-                      4 Fully Designed Slide Preview pages
+                      {selectedTemplate.slides.length} Fully Designed Slide Preview {selectedTemplate.slides.length === 1 ? 'page' : 'pages'}
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1 h-1 rounded-full bg-loverai-gold" />
