@@ -343,7 +343,31 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               backgroundPosition: "center",
             }}
           ></div>
-          <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+
+          {/* Centered Pitch details */}
+          <div className="relative z-20 text-center px-4 max-w-3xl mx-auto space-y-6">
+            <h1 
+              className="text-[clamp(2.5rem,6vw,5rem)] font-light tracking-wider leading-none text-white font-heading" 
+              style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}
+            >
+              Pitch with AI
+            </h1>
+            <p className="text-lg md:text-xl text-white/80 font-light max-w-2xl mx-auto leading-relaxed">
+              Pitch your couples and vendors with accurate presentation with these tools.
+            </p>
+            <div className="pt-4 animate-bounce">
+              <a 
+                href="#library-section" 
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white hover:bg-white/10 transition"
+                aria-label="Scroll to tools"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
