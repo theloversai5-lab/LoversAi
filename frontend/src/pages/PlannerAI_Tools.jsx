@@ -4,6 +4,7 @@ import { openLemonCheckout } from "../utils/lemonCheckout";
 import RetexturingTool from "./planner/ai_tools/retexturing";
 import AngleChangeComponent from "./planner/ai_tools/image_angle";
 import ImageToVideo from "./planner/ai_tools/image_to_video";
+import PlannerLibrary from "./planner/PlannerLibrary";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { paymentAPI } from "../api/api";
@@ -176,6 +177,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
   const [showAngleChanger, setShowAngleChanger] = useState(false);
   const [showRetexturing, setShowRetexturing] = useState(false);
   const [showImageToVideo, setShowImageToVideo] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
   const [showContactPopup, setShowContactPopup] = useState(false);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -219,6 +221,8 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
           setShowAngleChanger(true);
         } else if (toolToOpen === "image-to-video") {
           setShowImageToVideo(true);
+        } else if (toolToOpen === "library") {
+          setShowLibrary(true);
         }
         // You can add more tools here as needed
       }
@@ -228,14 +232,14 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
   // Scroll to top when tools are opened/closed to prevent scroll issues
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
-  }, [showRetexturing, showAngleChanger, showImageToVideo]);
+  }, [showRetexturing, showAngleChanger, showImageToVideo, showLibrary]);
 
   // Notify parent component about active tool status to hide footer
   useEffect(() => {
     if (onToggleTool) {
-      onToggleTool(showRetexturing || showAngleChanger || showImageToVideo);
+      onToggleTool(showRetexturing || showAngleChanger || showImageToVideo || showLibrary);
     }
-  }, [showRetexturing, showAngleChanger, showImageToVideo, onToggleTool]);
+  }, [showRetexturing, showAngleChanger, showImageToVideo, showLibrary, onToggleTool]);
 
   const handlePurchase = async (plan) => {
     console.log("ðŸš€ handlePurchase called for plan:", plan);
@@ -307,7 +311,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
 
   return (
     <>
-      {!showImageToVideo && (
+      {!showImageToVideo && !showLibrary && (
         <>
           <div className="fixed left-4 top-4 z-30 sm:left-6 sm:top-6 lg:left-8 lg:top-8">
             <button
@@ -329,7 +333,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       )}
 
       {/* Hero Section */}
-      {!showRetexturing && !showAngleChanger && !showImageToVideo && (
+      {!showRetexturing && !showAngleChanger && !showImageToVideo && !showLibrary && (
         <div className="relative w-full min-h-[100svh] flex items-center justify-center text-white overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center z-0"
@@ -343,8 +347,58 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
         </div>
       )}
 
+      {/* Pitch with Library Section */}
+      {!showAngleChanger && !showImageToVideo && !showRetexturing && !showLibrary && (
+        <div
+          id="library-section"
+          className="bg-black px-4 pt-20 pb-10"
+        >
+          <div className="w-full px-4 sm:px-[6%] md:px-[10%]">
+            <h2
+              onClick={() => handleToolClick("library", () => setShowLibrary(true))}
+              className="text-[clamp(2.1rem,5vw,4rem)] font-light text-white mb-12 heading-font text-left cursor-pointer hover:text-rose-300 transition"
+            >
+              Pitch with Library ->
+            </h2>
+
+            <div
+              className="glass-card rounded-[40px] md:rounded-[56px] p-8 md:p-16 border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
+              onClick={() => handleToolClick("library", () => setShowLibrary(true))}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14 items-center">
+                <div className="relative rounded-[32px] overflow-hidden aspect-[4/3.1]">
+                  <img
+                    src="/images/Library/Wedding-1.png"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                    alt="Wedding Pitch Deck Preview"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6">
+                    <span className="text-loverai-gold text-xs font-bold uppercase tracking-wider mb-1">Featured PPTX</span>
+                    <h3 className="text-white text-lg font-semibold">Wedding Royal Mandap Deck</h3>
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <h3 className="text-2xl md:text-3xl font-light text-white">
+                    Access Premium Wedding Presentation Templates
+                  </h3>
+                  <p className="text-white/60 leading-relaxed">
+                    Download fully editable, high-quality PowerPoint presentation decks. Showcase beautiful luxury themes for Sangeet, Mehndi, Haldi, and Shaadi to secure and impress your clients.
+                  </p>
+                  <div className="inline-flex items-center gap-2 text-loverai-gold font-semibold group-hover:translate-x-2 transition-transform duration-300">
+                    Browse Design Library 
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Image Retexturing Section */}
-      {!showAngleChanger && !showImageToVideo && (
+      {!showAngleChanger && !showImageToVideo && !showLibrary && (
         <div
           id="ai-tools-section"
           className={`bg-black px-4 transition-all duration-300 ${
@@ -413,7 +467,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       )}
 
       {/* Image Angle Section */}
-      {!showRetexturing && !showImageToVideo && (
+      {!showRetexturing && !showImageToVideo && !showLibrary && (
         <div
           className={`bg-black px-4 transition-all duration-300 ${
             showAngleChanger ? "pt-16 pb-4 md:pt-20 md:pb-6" : "py-20"
@@ -500,7 +554,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       )}
 
       {/* Image to Video Section */}
-      {!showRetexturing && !showAngleChanger && !showImageToVideo && (
+      {!showRetexturing && !showAngleChanger && !showImageToVideo && !showLibrary && (
         <>
           <div className="bg-black py-20 px-4">
             <div className="w-full px-4 sm:px-[6%] md:px-[10%] mt-16 transition-all duration-300">
@@ -762,6 +816,15 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
         <div className="bg-black px-0 py-0 transition-all duration-300">
           <div className="w-full transition-all duration-300">
             <SafeImageToVideo onClose={() => setShowImageToVideo(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Active Design Library Screen Inline */}
+      {showLibrary && (
+        <div className="bg-black px-4 py-16 transition-all duration-300">
+          <div className="max-w-[1550px] mx-auto px-2 md:px-4">
+            <PlannerLibrary onClose={() => setShowLibrary(false)} />
           </div>
         </div>
       )}

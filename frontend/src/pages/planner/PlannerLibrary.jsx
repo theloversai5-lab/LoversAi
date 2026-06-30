@@ -79,7 +79,7 @@ const defaultTemplates = {
   ],
 };
 
-export default function PlannerLibrary() {
+export default function PlannerLibrary({ onClose }) {
   const { currentUser } = useAuth();
 
   const isAdminEmail = (email) => {
@@ -344,16 +344,31 @@ export default function PlannerLibrary() {
   };
 
   const activeAssets = templates[activeFolder] || [];
+  const isSingle = activeAssets.length === 1;
 
   return (
-    <div className="space-y-6 animate-fadeInUp">
+    <div className="space-y-4 animate-fadeInUp">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-3xl text-white tracking-wide" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
-            Design Library
-          </h1>
-          <p className="text-xs text-white/30 mt-1">Acquire premium PPT pitch decks to wow your wedding planning clients</p>
+        <div className="flex items-center gap-3">
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="mr-2 p-2 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:text-loverai-gold transition"
+              aria-label="Back to AI Tools"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+          <div>
+            <h1 className="font-heading text-3xl text-white tracking-wide" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
+              Design Library
+            </h1>
+            <p className="text-xs text-white/30 mt-1">Acquire premium PPT pitch decks to wow your wedding planning clients</p>
+          </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {isAdminEmail(currentUser?.email) && (
@@ -387,22 +402,22 @@ export default function PlannerLibrary() {
                 setActiveFolder(folderName);
                 setSelectedTemplate(null);
               }}
-              className={`relative text-left rounded-2xl p-5 border transition-all duration-300 group hover-lift ${
+              className={`relative text-left rounded-2xl p-4 border transition-all duration-300 group hover-lift ${
                 isActive
-                  ? 'glass-card border-loverai-gold text-loverai-gold shadow-lg shadow-loverai-gold/5 scale-[1.02]'
+                  ? 'glass-card border-loverai-gold text-loverai-gold shadow-lg shadow-loverai-gold/5 scale-[1.01]'
                   : 'glass-card border-white/5 text-white/70 hover:border-white/20 hover:text-white'
               }`}
             >
               {/* Folder tab design accent */}
-              <div className={`absolute top-0 left-6 -translate-y-[6px] h-[6px] w-12 rounded-t-md transition-colors duration-300 ${
+              <div className={`absolute top-0 left-6 -translate-y-[6px] h-[5px] w-12 rounded-t-md transition-colors duration-300 ${
                 isActive ? 'bg-loverai-gold' : 'bg-white/10 group-hover:bg-white/30'
               }`} />
               
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-300 ${
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-300 ${
                   isActive ? 'bg-loverai-gold/10 text-loverai-gold' : 'bg-white/5 text-white/40 group-hover:bg-white/10'
                 }`}>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 17a5 5 0 01-.9-9.9 5 5 0 019.2 0 5 5 0 019.2 0 5 5 0 01-.2 9.9M7 19h10a2 2 0 002-2v-4a2 2 0 00-2-2H7a2 2 0 00-2 2v4a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -421,7 +436,7 @@ export default function PlannerLibrary() {
       </div>
 
       {/* Gallery Section */}
-      <div className="glass-card rounded-2xl border border-white/5 p-6 space-y-6">
+      <div className="glass-card rounded-2xl border border-white/5 p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-loverai-gold" />
@@ -443,15 +458,17 @@ export default function PlannerLibrary() {
             <p className="text-xs text-white/20">Decks will be added to the {activeFolder} catalog soon.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={`grid gap-6 ${isSingle ? 'grid-cols-1 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}>
             {activeAssets.map((asset) => (
               <div
                 key={asset.id}
-                className="group glass-card-subtle border border-white/5 rounded-2xl overflow-hidden hover-glow transition-all duration-300 flex flex-col sm:flex-row h-full"
+                className={`group glass-card-subtle border border-white/5 rounded-2xl overflow-hidden hover-glow transition-all duration-300 flex flex-col sm:flex-row h-full ${
+                  isSingle ? 'min-h-[320px]' : 'min-h-[220px]'
+                }`}
               >
                 {/* PPT Slide Preview Aspect Box */}
                 <div 
-                  className="relative w-full sm:w-[220px] aspect-[4/3] sm:aspect-auto sm:h-full bg-black/40 flex items-center justify-center shrink-0 cursor-pointer overflow-hidden border-b sm:border-b-0 sm:border-r border-white/5"
+                  className={`relative w-full ${isSingle ? 'sm:w-[420px]' : 'sm:w-[220px]'} aspect-[16/9] sm:aspect-auto sm:h-full bg-black/40 flex items-center justify-center shrink-0 cursor-pointer overflow-hidden border-b sm:border-b-0 sm:border-r border-white/5`}
                   onClick={() => handleOpenPreview(asset)}
                 >
                   <img
@@ -469,7 +486,7 @@ export default function PlannerLibrary() {
                 </div>
 
                 {/* Card Content details */}
-                <div className="p-5 flex flex-col justify-between flex-1 gap-4">
+                <div className={`flex flex-col justify-between flex-1 gap-4 ${isSingle ? 'p-6 md:p-8' : 'p-5'}`}>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-loverai-gold/70 bg-loverai-gold/5 px-2 py-0.5 rounded-full border border-loverai-gold/10 font-semibold tracking-wider uppercase">
@@ -479,10 +496,10 @@ export default function PlannerLibrary() {
                         {asset.slideCount ? `${asset.slideCount} Slides (4 Previewed)` : '4 Slides Preview'}
                       </span>
                     </div>
-                    <h3 className="text-white font-medium text-base line-clamp-1 group-hover:text-loverai-gold transition-colors font-heading" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
+                    <h3 className={`text-white font-medium group-hover:text-loverai-gold transition-colors font-heading ${isSingle ? 'text-xl md:text-2xl' : 'text-base line-clamp-1'}`} style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
                       {asset.title}
                     </h3>
-                    <p className="text-xs text-white/50 line-clamp-2 leading-relaxed">
+                    <p className={`text-white/50 leading-relaxed ${isSingle ? 'text-sm line-clamp-3' : 'text-xs line-clamp-2'}`}>
                       {asset.description}
                     </p>
                   </div>
@@ -490,7 +507,7 @@ export default function PlannerLibrary() {
                   <div className="flex items-center justify-between gap-3 pt-2">
                     <div>
                       <p className="text-[9px] text-white/30 uppercase tracking-widest leading-none">Price</p>
-                      <p className="text-sm font-semibold text-loverai-gold mt-1 leading-none">
+                      <p className={`font-semibold text-loverai-gold mt-1 leading-none ${isSingle ? 'text-lg' : 'text-sm'}`}>
                         {asset.purchased ? 'Unlocked' : `\u20B9${asset.price.toLocaleString('en-IN')}`}
                       </p>
                     </div>
@@ -500,7 +517,9 @@ export default function PlannerLibrary() {
                         type="button"
                         disabled={downloadingId === asset.id}
                         onClick={() => handleDownload(asset)}
-                        className={`flex items-center gap-1.5 text-xs font-semibold py-2 px-4 rounded-xl bg-loverai-gold text-[#201913] hover:brightness-105 transition-all active:scale-95 ${
+                        className={`flex items-center gap-1.5 font-semibold rounded-xl bg-loverai-gold text-[#201913] hover:brightness-105 transition-all active:scale-95 ${
+                          isSingle ? 'text-sm py-2.5 px-5' : 'text-xs py-2 px-4'
+                        } ${
                           downloadingId === asset.id ? 'opacity-50 cursor-wait' : ''
                         }`}
                       >
@@ -513,7 +532,9 @@ export default function PlannerLibrary() {
                       <button
                         type="button"
                         onClick={() => handleOpenPreview(asset)}
-                        className="flex items-center gap-1.5 text-xs font-semibold py-2 px-4 rounded-xl border border-white/10 text-white bg-white/5 hover:border-loverai-gold hover:text-loverai-gold hover:bg-loverai-gold/5 transition-all active:scale-95"
+                        className={`flex items-center gap-1.5 font-semibold rounded-xl border border-white/10 text-white bg-white/5 hover:border-loverai-gold hover:text-loverai-gold hover:bg-loverai-gold/5 transition-all active:scale-95 ${
+                          isSingle ? 'text-sm py-2.5 px-5' : 'text-xs py-2 px-4'
+                        }`}
                       >
                         Preview & Buy
                       </button>
