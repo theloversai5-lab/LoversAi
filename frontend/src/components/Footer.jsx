@@ -21,7 +21,7 @@ const defaultFooterLinks = {
   "About Lovers AI": [{ label: "Our Story", page: "ourstory" }],
   Legal: [
     { label: "Privacy Notice", page: "privacy" },
-    { label: "Terms & Conditions", page: null },
+    { label: "Terms & Conditions", page: "terms" },
   ],
 };
 
@@ -41,9 +41,10 @@ const plannerFooterLinks = {
     { label: "Planner Quotes", page: "plannerQuotes" },
     { label: "Planner Deals", page: "plannerDeals" },
   ],
+  "About Lovers AI": [{ label: "Our Story", page: "ourstory" }],
   Legal: [
     { label: "Privacy Notice", page: "privacy" },
-    { label: "Terms & Conditions", page: null },
+    { label: "Terms & Conditions", page: "terms" },
   ],
 };
 
@@ -93,6 +94,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
       plannerMessages: "/planner/messages",
       pitch: "/planner-ai-tools",
       privacy: "/privacy",
+      terms: "/terms-and-conditions",
       faq: "/faq",
       ourstory: "/ourstory",
     };
@@ -292,7 +294,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-8 gap-x-4 sm:grid-cols-4 pt-8 border-t border-white/10">
+                <div className="grid grid-cols-2 gap-y-8 gap-x-4 sm:grid-cols-3 lg:grid-cols-5 pt-8 border-t border-white/10">
                   {Object.keys(footerLinks).map((category) => (
                     <div key={category}>
                       <h4 className="footer-heading-font mb-3.5 text-sm font-semibold tracking-wider uppercase text-white/50">

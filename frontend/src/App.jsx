@@ -28,6 +28,9 @@ import PlannerAITools from "./pages/PlannerAI_Tools";
 import PricingPage from "./pages/PricingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import OurStory from "./pages/OurStory";
 import UserForm from "./pages/UserForm";
 import Profile from "./pages/Profile";
 import AdminProtectedRoute from "./admin/AdminProtectedRoute";
@@ -112,6 +115,9 @@ function AppContent() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/ourstory" element={<OurStory />} />
         <Route path="/planner/signup" element={<PlannerSignup />} />
         <Route
           path="/planner/onboarding"
