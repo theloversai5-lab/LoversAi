@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, useInView } from "framer-motion";
 
+
+
 /* ─── Section Data ─── */
 const PRIVACY_SECTIONS = [
   { id: "info-collect", num: "01", title: "Information We Collect" },
@@ -53,7 +55,8 @@ const AnimatedSection = ({ id, children }) => {
     </motion.section>
   );
 };
-
+// TODO: Review policy with legal team before production release.
+// TODO: Update the effective date during deployment.
 /* ─── Section Header ─── */
 const SectionHeader = ({ num, title }) => (
   <div className="flex items-center gap-4 mb-5">

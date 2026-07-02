@@ -329,6 +329,8 @@ function AppContent() {
   );
 }
 
+// TODO: Integrate remaining application routes after UI review.
+// TODO: Connect footer links to their final pages once approved.
 export default function App() {
   return (
     <AuthProvider>

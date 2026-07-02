@@ -55,7 +55,8 @@ const SectionHeader = ({ num, title }) => (
     </h2>
   </div>
 );
-
+// TODO: Review terms with legal team before production release.
+// TODO: Add links to Privacy Policy and Contact Us page.
 /* ─── Paragraph ─── */
 const P = ({ children, className = "" }) => (
   <p className={`text-white/65 text-[14.5px] leading-[1.8] font-light mb-4 ${className}`}>{children}</p>

@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+// TODO: Refine content and animations based on design feedback.
+// TODO: Replace placeholder images with brand assets.
 // Reusable animation variants
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
