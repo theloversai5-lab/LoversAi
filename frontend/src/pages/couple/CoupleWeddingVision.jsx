@@ -45,6 +45,100 @@ const TITLE_MAP = {
   "Small Function (Birthday, Engagement)": "Intimate Celebration of Love",
 };
 
+const getBentoCardTitleAndDesc = (functionType, planningType, cardKey) => {
+  const func = (() => {
+    if (!functionType) return "Wedding";
+    const text = functionType.toLowerCase();
+    if (text.includes("haldi")) return "Haldi";
+    if (text.includes("mehndi") || text.includes("mehendi") || text.includes("mehandi")) return "Mehndi";
+    if (text.includes("sangeet")) return "Sangeet";
+    if (text.includes("reception")) return "Reception";
+    if (text.includes("wedding")) return "Wedding";
+    if (text.includes("engagement") || text.includes("birthday")) return "Function";
+    return functionType;
+  })();
+
+  const plan = planningType || "Decor / Planning / Venue";
+
+  if (plan === "Fashion / Photography") {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Fashion Scene`,
+          description: "Key couples look & fashion style"
+        };
+      case "decor":
+        return {
+          title: `${func} Bridal Wear & Styling`,
+          description: "Details of bride's attire & style"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Groom Wear & Styling`,
+          description: "Details of groom's attire & portraits"
+        };
+      case "venue":
+        return {
+          title: `${func} Photography & Portrait Setup`,
+          description: "Photography theme & shoot setup"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  } else if (plan === "Sounds / Lights / Entertainment") {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Sound & Light Scene`,
+          description: "Key audio-visual & stage setup"
+        };
+      case "decor":
+        return {
+          title: `${func} Stage & Lighting Design`,
+          description: "Stage design, lighting truss, & screens"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Performance & Entertainment`,
+          description: "DJ booth, dancefloor, & artist setup"
+        };
+      case "venue":
+        return {
+          title: `${func} Special Effects & Ambient Lights`,
+          description: "Special effects, dry ice, & lasers"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  } else {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Scene`,
+          description: "Key generated vision scene"
+        };
+      case "decor":
+        return {
+          title: `${func} Decor & Detailing`,
+          description: "Table settings & floral design"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Ceremony & Theme Detail`,
+          description: "Specific ritual & ceremonial setup"
+        };
+      case "venue":
+        return {
+          title: `${func} Venue Atmosphere`,
+          description: "Atmospheric lighting & scale"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  }
+};
+
+
 const getThemeFromFunction = (value = "") => {
   const text = value.toLowerCase();
   if (text.includes("haldi")) return "haldi";
@@ -729,16 +823,16 @@ export default function CoupleWeddingVision() {
           {/* Column 1 (Wider) */}
           <div className="flex flex-col gap-4 min-h-0 justify-between">
             {renderCard(
-              "Primary Wedding Scene",
-              "Key generated vision scene",
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").description,
               generatedImages[0],
               "Theme",
               "flex-[1.2] min-h-0",
               "primary"
             )}
             {renderCard(
-              "Ceremony & Theme Detail",
-              "Specific ritual & ceremonial setup",
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").description,
               generatedImages[2],
               "Functions",
               "flex-[0.8] min-h-0",
@@ -749,16 +843,16 @@ export default function CoupleWeddingVision() {
           {/* Column 2 */}
           <div className="flex flex-col gap-4 min-h-0 justify-between">
             {renderCard(
-              "Decor & Detailing",
-              "Table settings & floral design",
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").description,
               generatedImages[1],
               "Decoration",
               "flex-[0.75] min-h-0",
               "decor"
             )}
             {renderCard(
-              "Venue Atmosphere",
-              "Atmospheric lighting & scale",
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").description,
               generatedImages[3],
               "Venue",
               "flex-[1.25] min-h-0",

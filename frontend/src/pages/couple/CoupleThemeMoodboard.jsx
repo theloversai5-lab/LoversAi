@@ -54,6 +54,101 @@ const normalizeTheme = (value = "") => {
   return "wedding";
 };
 
+
+const getBentoCardTitleAndDesc = (functionType, planningType, cardKey) => {
+  const func = (() => {
+    if (!functionType) return "Wedding";
+    const text = functionType.toLowerCase();
+    if (text.includes("haldi")) return "Haldi";
+    if (text.includes("mehndi") || text.includes("mehendi") || text.includes("mehandi")) return "Mehndi";
+    if (text.includes("sangeet")) return "Sangeet";
+    if (text.includes("reception")) return "Reception";
+    if (text.includes("wedding")) return "Wedding";
+    if (text.includes("engagement") || text.includes("birthday")) return "Function";
+    return functionType;
+  })();
+
+  const plan = planningType || "Decor / Planning / Venue";
+
+  if (plan === "Fashion / Photography") {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Fashion Scene`,
+          description: "Key couples look & fashion style"
+        };
+      case "decor":
+        return {
+          title: `${func} Bridal Wear & Styling`,
+          description: "Details of bride's attire & style"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Groom Wear & Styling`,
+          description: "Details of groom's attire & portraits"
+        };
+      case "venue":
+        return {
+          title: `${func} Photography & Portrait Setup`,
+          description: "Photography theme & shoot setup"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  } else if (plan === "Sounds / Lights / Entertainment") {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Sound & Light Scene`,
+          description: "Key audio-visual & stage setup"
+        };
+      case "decor":
+        return {
+          title: `${func} Stage & Lighting Design`,
+          description: "Stage design, lighting truss, & screens"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Performance & Entertainment`,
+          description: "DJ booth, dancefloor, & artist setup"
+        };
+      case "venue":
+        return {
+          title: `${func} Special Effects & Ambient Lights`,
+          description: "Special effects, dry ice, & lasers"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  } else {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Scene`,
+          description: "Key generated vision scene"
+        };
+      case "decor":
+        return {
+          title: `${func} Decor & Detailing`,
+          description: "Table settings & floral design"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Ceremony & Theme Detail`,
+          description: "Specific ritual & ceremonial setup"
+        };
+      case "venue":
+        return {
+          title: `${func} Venue Atmosphere`,
+          description: "Atmospheric lighting & scale"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  }
+};
+
+
 const SparklesIcon = () => (
   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 3L14.5 9L21 11.5L14.5 14L12 20L9.5 14L3 11.5L9.5 9L12 3Z" fill="currentColor" />
@@ -930,7 +1025,13 @@ export default function CoupleThemeMoodboard() {
               <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 pb-3 flex-shrink-0">
                 <div>
                   <span className="rounded-full bg-[#e6c6b2]/10 border border-[#e6c6b2]/20 px-3.5 py-1 text-[11px] font-bold text-[#e6c6b2] uppercase tracking-wider">
-                    {activeBoard.functionType || selectedTheme.name} Decor
+                    {activeBoard.functionType || selectedTheme.name} {
+                      activeBoard?.details?.planningType === "Fashion / Photography"
+                        ? "Fashion & Photography"
+                        : activeBoard?.details?.planningType === "Sounds / Lights / Entertainment"
+                        ? "Sound, Light & Entertainment"
+                        : "Decor & Venue"
+                    }
                   </span>
                   <p className="mt-1 text-[11px] text-white/40 font-medium">
                     {activeBoard.style} Style / {activeBoard.functionType}
@@ -965,14 +1066,14 @@ export default function CoupleThemeMoodboard() {
                   {/* Column 1 (Wider) */}
                   <div className="flex flex-col gap-4 min-h-0 justify-between flex-1">
                     {renderMoodboardCard(
-                      "Primary Wedding Scene",
-                      "Key generated vision scene",
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "primary").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "primary").description,
                       0,
                       "flex-[1.2] min-h-0"
                     )}
                     {renderMoodboardCard(
-                      "Ceremony & Theme Detail",
-                      "Specific ritual & ceremonial setup",
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "ceremony").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "ceremony").description,
                       2,
                       "flex-[0.8] min-h-0"
                     )}
@@ -981,14 +1082,14 @@ export default function CoupleThemeMoodboard() {
                   {/* Column 2 */}
                   <div className="flex flex-col gap-4 min-h-0 justify-between flex-1">
                     {renderMoodboardCard(
-                      "Decor & Detailing",
-                      "Table settings & floral design",
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "decor").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "decor").description,
                       1,
                       "flex-[0.75] min-h-0"
                     )}
                     {renderMoodboardCard(
-                      "Venue Atmosphere",
-                      "Atmospheric lighting & scale",
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "venue").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "venue").description,
                       3,
                       "flex-[1.25] min-h-0"
                     )}
