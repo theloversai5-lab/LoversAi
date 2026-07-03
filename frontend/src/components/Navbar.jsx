@@ -229,7 +229,7 @@ const Navbar = () => {
         <div
           className={`pointer-events-auto relative transition-all duration-300 w-full ${
             isHamburgerLanding
-              ? "md:w-auto max-w-none rounded-none bg-transparent shadow-none backdrop-blur-0 border-none"
+              ? "md:w-auto max-w-none rounded-none bg-transparent shadow-none backdrop-blur-none border-none"
               : "max-w-[900px] rounded-[28px] md:rounded-full glass-card-strong"
           }`}
         >
@@ -537,8 +537,8 @@ const Navbar = () => {
 
         {/* Mobile Menu Overlay */}
         <div
-          className={`md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 z-40 ${
-            mobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          className={`md:hidden fixed inset-0 bg-black/50 transition-all duration-300 z-40 ${
+            mobileMenuOpen ? "opacity-100 visible backdrop-blur-sm" : "opacity-0 invisible"
           }`}
           onClick={() => setMobileMenuOpen(false)}
         />
@@ -546,8 +546,8 @@ const Navbar = () => {
         {/* Mobile Menu Panel */}
         <div
           ref={mobilePanelRef}
-          className={`md:hidden fixed top-0 right-0 w-[280px] h-full glass-sidebar shadow-2xl transition-transform duration-300 ease-out z-50 ${
-            mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          className={`md:hidden fixed top-0 right-0 w-[280px] h-full shadow-2xl transition-all duration-300 ease-out z-50 ${
+            mobileMenuOpen ? "translate-x-0 glass-sidebar opacity-100" : "translate-x-full opacity-0 pointer-events-none"
           }`}
           style={{
             background: "linear-gradient(180deg, #0f0a07 0%, #0a0604 100%)",

@@ -296,6 +296,7 @@ export default function CoupleThemeMoodboard() {
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [activeMobileCard, setActiveMobileCard] = useState(0);
   const uploadRef = useRef(null);
 
   const selectedTheme =
@@ -1061,8 +1062,61 @@ export default function CoupleThemeMoodboard() {
               {/* Scrollable area restricted inside bento wrapper */}
               <div className="flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-4 custom-scrollbar">
                 
-                {/* Bento Grid matching CoupleWeddingVision layout */}
-                <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-4 flex-1 min-h-0 flex-shrink-0">
+                {/* Mobile View: Carousel Slider */}
+                <div className="flex flex-col md:hidden flex-1 min-h-0 justify-between h-full flex-shrink-0">
+                  <div className="flex-1 min-h-0 relative flex items-center justify-center p-1">
+                    {activeMobileCard === 0 && renderMoodboardCard(
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "primary").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "primary").description,
+                      0,
+                      "w-full h-full min-h-[300px]"
+                    )}
+                    {activeMobileCard === 1 && renderMoodboardCard(
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "decor").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "decor").description,
+                      1,
+                      "w-full h-full min-h-[300px]"
+                    )}
+                    {activeMobileCard === 2 && renderMoodboardCard(
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "ceremony").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "ceremony").description,
+                      2,
+                      "w-full h-full min-h-[300px]"
+                    )}
+                    {activeMobileCard === 3 && renderMoodboardCard(
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "venue").title,
+                      getBentoCardTitleAndDesc(activeBoard?.functionType, activeBoard?.details?.planningType, "venue").description,
+                      3,
+                      "w-full h-full min-h-[300px]"
+                    )}
+                  </div>
+
+                  {/* Controls */}
+                  <div className="flex items-center justify-between mt-3 px-3 py-2 flex-shrink-0 bg-white/5 border border-white/10 rounded-xl mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setActiveMobileCard(prev => Math.max(0, prev - 1))}
+                      disabled={activeMobileCard === 0}
+                      className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-[#ebd8c7] text-[#251f1b] font-bold text-xs hover:bg-white hover:text-black transition disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      ← Prev
+                    </button>
+                    <span className="text-[11px] font-bold tracking-widest text-[#ebd8c7]">
+                      {activeMobileCard + 1} OF 4
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveMobileCard(prev => Math.min(3, prev + 1))}
+                      disabled={activeMobileCard === 3}
+                      className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-[#ebd8c7] text-[#251f1b] font-bold text-xs hover:bg-white hover:text-black transition disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
+
+                {/* Desktop View: Bento Grid */}
+                <div className="hidden md:grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-4 flex-1 min-h-0 flex-shrink-0">
                   {/* Column 1 (Wider) */}
                   <div className="flex flex-col gap-4 min-h-0 justify-between flex-1">
                     {renderMoodboardCard(

@@ -32,13 +32,51 @@ function CoupleHome() {
   const [activeSlide, setActiveSlide] = useState(0);
 
   const handleEnter = (e) => {
-    e.currentTarget.style.transform = "translateY(-10px) scale(1.03)";
-    e.currentTarget.style.boxShadow = "0 25px 60px rgba(0,0,0,0.6)";
+    e.currentTarget.style.transform = "translateY(-10px) scale(1.01)";
+    e.currentTarget.style.boxShadow = "0 25px 50px rgba(230, 198, 178, 0.15), 0 15px 40px rgba(0,0,0,0.6)";
+    e.currentTarget.style.borderColor = "rgba(230, 198, 178, 0.55)";
+    e.currentTarget.style.background = "radial-gradient(circle at 80% 20%, rgba(230, 198, 178, 0.16) 0%, transparent 60%), linear-gradient(135deg, rgba(46, 34, 29, 0.95) 0%, rgba(26, 18, 14, 0.98) 100%)";
+    const iconCircle = e.currentTarget.querySelector(".step-icon-circle");
+    if (iconCircle) {
+      iconCircle.style.background = "rgba(230, 198, 178, 0.22)";
+      iconCircle.style.borderColor = "rgba(230, 198, 178, 0.6)";
+      iconCircle.style.transform = "scale(1.08)";
+    }
+    const numBg = e.currentTarget.querySelector(".card-number-bg");
+    if (numBg) {
+      numBg.style.color = "rgba(230, 198, 178, 0.08)";
+      numBg.style.transform = "scale(1.05) translateY(-5px)";
+    }
+    const arrow = e.currentTarget.querySelector(".footer-arrow");
+    if (arrow) {
+      arrow.style.transform = "translateX(6px)";
+      arrow.style.color = "#ebd8c7";
+      arrow.style.opacity = "1";
+    }
   };
 
   const handleLeave = (e) => {
     e.currentTarget.style.transform = "translateY(0px) scale(1)";
     e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.4)";
+    e.currentTarget.style.borderColor = "rgba(230, 198, 178, 0.18)";
+    e.currentTarget.style.background = "radial-gradient(circle at 80% 20%, rgba(230, 198, 178, 0.08) 0%, transparent 50%), linear-gradient(135deg, rgba(37, 27, 23, 0.85) 0%, rgba(22, 15, 12, 0.95) 100%)";
+    const iconCircle = e.currentTarget.querySelector(".step-icon-circle");
+    if (iconCircle) {
+      iconCircle.style.background = "rgba(230, 198, 178, 0.08)";
+      iconCircle.style.borderColor = "rgba(230, 198, 178, 0.25)";
+      iconCircle.style.transform = "scale(1)";
+    }
+    const numBg = e.currentTarget.querySelector(".card-number-bg");
+    if (numBg) {
+      numBg.style.color = "rgba(230, 198, 178, 0.03)";
+      numBg.style.transform = "scale(1) translateY(0px)";
+    }
+    const arrow = e.currentTarget.querySelector(".footer-arrow");
+    if (arrow) {
+      arrow.style.transform = "translateX(0px)";
+      arrow.style.color = "rgba(230, 198, 178, 0.4)";
+      arrow.style.opacity = "0.75";
+    }
   };
 
   useEffect(() => {
@@ -97,19 +135,71 @@ function CoupleHome() {
 
         <div style={journeyGrid}>
           {[
-            { step: "Step 1", text: "Sign Up & Create Your Profile" },
-            { step: "Step 2", text: "Edit & Personalize Everything" },
-            { step: "Step 3", text: "Choose & Order Anything Last Moment" },
+            { 
+              num: "01",
+              step: "Step 1", 
+              text: "Sign Up & Create Your Profile",
+              desc: "Quickly set up your profile and tell us your dream wedding preferences to customize your experience.",
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ebd8c7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              )
+            },
+            { 
+              num: "02",
+              step: "Step 2", 
+              text: "Edit & Personalize Everything",
+              desc: "Refine layouts, change theme palettes, switch lightings, and preview real-time edits powered by our advanced AI tools.",
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ebd8c7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+              )
+            },
+            { 
+              num: "03",
+              step: "Step 3", 
+              text: "Choose & Order Anything Last Moment",
+              desc: "Secure your bookings, order custom decks, and coordinate with planners instantly, even at the last minute.",
+              icon: (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ebd8c7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+              )
+            },
           ].map((item) => (
             <div
               key={item.step}
               style={journeyCard}
               onMouseEnter={handleEnter}
               onMouseLeave={handleLeave}
+              onClick={handleStartYourStory}
             >
+              {/* Elegant serif watermark card number in the background */}
+              <div className="card-number-bg" style={cardNumberBg}>
+                {item.num}
+              </div>
+
               <div style={cardInner}>
-                <span style={stepLabel}>{item.step}</span>
-                <span style={cardText}>{item.text}</span>
+                <div className="step-icon-circle" style={iconCircle}>
+                  {item.icon}
+                </div>
+                <span style={stepLabelPill}>{item.step}</span>
+                <span style={cardTitleText}>{item.text}</span>
+                <p style={cardDescText}>{item.desc}</p>
+              </div>
+
+              {/* Action indicator at footer */}
+              <div className="footer-arrow" style={cardFooterArrow}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
               </div>
             </div>
           ))}
@@ -268,43 +358,105 @@ const journeyGrid = {
 /* JOURNEY CARD */
 
 const journeyCard = {
-  height: "180px",
-  borderRadius: "16px",
-  background: "linear-gradient(135deg, #33251c, #5c3c24)",
+  height: "300px",
+  borderRadius: "28px",
+  background: "radial-gradient(circle at 80% 20%, rgba(230, 198, 178, 0.08) 0%, transparent 50%), linear-gradient(135deg, rgba(37, 27, 23, 0.85) 0%, rgba(22, 15, 12, 0.95) 100%)",
+  backdropFilter: "blur(16px)",
+  border: "1px solid rgba(230, 198, 178, 0.18)",
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center",
-  textAlign: "center",
-  padding: "28px 24px",
+  justifyContent: "space-between",
+  padding: "32px 24px 20px",
   cursor: "pointer",
-  transition: "all 0.4s ease",
+  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
   boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+  position: "relative",
+  overflow: "hidden",
+};
+
+const cardNumberBg = {
+  position: "absolute",
+  right: "12px",
+  bottom: "0px",
+  fontSize: "120px",
+  fontWeight: 900,
+  fontFamily: "'DM Serif Display', serif",
+  color: "rgba(230, 198, 178, 0.03)",
+  lineHeight: 1,
+  pointerEvents: "none",
+  userSelect: "none",
+  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
 };
 
 const cardInner = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  justifyContent: "flex-start",
+  gap: "12px",
+  width: "100%",
+};
+
+const iconCircle = {
+  width: "48px",
+  height: "48px",
+  borderRadius: "50%",
+  background: "rgba(230, 198, 178, 0.08)",
+  border: "1px solid rgba(230, 198, 178, 0.25)",
+  display: "flex",
+  alignItems: "center",
   justifyContent: "center",
-  gap: "14px",
+  boxShadow: "inset 0 2px 8px rgba(255,255,255,0.05)",
+  transition: "all 0.3s ease",
 };
 
-const stepLabel = {
-  fontSize: "13px",
-  letterSpacing: "0.22em",
-  textTransform: "uppercase",
-  color: "rgba(230, 198, 178, 0.95)",
+const stepLabelPill = {
+  display: "inline-block",
+  background: "rgba(230, 198, 178, 0.12)",
+  border: "1px solid rgba(230, 198, 178, 0.35)",
+  borderRadius: "100px",
+  padding: "4px 14px",
+  fontSize: "10px",
   fontWeight: 700,
+  letterSpacing: "0.2em",
+  textTransform: "uppercase",
+  color: "#ebd8c7",
   fontFamily: "'Poppins', sans-serif",
+  textShadow: "0 1px 2px rgba(0,0,0,0.4)",
 };
 
-/* CARD TEXT */
-
-const cardText = {
+const cardTitleText = {
   fontSize: "18px",
-  lineHeight: "1.6",
-  fontFamily: "'Poppins', sans-serif",
+  fontWeight: 700,
+  fontFamily: "'DM Serif Display', serif",
+  color: "#fff",
+  lineHeight: "1.3",
+  letterSpacing: "0.02em",
+  maxWidth: "92%",
+  margin: "0 auto",
 };
+
+const cardDescText = {
+  fontSize: "12.5px",
+  fontFamily: "'Poppins', sans-serif",
+  color: "rgba(249, 247, 245, 0.55)",
+  lineHeight: "1.6",
+  maxWidth: "96%",
+  margin: "4px auto 0",
+};
+
+const cardFooterArrow = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "rgba(230, 198, 178, 0.4)",
+  opacity: "0.75",
+  transition: "all 0.3s ease",
+  marginTop: "12px",
+};
+
+
 
 /* QUOTE */
 

@@ -323,6 +323,7 @@ export default function CoupleWeddingVision() {
   const [moodboardTitle, setMoodboardTitle] = useState("");
   const [generationMeta, setGenerationMeta] = useState(null);
   const [error, setError] = useState(null);
+  const [activeMobileCard, setActiveMobileCard] = useState(0);
   const [savedTheme, setSavedTheme] = useState("");
   const [savedToMoodboard, setSavedToMoodboard] = useState(false);
   const [showMoodboardModal, setShowMoodboardModal] = useState(false);
@@ -353,6 +354,13 @@ export default function CoupleWeddingVision() {
       setModalTheme(current.theme);
     }
   }, [editingCard, refinements]);
+
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  }, []);
+
 
   const venueInputRef = useRef(null);
   const decorInputRef = useRef(null);
@@ -819,7 +827,69 @@ export default function CoupleWeddingVision() {
 
     return (
       <div className="flex flex-col flex-1 min-h-0 h-full justify-between">
-        <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-4 flex-1 min-h-0">
+        {/* Mobile View: Carousel Slider */}
+        <div className="flex flex-col md:hidden flex-1 min-h-0 justify-between h-full">
+          <div className="flex-1 min-h-0 relative flex items-center justify-center p-1">
+            {activeMobileCard === 0 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").description,
+              generatedImages[0],
+              "Theme",
+              "w-full h-full min-h-[300px]",
+              "primary"
+            )}
+            {activeMobileCard === 1 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").description,
+              generatedImages[1],
+              "Decoration",
+              "w-full h-full min-h-[300px]",
+              "decor"
+            )}
+            {activeMobileCard === 2 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").description,
+              generatedImages[2],
+              "Functions",
+              "w-full h-full min-h-[300px]",
+              "ceremony"
+            )}
+            {activeMobileCard === 3 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").description,
+              generatedImages[3],
+              "Venue",
+              "w-full h-full min-h-[300px]",
+              "venue"
+            )}
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center justify-between mt-3 px-3 py-2 flex-shrink-0 bg-white/5 border border-white/10 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setActiveMobileCard(prev => Math.max(0, prev - 1))}
+              disabled={activeMobileCard === 0}
+              className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-[#ebd8c7] text-[#251f1b] font-bold text-xs hover:bg-white hover:text-black transition disabled:opacity-30 disabled:pointer-events-none"
+            >
+              ← Prev
+            </button>
+            <span className="text-[11px] font-bold tracking-widest text-[#ebd8c7]">
+              {activeMobileCard + 1} OF 4
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveMobileCard(prev => Math.min(3, prev + 1))}
+              disabled={activeMobileCard === 3}
+              className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-[#ebd8c7] text-[#251f1b] font-bold text-xs hover:bg-white hover:text-black transition disabled:opacity-30 disabled:pointer-events-none"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop View: Bento Grid */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-4 flex-1 min-h-0">
           {/* Column 1 (Wider) */}
           <div className="flex flex-col gap-4 min-h-0 justify-between">
             {renderCard(
@@ -1022,7 +1092,7 @@ export default function CoupleWeddingVision() {
         <div className="flex gap-6 items-stretch flex-1 min-h-0 relative overflow-hidden">
           
           {/* Left Sidebar: Style Filters */}
-          <aside className={`bg-[#201915]/40 backdrop-blur-md border border-white/10 rounded-[20px] p-3 flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out flex-shrink-0 ${sidebarOpen ? 'w-[360px] opacity-100' : 'w-0 opacity-0 pointer-events-none p-0 border-0'}`}>
+          <aside className={`absolute md:relative z-30 md:z-auto bg-[#201915]/95 md:bg-[#201915]/40 backdrop-blur-lg md:backdrop-blur-md border border-white/10 rounded-[20px] p-3 flex flex-col h-[calc(100%-32px)] md:h-full overflow-hidden transition-all duration-300 ease-in-out flex-shrink-0 ${sidebarOpen ? 'w-[290px] sm:w-[320px] md:w-[360px] opacity-100 left-4 top-4 bottom-4 md:left-auto md:top-auto md:bottom-auto' : 'w-0 opacity-0 pointer-events-none p-0 border-0 -left-96 md:left-auto'}`}>
             <div className="pb-2.5 flex items-center justify-between flex-shrink-0 border-b border-white/10 mb-3">
               <p className="text-[15px] font-bold uppercase tracking-[0.22em] text-[#ebd8c7]">
                 Style Filters

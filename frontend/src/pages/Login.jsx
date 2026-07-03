@@ -546,8 +546,19 @@ const Login = () => {
         <div className={`glass-card-strong loverai-auth-panel overflow-hidden ${isCoupleExperience ? "rounded-[34px]" : "rounded-3xl p-8"}`}>
           {isCoupleExperience ? (
             <div className="grid min-h-[620px] md:grid-cols-[1.1fr_0.92fr]">
-              <div className="relative flex flex-col justify-end p-8 md:p-10 lg:p-12 border-b md:border-b-0 md:border-r border-white/10">
+              <div className="relative flex flex-col justify-between p-8 md:p-10 lg:p-12 border-b md:border-b-0 md:border-r border-white/10">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/15 to-transparent pointer-events-none" />
+                
+                {/* Big Logo in the middle/upper section */}
+                <div className="relative z-10 flex-1 flex items-center justify-center py-12">
+                  <img
+                    src="/images/LogoLoversai.png"
+                    alt="LoversAI Logo"
+                    className="h-44 w-auto object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.4)] animate-pulse"
+                    style={{ animationDuration: "3s" }}
+                  />
+                </div>
+
                 <div className="relative z-10 max-w-xl">
                   <p className="text-[11px] uppercase tracking-[0.38em] text-white/60 mb-5">
                     Lovers AI
@@ -563,16 +574,9 @@ const Login = () => {
 
               <div className="p-8 md:p-10 lg:p-12 flex items-center">
                 <div className="w-full">
-                  <div className="flex items-center gap-3 mb-8">
-                    <img
-                      src="/images/LogoLoversai.png"
-                      alt="LoversAI"
-                      className="h-12 w-auto object-contain"
-                    />
-                    <div>
-                      <p className="text-white/85 font-medium">Sign In</p>
-                      <p className="text-xs text-white/45">Access your couple workspace</p>
-                    </div>
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-heading text-[#fff5ea]">Sign In</h2>
+                    <p className="text-sm text-white/45 mt-1">Access your couple workspace</p>
                   </div>
                   {authContent}
                 </div>
