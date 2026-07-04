@@ -234,13 +234,19 @@ const Navbar = () => {
           }`}
         >
           {/* Mobile Layout */}
-          <div className="md:hidden px-3 py-3">
+          <div
+            className={`md:hidden px-3.5 py-2 rounded-2xl shadow-lg transition-all duration-300 ${
+              isHamburgerLanding
+                ? "bg-[#0a0604]/90 backdrop-blur-lg border border-white/10 mx-1.5"
+                : "bg-transparent"
+            }`}
+          >
             <div className="flex items-center justify-between">
-              <Link to={logoTarget} className="pointer-events-auto shrink-0">
+              <Link to={logoTarget} className="pointer-events-auto shrink-0 flex items-center">
                 <img
                   src="/images/logo copy.png"
                   alt="Lovers AI logo"
-                  className="h-[75px] w-auto object-contain transition-transform duration-300 hover:scale-105"
+                  className="h-[48px] w-auto object-contain transition-transform duration-300 hover:scale-105"
                 />
               </Link>
               <div className="flex items-center gap-3">

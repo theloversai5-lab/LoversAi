@@ -176,7 +176,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
           className="relative z-10 mx-auto w-full max-w-[1400px] rounded-[32px] md:rounded-[40px] p-5 sm:p-8 md:p-12 glass-card border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300"
         >
           {isPlannerFooter ? (
-            <div className="grid gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
+            <div className="grid grid-cols-1 gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
               <div className="flex flex-col items-center text-center md:items-center md:text-center md:pl-6">
                 <h2
                   className="text-white text-[clamp(28px,2.8vw,54px)] leading-[0.98] tracking-[-0.02em] font-normal text-center"
@@ -342,7 +342,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
               </div>
             </div>
           ) : (
-            <div className="grid gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
+            <div className="grid grid-cols-1 gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
               <div className="flex flex-col items-center text-center md:items-center md:text-center md:pl-6">
                 <h2
                   className="text-white text-2xl md:text-[32px] lg:text-[36px] leading-[1.1] tracking-[-0.02em] font-normal text-center"
