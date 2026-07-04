@@ -1362,10 +1362,6 @@ select option {
 }
 
 @media (max-width: 767px) {
-  .footer-blurred-bg {
-    position: static !important;
-  }
-
   .footer-blurred-bg::before {
     position: absolute;
     inset: 0;

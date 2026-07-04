@@ -168,12 +168,12 @@ const Footer = ({ navigateTo, openContactPopup }) => {
         className={
           isPlannerFooter
             ? "relative overflow-hidden bg-transparent px-4 pb-6 pt-8 footer-blurred-bg sm:px-8 lg:px-12 z-40"
-            : "fixed bottom-0 left-0 right-0 z-40 overflow-hidden bg-transparent px-6 py-16 footer-blurred-bg sm:px-10 md:px-16 lg:px-24"
+            : "relative overflow-hidden bg-transparent px-4 py-10 footer-blurred-bg sm:px-10 sm:py-16 md:px-16 lg:px-24 z-40"
         }
         style={footerBackgroundStyle}
       >
         <div
-          className="relative z-10 mx-auto w-full max-w-[1400px] rounded-[32px] md:rounded-[40px] p-8 md:p-12 glass-card border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300"
+          className="relative z-10 mx-auto w-full max-w-[1400px] rounded-[32px] md:rounded-[40px] p-5 sm:p-8 md:p-12 glass-card border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300"
         >
           {isPlannerFooter ? (
             <div className="grid gap-10 md:grid-cols-[1fr_auto_1.25fr] md:gap-12">
@@ -193,7 +193,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                   <img
                     src="/images/logo copy.png"
                     alt="Lovers AI Logo"
-                    className="h-[140px] md:h-[160px] w-auto object-contain transition-transform duration-300 hover:scale-[1.03]"
+                    className="h-[100px] sm:h-[120px] md:h-[160px] w-auto object-contain transition-transform duration-300 hover:scale-[1.03]"
                   />
 
                   <p className="footer-text-font mt-4 text-[11px] text-white/40 tracking-wider">
@@ -227,7 +227,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                         <select
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
-                          className="footer-text-font w-[130px] h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-5 text-[14px] text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all cursor-pointer"
+                          className="footer-text-font w-[95px] sm:w-[130px] h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-3 sm:px-5 text-[14px] text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all cursor-pointer"
                         >
                           <option
                             value="+91"
@@ -270,7 +270,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                             )
                           }
                           placeholder={`Enter your ${phonePlaceholder}`}
-                          className="footer-text-font flex-1 h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-5 text-[14px] text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all"
+                          className="footer-text-font flex-1 min-w-0 h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-5 text-[14px] text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all"
                         />
                       </div>
 
@@ -297,7 +297,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                 <div className="grid grid-cols-2 gap-y-8 gap-x-4 sm:grid-cols-3 lg:grid-cols-5 pt-8 border-t border-white/10">
                   {Object.keys(footerLinks).map((category) => (
                     <div key={category}>
-                      <h4 className="footer-heading-font mb-3.5 text-sm font-semibold tracking-wider uppercase text-white/50">
+                      <h4 className="footer-heading-font mb-3.5 text-xs sm:text-sm font-semibold tracking-wider uppercase text-white/50">
                         {category}
                       </h4>
 
@@ -324,12 +324,12 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                                     );
                                   }
                                 }}
-                                className="footer-text-font cursor-pointer text-sm font-normal text-white/70 transition-colors duration-200 hover:text-loverai-gold"
+                                className="footer-text-font cursor-pointer text-xs sm:text-sm font-normal text-white/70 transition-colors duration-200 hover:text-loverai-gold"
                               >
                                 {item.label}
                               </span>
                             ) : (
-                              <span className="footer-text-font text-sm font-normal text-white/30">
+                              <span className="footer-text-font text-xs sm:text-sm font-normal text-white/30">
                                 {item.label}
                               </span>
                             )}
@@ -359,7 +359,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                   <img
                     src="/images/logo copy.png"
                     alt="Lovers AI Logo"
-                    className="h-[140px] md:h-[160px] w-auto object-contain transition-transform duration-300 hover:scale-[1.03]"
+                    className="h-[100px] sm:h-[120px] md:h-[160px] w-auto object-contain transition-transform duration-300 hover:scale-[1.03]"
                   />
 
                   <p className="footer-text-font mt-4 text-[11px] text-white/40 tracking-wider">
@@ -390,7 +390,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                         <select
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
-                          className="footer-text-font w-[130px] h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-5 text-[14px] text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all cursor-pointer"
+                          className="footer-text-font w-[95px] sm:w-[130px] h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-3 sm:px-5 text-[14px] text-white focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all cursor-pointer"
                         >
                           <option
                             value="+91"
@@ -433,7 +433,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                             )
                           }
                           placeholder={`Enter your ${phonePlaceholder}`}
-                          className="footer-text-font flex-1 h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-5 text-[14px] text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all"
+                          className="footer-text-font flex-1 min-w-0 h-[54px] rounded-[22px] border border-white/10 bg-white/5 px-5 text-[14px] text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-loverai-gold/50 focus:border-loverai-gold/50 transition-all"
                         />
                       </div>
 
@@ -460,7 +460,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                 <div className="grid grid-cols-2 gap-y-8 gap-x-4 sm:grid-cols-4 pt-8 border-t border-white/10">
                   {Object.keys(footerLinks).map((category) => (
                     <div key={category}>
-                      <h4 className="footer-heading-font mb-3.5 text-sm font-semibold tracking-wider uppercase text-white/50">
+                      <h4 className="footer-heading-font mb-3.5 text-xs sm:text-sm font-semibold tracking-wider uppercase text-white/50">
                         {category}
                       </h4>
 
@@ -487,12 +487,12 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                                     );
                                   }
                                 }}
-                                className="footer-text-font cursor-pointer text-sm font-normal text-white/70 transition-colors duration-200 hover:text-loverai-gold"
+                                className="footer-text-font cursor-pointer text-xs sm:text-sm font-normal text-white/70 transition-colors duration-200 hover:text-loverai-gold"
                               >
                                 {item.label}
                               </span>
                             ) : (
-                              <span className="footer-text-font text-sm font-normal text-white/30">
+                              <span className="footer-text-font text-xs sm:text-sm font-normal text-white/30">
                                 {item.label}
                               </span>
                             )}
