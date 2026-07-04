@@ -119,7 +119,7 @@ function CoupleHome() {
       {/* Scroll-driven showcase hero anchoring the landing page visual story. */}
       <ScrollShowcase />
 
-      <div style={container}>
+      <div className="px-4 py-14 sm:px-8 md:px-10 md:py-16" style={container}>
         {/* Primary CTA and supporting content below the animated hero. */}
         <div id="journey" style={buttonWrapper}>
           <button style={button} onClick={handleStartYourStory}>
@@ -127,7 +127,7 @@ function CoupleHome() {
           </button>
         </div>
 
-        <h2 style={title}>
+        <h2 className="text-3xl sm:text-4xl md:text-5xl mt-12 sm:mt-16 md:mt-20" style={title}>
           Your Journey to the Perfect Day,
           <br />
           in 3 easy steps
@@ -210,8 +210,8 @@ function CoupleHome() {
             <p style={carouselEyebrow}>Wedding Inspiration</p>
           </div>
 
-          <div style={carouselShell}>
-            <div style={carouselViewport}>
+          <div className="w-full" style={carouselShell}>
+            <div className="w-full min-h-[320px] sm:min-h-[450px] md:min-h-[600px] lg:min-h-[750px]" style={carouselViewport}>
               {carouselImages.map((image, index) => (
                 <article
                   key={image.title}
@@ -234,7 +234,7 @@ function CoupleHome() {
               ))}
             </div>
 
-            <div style={carouselControls}>
+            <div className="w-full" style={carouselControls}>
               <button
                 onClick={() =>
                   setActiveSlide(
@@ -242,6 +242,7 @@ function CoupleHome() {
                       carouselImages.length,
                   )
                 }
+                className="w-[84px] sm:w-[112px] py-2.5 sm:py-3 text-xs sm:text-sm"
                 style={carouselArrow}
                 type="button"
               >
@@ -253,6 +254,7 @@ function CoupleHome() {
                   <button
                     key={image.title}
                     onClick={() => setActiveSlide(index)}
+                    className="w-4 sm:w-8"
                     style={{
                       ...carouselDot,
                       opacity: index === activeSlide ? 1 : 0.38,
@@ -268,6 +270,7 @@ function CoupleHome() {
                 onClick={() =>
                   setActiveSlide((activeSlide + 1) % carouselImages.length)
                 }
+                className="w-[84px] sm:w-[112px] py-2.5 sm:py-3 text-xs sm:text-sm"
                 style={carouselArrow}
                 type="button"
               >
@@ -277,8 +280,8 @@ function CoupleHome() {
           </div>
         </section>
 
-        <div id="quote" style={quoteSection}>
-          <h3 style={quoteText}>
+        <div id="quote" className="mt-12 sm:mt-16 md:mt-24 py-10 sm:py-14 md:py-20 px-4" style={quoteSection}>
+          <h3 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl" style={quoteText}>
             This won’t come again, with us or without us, make sure you live.
           </h3>
         </div>
@@ -309,7 +312,6 @@ const container = {
   width: "100%",
   maxWidth: "1400px",
   margin: "0 auto",
-  padding: "56px 40px 72px",
   background: "transparent",
 };
 
@@ -340,8 +342,6 @@ const button = {
 
 const title = {
   textAlign: "center",
-  marginTop: "56px",
-  fontSize: "42px",
   lineHeight: "1.2",
   fontFamily: "'DM Serif Display', serif",
 };
@@ -461,13 +461,10 @@ const cardFooterArrow = {
 /* QUOTE */
 
 const quoteSection = {
-  marginTop: "88px",
   textAlign: "center",
-  padding: "72px 20px 48px",
 };
 
 const quoteText = {
-  fontSize: "48px",
   lineHeight: "1.1",
   letterSpacing: "-0.02em",
   maxWidth: "none",
@@ -507,11 +504,12 @@ const carouselEyebrow = {
 const carouselShell = {
   display: "grid",
   gap: "18px",
+  width: "100%",
 };
 
 const carouselViewport = {
   position: "relative",
-  minHeight: "min(75vh, 800px)",
+  width: "100%",
   borderRadius: "28px",
   overflow: "hidden",
   background: "rgba(255,255,255,0.04)",
@@ -576,17 +574,16 @@ const carouselControls = {
   alignItems: "center",
   justifyContent: "space-between",
   gap: "16px",
+  width: "100%",
 };
 
 const carouselArrow = {
-  minWidth: "112px",
   borderRadius: "999px",
   border: "1px solid rgba(225, 195, 135, 0.26)",
   background: "rgba(255,255,255,0.05)",
   color: "#f8f1e8",
-  padding: "13px 18px",
+  textAlign: "center",
   cursor: "pointer",
-  fontSize: "14px",
   letterSpacing: "0.12em",
   textTransform: "uppercase",
   fontFamily: "'Poppins', sans-serif",
@@ -601,7 +598,6 @@ const carouselDots = {
 };
 
 const carouselDot = {
-  width: "32px",
   height: "4px",
   borderRadius: "999px",
   border: "none",

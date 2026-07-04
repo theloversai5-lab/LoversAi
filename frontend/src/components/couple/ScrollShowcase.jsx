@@ -57,7 +57,7 @@ export default function ScrollShowcase() {
       let timeline;
 
       const setup = () => {
-        const viewportWidth = window.innerWidth;
+        const viewportWidth = section.offsetWidth;
         const viewportHeight = window.innerHeight;
         const cards = [heroCard, leftCard, rightCard];
         const heroFrameWidth = Math.min(
@@ -133,9 +133,9 @@ export default function ScrollShowcase() {
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: () => `+=${window.innerHeight * 2.4}`,
+            end: () => `+=${viewportWidth < 768 ? window.innerHeight * 1.0 : window.innerHeight * 2.4}`,
             scrub: 1.15,
-            pin: true,
+            pin: viewportWidth >= 768,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           },
@@ -292,7 +292,7 @@ const haloStyle = {
 
 const viewportStyle = {
   position: "relative",
-  width: "100vw",
+  width: "100%",
   height: "100vh",
   overflow: "hidden",
 };
@@ -323,8 +323,8 @@ const heroCardStyle = {
 const sideCardStyle = {
   width: `min(${SIDE_WIDTH}px, calc((100vw - 64px) / 2.9))`,
   height: `min(${SIDE_HEIGHT}px, calc(100vh - 180px))`,
-  minWidth: "240px",
-  minHeight: "360px",
+  minWidth: "140px",
+  minHeight: "200px",
   borderRadius: "28px",
   boxShadow: "0 26px 64px rgba(0, 0, 0, 0.24)",
 };
@@ -332,8 +332,8 @@ const sideCardStyle = {
 const sideLargeCardStyle = {
   width: `min(${SIDE_LARGE_WIDTH}px, calc((100vw - 64px) / 2.7))`,
   height: `min(${SIDE_LARGE_HEIGHT}px, calc(100vh - 180px))`,
-  minWidth: "240px",
-  minHeight: "360px",
+  minWidth: "140px",
+  minHeight: "200px",
   borderRadius: "28px",
   boxShadow: "0 26px 64px rgba(0, 0, 0, 0.24)",
 };

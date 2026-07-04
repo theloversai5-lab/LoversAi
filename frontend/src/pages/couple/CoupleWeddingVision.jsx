@@ -826,16 +826,16 @@ export default function CoupleWeddingVision() {
     }
 
     return (
-      <div className="flex flex-col flex-1 min-h-0 h-full justify-between">
+      <div className="flex flex-col flex-1 min-h-0 h-full justify-between overflow-hidden">
         {/* Mobile View: Carousel Slider */}
-        <div className="flex flex-col md:hidden flex-1 min-h-0 justify-between h-full">
-          <div className="flex-1 min-h-0 relative flex items-center justify-center p-1">
+        <div className="flex flex-col md:hidden flex-1 min-h-0 justify-between h-full overflow-hidden">
+          <div className="flex-1 min-h-0 relative flex items-center justify-center p-1 overflow-hidden">
             {activeMobileCard === 0 && renderCard(
               getBentoCardTitleAndDesc(functionType, planningType, "primary").title,
               getBentoCardTitleAndDesc(functionType, planningType, "primary").description,
               generatedImages[0],
               "Theme",
-              "w-full h-full min-h-[300px]",
+              "w-full h-full absolute inset-0",
               "primary"
             )}
             {activeMobileCard === 1 && renderCard(
@@ -843,7 +843,7 @@ export default function CoupleWeddingVision() {
               getBentoCardTitleAndDesc(functionType, planningType, "decor").description,
               generatedImages[1],
               "Decoration",
-              "w-full h-full min-h-[300px]",
+              "w-full h-full absolute inset-0",
               "decor"
             )}
             {activeMobileCard === 2 && renderCard(
@@ -851,7 +851,7 @@ export default function CoupleWeddingVision() {
               getBentoCardTitleAndDesc(functionType, planningType, "ceremony").description,
               generatedImages[2],
               "Functions",
-              "w-full h-full min-h-[300px]",
+              "w-full h-full absolute inset-0",
               "ceremony"
             )}
             {activeMobileCard === 3 && renderCard(
@@ -859,7 +859,7 @@ export default function CoupleWeddingVision() {
               getBentoCardTitleAndDesc(functionType, planningType, "venue").description,
               generatedImages[3],
               "Venue",
-              "w-full h-full min-h-[300px]",
+              "w-full h-full absolute inset-0",
               "venue"
             )}
           </div>
@@ -966,32 +966,32 @@ export default function CoupleWeddingVision() {
       <div className="loverai-wedding-overlay" />
       
       {/* Outer Container with Premium Glassmorphism */}
-      <div className="relative z-10 mx-auto max-w-[1380px] w-full h-[calc(100vh-32px)] max-h-[960px] bg-white/5 backdrop-blur-2xl border border-white/15 rounded-[24px] shadow-[0_30px_70px_rgba(0,0,0,0.45)] p-4 md:p-6 lg:p-7 flex flex-col">
+      <div className="relative z-10 mx-auto max-w-[1380px] w-full h-[calc(100vh-32px)] max-h-[960px] bg-white/5 backdrop-blur-2xl border border-white/15 rounded-[24px] shadow-[0_30px_70px_rgba(0,0,0,0.45)] p-3 md:p-6 lg:p-7 flex flex-col overflow-hidden">
         
         {/* Header Section Inside Outer Container */}
-        <header className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between px-1 relative flex-shrink-0">
+        <header className="mb-3 md:mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between px-1 relative flex-shrink-0">
           {/* Left Side: Navigation Pill Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap flex-shrink-0 overflow-x-auto loverai-scrollbar-hide">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200"
+              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-2.5 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200 flex-shrink-0"
             >
               ← Back
             </button>
             <button
               type="button"
               onClick={() => navigate("/couple/moodboard/wedding")}
-              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200"
+              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-2.5 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200 flex-shrink-0"
             >
               Moodboards
             </button>
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200 flex items-center gap-1.5"
+              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-2.5 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200 flex items-center gap-1 flex-shrink-0"
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-3 sm:h-3">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <line x1="9" y1="3" x2="9" y2="21" />
               </svg>
@@ -1100,7 +1100,7 @@ export default function CoupleWeddingVision() {
             </div>
 
             {/* 1. Reference Uploads (Pinned at Top) */}
-            <div className="rounded-[8px] border border-white/10 bg-white/5 pt-2.5 pb-3 px-3 flex flex-col justify-between h-[105px] flex-shrink-0 mb-3 relative">
+            <div className="rounded-[8px] border border-white/10 bg-white/5 pt-2.5 pb-3 px-3 flex flex-col justify-between h-[114px] flex-shrink-0 mb-3 relative">
               <span className="text-[15px] font-semibold uppercase tracking-[0.12em] text-[#ebd8c7] select-none">
                 Reference Uploads
               </span>
@@ -1120,15 +1120,20 @@ export default function CoupleWeddingVision() {
               </div>
 
               {/* Upload Dashed Container */}
-              <div className="border border-dashed border-white/20 rounded-lg bg-[#ebd8c7]/5 flex items-center justify-between px-3 py-2 h-[56px] min-h-[56px]">
+              <div className="border border-dashed border-white/20 rounded-lg bg-[#ebd8c7]/5 flex items-center justify-between px-3 py-2 h-[60px] min-h-[60px]">
                 {!(venuePreview || decorPreview) ? (
-                  <div className="flex-1 flex items-center gap-2.5 min-w-0 pr-2">
+                  <div className="flex-1 flex items-center gap-3 min-w-0 pr-2">
                     <span className="text-[#ebd8c7] flex-shrink-0">
                       <UploadIcon />
                     </span>
-                    <p className="text-[11px] text-white/70 leading-snug select-none text-left">
-                      Add Your Inspiration (Instagram Reel,<br/>Screenshot, Pinterest)
-                    </p>
+                    <div className="flex flex-col text-left min-w-0">
+                      <span className="text-[11.5px] font-medium text-white/95 leading-tight select-none">
+                        Upload Inspiration
+                      </span>
+                      <span className="text-[9.5px] text-[#ebd8c7]/60 leading-tight select-none truncate">
+                        Reels, Pinterest, screenshots
+                      </span>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex-1 flex gap-2 justify-start items-center min-w-0 pr-2">
@@ -1278,11 +1283,11 @@ export default function CoupleWeddingVision() {
           </aside>
 
           {/* Right Panel: Prompt & Bento Canvas */}
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-[20px] p-4 flex flex-col flex-1 h-full min-h-0 overflow-hidden">
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-[20px] p-3 md:p-4 flex flex-col flex-1 h-full min-h-0 overflow-hidden">
             
             {/* Top Prompt Row */}
-            <div className="flex flex-col gap-3 lg:flex-row flex-shrink-0">
-              <div className="flex flex-1 items-center gap-3 rounded-[16px] border border-white/10 px-4 py-2 bg-black/10">
+            <div className="flex gap-2 items-center flex-shrink-0">
+              <div className="flex flex-1 items-center gap-2.5 rounded-[12px] border border-white/10 px-3 py-1.5 bg-black/10 h-[40px] sm:h-auto">
                 <span className="text-[#ebd8c7]">
                   <SparkIcon />
                 </span>
@@ -1290,11 +1295,11 @@ export default function CoupleWeddingVision() {
                   value={userPrompt}
                   onChange={(e) => setUserPrompt(e.target.value)}
                   placeholder="Describe your Wedding Scene..."
-                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/35 font-sans"
+                  className="w-full bg-transparent text-xs sm:text-sm text-white outline-none placeholder:text-white/35 font-sans"
                 />
                 <button
                   type="button"
-                  className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-[#e6c6b2] transition duration-200 flex-shrink-0"
+                  className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-[#e6c6b2] transition duration-200 flex-shrink-0"
                   title="Improve Prompt"
                 >
                   <SparkIcon />
@@ -1305,7 +1310,7 @@ export default function CoupleWeddingVision() {
                 type="button"
                 onClick={handleGenerate}
                 disabled={generating}
-                className="inline-flex items-center justify-center gap-2 rounded-[16px] loverai-btn-accent px-6 py-2 hover:bg-[#ebd0be] transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed text-[#3D1B2D] font-semibold"
+                className="inline-flex items-center justify-center gap-1.5 rounded-[12px] loverai-btn-accent px-4 py-2 hover:bg-[#ebd0be] transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed text-[#3D1B2D] font-semibold text-xs sm:text-sm h-[40px] sm:h-auto flex-shrink-0"
               >
                 <SparkIcon />
                 Generate
@@ -1319,7 +1324,7 @@ export default function CoupleWeddingVision() {
             )}
 
             {/* Bento Grid Canvas */}
-            <section className="rounded-[14px] border border-white/5 bg-white/5 p-4 flex flex-col flex-1 mt-4 min-h-0 overflow-hidden">
+            <section className="rounded-[14px] border border-white/5 bg-white/5 p-3 md:p-4 flex flex-col flex-1 mt-3 md:mt-4 min-h-0 overflow-hidden">
               {renderCanvas()}
             </section>
           </div>
