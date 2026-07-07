@@ -406,7 +406,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     Access Premium Wedding Presentation Templates
                   </h3>
                   <p className="text-white/60 leading-relaxed">
-                    Download fully editable, high-quality PowerPoint presentation decks. Showcase beautiful luxury themes for Sangeet, Mehndi, Haldi, and Shaadi to secure and impress your clients.
+                    Download fully editable, high-quality PowerPoint presentation decks. Showcase beautiful luxury themes for Haldi, Mehendi, Mayra, Sangeet, Shaadi, and Reception to secure and impress your clients.
                   </p>
                   <div className="inline-flex items-center gap-2 text-loverai-gold font-semibold group-hover:translate-x-2 transition-transform duration-300">
                     Browse Design Library 

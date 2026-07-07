@@ -5,7 +5,25 @@ import { useAuth } from '../../context/AuthContext';
 import { paymentAPI } from '../../api/api';
 
 const defaultTemplates = {
-  Mehndi: [
+  'Haldi, Mehendi & Mayra': [
+    {
+      id: 'ppt-cl1',
+      title: 'Carnival Lunch Pitch Deck 1',
+      description: 'Vibrant and colorful outdoor setups, bohemian-style details, and festive food stall presentation slide templates.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.27 PM.png',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.38 PM.png',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.50 PM.png',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.01 PM.png',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.10 PM.png',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.20 PM.png'
+      ],
+      fileName: 'Wedding_Carnival_Lunch_Pitch_Deck_1.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1ybJjV6N0ChqZPxBfrixqNjmKrtdECRUr',
+      slideCount: 6
+    },
     {
       id: 'ppt-m1',
       title: 'Mehndi Pitch Deck 1',
@@ -13,136 +31,325 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/images/mehndi cp-1.png'
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.38 PM.png',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.45 PM.png',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.56 PM.png',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.49.10 PM.png',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.49.17 PM.png'
       ],
-      fileName: 'Mehndi docs-1.pptx',
-      downloadUrl: '/Mehndi docs-1.pptx',
-      slideCount: 10
+      fileName: 'Wedding_Mehndi_Pitch_Deck_1.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1A_Fo2xiqL5S0pJGmRRgbn3h9fj4_VMAA',
+      slideCount: 5
     },
     {
       id: 'ppt-m2',
       title: 'Mehndi Pitch Deck 2',
-      description: 'Vibrant marigold pathways, traditional seating decor, and intricate stage design templates.',
+      description: 'Royal vibrant green floral mehendi lounge configurations, swing setup designs, and luxury canopy seating slides.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/mehndi cp-2.png'
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.08 PM.png',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.16 PM.png',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.25 PM.png',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.36 PM.png',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.45 PM.png',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.54 PM.png'
       ],
-      fileName: 'Mehndi docs-2.pptx',
-      downloadUrl: '/Mehndi docs-2.pptx',
-      slideCount: 13
+      fileName: 'Wedding_Mehndi_Pitch_Deck_2.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=19zHc6HLnDWUgrfeGVjZGMO4n7e-SVULP',
+      slideCount: 6
     },
     {
       id: 'ppt-m3',
       title: 'Mehndi Pitch Deck 3',
-      description: 'Modern fusion Mehndi themes, lounge layout blueprints, and colorful festive design slides.',
+      description: 'Boho-style marigold and mirror hanging mehndi backdrops, custom bride-groom seating configurations, and luxury presentation layout designs.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/mehndi cp-3.png'
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.25 PM.png',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.35 PM.png',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.44 PM.png',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.56 PM.png',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.05.05 PM.png',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.05.14 PM.png'
       ],
-      fileName: 'Mehndi docs-3.pptx',
-      downloadUrl: '/Mehndi docs-3.pptx',
-      slideCount: 9
-    }
-  ],
-  Sangeet: [
-    {
-      id: 'ppt-s1',
-      title: 'Sangeet Pitch Deck 1',
-      description: 'Concert-style stages, neon lighting arrangements, and high-energy starlit dance floor slide templates.',
-      price: 20000,
-      purchased: false,
-      slides: [
-        '/images/Sangeet cp-1.png'
-      ],
-      fileName: 'Sangeet docs-1.pptx',
-      downloadUrl: '/Sangeet docs-1.pptx',
-      slideCount: 9
+      fileName: 'Wedding_Mehndi_Pitch_Deck_3.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=15ng_pQ72_tLiR5vtqYe6q8AaWqvaVwtH',
+      slideCount: 6
     },
     {
-      id: 'ppt-s2',
-      title: 'Sangeet Pitch Deck 2',
-      description: 'Modern disco backdrops, glamorous entrance designs, and DJ booth layout proposals.',
+      id: 'ppt-m4',
+      title: 'Mehndi Pitch Deck 4',
+      description: 'Premium floral dome configurations, bright yellow-and-green drapery, and luxury seating setups for mehndi ceremonies.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Sangeet cp-2.png'
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.06.46 PM.png',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.06.58 PM.png',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.07 PM.png',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.15 PM.png',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.31 PM.png',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.39 PM.png'
       ],
-      fileName: 'Sangeet docs-2.pptx',
-      downloadUrl: '/Sangeet docs-2.pptx',
-      slideCount: 7
+      fileName: 'Wedding_Mehndi_Pitch_Deck_4.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1irgadKjN7KHQQiV3eLtC9HUaMnFAPAtL',
+      slideCount: 6
     },
     {
-      id: 'ppt-s3',
-      title: 'Sangeet Pitch Deck 3',
-      description: 'Traditional and contemporary fusion stage decor, acoustic lounge designs, and seating grids.',
+      id: 'ppt-m5',
+      title: 'Mehndi Pitch Deck 5',
+      description: 'Modern fusion mehndi setups, pastel floral details, and bright marigold backdrop presentation slide layouts.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Sangeet cp-3.png'
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.14 PM.png',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.22 PM.png',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.34 PM.png',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.41 PM.png',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.49 PM.png',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.56 PM.png'
       ],
-      fileName: 'Sangeet docs-3.pptx',
-      downloadUrl: '/Sangeet docs-3.pptx',
-      slideCount: 9
-    }
-  ],
-  Haldi: [
+      fileName: 'Wedding_Mehndi_Pitch_Deck_5.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1TbgTa9rWP0p_58Ts2vwCJhL9zvNj2uYP',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-my1',
+      title: 'Mayra Pitch Deck 1',
+      description: 'Traditional royal Mayra setup configurations, marigold hangings, and premium guest welcoming seating configurations.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/Myra-2/Screenshot 2026-07-07 at 11.16.15 PM.png',
+        '/Myra-2/Screenshot 2026-07-07 at 11.16.48 PM.png',
+        '/Myra-2/Screenshot 2026-07-07 at 11.16.55 PM.png',
+        '/Myra-2/Screenshot 2026-07-07 at 11.17.03 PM.png',
+        '/Myra-2/Screenshot 2026-07-07 at 11.17.11 PM.png',
+        '/Myra-2/Screenshot 2026-07-07 at 11.17.18 PM.png'
+      ],
+      fileName: 'Wedding_Mayra_Pitch_Deck_1.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1gmvCap7DJ6nStFPLVFL3P5-KGPbxe2Kb',
+      slideCount: 6
+    },
     {
       id: 'ppt-h1',
       title: 'Haldi Pitch Deck 1',
-      description: 'Bright marigold canopies, classic seating setups, and organic yellow color palette presentation themes.',
+      description: 'Sunshine yellow themes, marigold backdrop designs, traditional brass vessel seating arrangements, and floral pathway setup presentation slides.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Haldi cp-1.png'
+        '/Haldi-1/Screenshot 2026-07-07 at 11.39.37 PM.png',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.39.56 PM.png',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.04 PM.png',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.11 PM.png',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.20 PM.png',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.27 PM.png'
       ],
-      fileName: 'Haldi docs-1.pptx',
-      downloadUrl: '/Haldi docs-1.pptx',
-      slideCount: 7
+      fileName: 'Wedding_Haldi_Pitch_Deck_1.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=10D4QuEEdFbaXfeBr_pttNTGHbe6VrU85',
+      slideCount: 6
     },
     {
       id: 'ppt-h2',
       title: 'Haldi Pitch Deck 2',
-      description: 'Traditional decor elements, custom mustard fabric backdrops, and festive Haldi layout designs.',
+      description: 'Premium outdoor poolside Haldi themes, vibrant yellow floral structures, marigold hangings, and modern lounge seating configurations.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/Haldi cp-2.png'
+        '/Haldi-2/Screenshot 2026-07-07 at 11.41.51 PM.png',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.00 PM.png',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.06 PM.png',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.19 PM.png',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.26 PM.png',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.32 PM.png'
       ],
-      fileName: 'Haldi docs-2.pptx',
-      downloadUrl: '/Haldi docs-2.pptx',
-      slideCount: 19
+      fileName: 'Wedding_Haldi_Pitch_Deck_2.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=15jKwe-dwBOvEEUGe8eVwTUrFdgD14kT-',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-h3',
+      title: 'Haldi Pitch Deck 3',
+      description: 'Royal Marigold backdrops, traditional setup designs, hanging flower garlands, and elegant guest welcoming configurations.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.00 PM.png',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.12 PM.png',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.21 PM.png',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.30 PM.png',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.39 PM.png',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.50 PM.png'
+      ],
+      fileName: 'Wedding_Haldi_Pitch_Deck_3.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1fd-JLq5lmT16bt0oHMCCEQaPPo7aUJ9u',
+      slideCount: 6
     }
   ],
-  Shaadi: [
+  'Sangeet, Shaadi & Reception': [
     {
       id: 'ppt-sh1',
-      title: 'Wedding Pitch Deck 1',
-      description: 'Imperial mandap configurations, entrance layouts, and traditional red-and-gold luxury slide motifs.',
+      title: 'Shaadi Pitch Deck 1',
+      description: 'Vibrant and luxurious Shaadi mandap setups, starlit floral pathways, and traditional red-and-gold presentation slides.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/wedding cp-1.png'
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.32 PM.png',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.43 PM.png',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.53 PM.png',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.00 PM.png',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.08 PM.png',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.14 PM.png'
       ],
-      fileName: 'Wedding docs-1.pptx',
-      downloadUrl: '/Wedding docs-1.pptx',
-      slideCount: 14
+      fileName: 'Wedding_Shaadi_Pitch_Deck_1.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1gm5XzjZlFcZbk8Cw_6n6rpndhmMjs9xw',
+      slideCount: 6
     },
     {
       id: 'ppt-sh2',
-      title: 'Wedding Pitch Deck 2',
-      description: 'Pastel floral mandap setups, royal aisle decorations, and premium banquet lounge slide designs.',
+      title: 'Shaadi Pitch Deck 2',
+      description: 'Premium floral mandap configurations, royal aisle decorations, and premium banquet lounge slide designs.',
       price: 20000,
       purchased: false,
       slides: [
-        '/images/wedding cp-2.png'
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.31.26 PM.png',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.31.59 PM.png',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.10 PM.png',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.18 PM.png',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.27 PM.png',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.37 PM.png'
       ],
-      fileName: 'wedding docs-2.pptx',
-      downloadUrl: '/wedding docs-2.pptx',
-      slideCount: 25
+      fileName: 'Wedding_Shaadi_Pitch_Deck_2.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1C6PAwWDFhx2PCra8G-pefNJDksqgfl9Z',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-s1',
+      title: 'Sangeet Pitch Deck 1',
+      description: 'Starlit musical night themes, neon stage configurations, and modern dance floor setup slides.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/sangeet-1/Screenshot 2026-07-07 at 11.21.55 PM.png',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.03 PM.png',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.11 PM.png',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.19 PM.png',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.28 PM.png',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.35 PM.png'
+      ],
+      fileName: 'Wedding_Sangeet_Pitch_Deck_1.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=17NV8JNyzU7nRrBb0xQ5-UJLN8OTr_sdp',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-s2',
+      title: 'Sangeet Pitch Deck 2',
+      description: 'Premium concert-style stages, led screen backdrops, disco lighting configurations, and dynamic performance layout presentation templates.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.23.56 PM.png',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.05 PM.png',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.29 PM.png',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.40 PM.png',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.50 PM.png',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.25.05 PM.png'
+      ],
+      fileName: 'Wedding_Sangeet_Pitch_Deck_2.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1k0wb04dUtalOZ4drIKcfQ9ygkZtbb7ng',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-s3',
+      title: 'Sangeet Pitch Deck 3',
+      description: 'Royal palaces background settings, traditional instrument setup graphics, and premium royal seating configurations for sangeet nights.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.28.44 PM.png',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.28.52 PM.png',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.00 PM.png',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.22 PM.png',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.30 PM.png',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.37 PM.png'
+      ],
+      fileName: 'Wedding_Sangeet_Pitch_Deck_3.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1Te9kD89UKpehjtLFEmKNqz3chrHa2xH_',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-s4',
+      title: 'Sangeet Pitch Deck 4',
+      description: 'Modern floral stage designs, hanging crystal elements, elegant seating configurations, and luxury ballroom sangeet presentation slides.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.07 PM.png',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.16 PM.png',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.24 PM.png',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.33 PM.png',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.39 PM.png',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.50 PM.png'
+      ],
+      fileName: 'Wedding_Sangeet_Pitch_Deck_4.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1AY66PCBnQ_HJrzOBpLZ1eyScH63VX-rj',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-r1',
+      title: 'Reception Pitch Deck 1',
+      description: 'Stunning Reception stage backdrops, grand entrance arch configurations, luxurious floral pillars, and modern reception lighting setup slides.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/reception-1/Screenshot 2026-07-07 at 11.49.52 PM.png',
+        '/reception-1/Screenshot 2026-07-07 at 11.49.58 PM.png',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.06 PM.png',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.14 PM.png',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.35 PM.png',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.42 PM.png'
+      ],
+      fileName: 'Wedding_Reception_Pitch_Deck_1.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=14cVNo_TwwtLALxWTKbSFvYXU297fSK1Q',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-r2',
+      title: 'Reception Pitch Deck 2',
+      description: 'Modern glasshouse reception layout designs, golden lighting accents, starlit ceiling structures, and luxury floral tabletop setups.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/reception-2/Screenshot 2026-07-07 at 11.52.17 PM.png',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.24 PM.png',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.29 PM.png',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.35 PM.png',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.41 PM.png',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.47 PM.png'
+      ],
+      fileName: 'Wedding_Reception_Pitch_Deck_2.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=100rHJxjoml8cMcsN2PsCkPTx3iWPhB0I',
+      slideCount: 6
+    },
+    {
+      id: 'ppt-r3',
+      title: 'Reception Pitch Deck 3',
+      description: 'Royal red and gold stage settings, elegant floral frame backdrops, premium seating designs, and velvet drapes layout templates.',
+      price: 20000,
+      purchased: false,
+      slides: [
+        '/reception-3/Screenshot 2026-07-07 at 11.55.22 PM.png',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.29 PM.png',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.41 PM.png',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.48 PM.png',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.55 PM.png',
+        '/reception-3/Screenshot 2026-07-07 at 11.56.02 PM.png'
+      ],
+      fileName: 'Wedding_Reception_Pitch_Deck_3.pptx',
+      downloadUrl: 'https://docs.google.com/uc?export=download&id=1BNftLDLPFOCGZ5K6I3i60J-d7hbmwbAi',
+      slideCount: 6
     }
-  ],
+  ]
 };
 
 export default function PlannerLibrary({ onClose }) {
@@ -156,7 +363,7 @@ export default function PlannerLibrary({ onClose }) {
     return !!(email && adminEmails.includes(email.toLowerCase()));
   };
 
-  const [activeFolder, setActiveFolder] = useState('Mehndi');
+  const [activeFolder, setActiveFolder] = useState('Haldi, Mehendi & Mayra');
   const [templates, setTemplates] = useState(defaultTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [previewSlideIndex, setPreviewSlideIndex] = useState(0);
@@ -169,7 +376,7 @@ export default function PlannerLibrary({ onClose }) {
   // New PPT Form states
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
-  const [newCategory, setNewCategory] = useState('Mehndi');
+  const [newCategory, setNewCategory] = useState('Haldi, Mehendi & Mayra');
   const [newPrice, setNewPrice] = useState(20000);
   const [newPPTFile, setNewPPTFile] = useState(null);
   const [newSlideFiles, setNewSlideFiles] = useState([null, null, null, null]);
@@ -329,9 +536,16 @@ export default function PlannerLibrary({ onClose }) {
 
   // Mock PPT Download
   const handleDownload = async (template) => {
+    if (!template.purchased) {
+      toast.error("Please purchase the template to unlock downloading!");
+      return;
+    }
     try {
       setDownloadingId(template.id);
-      if (template.downloadUrl) {
+      if (template.downloadUrl && (template.downloadUrl.startsWith('http://') || template.downloadUrl.startsWith('https://'))) {
+        window.open(template.downloadUrl, '_blank');
+        toast.success(`${template.title} download started!`);
+      } else if (template.downloadUrl) {
         const response = await fetch(template.downloadUrl);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -342,6 +556,7 @@ export default function PlannerLibrary({ onClose }) {
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
+        toast.success(`${template.title} downloaded successfully!`);
       } else {
         const content = `Mock PPTX Presentation: ${template.title}\nPrice: ₹${template.price}\nLoversAI Design Pitch Deck`;
         const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
@@ -353,8 +568,8 @@ export default function PlannerLibrary({ onClose }) {
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
+        toast.success(`${template.title} downloaded successfully!`);
       }
-      toast.success(`${template.title} downloaded successfully!`);
     } catch (err) {
       console.error(err);
       toast.error('Download failed');
@@ -400,7 +615,7 @@ export default function PlannerLibrary({ onClose }) {
     // Reset Form
     setNewTitle('');
     setNewDescription('');
-    setNewCategory('Mehndi');
+    setNewCategory('Haldi, Mehendi & Mayra');
     setNewPrice(20000);
     setNewPPTFile(null);
     setNewSlideFiles([null, null, null, null]);
@@ -456,7 +671,7 @@ export default function PlannerLibrary({ onClose }) {
       </div>
 
       {/* Folders Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {Object.keys(templates).map((folderName) => {
           const isActive = activeFolder === folderName;
           const count = templates[folderName].length;
@@ -540,8 +755,18 @@ export default function PlannerLibrary({ onClose }) {
                   <img
                     src={asset.slides[0]}
                     alt={asset.title}
-                    className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500"
+                    className={`w-full h-full object-contain group-hover:scale-102 transition-transform duration-500 ${
+                      !asset.purchased ? 'filter brightness-[0.7]' : ''
+                    }`}
                   />
+                  
+                  {!asset.purchased && (
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center select-none z-10 overflow-hidden bg-black/10">
+                      <div className="text-white/[0.42] font-heading font-black text-[clamp(1.2rem,4vw,2rem)] uppercase tracking-[0.3em] -rotate-12 drop-shadow-[0_3px_6px_rgba(0,0,0,0.9)]">
+                        LoversAI
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Click to Preview Indicator */}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -559,7 +784,7 @@ export default function PlannerLibrary({ onClose }) {
                         PPT Deck
                       </span>
                       <span className="text-[11px] text-white/35">
-                        {asset.slideCount ? `${asset.slideCount} Slides (${asset.slides.length} Previewed)` : `${asset.slides.length} Slide Preview`}
+                        High-Quality Images
                       </span>
                     </div>
                     <h3 className={`text-white font-medium group-hover:text-loverai-gold transition-colors font-heading ${isSingle ? 'text-xl md:text-2xl' : 'text-base line-clamp-1'}`} style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
@@ -662,8 +887,45 @@ export default function PlannerLibrary({ onClose }) {
                 <img
                   src={selectedTemplate.slides[previewSlideIndex]}
                   alt={`Slide ${previewSlideIndex + 1}`}
-                  className="w-full h-full object-contain select-none transition duration-300"
+                  className={`w-full h-full object-contain select-none transition duration-300 ${
+                    !selectedTemplate.purchased
+                      ? (previewSlideIndex % 2 === 1)
+                        ? 'filter blur-[12px] brightness-[0.35] pointer-events-none'
+                        : 'filter brightness-[0.68]'
+                      : ''
+                  }`}
                 />
+
+                {/* Watermark Overlay for Unpurchased Templates */}
+                {!selectedTemplate.purchased && (
+                  <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 p-6 overflow-hidden select-none z-10 bg-black/15">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`flex items-center justify-center uppercase -rotate-12 transition-all duration-300 ${
+                          (previewSlideIndex % 2 === 0) 
+                            ? 'text-white/[0.42] font-heading font-black text-lg sm:text-2xl tracking-[0.28em] drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]' 
+                            : 'text-white/[0.12] font-heading text-sm sm:text-base tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'
+                        }`}
+                      >
+                        LoversAI
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {(!selectedTemplate.purchased && (previewSlideIndex % 2 === 1)) && (
+                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-3 backdrop-blur-[2px] transition duration-300 z-20">
+                    <div className="w-14 h-14 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-loverai-gold shadow-lg animate-pulse">
+                      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <p className="text-white font-medium text-xs tracking-wide bg-black/80 px-4 py-2 rounded-full border border-white/10 shadow-md">
+                      Unlock full PPTX to view all slides
+                    </p>
+                  </div>
+                )}
 
                 {/* Next Arrow */}
                 {selectedTemplate.slides.length > 1 && (
@@ -717,11 +979,11 @@ export default function PlannerLibrary({ onClose }) {
                   <ul className="space-y-1.5 text-xs text-white/50">
                     <li className="flex items-center gap-2">
                       <span className="w-1 h-1 rounded-full bg-loverai-gold" />
-                      {selectedTemplate.slides.length} Fully Designed Slide Preview {selectedTemplate.slides.length === 1 ? 'page' : 'pages'}
+                      Fully designed slides with high-quality previews
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1 h-1 rounded-full bg-loverai-gold" />
-                      {selectedTemplate.slideCount ? `Full Deck contains ${selectedTemplate.slideCount} slides` : 'Fully Editable PowerPoint PPTX file download'}
+                      Full Deck contains high-quality images
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1 h-1 rounded-full bg-loverai-gold" />
@@ -766,7 +1028,7 @@ export default function PlannerLibrary({ onClose }) {
                     <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Download PPTX ({selectedTemplate.slideCount} Slides)
+                    Download PPTX
                   </button>
                 ) : (
                   <button
@@ -828,10 +1090,8 @@ export default function PlannerLibrary({ onClose }) {
                      onChange={(e) => setNewCategory(e.target.value)}
                      className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 text-sm text-white/90 focus:outline-none focus:border-loverai-gold cursor-pointer"
                   >
-                    <option value="Mehndi" className="bg-[#1C120C] text-white">Mehndi</option>
-                    <option value="Sangeet" className="bg-[#1C120C] text-white">Sangeet</option>
-                    <option value="Haldi" className="bg-[#1C120C] text-white">Haldi</option>
-                    <option value="Shaadi" className="bg-[#1C120C] text-white">Shaadi</option>
+                    <option value="Haldi, Mehendi & Mayra" className="bg-[#1C120C] text-white">Haldi, Mehendi & Mayra</option>
+                    <option value="Sangeet, Shaadi & Reception" className="bg-[#1C120C] text-white">Sangeet, Shaadi & Reception</option>
                   </select>
                 </div>
 

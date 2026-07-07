@@ -261,9 +261,24 @@ router.post('/library/verify', protect, async (req, res) => {
 
         const templateNames = {
           'ppt-m1': 'Mehndi Luxury Pitch Deck',
+          'ppt-m2': 'Mehndi Royal Swing Pitch Deck',
+          'ppt-m3': 'Mehndi Boho Marigold Pitch Deck',
+          'ppt-m4': 'Mehndi Royal Dome Pitch Deck',
+          'ppt-m5': 'Mehndi Modern Fusion Pitch Deck',
+          'ppt-my1': 'Mayra Royal Setup Pitch Deck',
           'ppt-s1': 'Sangeet Starlit Pitch Deck',
+          'ppt-s2': 'Sangeet Concert Style Pitch Deck',
+          'ppt-s3': 'Sangeet Royal Palace Pitch Deck',
+          'ppt-s4': 'Sangeet Luxury Ballroom Pitch Deck',
+          'ppt-r1': 'Reception Grand Stage Pitch Deck',
+          'ppt-r2': 'Reception Glasshouse Layout Pitch Deck',
+          'ppt-r3': 'Reception Royal Velvet Stage Pitch Deck',
           'ppt-h1': 'Haldi Sunshine Pitch Deck',
-          'ppt-sh1': 'Shaadi Royal Mandap Pitch Deck'
+          'ppt-h2': 'Haldi Poolside Pitch Deck',
+          'ppt-h3': 'Haldi Marigold Pitch Deck',
+          'ppt-sh1': 'Shaadi Royal Mandap Pitch Deck',
+          'ppt-sh2': 'Shaadi Royal Floral Pitch Deck',
+          'ppt-cl1': 'Carnival Lunch Pitch Deck'
         };
         const templateName = templateNames[templateId] || 'Premium Pitch Deck';
 
