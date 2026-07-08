@@ -6,6 +6,24 @@ import PlannerQuickMenu from "../../components/PlannerQuickMenu";
 
 const sidebarLinks = [
   {
+    to: "/vendor-ai",
+    label: "Vendor AI",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg>
+    ),
+  },
+  {
+    to: "/planner/vendors",
+    label: "Vendor Directory",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
     to: "/planner/dashboard",
     label: "Dashboard",
     icon: (
@@ -51,15 +69,7 @@ const sidebarLinks = [
       </svg>
     ),
   },
-  {
-    to: "/vendor-ai",
-    label: "Vendor AI",
-    icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-    ),
-  },
+
   {
     to: "/planner/profile",
     label: "Profile",
@@ -77,6 +87,25 @@ export default function PlannerLayout() {
   const { currentUser, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Initialize activeMode based on the current URL
+  const [activeMode, setActiveMode] = useState(() => {
+    if (location.pathname.includes('/planner/vendors') || location.pathname.includes('/vendor-ai')) {
+      return "vendor";
+    }
+    return "leads"; // Default mode
+  });
+
+  // Update activeMode if user navigates to an anchor page
+  useEffect(() => {
+    if (location.pathname.includes('/planner/bids')) {
+      setActiveMode("leads");
+    } else if (location.pathname.includes('/planner/vendors') || location.pathname.includes('/vendor-ai')) {
+      setActiveMode("vendor");
+    }
+    // Shared pages like /planner/dashboard or /planner/messages won't trigger an update,
+    // so activeMode remains whatever it was previously.
+  }, [location.pathname]);
 
   useEffect(() => {
     chatAPI
@@ -122,6 +151,20 @@ export default function PlannerLayout() {
   const userName =
     currentUser?.fullName || currentUser?.email?.split("@")[0] || "Planner";
 
+  // Filter sidebar links based on the activeMode
+  const filteredSidebarLinks = sidebarLinks.filter(link => {
+    // We always hide the Profile link as requested
+    if (link.label === 'Profile') return false;
+    
+    if (activeMode === 'leads') {
+      if (link.label === 'Vendor AI' || link.label === 'Vendor Directory') return false;
+    } else if (activeMode === 'vendor') {
+      if (link.label === 'Find Leads') return false;
+    }
+    
+    return true;
+  });
+
   return (
     <div
       className="min-h-screen loverai-page-bg flex text-white font-body"
@@ -158,7 +201,7 @@ export default function PlannerLayout() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-3">
-          {sidebarLinks.map((link) => {
+          {filteredSidebarLinks.map((link) => {
             const isActive = location.pathname === link.to;
             const badge = link.badgeKey === "unread" ? unreadCount : 0;
             const isFeatured = Boolean(link.featured);
