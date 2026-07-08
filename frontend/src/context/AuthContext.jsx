@@ -104,6 +104,23 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
+  // Verify Email
+  const verifyEmail = useCallback(async (dataObj) => {
+    const data = await authAPI.verifyEmail(dataObj);
+    if (data.success) {
+      setToken(data.token);
+      setCurrentUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userRole', data.user.role);
+    }
+    return data;
+  }, []);
+
+  // Resend OTP
+  const resendOTP = useCallback(async (email) => {
+    return await authAPI.resendOTP({ email });
+  }, []);
+
   // Logout
   const logout = useCallback(() => {
     removeToken();
@@ -136,6 +153,8 @@ export function AuthProvider({ children }) {
     register,
     googleLogin,
     firebaseLogin,
+    verifyEmail,
+    resendOTP,
     logout,
     refreshUser,
   };

@@ -283,7 +283,7 @@ router.post('/library/verify', protect, async (req, res) => {
         const templateName = templateNames[templateId] || 'Premium Pitch Deck';
 
         const emailData = {
-          from: 'LoversAI <onboarding@resend.dev>',
+          from: `LoversAI <${process.env.FROM_EMAIL || 'noreply@loversai.com'}>`,
           to: user.email,
           subject: `Invoice for ${templateName} Purchase - LoversAI`,
           html: `

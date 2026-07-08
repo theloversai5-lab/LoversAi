@@ -184,6 +184,13 @@ const userSchema = new mongoose.Schema(
     // ─── Security ───
     lastLoginAt: Date,
     loginCount: { type: Number, default: 0 },
+    
+    // ─── Registration Email OTP ───
+    emailVerified: { type: Boolean, default: true }, // Default true for backward compatibility
+    otpCode: { type: String, select: false },
+    otpExpiresAt: Date,
+    otpCooldownUntil: Date,
+    otpAttempts: { type: Number, default: 0 },
   },
   {
     timestamps: true,

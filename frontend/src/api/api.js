@@ -139,6 +139,12 @@ export const authAPI = {
   firebaseLogin: (data) =>
     apiFetch('/auth/firebase-login', { method: 'POST', data }),
 
+  verifyEmail: (data) =>
+    apiFetch('/auth/verify-email', { method: 'POST', data }),
+
+  resendOTP: (data) =>
+    apiFetch('/auth/resend-otp', { method: 'POST', data }),
+
   getMe: () => apiFetch('/auth/me'),
 };
 

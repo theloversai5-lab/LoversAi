@@ -110,6 +110,19 @@ export default function Signup() {
       });
 
       if (data.success) {
+        // If the backend requires email verification (Email OTP flow)
+        if (data.requiresVerification) {
+          navigate("/verify-email", { 
+            state: { 
+              email: validated.email,
+              role: role.toLowerCase(),
+              name: name.trim(),
+              partnerName: partnerName.trim()
+            } 
+          });
+          return;
+        }
+
         const lowerRole = role.toLowerCase();
         if (lowerRole === "planner") {
           navigate("/planner/onboarding");

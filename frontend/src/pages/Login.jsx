@@ -21,10 +21,11 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, firebaseLogin, currentUser, logout } = useAuth();
+  const { login, firebaseLogin, currentUser, logout, resendOTP } = useAuth();
 
   useEffect(() => {
     if (currentUser) {
@@ -110,6 +111,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setUnverifiedEmail("");
 
     const validation = authLoginSchema.safeParse({ email, password });
 
@@ -151,10 +153,29 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      const msg =
-        err.response?.data?.error || err.message || "Failed to login.";
-      setError(msg);
+      const data = err.response?.data;
+      if (data?.code === "UNVERIFIED_EMAIL") {
+        setUnverifiedEmail(email);
+        setError(data.error || "Your email has not been verified yet.");
+      } else {
+        const msg = data?.error || err.message || "Failed to login.";
+        setError(msg);
+      }
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await resendOTP({ email: unverifiedEmail });
+      if (res.success) {
+        navigate("/verify-email", { state: { email: unverifiedEmail } });
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to resend verification code.");
       setLoading(false);
     }
   };
@@ -397,8 +418,17 @@ const Login = () => {
         </div>
       )}
       {error && (
-        <div className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-sm text-red-200">
           {error}
+          {unverifiedEmail && (
+            <button
+              onClick={handleResendVerification}
+              disabled={loading}
+              className="mt-3 block w-full rounded-lg bg-red-500/20 py-2 font-medium text-red-100 hover:bg-red-500/30 transition-colors"
+            >
+              Resend Verification Code
+            </button>
+          )}
         </div>
       )}
       {isLoggedIn ? (

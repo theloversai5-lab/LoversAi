@@ -5,6 +5,9 @@ import User from "../models/User.js";
 import { generateToken, protect } from "../middleware/auth.js";
 import { WELCOME_CREDITS } from "../constants/credits.js";
 import { syncPlannerUserFromAuth } from "../utils/syncPlannerUser.js";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import { sendVerificationOTP } from "../utils/emailService.js";
 
 const router = express.Router();
 
@@ -49,6 +52,11 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // ─── Generate OTP ───
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const salt = await bcrypt.genSalt(10);
+    const hashedOtp = await bcrypt.hash(otp, salt);
+
     // ─── Create user ───
     const userData = {
       email: email.toLowerCase().trim(),
@@ -57,6 +65,9 @@ router.post("/register", async (req, res) => {
       role: userRole,
       authProvider: "local",
       credits: WELCOME_CREDITS, // 🎁 Welcome credits
+      emailVerified: false,
+      otpCode: hashedOtp,
+      otpExpiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
     };
 
     // Role-specific fields
@@ -69,13 +80,18 @@ router.post("/register", async (req, res) => {
 
     const user = await User.create(userData);
     await syncPlannerUserFromAuth(user, "signup");
-    const token = generateToken(user);
+    
+    // Send OTP email asynchronously
+    sendVerificationOTP(user.email, otp).catch(err => {
+      console.error("Failed to send initial OTP:", err);
+    });
 
-    console.log(`✅ New user registered: ${user.email} (${user.role}) — ${WELCOME_CREDITS} welcome credits`);
+    console.log(`✅ New user registered (Unverified): ${user.email} (${user.role})`);
 
     res.status(201).json({
       success: true,
-      token,
+      message: "Registration successful. Please verify your email.",
+      requiresVerification: true,
       user: sanitizeUser(user),
     });
   } catch (err) {
@@ -143,6 +159,15 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({
         success: false,
         error: "Invalid email or password",
+      });
+    }
+
+    // Check email verification
+    if (user.emailVerified === false) {
+      return res.status(403).json({
+        success: false,
+        error: "Your email has not been verified yet.",
+        code: "UNVERIFIED_EMAIL",
       });
     }
 
@@ -321,6 +346,121 @@ router.post("/google", async (req, res) => {
       success: false,
       error: "Google authentication failed",
     });
+  }
+});
+
+/* ================================================================
+   POST /api/auth/verify-email — Verify Registration OTP
+================================================================ */
+router.post("/verify-email", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, error: "Email and OTP are required" });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+otpCode");
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({ success: false, error: "Email is already verified" });
+    }
+
+    if (!user.otpCode || !user.otpExpiresAt) {
+      return res.status(400).json({ success: false, error: "No pending verification found" });
+    }
+
+    if (user.otpExpiresAt < new Date()) {
+      return res.status(400).json({ success: false, error: "Verification code has expired. Please request a new one." });
+    }
+
+    const isMatch = await bcrypt.compare(otp, user.otpCode);
+
+    if (!isMatch) {
+      user.otpAttempts += 1;
+      await user.save();
+      return res.status(400).json({ success: false, error: "Invalid verification code" });
+    }
+
+    // Success! Mark as verified and clean up
+    user.emailVerified = true;
+    user.otpCode = undefined;
+    user.otpExpiresAt = undefined;
+    user.otpCooldownUntil = undefined;
+    user.otpAttempts = 0;
+    
+    // Login tracking
+    user.lastLoginAt = new Date();
+    user.loginCount += 1;
+    
+    await user.save();
+    
+    const token = generateToken(user);
+    await syncPlannerUserFromAuth(user, "signin");
+
+    res.json({
+      success: true,
+      message: "Email verified successfully",
+      token,
+      user: sanitizeUser(user),
+    });
+  } catch (err) {
+    console.error("Email verification error:", err);
+    res.status(500).json({ success: false, error: "Verification failed" });
+  }
+});
+
+/* ================================================================
+   POST /api/auth/resend-otp — Resend Verification Email
+================================================================ */
+router.post("/resend-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: "Email is required" });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({ success: false, error: "Email is already verified" });
+    }
+
+    if (user.otpCooldownUntil && user.otpCooldownUntil > new Date()) {
+      const waitTime = Math.ceil((user.otpCooldownUntil - new Date()) / 1000);
+      return res.status(429).json({ 
+        success: false, 
+        error: `Please wait ${waitTime} seconds before requesting a new code.` 
+      });
+    }
+
+    // Generate new OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const salt = await bcrypt.genSalt(10);
+    const hashedOtp = await bcrypt.hash(otp, salt);
+
+    user.otpCode = hashedOtp;
+    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    user.otpCooldownUntil = new Date(Date.now() + 60 * 1000); // 60 seconds cooldown
+    user.otpAttempts = 0;
+    
+    await user.save();
+
+    await sendVerificationOTP(user.email, otp);
+
+    res.json({ success: true, message: "Verification code sent to your email." });
+  } catch (err) {
+    console.error("Resend OTP error:", err);
+    res.status(500).json({ success: false, error: "Failed to resend verification code" });
   }
 });
 

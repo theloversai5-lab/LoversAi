@@ -28,6 +28,7 @@ import PlannerAITools from "./pages/PlannerAI_Tools";
 import PricingPage from "./pages/PricingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import VerifyEmail from "./pages/VerifyEmail";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import OurStory from "./pages/OurStory";
@@ -88,6 +89,7 @@ function AppContent() {
     location.pathname.startsWith("/admin") ||
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
+    location.pathname === "/verify-email" ||
     location.pathname.startsWith("/planner/") ||
     location.pathname === "/planner" ||
     location.pathname === "/planner-ai-tools" ||
@@ -102,7 +104,7 @@ function AppContent() {
     location.pathname.startsWith("/couple/quote");
 
   const hideNavbar =
-    hideNavbarAndFooter || location.pathname === "/user-form";
+    hideNavbarAndFooter || location.pathname === "/user-form" || location.pathname === "/ourstory";
 
   const hideFooter =
     (hideNavbarAndFooter &&
@@ -119,6 +121,7 @@ function AppContent() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/ourstory" element={<OurStory />} />
