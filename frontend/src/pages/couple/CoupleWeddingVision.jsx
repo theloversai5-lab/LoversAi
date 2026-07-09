@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { coupleMoodboardAPI } from "../../api/api";
+import CreditWalletBadge from "../../components/couple/CreditWalletBadge";
 import { saveThemeMoodboard } from "./CoupleThemeMoodboard";
 import { useAuth } from "../../context/AuthContext";
 
@@ -501,13 +502,25 @@ export default function CoupleWeddingVision() {
         throw new Error(result.error || "Generation failed");
       }
     } catch (err) {
-      const apiMessage = err.response?.data?.error;
-      const apiDetails = err.response?.data?.details;
-      const message = [apiMessage || err.message || "Generation failed. Please try again.", apiDetails]
-        .filter(Boolean)
-        .join(" ");
+      if (err.response && err.response.status === 402) {
+        setError(
+          <div className="flex flex-col items-center">
+            <span className="font-bold text-lg mb-1">Insufficient Credits</span>
+            <span className="text-sm opacity-90">You have used all your AI generation credits. Please upgrade your plan to continue generating!</span>
+            <button 
+              onClick={() => navigate("/pricing")}
+              className="mt-3 px-4 py-1.5 bg-white text-rose-500 rounded-full text-sm font-semibold hover:bg-rose-50 transition-colors shadow-sm"
+            >
+              Upgrade Plan
+            </button>
+          </div>
+        );
+      } else {
+        setError(
+          err.response?.data?.error || err.message || "Generation failed. Please try again."
+        );
+      }
       console.error("Moodboard generation error:", err);
-      setError(message);
     } finally {
       setProgress("");
       setGenerating(false);
@@ -1010,7 +1023,8 @@ export default function CoupleWeddingVision() {
           </div>
 
           {/* Right Side: Round Hamburger Menu Button */}
-          <div className="flex items-center justify-end relative">
+          <div className="flex items-center justify-end relative z-50">
+            <CreditWalletBadge />
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}

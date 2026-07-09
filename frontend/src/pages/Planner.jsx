@@ -57,7 +57,7 @@ const PlannerPage = () => {
     {
       title: "Find Vendors",
       image: "/images/execute.gif",
-      onClick: () => handleNavigate('/planner/vendors'),
+      onClick: () => handleNavigate('/vendor-ai'),
       badge: "Directory",
       badgeColor: "bg-blue-400/20 text-blue-400 border-blue-400/30",
     },

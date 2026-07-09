@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { coupleMoodboardAPI } from "../../api/api";
+import CreditWalletBadge from "../../components/couple/CreditWalletBadge";
 
 const FUNCTION_OPTIONS = [
   "Pre-wedding (Haldi/Mehndi)",
@@ -123,9 +124,24 @@ export default function CoupleMoodboard() {
       }
     } catch (err) {
       console.error("Moodboard generation error:", err);
-      const msg =
-        err.response?.data?.error || err.message || "Generation failed. Please try again.";
-      setError(msg);
+      if (err.response && err.response.status === 402) {
+        setError(
+          <div className="flex flex-col items-center">
+            <span className="font-bold text-lg mb-1">Insufficient Credits</span>
+            <span className="text-sm opacity-90">You have used all your AI generation credits. Please upgrade your plan to continue generating beautiful wedding moodboards!</span>
+            <button 
+              onClick={() => navigate("/pricing")}
+              className="mt-3 px-4 py-1.5 bg-white text-rose-500 rounded-full text-sm font-semibold hover:bg-rose-50 transition-colors shadow-sm"
+            >
+              Upgrade Plan
+            </button>
+          </div>
+        );
+      } else {
+        setError(
+          err.response?.data?.error || err.message || "Generation failed. Please try again."
+        );
+      }
       setProgress("");
     } finally {
       setGenerating(false);
@@ -254,15 +270,18 @@ export default function CoupleMoodboard() {
             AI Moodboard
           </p>
         </div>
-        <button
-          onClick={() => navigate("/couple/cart")}
-          className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors cursor-pointer text-white/80"
-          title="View Cart"
-        >
+        <div className="flex items-center gap-3">
+          <CreditWalletBadge />
+          <button
+            onClick={() => navigate("/couple/cart")}
+            className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors cursor-pointer text-white/80"
+            title="View Cart"
+          >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 20a1 1 0 1 0 0 2 1 1 0 1 0 0-2zm11 0a1 1 0 1 0 0 2 1 1 0 1 0 0-2zM3 3h2l3.6 7.59-1.35 2.44A2 2 0 0 0 8.5 16H21v-2H8.5l1.1-2h7.45a2 2 0 0 0 1.9-1.4l2.5-9v-.1H5.21L4.27 2H1v2h2z" />
-          </svg>
-        </button>
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}

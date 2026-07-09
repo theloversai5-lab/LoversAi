@@ -148,6 +148,12 @@ export const authAPI = {
   getMe: () => apiFetch('/auth/me'),
 };
 
+// ─── Credit & Wallet API ───
+export const creditAPI = {
+  getWallet: () => api.get('/credits/wallet').then((res) => res.data),
+  getHistory: (params) => api.get('/credits/history', { params }).then((res) => res.data),
+};
+
 // ─── User APIs ───
 export const userAPI = {
   getProfile: () => apiFetch('/users/profile'),

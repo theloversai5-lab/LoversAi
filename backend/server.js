@@ -18,6 +18,7 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/users.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import authRoutes from "./routes/authRoutes.js"; // ✅ New JWT auth routes
+import creditRoutes from "./routes/creditRoutes.js"; // ✅ Credit System
 import debugRoutes from "./routes/debugRoutes.js";
 import adminRoutes from "./admin/adminRoutes.js";
 import quoteRoutes from "./routes/quoteRoutes.js"; // ✅ Quote/Bid routes
@@ -440,6 +441,7 @@ async function startServer() {
        Core Application Routes (loaded AFTER AI routes)
     ============================================================ */
     app.use("/api/auth", authRoutes); // ✅ JWT Auth (register, login, google, me)
+    app.use("/api/credits", creditRoutes); // ✅ Credit & Wallet System
     app.use("/api/users", userRoutes); // ✅ User profile & management (consolidated)
     app.use("/api/quotes", quoteRoutes); // ✅ Quote/Bid management
     app.use("/api/payment", paymentRoutes);

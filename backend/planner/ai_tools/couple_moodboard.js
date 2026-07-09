@@ -3,7 +3,9 @@ import multer from "multer";
 import fetch from "node-fetch";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
-import Subscription from "../../models/Subscription.js";
+import { Subscription } from "../../models/Subscription.js";
+import creditService from "../../services/creditService.js";
+import { OPERATION_COSTS, TRANSACTION_SOURCES } from "../../config/credits.js";
 import {
   isCloudinaryConfigured,
   uploadRemoteToCloudinary,
@@ -1337,14 +1339,26 @@ router.post(
         userId: user._id,
       });
 
-      // Credit check
-      if ((user.credits || 0) < CREDIT_COST) {
-        return res.status(402).json({
-          success: false,
-          error: "Insufficient credits",
-          currentCredits: user.credits || 0,
-          requiredCredits: CREDIT_COST,
-        });
+      // Credit check and immediate deduction
+      const cost = OPERATION_COSTS.COUPLE_MOODBOARD_GENERATION;
+      try {
+        await creditService.deductCredits(
+          user._id,
+          cost,
+          TRANSACTION_SOURCES.AI_GENERATION,
+          `mb_${Date.now()}`,
+          { functionType, style, action: "generate" }
+        );
+      } catch (err) {
+        if (err.code === "INSUFFICIENT_CREDITS") {
+          return res.status(402).json({
+            success: false,
+            error: "Insufficient credits",
+            currentCredits: user.credits || 0,
+            requiredCredits: cost,
+          });
+        }
+        throw err;
       }
 
       timer.mark("creditCheck");
@@ -1484,9 +1498,12 @@ router.post(
           });
         }
 
+        // REFUND: All generations failed
+        await creditService.refundCredits(user._id, cost, "generate_failed", { reason: "all_generations_failed", details: firstError }).catch(console.error);
+
         return res.status(503).json({
           success: false,
-          error: "All 4 image generations failed. Please try again.",
+          error: "All 4 image generations failed. Please try again. Your credits have been refunded.",
           details: firstError,
           pipelineTimings: timer.getTimings(),
         });
@@ -1538,44 +1555,23 @@ router.post(
       };
 
       try {
-        const oldCredits = user.credits;
-        user.deductCredits(
-          CREDIT_COST,
-          "Couple moodboard generation",
-          "ai_generation",
-          {
-            mode: visionResult.mode,
-            generationId:
-              generatedImages[0]?.generationId || `mb_${Date.now()}`,
-            style,
-            functionType,
-            imageCount: generatedImages.length,
-          },
-        );
-
         const subscription = await Subscription.findOne({
           userId: user._id,
         }).sort({ createdAt: -1 });
         if (subscription) {
-          subscription.creditsUsed =
-            (subscription.creditsUsed || 0) + CREDIT_COST;
+          subscription.creditsUsed = (subscription.creditsUsed || 0) + cost;
           await subscription.save();
         }
-
-        await user.save();
+        
+        // Fetch fresh user balance to return in response
+        const freshUser = await User.findById(user._id).select("credits");
 
         responseData.creditInfo = {
-          deducted: CREDIT_COST,
-          oldBalance: oldCredits,
-          newBalance: user.credits,
+          deducted: cost,
+          newBalance: freshUser ? freshUser.credits : 0,
         };
       } catch (deductErr) {
-        console.error(
-          "⚠️ [Moodboard] Credit deduction error:",
-          deductErr.message,
-        );
-        responseData.creditWarning =
-          "Generation succeeded but credits were not deducted.";
+        console.error("⚠️ [Moodboard] Subscription tracking error:", deductErr.message);
       }
 
       timer.mark("complete");
@@ -1586,16 +1582,27 @@ router.post(
       return res.json(responseData);
     } catch (error) {
       console.error("❌ [Moodboard] Generation error:", error);
+      
+      // Attempt Refund if an unexpected error crashed the pipeline
+      const cost = OPERATION_COSTS.COUPLE_MOODBOARD_GENERATION;
+      try {
+        if (req.user && req.user._id) {
+          await creditService.refundCredits(req.user._id, cost, "pipeline_crash", { reason: error.message });
+        }
+      } catch (refundErr) {
+        console.error("Failed to refund on crash:", refundErr);
+      }
+
       timer.mark("error");
       let statusCode = 500;
-      let msg = "Moodboard generation failed. Please try again.";
+      let msg = "Moodboard generation failed. Please try again. Your credits have been refunded.";
       if (error.message.includes("timeout"))
-        msg = "Generation timed out. Please try again.";
+        msg = "Generation timed out. Please try again. Your credits have been refunded.";
       else if (
         error.message.includes("rate") ||
         error.message.includes("busy")
       ) {
-        msg = "Service is busy. Please wait.";
+        msg = "Service is busy. Please wait. Your credits have been refunded.";
         statusCode = 429;
       } else if (error.message.includes("credits")) {
         msg = error.message;
@@ -1605,7 +1612,7 @@ router.post(
         statusCode = 503;
       } else if (isGeminiAuthError(error.message)) {
         msg =
-          "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it.";
+          "Gemini authentication failed. Restart the backend after setting GEMINI_API_KEY; if this continues, verify the key in Google AI Studio and confirm image generation is enabled for it. Your credits have been refunded.";
         statusCode = 401;
       }
       return res.status(statusCode).json({
@@ -1657,33 +1664,28 @@ router.post(
       } = req.body;
 
       const dimensions = await detectAspectRatio(req.file.buffer);
-      // Credit check & tentative deduction for edit operation
+      // Credit check & deduction for edit operation
       const user = req.user;
-      if ((user.credits || 0) < CREDIT_COST) {
-        return res.status(402).json({
-          success: false,
-          error: "Insufficient credits for edit",
-          currentCredits: user.credits || 0,
-          requiredCredits: CREDIT_COST,
-        });
-      }
-
+      const cost = OPERATION_COSTS.COUPLE_MOODBOARD_EDIT;
+      
       try {
-        // Deduct in-memory; we'll persist after successful edit or roll back on failure
-        user.deductCredits(
-          CREDIT_COST,
-          "Couple moodboard edit",
-          "ai_generation",
-          { functionType },
+        await creditService.deductCredits(
+          user._id,
+          cost,
+          TRANSACTION_SOURCES.AI_GENERATION,
+          `mb_edit_${Date.now()}`,
+          { functionType, action: "edit-image" }
         );
-      } catch (deductErr) {
-        console.error(
-          "⚠️ [Moodboard] Failed to deduct credits for edit:",
-          deductErr,
-        );
-        return res
-          .status(402)
-          .json({ success: false, error: "Insufficient credits" });
+      } catch (err) {
+        if (err.code === "INSUFFICIENT_CREDITS") {
+          return res.status(402).json({
+            success: false,
+            error: "Insufficient credits for edit",
+            currentCredits: user.credits || 0,
+            requiredCredits: cost,
+          });
+        }
+        return res.status(500).json({ success: false, error: "Failed to process credits." });
       }
       const refinementPrompt = [
         `Edit this wedding photo for a ${functionType} moodboard.`,
@@ -1709,43 +1711,16 @@ router.post(
           dimensions,
         );
       } catch (apiErr) {
-        // Rollback tentative credit deduction
+        // Refund on edit failure
         try {
-          user.addCredits(
-            CREDIT_COST,
-            "Rollback edit-image",
-            "ai_generation_rollback",
-            { originalAction: "edit-image" },
-          );
-          await user.save();
+          await creditService.refundCredits(user._id, cost, "edit_failed", { action: "edit-image" });
         } catch (rbErr) {
-          console.error(
-            "⚠️ [Moodboard] Failed to rollback credits after edit-image error:",
-            rbErr,
-          );
+          console.error("⚠️ [Moodboard] Failed to refund credits after edit-image error:", rbErr);
         }
         throw apiErr; // let outer handler return an error response
       }
 
       result = await persistSingleGeneratedMoodboardImage(result, functionType);
-
-      // Persist credit deduction (subscription tracking) after successful edit
-      try {
-        const subscription = await Subscription.findOne({
-          userId: user._id,
-        }).sort({ createdAt: -1 });
-        if (subscription) {
-          subscription.creditsUsed =
-            (subscription.creditsUsed || 0) + CREDIT_COST;
-          await subscription.save();
-        }
-        await user.save();
-      } catch (persistErr) {
-        console.error(
-          "⚠️ [Moodboard] Failed to persist credit deduction after edit:",
-          persistErr,
-        );
-      }
 
       return res.json({
         success: true,

@@ -8,6 +8,8 @@ import { syncPlannerUserFromAuth } from "../utils/syncPlannerUser.js";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { sendVerificationOTP } from "../utils/emailService.js";
+import creditService from "../services/creditService.js";
+import { PLAN_CREDITS, TRANSACTION_SOURCES } from "../config/credits.js";
 
 const router = express.Router();
 
@@ -64,7 +66,7 @@ router.post("/register", async (req, res) => {
       fullName: fullName?.trim() || "",
       role: userRole,
       authProvider: "local",
-      credits: WELCOME_CREDITS, // 🎁 Welcome credits
+      credits: 0, // Initialized to 0, added via creditService
       emailVerified: false,
       otpCode: hashedOtp,
       otpExpiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
@@ -79,6 +81,16 @@ router.post("/register", async (req, res) => {
     }
 
     const user = await User.create(userData);
+
+    // Grant Initial Free Credits and create ledger entry
+    await creditService.addCredits(
+      user._id,
+      PLAN_CREDITS.free,
+      TRANSACTION_SOURCES.FREE_PLAN,
+      "signup",
+      { message: "Initial free credits allocation" }
+    );
+
     await syncPlannerUserFromAuth(user, "signup");
     
     // Send OTP email asynchronously
@@ -313,10 +325,19 @@ router.post("/google", async (req, res) => {
         authProvider: "google",
         avatar: picture,
         role: userRole,
-        credits: WELCOME_CREDITS, // 🎁 Welcome credits
+        credits: 0,
         lastLoginAt: new Date(),
         loginCount: 1,
       });
+
+      // Grant Initial Free Credits and create ledger entry
+      await creditService.addCredits(
+        user._id,
+        PLAN_CREDITS.free,
+        TRANSACTION_SOURCES.FREE_PLAN,
+        "signup_google",
+        { message: "Initial free credits allocation" }
+      );
 
       await syncPlannerUserFromAuth(user, "signup");
 
@@ -523,10 +544,19 @@ router.post("/firebase-login", async (req, res) => {
         avatar: decoded.picture,
         authProvider: "google",
         role: userRole,
-        credits: WELCOME_CREDITS,
+        credits: 0,
         lastLoginAt: new Date(),
         loginCount: 1,
       });
+
+      // Grant Initial Free Credits and create ledger entry
+      await creditService.addCredits(
+        user._id,
+        PLAN_CREDITS.free,
+        TRANSACTION_SOURCES.FREE_PLAN,
+        "signup_firebase",
+        { message: "Initial free credits allocation" }
+      );
 
       await syncPlannerUserFromAuth(user, "signup");
     } else {

@@ -3,15 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 /* ─── Sub-schemas ─── */
-const creditTransactionSchema = new mongoose.Schema({
-  type: { type: String, enum: ["credit", "debit"], required: true },
-  amount: { type: Number, required: true },
-  description: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now },
-  reference: { type: String, default: "ai_generation" },
-  remainingBalance: { type: Number, required: true },
-  metadata: { type: mongoose.Schema.Types.Mixed, default: {} },
-});
+
 
 const weddingProfileSchema = new mongoose.Schema(
   {
@@ -141,9 +133,17 @@ const userSchema = new mongoose.Schema(
     vendorProfile: vendorProfileSchema,
 
     // ─── Credits & Payments ───
-    credits: { type: Number, default: 0, min: 0 },
-    creditTransactions: [creditTransactionSchema],
-    lastCreditUpdate: { type: Date, default: Date.now },
+    credits: { type: Number, default: 0, min: 0 }, // Cached total balance for fast queries
+    wallet: {
+      freeCredits: { type: Number, default: 0, min: 0 },
+      subscriptionCredits: { type: Number, default: 0, min: 0 },
+      purchasedCredits: { type: Number, default: 0, min: 0 },
+      bonusCredits: { type: Number, default: 0, min: 0 },
+      promotionalCredits: { type: Number, default: 0, min: 0 },
+      lifetimeAdded: { type: Number, default: 0 },
+      lifetimeUsed: { type: Number, default: 0 },
+      lastUpdated: { type: Date, default: Date.now }
+    },
 
     plan: {
       type: String,
@@ -223,49 +223,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-userSchema.methods.addCredits = function (
-  amount,
-  description,
-  reference = "manual_addition",
-  metadata = {},
-) {
-  this.credits += amount;
-  this.lastCreditUpdate = new Date();
-  this.creditTransactions.push({
-    type: "credit",
-    amount,
-    description,
-    reference,
-    remainingBalance: this.credits,
-    metadata,
-  });
-  return this.credits;
-};
 
-userSchema.methods.deductCredits = function (
-  amount,
-  description,
-  reference = "ai_generation",
-  metadata = {},
-) {
-  if (this.credits < amount) {
-    throw new Error(
-      `Insufficient credits. Available: ${this.credits}, Required: ${amount}`,
-    );
-  }
-  this.credits -= amount;
-  this.lastCreditUpdate = new Date();
-  this.totalCreditsUsed = (this.totalCreditsUsed || 0) + amount;
-  this.creditTransactions.push({
-    type: "debit",
-    amount,
-    description,
-    reference,
-    remainingBalance: this.credits,
-    metadata,
-  });
-  return this.credits;
-};
 
 /* ─── Virtuals ─── */
 userSchema.virtual("hasActiveSubscription").get(function () {

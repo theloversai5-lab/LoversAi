@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { apiFetch, coupleMoodboardAPI, uploadAPI, moodboardAPI } from "../../api/api";
+import CreditWalletBadge from "../../components/couple/CreditWalletBadge";
 
 const STORAGE_KEY = "loversai_theme_moodboards";
 
@@ -588,9 +589,24 @@ export default function CoupleThemeMoodboard() {
       setEditTarget(null);
       setEditPrompt("");
     } catch (err) {
-      setError(
-        err.response?.data?.error || err.message || "Failed to edit image.",
-      );
+      if (err.response && err.response.status === 402) {
+        setError(
+          <div className="flex flex-col items-center">
+            <span className="font-bold text-lg mb-1">Insufficient Credits</span>
+            <span className="text-sm opacity-90">You have used all your AI generation credits. Please upgrade your plan to continue editing!</span>
+            <button 
+              onClick={() => navigate("/pricing")}
+              className="mt-3 px-4 py-1.5 bg-white text-rose-500 rounded-full text-sm font-semibold hover:bg-rose-50 transition-colors shadow-sm"
+            >
+              Upgrade Plan
+            </button>
+          </div>
+        );
+      } else {
+        setError(
+          err.response?.data?.error || err.message || "Edit failed. Please try again."
+        );
+      }
     } finally {
       setEditing(false);
     }
@@ -875,7 +891,8 @@ export default function CoupleThemeMoodboard() {
           </div>
 
           {/* Premium Hamburger Menu Dropdown Trigger */}
-          <div className="relative">
+          <div className="flex items-center justify-end relative z-50">
+            <CreditWalletBadge />
             <button
               type="button"
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
