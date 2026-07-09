@@ -1,0 +1,154 @@
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 90px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.bg {
+  position: absolute;
+  inset: -10%;          /* extra room for parallax travel */
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(26,24,18,0.10) 0%,
+    rgba(26,24,18,0.55) 55%,
+    rgba(26,24,18,0.90) 100%
+  );
+}
+
+/* Corner borders */
+.corner {
+  position: absolute;
+  width: 0px;
+  height: 80px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.tl { top: 32px;    left: 32px;    border-width: 1px 0 0 1px; }
+.br { bottom: 32px; right: 32px;   border-width: 0 1px 1px 0; }
+
+.content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.tag {
+  font-size: 10px;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.title {
+  /* This version makes the max size 3.5rem instead of 5rem */
+  font-size: clamp(2rem, 5vw, 3.5rem); 
+  color: var(--cream);
+  line-height: 1.12;
+  margin-bottom: 32px;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  font-family: 'DreamAvenue';
+}
+
+/* From Uiverse.io by vinodjangid07 */ 
+.Btn {
+  width: 150px;
+  height: 40px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(to right,#77530a,#ffd277,#77530a,#77530a,#ffd277,#77530a);
+  background-size: 250%;
+  background-position: left;
+  color: #ffd277;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  cursor: pointer;
+  transition-duration: 1s;
+  overflow: hidden;
+}
+
+.Btn::before {
+  position: absolute;
+  content: "Join Waitlist";
+  color: #ffd277;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 97%;
+  height: 90%;
+  border-radius: 50px;
+  transition-duration: 1s;
+  background-color: rgba(0, 0, 0, 0.842);
+  background-size: 200%;
+}
+
+.Btn:hover {
+  background-position: right;
+  transition-duration: 1s;
+}
+
+.Btn:hover::before {
+  background-position: right;
+  transition-duration: 1s;
+}
+
+.Btn:active {
+  transform: scale(0.95);
+}
+
+/* Scroll hint */
+.scrollHint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+}
+
+.scrollLine {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; transform: scaleY(1); }
+  50%       { opacity: 1;   transform: scaleY(1.15); }
+}
+
+.scrollLabel {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}

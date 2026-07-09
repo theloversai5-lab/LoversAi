@@ -170,6 +170,14 @@ const Navbar = () => {
   };
 
   const getNavLinks = () => {
+    if (location.pathname === "/ourstory") {
+      return [
+        { to: "#about", label: "About Us" },
+        { to: "#team", label: "Team" },
+        { to: "#presence", label: "Presence" },
+      ];
+    }
+
     const userRole = localStorage.getItem("userRole");
     const baseLinks = [{ to: "/", label: "Home" }];
 

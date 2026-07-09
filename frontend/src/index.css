@@ -9,6 +9,19 @@
    Unified warm brown/gold + glassmorphism
    =========================== */
 
+@font-face {
+  font-family: 'DreamAvenue';
+  src: url('./assets/fonts/FontsFree-Net-Dream-Avenue.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-dream, .font-DreamAvenue {
+  font-family: 'DreamAvenue', 'Palatino Linotype', serif;
+  letter-spacing: 0.02em;
+}
+
 :root {
   /* Core palette */
   --loverai-bg-deep: #0a0604;

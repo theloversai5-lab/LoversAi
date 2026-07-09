@@ -1,0 +1,36 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px;
+}
+
+.links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+
+.links a {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-body);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.links a:hover {
+  color: var(--gold);
+}
+
+@media (max-width: 640px) {
+  .nav {
+    padding: 16px 24px;
+  }
+}
