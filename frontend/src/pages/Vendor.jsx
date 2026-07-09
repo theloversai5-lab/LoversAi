@@ -60,7 +60,7 @@ const VendorPage = () => {
       <div className="relative w-full overflow-hidden min-h-screen">
         <div
           className="absolute inset-0 bg-cover bg-center z-0"
-          style={{ backgroundImage: `url("./images/planner.png")`, filter: "brightness(0.35)" }}
+          style={{ backgroundImage: `url("./images/planner.webp")`, filter: "brightness(0.35)" }}
         />
         <div className="absolute inset-0 z-[1] bg-gradient-to-b from-loverai-deep/40 via-transparent to-loverai-deep/90"></div>
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-loverai-gold/[0.03] rounded-full blur-[150px] z-[1]"></div>

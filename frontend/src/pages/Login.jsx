@@ -8,11 +8,11 @@ import PlannerQuickMenu from "../components/PlannerQuickMenu";
 import { authLoginSchema, formatZodErrors } from "../utils/authValidation";
 
 const plannerWeddingBackground = {
-  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.webp")',
 };
 
 const coupleWeddingBackground = {
-  backgroundImage: 'url("/images/signup.png")',
+  backgroundImage: 'url("/images/signup.webp")',
 };
 
 const Login = () => {
@@ -560,7 +560,7 @@ const Login = () => {
             </div>
 
             <div className="planner-auth-visual">
-              <img src="/images/bridal.png" alt="Planner auth visual" />
+              <img src="/images/bridal.webp" alt="Planner auth visual" />
             </div>
           </div>
         </div>

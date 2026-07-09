@@ -821,7 +821,7 @@ export default function CoupleProfileForm() {
       <div
         className="fixed inset-0 bg-cover bg-center -z-20"
         style={{
-          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%), url('/images/footer.png')",
+          backgroundImage: "linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%), url('/images/footer.webp')",
           backgroundAttachment: "fixed",
         }}
       />

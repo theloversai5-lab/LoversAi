@@ -113,7 +113,7 @@ export default function PlannerBuildQuote() {
   const guestCount = quote?.eventDetails?.guestCount || '—';
   const tradition = quote?.eventDetails?.tradition || '';
   const notes = quote?.eventDetails?.notes || '';
-  const primaryImage = quote?.images?.[0]?.url || '/images/planner.png';
+  const primaryImage = quote?.images?.[0]?.url || '/images/planner.webp';
 
   // Calculate moodboard expiry
   const moodboardExpiry = quote?.moodboardExpiresAt ? new Date(quote.moodboardExpiresAt) : null;

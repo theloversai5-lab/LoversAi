@@ -582,7 +582,7 @@ export default function CoupleBidProgress() {
       <div
         className="absolute inset-0 bg-cover bg-center -z-20"
         style={{
-          backgroundImage: 'url("/images/signup.png")',
+          backgroundImage: 'url("/images/signup.webp")',
           filter: "brightness(0.75) contrast(1.05)",
         }}
       />

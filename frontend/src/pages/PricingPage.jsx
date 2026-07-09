@@ -5,7 +5,7 @@ const PricingPage = () => {
   const serif = { fontFamily: "'Cormorant Garamond', serif" };
   const pageStyle = {
     minHeight: "100vh",
-    backgroundImage: "linear-gradient(to bottom, rgba(20, 12, 10, 0.65) 0%, rgba(10, 5, 4, 0.85) 100%), url('/images/signup.png')",
+    backgroundImage: "linear-gradient(to bottom, rgba(20, 12, 10, 0.65) 0%, rgba(10, 5, 4, 0.85) 100%), url('/images/signup.webp')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",

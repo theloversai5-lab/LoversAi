@@ -961,7 +961,7 @@ export default function CoupleWeddingVision() {
     <main className="loverai-wedding-shell min-h-screen text-white px-3 md:px-6 flex flex-col items-center justify-center overflow-visible py-4">
       <div
         className="loverai-wedding-bg"
-        style={{ backgroundImage: 'url("/images/signup.png")' }}
+        style={{ backgroundImage: 'url("/images/signup.webp")' }}
       />
       <div className="loverai-wedding-overlay" />
       

@@ -1,12 +1,12 @@
 import React from 'react';
 
 const portfolioImages = [
-  "/images/0_2.jpg",
-  "/images/0_0 (1).jpg",
-  "/images/0_1.jpg",
-  "/images/0_0.jpg",
-  "/images/0_3 (2).jpg",
-  "/images/0_1 (1).jpg"
+  "/images/0_2.webp",
+  "/images/0_0 (1).webp",
+  "/images/0_1.webp",
+  "/images/0_0.webp",
+  "/images/0_3 (2).webp",
+  "/images/0_1 (1).webp"
 ];
 
 const PortfolioSection = () => (

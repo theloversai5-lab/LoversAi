@@ -6,11 +6,11 @@ import { auth } from "../firebase/firebase";
 import { formatZodErrors, plannerSignupSchema } from "../utils/authValidation";
 
 const plannerWeddingBackground = {
-  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.webp")',
 };
 
 const coupleWeddingBackground = {
-  backgroundImage: 'url("/images/signup.png")',
+  backgroundImage: 'url("/images/signup.webp")',
 };
 
 export default function Signup() {
@@ -391,7 +391,7 @@ export default function Signup() {
             </div>
 
             <div className="planner-auth-visual">
-              <img src="/images/bridal.png" alt="Planner signup visual" />
+              <img src="/images/bridal.webp" alt="Planner signup visual" />
             </div>
           </div>
         </div>

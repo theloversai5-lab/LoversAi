@@ -1562,6 +1562,15 @@ select option {
   background-color: rgba(230, 198, 178, 0.18) !important;
   border-color: rgba(230, 198, 178, 0.5) !important;
 }
+@keyframes slideDrawer {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
 
-
-
+.animate-slideDrawer {
+  animation: slideDrawer 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

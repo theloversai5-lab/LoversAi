@@ -338,7 +338,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
           <div
             className="absolute inset-0 bg-cover bg-center z-0"
             style={{
-              backgroundImage: `url("./images/bridal.png")`,
+              backgroundImage: `url("./images/bridal.webp")`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -392,7 +392,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14 items-center">
                 <div className="relative rounded-[32px] overflow-hidden aspect-[4/3.1]">
                   <img
-                    src="/images/Library/Wedding-1.png"
+                    src="/images/Library/Wedding-1.webp"
                     className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
                     alt="Wedding Pitch Deck Preview"
                   />
@@ -463,7 +463,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                       Before
                     </div>
                     <img
-                      src="./images/blue.jpg"
+                      src="./images/blue.webp"
                       className="w-full h-full object-cover"
                       alt="Blue themed venue"
                     />
@@ -473,7 +473,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                       After
                     </div>
                     <img
-                      src="./images/golden.png"
+                      src="./images/golden.webp"
                       className="w-full h-full object-cover"
                       alt="Golden themed venue"
                     />
@@ -530,35 +530,35 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-10">
                   <div className="md:col-span-8 rounded-[32px] overflow-hidden h-[260px] sm:h-[340px] md:h-[520px]">
                     <img
-                      src="./images/Picture1.png"
+                      src="./images/Picture1.webp"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 1"
                     />
                   </div>
                   <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[300px] md:h-[520px]">
                     <img
-                      src="./images/Picture2.png"
+                      src="./images/Picture2.webp"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 2"
                     />
                   </div>
                   <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[260px] md:h-[360px]">
                     <img
-                      src="./images/Picture3.png"
+                      src="./images/Picture3.webp"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 3"
                     />
                   </div>
                   <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[260px] md:h-[360px]">
                     <img
-                      src="./images/Picture4.png"
+                      src="./images/Picture4.webp"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 4"
                     />
                   </div>
                   <div className="md:col-span-4 rounded-[32px] overflow-hidden h-[220px] sm:h-[300px] md:h-[360px]">
                     <img
-                      src="./images/Picture5.png"
+                      src="./images/Picture5.webp"
                       className="w-full h-full object-cover rounded-[32px]"
                       alt="Angle preview 5"
                     />
@@ -607,7 +607,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     </div>
                     <div className="rounded-[32px] overflow-hidden aspect-[4/3.4]">
                       <img
-                        src="./images/mandap-image.png"
+                        src="./images/mandap-image.webp"
                         alt="Video before"
                         className="w-full h-full object-cover rounded-[32px]"
                       />

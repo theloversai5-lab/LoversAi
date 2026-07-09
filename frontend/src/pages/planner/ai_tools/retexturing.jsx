@@ -44,9 +44,9 @@ const RetexturingTool = ({ onClose }) => {
   };
 
   const THEME_PRESET_IMAGE_URLS = {
-    haldi: "/images/ai_tools_img/haldi.png",
-    mehndi: "/images/ai_tools_img/mehendi.png.png",
-    wedding: "/images/ai_tools_img/corridor1.jpg",
+    haldi: "/images/ai_tools_img/haldi.webp",
+    mehndi: "/images/ai_tools_img/mehendi.png.webp",
+    wedding: "/images/ai_tools_img/corridor1.webp",
   };
 
   const isPresetTheme = (themeKey) =>

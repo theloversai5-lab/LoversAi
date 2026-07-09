@@ -39,7 +39,7 @@ export default function VendorLayout() {
   const pageStyle = {
     width: "100%",
     minHeight: "100vh",
-    backgroundImage: "url('/images/signup.png')",
+    backgroundImage: "url('/images/signup.webp')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",

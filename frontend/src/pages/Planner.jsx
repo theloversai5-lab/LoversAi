@@ -28,6 +28,10 @@ const PlannerPage = () => {
     }
   };
 
+  const scrollToTools = () => {
+    document.getElementById('tools-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const tools = [
     {
       title: "Find Leads",
@@ -83,15 +87,56 @@ const PlannerPage = () => {
         <div
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{
-            backgroundImage: 'url("/images/planner.png")',
-            filter: "brightness(1.08) saturate(1.12) contrast(1.08)",
+            backgroundImage: 'url("/images/planner.webp")',
+            filter: "brightness(1.45) saturate(1.15) contrast(0.95)",
           }}
         />
-        <div className="absolute inset-0 z-[1] bg-transparent"></div>
+        {/* Soft dark overlay to make white text pop */}
+        <div className="absolute inset-0 z-[1] bg-black/15" />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/20 via-transparent to-transparent" />
+
+        {/* Premium Hero Content */}
+        <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center px-4 text-center">
+          <div className="max-w-4xl mx-auto">
+            {/* Small uppercase label */}
+            <p 
+              className="text-[10px] sm:text-xs font-semibold uppercase tracking-[6px] text-loverai-gold mb-5 animate-fadeInUp"
+              style={{ textShadow: "0 2px 10px rgba(0, 0, 0, 0.8)" }}
+            >
+              LOVERS AI FOR PROFESSIONALS
+            </p>
+
+            {/* Main Title with gold text highlight, custom display typography and text-shadow for readability */}
+            <h1 
+              className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-heading text-white mb-6 tracking-tight leading-[1.1] animate-fadeInUp stagger-1"
+              style={{ textShadow: "0 4px 20px rgba(0, 0, 0, 0.75)" }}
+            >
+              Where <span className="text-transparent bg-clip-text bg-gradient-to-r from-loverai-gold via-[#f3d4c1] to-white">Artistry</span> Meets <span className="italic font-display text-loverai-gold">Intelligence</span>
+            </h1>
+
+            {/* Sub-description with warm text color and shadow */}
+            <p 
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto mb-10 font-body font-normal leading-relaxed animate-fadeInUp stagger-2"
+              style={{ textShadow: "0 2px 12px rgba(0, 0, 0, 0.85)" }}
+            >
+              Transform the way you coordinate and design weddings. Access live couple leads, draft custom AI pitches, and connect with premier vendors—all in one elegant workspace.
+            </p>
+
+            {/* Call to Action Button */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fadeInUp stagger-3">
+              <button
+                onClick={scrollToTools}
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-loverai-gold text-loverai-deep font-semibold text-sm hover:bg-white hover:text-black transition-all duration-300 shadow-[0_4px_25px_rgba(0,0,0,0.3)] hover:scale-105 cursor-pointer"
+              >
+                Explore Tools
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Planner Tools Section */}
-      <div className="loverai-page-bg py-16 sm:py-20 px-4 sm:px-8">
+      <div id="tools-section" className="loverai-page-bg py-16 sm:py-20 px-4 sm:px-8">
         <div className="relative z-10">
           <h2 className="text-center text-white mb-4 font-heading text-3xl sm:text-5xl md:text-6xl animate-fadeInUp">
             Planner Tools

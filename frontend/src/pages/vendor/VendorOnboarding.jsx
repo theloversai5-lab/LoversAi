@@ -87,7 +87,7 @@ export default function VendorOnboarding() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden py-10">
-      <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url("/images/planner.png")`, filter: "brightness(0.3)" }} />
+      <div className="absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url("/images/planner.webp")`, filter: "brightness(0.3)" }} />
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-loverai-deep/60 via-loverai-dark/40 to-loverai-deep/70"></div>
       <div className="absolute top-1/3 left-1/4 w-[350px] h-[350px] bg-loverai-gold/[0.04] rounded-full blur-[120px] z-[1]"></div>
 

@@ -13,12 +13,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.27 PM.png',
-        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.38 PM.png',
-        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.50 PM.png',
-        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.01 PM.png',
-        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.10 PM.png',
-        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.20 PM.png'
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.27 PM.webp',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.38 PM.webp',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.50 PM.webp',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.01 PM.webp',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.10 PM.webp',
+        '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.38.20 PM.webp'
       ],
       fileName: 'Wedding_Carnival_Lunch_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1ybJjV6N0ChqZPxBfrixqNjmKrtdECRUr',
@@ -31,11 +31,11 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.38 PM.png',
-        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.45 PM.png',
-        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.56 PM.png',
-        '/Mehndi-1/Screenshot 2026-07-07 at 10.49.10 PM.png',
-        '/Mehndi-1/Screenshot 2026-07-07 at 10.49.17 PM.png'
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.38 PM.webp',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.45 PM.webp',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.48.56 PM.webp',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.49.10 PM.webp',
+        '/Mehndi-1/Screenshot 2026-07-07 at 10.49.17 PM.webp'
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1A_Fo2xiqL5S0pJGmRRgbn3h9fj4_VMAA',
@@ -48,12 +48,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.08 PM.png',
-        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.16 PM.png',
-        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.25 PM.png',
-        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.36 PM.png',
-        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.45 PM.png',
-        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.54 PM.png'
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.08 PM.webp',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.16 PM.webp',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.25 PM.webp',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.36 PM.webp',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.45 PM.webp',
+        '/Mehndi-2/Screenshot 2026-07-07 at 10.58.54 PM.webp'
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_2.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=19zHc6HLnDWUgrfeGVjZGMO4n7e-SVULP',
@@ -66,12 +66,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.25 PM.png',
-        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.35 PM.png',
-        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.44 PM.png',
-        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.56 PM.png',
-        '/Mehndi-3/Screenshot 2026-07-07 at 11.05.05 PM.png',
-        '/Mehndi-3/Screenshot 2026-07-07 at 11.05.14 PM.png'
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.25 PM.webp',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.35 PM.webp',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.44 PM.webp',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.04.56 PM.webp',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.05.05 PM.webp',
+        '/Mehndi-3/Screenshot 2026-07-07 at 11.05.14 PM.webp'
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_3.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=15ng_pQ72_tLiR5vtqYe6q8AaWqvaVwtH',
@@ -84,12 +84,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Mehndi-4/Screenshot 2026-07-07 at 11.06.46 PM.png',
-        '/Mehndi-4/Screenshot 2026-07-07 at 11.06.58 PM.png',
-        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.07 PM.png',
-        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.15 PM.png',
-        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.31 PM.png',
-        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.39 PM.png'
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.06.46 PM.webp',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.06.58 PM.webp',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.07 PM.webp',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.15 PM.webp',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.31 PM.webp',
+        '/Mehndi-4/Screenshot 2026-07-07 at 11.07.39 PM.webp'
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_4.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1irgadKjN7KHQQiV3eLtC9HUaMnFAPAtL',
@@ -102,12 +102,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.14 PM.png',
-        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.22 PM.png',
-        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.34 PM.png',
-        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.41 PM.png',
-        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.49 PM.png',
-        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.56 PM.png'
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.14 PM.webp',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.22 PM.webp',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.34 PM.webp',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.41 PM.webp',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.49 PM.webp',
+        '/Mehndi-5/Screenshot 2026-07-07 at 11.12.56 PM.webp'
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_5.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1TbgTa9rWP0p_58Ts2vwCJhL9zvNj2uYP',
@@ -120,12 +120,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Myra-2/Screenshot 2026-07-07 at 11.16.15 PM.png',
-        '/Myra-2/Screenshot 2026-07-07 at 11.16.48 PM.png',
-        '/Myra-2/Screenshot 2026-07-07 at 11.16.55 PM.png',
-        '/Myra-2/Screenshot 2026-07-07 at 11.17.03 PM.png',
-        '/Myra-2/Screenshot 2026-07-07 at 11.17.11 PM.png',
-        '/Myra-2/Screenshot 2026-07-07 at 11.17.18 PM.png'
+        '/Myra-2/Screenshot 2026-07-07 at 11.16.15 PM.webp',
+        '/Myra-2/Screenshot 2026-07-07 at 11.16.48 PM.webp',
+        '/Myra-2/Screenshot 2026-07-07 at 11.16.55 PM.webp',
+        '/Myra-2/Screenshot 2026-07-07 at 11.17.03 PM.webp',
+        '/Myra-2/Screenshot 2026-07-07 at 11.17.11 PM.webp',
+        '/Myra-2/Screenshot 2026-07-07 at 11.17.18 PM.webp'
       ],
       fileName: 'Wedding_Mayra_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1gmvCap7DJ6nStFPLVFL3P5-KGPbxe2Kb',
@@ -138,12 +138,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Haldi-1/Screenshot 2026-07-07 at 11.39.37 PM.png',
-        '/Haldi-1/Screenshot 2026-07-07 at 11.39.56 PM.png',
-        '/Haldi-1/Screenshot 2026-07-07 at 11.40.04 PM.png',
-        '/Haldi-1/Screenshot 2026-07-07 at 11.40.11 PM.png',
-        '/Haldi-1/Screenshot 2026-07-07 at 11.40.20 PM.png',
-        '/Haldi-1/Screenshot 2026-07-07 at 11.40.27 PM.png'
+        '/Haldi-1/Screenshot 2026-07-07 at 11.39.37 PM.webp',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.39.56 PM.webp',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.04 PM.webp',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.11 PM.webp',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.20 PM.webp',
+        '/Haldi-1/Screenshot 2026-07-07 at 11.40.27 PM.webp'
       ],
       fileName: 'Wedding_Haldi_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=10D4QuEEdFbaXfeBr_pttNTGHbe6VrU85',
@@ -156,12 +156,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Haldi-2/Screenshot 2026-07-07 at 11.41.51 PM.png',
-        '/Haldi-2/Screenshot 2026-07-07 at 11.42.00 PM.png',
-        '/Haldi-2/Screenshot 2026-07-07 at 11.42.06 PM.png',
-        '/Haldi-2/Screenshot 2026-07-07 at 11.42.19 PM.png',
-        '/Haldi-2/Screenshot 2026-07-07 at 11.42.26 PM.png',
-        '/Haldi-2/Screenshot 2026-07-07 at 11.42.32 PM.png'
+        '/Haldi-2/Screenshot 2026-07-07 at 11.41.51 PM.webp',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.00 PM.webp',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.06 PM.webp',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.19 PM.webp',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.26 PM.webp',
+        '/Haldi-2/Screenshot 2026-07-07 at 11.42.32 PM.webp'
       ],
       fileName: 'Wedding_Haldi_Pitch_Deck_2.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=15jKwe-dwBOvEEUGe8eVwTUrFdgD14kT-',
@@ -174,12 +174,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Haldi-3/Screenshot 2026-07-07 at 11.45.00 PM.png',
-        '/Haldi-3/Screenshot 2026-07-07 at 11.45.12 PM.png',
-        '/Haldi-3/Screenshot 2026-07-07 at 11.45.21 PM.png',
-        '/Haldi-3/Screenshot 2026-07-07 at 11.45.30 PM.png',
-        '/Haldi-3/Screenshot 2026-07-07 at 11.45.39 PM.png',
-        '/Haldi-3/Screenshot 2026-07-07 at 11.45.50 PM.png'
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.00 PM.webp',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.12 PM.webp',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.21 PM.webp',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.30 PM.webp',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.39 PM.webp',
+        '/Haldi-3/Screenshot 2026-07-07 at 11.45.50 PM.webp'
       ],
       fileName: 'Wedding_Haldi_Pitch_Deck_3.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1fd-JLq5lmT16bt0oHMCCEQaPPo7aUJ9u',
@@ -194,12 +194,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.32 PM.png',
-        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.43 PM.png',
-        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.53 PM.png',
-        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.00 PM.png',
-        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.08 PM.png',
-        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.14 PM.png'
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.32 PM.webp',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.43 PM.webp',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.55.53 PM.webp',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.00 PM.webp',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.08 PM.webp',
+        '/Shaadi-1/Screenshot 2026-07-07 at 9.56.14 PM.webp'
       ],
       fileName: 'Wedding_Shaadi_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1gm5XzjZlFcZbk8Cw_6n6rpndhmMjs9xw',
@@ -212,12 +212,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Shaadi-2/Screenshot 2026-07-07 at 10.31.26 PM.png',
-        '/Shaadi-2/Screenshot 2026-07-07 at 10.31.59 PM.png',
-        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.10 PM.png',
-        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.18 PM.png',
-        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.27 PM.png',
-        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.37 PM.png'
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.31.26 PM.webp',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.31.59 PM.webp',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.10 PM.webp',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.18 PM.webp',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.27 PM.webp',
+        '/Shaadi-2/Screenshot 2026-07-07 at 10.32.37 PM.webp'
       ],
       fileName: 'Wedding_Shaadi_Pitch_Deck_2.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1C6PAwWDFhx2PCra8G-pefNJDksqgfl9Z',
@@ -230,12 +230,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/sangeet-1/Screenshot 2026-07-07 at 11.21.55 PM.png',
-        '/sangeet-1/Screenshot 2026-07-07 at 11.22.03 PM.png',
-        '/sangeet-1/Screenshot 2026-07-07 at 11.22.11 PM.png',
-        '/sangeet-1/Screenshot 2026-07-07 at 11.22.19 PM.png',
-        '/sangeet-1/Screenshot 2026-07-07 at 11.22.28 PM.png',
-        '/sangeet-1/Screenshot 2026-07-07 at 11.22.35 PM.png'
+        '/sangeet-1/Screenshot 2026-07-07 at 11.21.55 PM.webp',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.03 PM.webp',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.11 PM.webp',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.19 PM.webp',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.28 PM.webp',
+        '/sangeet-1/Screenshot 2026-07-07 at 11.22.35 PM.webp'
       ],
       fileName: 'Wedding_Sangeet_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=17NV8JNyzU7nRrBb0xQ5-UJLN8OTr_sdp',
@@ -248,12 +248,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Sangeet-2/Screenshot 2026-07-07 at 11.23.56 PM.png',
-        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.05 PM.png',
-        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.29 PM.png',
-        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.40 PM.png',
-        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.50 PM.png',
-        '/Sangeet-2/Screenshot 2026-07-07 at 11.25.05 PM.png'
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.23.56 PM.webp',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.05 PM.webp',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.29 PM.webp',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.40 PM.webp',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.24.50 PM.webp',
+        '/Sangeet-2/Screenshot 2026-07-07 at 11.25.05 PM.webp'
       ],
       fileName: 'Wedding_Sangeet_Pitch_Deck_2.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1k0wb04dUtalOZ4drIKcfQ9ygkZtbb7ng',
@@ -266,12 +266,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/Sangeet-3/Screenshot 2026-07-07 at 11.28.44 PM.png',
-        '/Sangeet-3/Screenshot 2026-07-07 at 11.28.52 PM.png',
-        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.00 PM.png',
-        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.22 PM.png',
-        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.30 PM.png',
-        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.37 PM.png'
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.28.44 PM.webp',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.28.52 PM.webp',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.00 PM.webp',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.22 PM.webp',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.30 PM.webp',
+        '/Sangeet-3/Screenshot 2026-07-07 at 11.29.37 PM.webp'
       ],
       fileName: 'Wedding_Sangeet_Pitch_Deck_3.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1Te9kD89UKpehjtLFEmKNqz3chrHa2xH_',
@@ -284,12 +284,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/sangeet-4/Screenshot 2026-07-07 at 11.34.07 PM.png',
-        '/sangeet-4/Screenshot 2026-07-07 at 11.34.16 PM.png',
-        '/sangeet-4/Screenshot 2026-07-07 at 11.34.24 PM.png',
-        '/sangeet-4/Screenshot 2026-07-07 at 11.34.33 PM.png',
-        '/sangeet-4/Screenshot 2026-07-07 at 11.34.39 PM.png',
-        '/sangeet-4/Screenshot 2026-07-07 at 11.34.50 PM.png'
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.07 PM.webp',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.16 PM.webp',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.24 PM.webp',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.33 PM.webp',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.39 PM.webp',
+        '/sangeet-4/Screenshot 2026-07-07 at 11.34.50 PM.webp'
       ],
       fileName: 'Wedding_Sangeet_Pitch_Deck_4.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1AY66PCBnQ_HJrzOBpLZ1eyScH63VX-rj',
@@ -302,12 +302,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/reception-1/Screenshot 2026-07-07 at 11.49.52 PM.png',
-        '/reception-1/Screenshot 2026-07-07 at 11.49.58 PM.png',
-        '/reception-1/Screenshot 2026-07-07 at 11.50.06 PM.png',
-        '/reception-1/Screenshot 2026-07-07 at 11.50.14 PM.png',
-        '/reception-1/Screenshot 2026-07-07 at 11.50.35 PM.png',
-        '/reception-1/Screenshot 2026-07-07 at 11.50.42 PM.png'
+        '/reception-1/Screenshot 2026-07-07 at 11.49.52 PM.webp',
+        '/reception-1/Screenshot 2026-07-07 at 11.49.58 PM.webp',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.06 PM.webp',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.14 PM.webp',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.35 PM.webp',
+        '/reception-1/Screenshot 2026-07-07 at 11.50.42 PM.webp'
       ],
       fileName: 'Wedding_Reception_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=14cVNo_TwwtLALxWTKbSFvYXU297fSK1Q',
@@ -320,12 +320,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/reception-2/Screenshot 2026-07-07 at 11.52.17 PM.png',
-        '/reception-2/Screenshot 2026-07-07 at 11.52.24 PM.png',
-        '/reception-2/Screenshot 2026-07-07 at 11.52.29 PM.png',
-        '/reception-2/Screenshot 2026-07-07 at 11.52.35 PM.png',
-        '/reception-2/Screenshot 2026-07-07 at 11.52.41 PM.png',
-        '/reception-2/Screenshot 2026-07-07 at 11.52.47 PM.png'
+        '/reception-2/Screenshot 2026-07-07 at 11.52.17 PM.webp',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.24 PM.webp',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.29 PM.webp',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.35 PM.webp',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.41 PM.webp',
+        '/reception-2/Screenshot 2026-07-07 at 11.52.47 PM.webp'
       ],
       fileName: 'Wedding_Reception_Pitch_Deck_2.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=100rHJxjoml8cMcsN2PsCkPTx3iWPhB0I',
@@ -338,12 +338,12 @@ const defaultTemplates = {
       price: 20000,
       purchased: false,
       slides: [
-        '/reception-3/Screenshot 2026-07-07 at 11.55.22 PM.png',
-        '/reception-3/Screenshot 2026-07-07 at 11.55.29 PM.png',
-        '/reception-3/Screenshot 2026-07-07 at 11.55.41 PM.png',
-        '/reception-3/Screenshot 2026-07-07 at 11.55.48 PM.png',
-        '/reception-3/Screenshot 2026-07-07 at 11.55.55 PM.png',
-        '/reception-3/Screenshot 2026-07-07 at 11.56.02 PM.png'
+        '/reception-3/Screenshot 2026-07-07 at 11.55.22 PM.webp',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.29 PM.webp',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.41 PM.webp',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.48 PM.webp',
+        '/reception-3/Screenshot 2026-07-07 at 11.55.55 PM.webp',
+        '/reception-3/Screenshot 2026-07-07 at 11.56.02 PM.webp'
       ],
       fileName: 'Wedding_Reception_Pitch_Deck_3.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1BNftLDLPFOCGZ5K6I3i60J-d7hbmwbAi',
@@ -368,10 +368,36 @@ export default function PlannerLibrary({ onClose }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [previewSlideIndex, setPreviewSlideIndex] = useState(0);
   const [downloadingId, setDownloadingId] = useState(null);
+  const [viewPurchasedOnly, setViewPurchasedOnly] = useState(false);
+
+  // Cart states
+  const [cart, setCart] = useState([]);
+  const [showCartModal, setShowCartModal] = useState(false);
   
   // Checkout & Upload Dialog states
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
+
+  const isInCart = (id) => cart.some(item => item.id === id);
+
+  const handleToggleCart = (template) => {
+    if (template.purchased) {
+      toast.error("You have already purchased this template!");
+      return;
+    }
+    const exists = cart.some(item => item.id === template.id);
+    if (exists) {
+      toast.success(`Removed "${template.title}" from cart.`);
+      setCart(prev => prev.filter(item => item.id !== template.id));
+    } else {
+      toast.success(`Added "${template.title}" to cart.`);
+      setCart(prev => [...prev, template]);
+    }
+  };
+
+  const cartSubtotal = cart.reduce((sum, item) => sum + item.price, 0);
+  const cartGst = Math.round(cartSubtotal * 0.18);
+  const cartTotal = cartSubtotal + cartGst;
 
   // New PPT Form states
   const [newTitle, setNewTitle] = useState('');
@@ -534,6 +560,116 @@ export default function PlannerLibrary({ onClose }) {
     }
   };
 
+  const handlePurchaseCart = async () => {
+    if (cart.length === 0) return;
+    try {
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        toast.error("Razorpay SDK failed to load. Are you online?");
+        return;
+      }
+
+      setPurchasing(true);
+      toast.loading("Initializing payment...", { id: "payment" });
+      
+      const templateIds = cart.map(item => item.id).join(',');
+      const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+      const totalWithGst = Math.round(totalPrice * 1.18);
+
+      const orderData = await paymentAPI.createLibraryOrder({
+        templateId: templateIds,
+        price: totalWithGst,
+      });
+
+      if (!orderData || !orderData.orderId) {
+        toast.error("Server error: Could not create order", { id: "payment" });
+        setPurchasing(false);
+        return;
+      }
+
+      toast.dismiss("payment");
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "LoversAI Platform",
+        description: `Unlock ${cart.length} Templates`,
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          try {
+            toast.loading("Verifying payment...", { id: "verify" });
+            const verifyRes = await paymentAPI.verifyLibraryPayment({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              templateId: templateIds,
+            });
+
+            if (verifyRes.success) {
+              toast.success("Payment successful! PPT Decks unlocked.", {
+                id: "verify",
+              });
+              
+              const purchasedIds = templateIds.split(',');
+              // Update template purchased state in our lists
+              setTemplates(prev => {
+                const updated = { ...prev };
+                Object.keys(updated).forEach(cat => {
+                  updated[cat] = updated[cat].map(t => 
+                    purchasedIds.includes(t.id) ? { ...t, purchased: true } : t
+                  );
+                });
+                return updated;
+              });
+
+              // Clear cart and close modal
+              setCart([]);
+              setShowCartModal(false);
+            } else {
+              toast.error("Payment verification failed", { id: "verify" });
+            }
+          } catch (verifyErr) {
+            console.error("Verification error", verifyErr);
+            toast.error("Server connection lost during verification", {
+              id: "verify",
+            });
+          } finally {
+            setPurchasing(false);
+          }
+        },
+        prefill: {
+          name: currentUser?.fullName || "Valued User",
+          email: currentUser?.email || "user@loversai.com",
+        },
+        theme: {
+          color: "#b89f79",
+        },
+        modal: {
+          ondismiss: function() {
+            setPurchasing(false);
+          }
+        }
+      };
+
+      const razorpayWindow = new window.Razorpay(options);
+      razorpayWindow.on("payment.failed", function (res) {
+        console.error(res.error);
+        toast.error(res.error.description || "Payment failed");
+        setPurchasing(false);
+      });
+
+      razorpayWindow.open();
+    } catch (error) {
+      console.error("Error during purchase:", error);
+      toast.error(
+        `Failed to initiate purchase: ${error.response?.data?.error || error.message}`,
+        { id: "payment" }
+      );
+      setPurchasing(false);
+    }
+  };
+
   // Mock PPT Download
   const handleDownload = async (template) => {
     if (!template.purchased) {
@@ -624,8 +760,10 @@ export default function PlannerLibrary({ onClose }) {
     toast.success('PPT template uploaded successfully!');
   };
 
-  const activeAssets = templates[activeFolder] || [];
-  const isSingle = activeAssets.length === 1;
+  const activeAssets = viewPurchasedOnly 
+    ? Object.values(templates).flat().filter(t => t.purchased)
+    : (templates[activeFolder] || []);
+  const isSingle = true;
 
   return (
     <div className="space-y-4 animate-fadeInUp">
@@ -664,16 +802,47 @@ export default function PlannerLibrary({ onClose }) {
               Upload PPT
             </button>
           )}
-          <div className="text-xs font-medium text-loverai-gold bg-loverai-gold/10 border border-loverai-gold/20 px-3.5 py-1.5 rounded-full">
+          {/* Cart Button */}
+          <button
+            type="button"
+            onClick={() => setShowCartModal(true)}
+            className="relative rounded-full px-5 py-2 text-xs font-semibold bg-white/5 border border-white/10 hover:border-loverai-gold hover:text-loverai-gold transition active:scale-95 text-white flex items-center gap-1.5"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Cart
+            {cart.length > 0 && (
+              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-loverai-gold text-loverai-deep text-[10px] font-bold shadow-lg animate-scaleIn">
+                {cart.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setViewPurchasedOnly(prev => !prev);
+              setSelectedTemplate(null);
+            }}
+            className={`rounded-full px-5 py-2 text-xs font-semibold border transition active:scale-95 flex items-center gap-1.5 cursor-pointer ${
+              viewPurchasedOnly
+                ? 'bg-loverai-gold text-loverai-deep border-loverai-gold shadow-lg shadow-loverai-gold/10 font-bold'
+                : 'bg-white/5 border-white/10 text-white hover:border-loverai-gold hover:text-loverai-gold'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+            </svg>
             Company Store
-          </div>
+          </button>
         </div>
       </div>
 
       {/* Folders Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {Object.keys(templates).map((folderName) => {
-          const isActive = activeFolder === folderName;
+          const isActive = !viewPurchasedOnly && activeFolder === folderName;
           const count = templates[folderName].length;
 
           return (
@@ -681,6 +850,7 @@ export default function PlannerLibrary({ onClose }) {
               key={folderName}
               onClick={() => {
                 setActiveFolder(folderName);
+                setViewPurchasedOnly(false);
                 setSelectedTemplate(null);
               }}
               className={`relative text-left rounded-2xl p-4 border transition-all duration-300 group hover-lift ${
@@ -720,26 +890,51 @@ export default function PlannerLibrary({ onClose }) {
       <div className="glass-card rounded-2xl border border-white/5 p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-loverai-gold" />
+            <span className={`w-1.5 h-1.5 rounded-full bg-loverai-gold ${viewPurchasedOnly ? 'animate-pulse' : ''}`} />
             <h2 className="text-lg font-medium text-white font-heading">
-              {activeFolder} PPT Templates
+              {viewPurchasedOnly ? 'Company Store • Purchased Decks' : `${activeFolder} PPT Templates`}
             </h2>
           </div>
-          <span className="text-[10px] text-white/30 bg-white/5 px-2.5 py-1 rounded-md">
-            ₹20,000 / Deck
-          </span>
+          {viewPurchasedOnly ? (
+            <span className="text-[10px] text-loverai-gold bg-loverai-gold/10 px-2.5 py-1 rounded-md border border-loverai-gold/20 font-bold">
+              {activeAssets.length} {activeAssets.length === 1 ? 'Deck' : 'Decks'} Unlocked
+            </span>
+          ) : (
+            <span className="text-[10px] text-white/30 bg-white/5 px-2.5 py-1 rounded-md">
+              ₹23,600 / Deck (Incl. GST)
+            </span>
+          )}
         </div>
 
         {activeAssets.length === 0 ? (
-          <div className="text-center py-16 text-white/30 rounded-2xl bg-black/10 border border-white/5 p-8">
-            <svg className="w-12 h-12 mx-auto mb-3 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="font-heading text-lg text-white/50 mb-1" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>No Templates Uploaded</p>
-            <p className="text-xs text-white/20">Decks will be added to the {activeFolder} catalog soon.</p>
-          </div>
+          viewPurchasedOnly ? (
+            <div className="text-center py-20 text-white/35 rounded-2xl bg-black/10 border border-white/5 p-8 max-w-lg mx-auto space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/20">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <p className="font-heading text-xl text-white/70" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>Your Company Store is Empty</p>
+              <p className="text-xs text-white/30 max-w-sm mx-auto">Templates you purchase will automatically be copied here for direct download access at any time.</p>
+              <button
+                type="button"
+                onClick={() => setViewPurchasedOnly(false)}
+                className="px-6 py-2.5 bg-loverai-gold hover:brightness-105 text-[#201913] rounded-xl text-xs font-bold transition shadow-lg cursor-pointer"
+              >
+                Browse Pitch Decks
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-16 text-white/30 rounded-2xl bg-black/10 border border-white/5 p-8">
+              <svg className="w-12 h-12 mx-auto mb-3 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p className="font-heading text-lg text-white/50 mb-1" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>No Templates Uploaded</p>
+              <p className="text-xs text-white/20">Decks will be added to the {activeFolder} catalog soon.</p>
+            </div>
+          )
         ) : (
-          <div className={`grid gap-6 ${isSingle ? 'grid-cols-1 max-w-4xl mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}>
+          <div className="grid grid-cols-1 max-w-5xl mx-auto gap-6">
             {activeAssets.map((asset) => (
               <div
                 key={asset.id}
@@ -755,15 +950,14 @@ export default function PlannerLibrary({ onClose }) {
                   <img
                     src={asset.slides[0]}
                     alt={asset.title}
-                    className={`w-full h-full object-contain group-hover:scale-102 transition-transform duration-500 ${
-                      !asset.purchased ? 'filter brightness-[0.7]' : ''
-                    }`}
+                    className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500 filter brightness-[1.12] saturate-[1.08] contrast-[1.02]"
                   />
                   
                   {!asset.purchased && (
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center select-none z-10 overflow-hidden bg-black/10">
-                      <div className="text-white/[0.42] font-heading font-black text-[clamp(1.2rem,4vw,2rem)] uppercase tracking-[0.3em] -rotate-12 drop-shadow-[0_3px_6px_rgba(0,0,0,0.9)]">
-                        LoversAI
+                      <div className="text-white/50 font-heading font-black text-xs sm:text-sm uppercase tracking-[0.2em] -rotate-12 drop-shadow-[0_2px_5px_rgba(0,0,0,0.95)] text-center leading-tight">
+                        <div>@Lovers AI</div>
+                        <div className="text-[9px] sm:text-[10px] tracking-[0.1em] mt-1 font-mono opacity-80">9821640951</div>
                       </div>
                     </div>
                   )}
@@ -797,9 +991,9 @@ export default function PlannerLibrary({ onClose }) {
 
                   <div className="flex items-center justify-between gap-3 pt-2">
                     <div>
-                      <p className="text-[9px] text-white/30 uppercase tracking-widest leading-none">Price</p>
+                      <p className="text-[9px] text-white/30 uppercase tracking-widest leading-none">Price (Incl. GST)</p>
                       <p className={`font-semibold text-loverai-gold mt-1 leading-none ${isSingle ? 'text-lg' : 'text-sm'}`}>
-                        {asset.purchased ? 'Unlocked' : `\u20B9${asset.price.toLocaleString('en-IN')}`}
+                        {asset.purchased ? 'Unlocked' : `\u20B9${Math.round(asset.price * 1.18).toLocaleString('en-IN')}`}
                       </p>
                     </div>
 
@@ -820,15 +1014,30 @@ export default function PlannerLibrary({ onClose }) {
                         Download
                       </button>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleOpenPreview(asset)}
-                        className={`flex items-center gap-1.5 font-semibold rounded-xl border border-white/10 text-white bg-white/5 hover:border-loverai-gold hover:text-loverai-gold hover:bg-loverai-gold/5 transition-all active:scale-95 ${
-                          isSingle ? 'text-sm py-2.5 px-5' : 'text-xs py-2 px-4'
-                        }`}
-                      >
-                        Preview & Buy
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenPreview(asset)}
+                          className={`flex items-center gap-1 font-semibold rounded-xl border border-white/10 text-white bg-white/5 hover:border-loverai-gold hover:text-loverai-gold transition-all active:scale-95 ${
+                            isSingle ? 'text-sm py-2.5 px-4' : 'text-xs py-2 px-3'
+                          }`}
+                        >
+                          Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleCart(asset)}
+                          className={`flex items-center gap-1 font-semibold rounded-xl transition-all active:scale-95 ${
+                            isSingle ? 'text-sm py-2.5 px-4' : 'text-xs py-2 px-3'
+                          } ${
+                            isInCart(asset.id)
+                              ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
+                              : 'bg-loverai-gold text-loverai-deep hover:bg-white hover:text-black'
+                          }`}
+                        >
+                          {isInCart(asset.id) ? 'Remove' : 'Add to Cart'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -841,19 +1050,24 @@ export default function PlannerLibrary({ onClose }) {
       {/* Lightbox / Slide Preview Modal */}
       {selectedTemplate && createPortal(
         <div 
-          className="fixed inset-0 bg-black/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center p-4 select-none animate-fadeIn"
+          className="fixed inset-0 bg-[#080605] z-[9999] flex flex-col select-none animate-fadeIn overflow-hidden"
           onClick={() => setSelectedTemplate(null)}
         >
           {/* Top Bar */}
-          <div className="w-full max-w-6xl mx-auto flex items-center justify-between mb-4 px-4 z-50">
-            <div className="text-white/80 font-heading text-lg">
-              {selectedTemplate.title} {selectedTemplate.slides.length > 1 && <span className="text-white/30 text-xs font-light">(Slide {previewSlideIndex + 1}/{selectedTemplate.slides.length})</span>}
+          <div className="w-full flex items-center justify-between py-4 px-6 md:px-10 border-b border-white/5 z-50 bg-[#080605]">
+            <div className="text-white/90 font-heading text-xl flex items-center gap-3">
+              <span>{selectedTemplate.title}</span>
+              {selectedTemplate.slides.length > 1 && (
+                <span className="text-white/40 text-sm font-body font-light">
+                  (Slide {previewSlideIndex + 1} of {selectedTemplate.slides.length})
+                </span>
+              )}
             </div>
             
             <button 
               type="button"
               onClick={() => setSelectedTemplate(null)}
-              className="w-10 h-10 rounded-full border border-white/15 bg-white/5 hover:bg-white/15 flex items-center justify-center text-white transition shadow-lg"
+              className="w-10 h-10 rounded-full border border-white/15 bg-white/5 hover:bg-white/15 flex items-center justify-center text-white transition shadow-lg cursor-pointer"
               aria-label="Close template view"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -862,55 +1076,61 @@ export default function PlannerLibrary({ onClose }) {
             </button>
           </div>
 
-          {/* Core Content: Left Carousel + Right Purchase Details */}
+          {/* Core Content: Left Carousel (main focus) + Right Purchase Details */}
           <div 
-            className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 bg-[#16100D]/80 border border-white/5 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md"
+            className="w-full flex-1 grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
             {/* Slide Preview Grid/Carousel */}
-            <div className="flex flex-col gap-4">
-              <div className="relative aspect-[4/3] bg-black/40 border border-white/5 rounded-2xl overflow-hidden flex items-center justify-center">
+            <div className="flex flex-col justify-center p-6 md:p-10 gap-4 h-full overflow-hidden bg-black">
+              <div className="relative w-full flex-1 bg-black/20 rounded-2xl overflow-hidden flex items-center justify-center border border-white/5">
                 {/* Prev Arrow */}
                 {selectedTemplate.slides.length > 1 && (
                   <button
                     type="button"
                     onClick={() => setPreviewSlideIndex(p => (p - 1 + selectedTemplate.slides.length) % selectedTemplate.slides.length)}
-                    className="absolute left-3 z-20 w-10 h-10 rounded-full border border-white/10 bg-black/50 hover:bg-black/75 text-white flex items-center justify-center transition active:scale-95"
+                    className="absolute left-4 z-20 w-12 h-12 rounded-full border border-white/10 bg-black/60 hover:bg-black/85 text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-lg"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
                 )}
 
-                {/* Selected Slide */}
+                {/* Selected Slide (Made bright with brightness-112 and saturate-108) */}
                 <img
                   src={selectedTemplate.slides[previewSlideIndex]}
                   alt={`Slide ${previewSlideIndex + 1}`}
-                  className={`w-full h-full object-contain select-none transition duration-300 ${
+                  className={`max-w-full max-h-[70vh] object-contain select-none transition duration-300 ${
                     !selectedTemplate.purchased
                       ? (previewSlideIndex % 2 === 1)
                         ? 'filter blur-[12px] brightness-[0.35] pointer-events-none'
-                        : 'filter brightness-[0.68]'
-                      : ''
+                        : 'filter brightness-[1.12] saturate-[1.08] contrast-[1.02]'
+                      : 'filter brightness-[1.12] saturate-[1.08] contrast-[1.02]'
                   }`}
                 />
 
                 {/* Watermark Overlay for Unpurchased Templates */}
                 {!selectedTemplate.purchased && (
-                  <div className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-2 p-6 overflow-hidden select-none z-10 bg-black/15">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div 
-                        key={i} 
-                        className={`flex items-center justify-center uppercase -rotate-12 transition-all duration-300 ${
-                          (previewSlideIndex % 2 === 0) 
-                            ? 'text-white/[0.42] font-heading font-black text-lg sm:text-2xl tracking-[0.28em] drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]' 
-                            : 'text-white/[0.12] font-heading text-sm sm:text-base tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'
-                        }`}
-                      >
-                        LoversAI
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center select-none z-10 overflow-hidden bg-black/5">
+                    <div 
+                      className="uppercase -rotate-12 font-heading font-black tracking-[0.25em] text-white/50 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] select-none text-center"
+                    >
+                      <div className={
+                        (previewSlideIndex % 2 === 0) 
+                          ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl opacity-100 font-extrabold' 
+                          : 'text-2xl sm:text-4xl md:text-5xl opacity-45 font-bold'
+                      }>
+                        @Lovers AI
                       </div>
-                    ))}
+                      <div className={`font-mono tracking-[0.15em] mt-2 opacity-95 ${
+                        (previewSlideIndex % 2 === 0) 
+                          ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' 
+                          : 'text-lg sm:text-xl md:text-2xl'
+                      }`}>
+                        9821640951
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -932,9 +1152,9 @@ export default function PlannerLibrary({ onClose }) {
                   <button
                     type="button"
                     onClick={() => setPreviewSlideIndex(p => (p + 1) % selectedTemplate.slides.length)}
-                    className="absolute right-3 z-20 w-10 h-10 rounded-full border border-white/10 bg-black/50 hover:bg-black/75 text-white flex items-center justify-center transition active:scale-95"
+                    className="absolute right-4 z-20 w-12 h-12 rounded-full border border-white/10 bg-black/60 hover:bg-black/85 text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-lg"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
@@ -949,7 +1169,7 @@ export default function PlannerLibrary({ onClose }) {
                       key={idx}
                       type="button"
                       onClick={() => setPreviewSlideIndex(idx)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer ${
                         previewSlideIndex === idx ? 'bg-loverai-gold scale-110 w-6' : 'bg-white/20'
                       }`}
                     />
@@ -958,97 +1178,85 @@ export default function PlannerLibrary({ onClose }) {
               )}
             </div>
 
-            {/* Template Side Purchase Panel */}
-            <div className="flex flex-col justify-between py-2 text-left gap-6">
-              <div className="space-y-4">
-                <div>
-                  <span className="text-[10px] text-loverai-gold/70 bg-loverai-gold/5 px-2 py-0.5 rounded-full border border-loverai-gold/10 font-bold uppercase tracking-wider">
-                    Exclusive Presentation Pitch
-                  </span>
-                  <h2 className="text-white text-2xl font-semibold font-heading mt-2" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
-                    {selectedTemplate.title}
-                  </h2>
-                </div>
-
-                <p className="text-sm text-white/60 leading-relaxed font-light">
-                  {selectedTemplate.description}
-                </p>
-
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold text-white/80">Features Included:</h4>
-                  <ul className="space-y-1.5 text-xs text-white/50">
-                    <li className="flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-loverai-gold" />
-                      Fully designed slides with high-quality previews
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-loverai-gold" />
-                      Full Deck contains high-quality images
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-loverai-gold" />
-                      Licensed for client pitches and presentations
-                    </li>
-                  </ul>
-                </div>
+            {/* Template Side Purchase Panel (Clean & Minimal) */}
+            <div className="flex flex-col justify-center p-6 md:p-10 text-left gap-6 border-t lg:border-t-0 lg:border-l border-white/5 bg-[#212121]">
+              <div className="space-y-3">
+                <span className="text-[9px] text-loverai-gold/70 bg-loverai-gold/5 px-2 py-0.5 rounded-full border border-loverai-gold/10 font-bold uppercase tracking-widest">
+                  PPT Deck Template
+                </span>
+                <h2 className="text-white text-3xl font-semibold font-heading leading-tight" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
+                  {selectedTemplate.title}
+                </h2>
+                <p className="text-xs text-white/40 leading-relaxed">Includes full presentation deck with editable layouts and premium placeholders.</p>
               </div>
 
               <div className="space-y-4">
                 {!selectedTemplate.purchased ? (
-                  <div className="border-t border-white/5 pt-4 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-white/50 font-light">
-                      <span>Base Price</span>
-                      <span>₹{selectedTemplate.price.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-white/50 font-light">
-                      <span>GST (18%)</span>
-                      <span>₹{(selectedTemplate.price * 0.18).toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-white/5 pt-2">
-                      <span className="text-sm text-white/70 font-semibold">Total Amount</span>
-                      <span className="text-xl font-bold text-loverai-gold">
+                  <div className="pt-4 border-t border-white/5 space-y-1">
+                    <span className="text-[10px] text-white/40 uppercase tracking-wider font-medium">Total Amount</span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-loverai-gold">
                         ₹{(selectedTemplate.price * 1.18).toLocaleString('en-IN')}
                       </span>
+                      <span className="text-[10px] text-white/35">(Incl. 18% GST)</span>
                     </div>
                   </div>
                 ) : (
-                  <div className="border-t border-white/5 pt-4 flex items-center justify-between">
+                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                     <span className="text-sm text-white/50 font-light">Status</span>
                     <span className="text-xl font-bold text-loverai-gold">Unlocked</span>
                   </div>
                 )}
 
-                {selectedTemplate.purchased ? (
-                  <button
-                    type="button"
-                    disabled={downloadingId === selectedTemplate.id}
-                    onClick={() => handleDownload(selectedTemplate)}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-loverai-gold text-[#201913] font-bold text-sm hover:brightness-105 active:scale-98 transition duration-200"
-                  >
-                    <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download PPTX
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={purchasing}
-                    onClick={() => handlePurchaseTemplate(selectedTemplate)}
-                    className={`w-full py-3 rounded-xl bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] font-bold text-sm hover:brightness-115 active:scale-98 transition duration-200 flex items-center justify-center gap-2 ${
-                      purchasing ? 'opacity-50 cursor-wait' : ''
-                    }`}
-                  >
-                    {purchasing ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      `Pay ₹${(selectedTemplate.price * 1.18).toLocaleString('en-IN')} (Incl. 18% GST)`
-                    )}
-                  </button>
-                )}
+                <div className="pt-2">
+                  {selectedTemplate.purchased ? (
+                    <button
+                      type="button"
+                      disabled={downloadingId === selectedTemplate.id}
+                      onClick={() => handleDownload(selectedTemplate)}
+                      className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-loverai-gold text-[#201913] font-bold text-sm hover:brightness-105 active:scale-98 transition duration-200 cursor-pointer shadow-lg"
+                    >
+                      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      Download PPTX
+                    </button>
+                  ) : (
+                    <div className="flex flex-col gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleCart(selectedTemplate)}
+                        className={`w-full py-4 rounded-xl font-bold text-sm transition duration-200 border cursor-pointer flex items-center justify-center gap-2 ${
+                          isInCart(selectedTemplate.id)
+                            ? 'border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                            : 'border-white/10 bg-white/5 text-white hover:border-loverai-gold hover:text-loverai-gold hover:bg-loverai-gold/5'
+                        }`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {isInCart(selectedTemplate.id) ? 'Remove from Cart' : 'Add to Cart'}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={purchasing}
+                        onClick={() => handlePurchaseTemplate(selectedTemplate)}
+                        className={`w-full py-4 rounded-xl bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] font-bold text-sm hover:brightness-115 active:scale-98 transition duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-lg ${
+                          purchasing ? 'opacity-50 cursor-wait' : ''
+                        }`}
+                      >
+                        {purchasing ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          `Buy Now`
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1183,6 +1391,180 @@ export default function PlannerLibrary({ onClose }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Cart Modal / Drawer */}
+      {showCartModal && (
+        <div 
+          className="fixed inset-0 z-[99999] overflow-hidden"
+          role="dialog" 
+          aria-modal="true"
+        >
+          {/* Backdrop Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 animate-fadeIn"
+            onClick={() => setShowCartModal(false)}
+          />
+
+          {/* Slide-over Panel */}
+          <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+            <div 
+              className="w-screen max-w-md bg-[#120D0A] border-l border-white/10 shadow-2xl flex flex-col justify-between animate-slideDrawer overflow-hidden text-left"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between bg-[#1A1310]/40">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <svg className="w-6 h-6 text-loverai-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    {cart.length > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-loverai-gold text-loverai-deep font-bold text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center border border-[#120D0A] shadow-md">
+                        {cart.length}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-xl text-white tracking-wide">Shopping Bag</h3>
+                    <p className="text-[10px] text-white/40 mt-0.5 tracking-wide">Review & unlock premium templates</p>
+                  </div>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setShowCartModal(false)}
+                  className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition cursor-pointer active:scale-95 border border-white/5"
+                  aria-label="Close cart"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Cart Content */}
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 scrollbar-thin">
+                {cart.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
+                    <div className="w-16 h-16 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/20 mb-2">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-white font-medium text-sm">Your bag is currently empty</p>
+                      <p className="text-xs text-white/35 mt-1 max-w-[200px] mx-auto">Explore our design library to add premium pitch decks to your cart.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowCartModal(false)}
+                      className="px-6 py-2.5 bg-loverai-gold hover:brightness-105 text-[#201913] rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-lg active:scale-95"
+                    >
+                      Start Exploring Decks
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {cart.map((item) => (
+                      <div 
+                        key={item.id}
+                        className="group flex gap-4 p-4 bg-white/[0.02] hover:bg-white/[0.04] rounded-2xl border border-white/5 transition-all duration-300"
+                      >
+                        {/* Slide Image */}
+                        <div className="w-24 aspect-[16/9] bg-black rounded-lg overflow-hidden shrink-0 border border-white/5 relative">
+                          <img src={item.slides[0]} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-black/10" />
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                          <div>
+                            <span className="text-[9px] text-loverai-gold/60 font-bold uppercase tracking-wider font-body">PPT Deck</span>
+                            <h4 className="text-xs font-semibold text-white/90 truncate mt-0.5" title={item.title}>{item.title}</h4>
+                          </div>
+                          <p className="text-xs font-bold text-loverai-gold mt-1">₹{item.price.toLocaleString('en-IN')}</p>
+                        </div>
+                        
+                        {/* Delete Button */}
+                        <div className="flex items-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleCart(item)}
+                            className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-red-400 hover:border-red-500/20 transition active:scale-95 cursor-pointer hover:bg-red-500/5"
+                            title="Remove item"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Summary & Checkout */}
+              {cart.length > 0 && (
+                <div className="bg-[#0B0806] border-t border-white/5 p-6 md:p-8 space-y-6">
+                  {/* Pricing Details */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs text-white/40 font-light">
+                      <span>Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
+                      <span className="font-mono text-white/70">₹{cartSubtotal.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-white/40 font-light">
+                      <span>GST (18%)</span>
+                      <span className="font-mono text-white/70">₹{cartGst.toLocaleString('en-IN')}</span>
+                    </div>
+                    
+                    <div className="h-px bg-white/5 my-2" />
+                    
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm font-medium text-white/80">Total Amount</span>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold text-loverai-gold font-mono">
+                          ₹{cartTotal.toLocaleString('en-IN')}
+                        </span>
+                        <p className="text-[9px] text-white/30 mt-0.5">Includes 18% GST</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="space-y-4">
+                    <button 
+                      type="button"
+                      disabled={purchasing}
+                      onClick={handlePurchaseCart}
+                      className="w-full py-4 rounded-xl bg-loverai-gold hover:brightness-105 text-[#201913] font-bold text-sm transition duration-200 active:scale-98 flex items-center justify-center gap-2.5 cursor-pointer shadow-lg shadow-loverai-gold/5"
+                    >
+                      {purchasing ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-[#201913]/30 border-t-[#201913] rounded-full animate-spin" />
+                          Securing Checkout...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          Pay & Unlock Access
+                        </>
+                      )}
+                    </button>
+                    
+                    <div className="flex items-center justify-center gap-1.5 text-white/20 text-[10px] uppercase tracking-wider font-semibold">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      Secure Checkout by Razorpay
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -177,7 +177,7 @@ export default function TermsAndConditions() {
 
   const pageStyle = {
     minHeight: "100vh",
-    backgroundImage: "linear-gradient(to bottom, rgba(20, 12, 10, 0.75) 0%, rgba(10, 5, 4, 0.95) 100%), url('/images/signup.png')",
+    backgroundImage: "linear-gradient(to bottom, rgba(20, 12, 10, 0.75) 0%, rgba(10, 5, 4, 0.95) 100%), url('/images/signup.webp')",
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundAttachment: "fixed",

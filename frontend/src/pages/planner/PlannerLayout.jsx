@@ -169,7 +169,7 @@ export default function PlannerLayout() {
     <div
       className="min-h-screen loverai-page-bg flex text-white font-body"
       style={{
-        backgroundImage: "url('/images/signup.png')",
+        backgroundImage: "url('/images/signup.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: "fixed",

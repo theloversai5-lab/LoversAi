@@ -234,25 +234,32 @@ router.post('/library/verify', protect, async (req, res) => {
       user.purchasedTemplates = [];
     }
     
-    if (!user.purchasedTemplates.includes(templateId)) {
-      user.purchasedTemplates.push(templateId);
+    const templateIds = templateId.split(',').map(id => id.trim()).filter(Boolean);
+    for (const id of templateIds) {
+      if (!user.purchasedTemplates.includes(id)) {
+        user.purchasedTemplates.push(id);
+      }
     }
     
     user.lastPaymentStatus = 'success';
     user.lastPaymentAt = new Date();
     await user.save();
 
-    console.log(`✅ Template ${templateId} purchased successfully by ${user.email}`);
+    console.log(`✅ Templates [${templateIds.join(', ')}] purchased successfully by ${user.email}`);
 
     // Send Invoice Email via Resend
     if (resend) {
       try {
         let paymentMethod = 'Razorpay Online';
+        let amountStr = '₹23,600';
         if (razorpay) {
           try {
             const payment = await razorpay.payments.fetch(razorpay_payment_id);
             if (payment && payment.method) {
               paymentMethod = payment.method.toUpperCase();
+            }
+            if (payment && payment.amount) {
+              amountStr = `₹${(payment.amount / 100).toLocaleString('en-IN')}`;
             }
           } catch (fetchErr) {
             console.error("Failed to fetch payment details from Razorpay:", fetchErr);
@@ -280,19 +287,20 @@ router.post('/library/verify', protect, async (req, res) => {
           'ppt-sh2': 'Shaadi Royal Floral Pitch Deck',
           'ppt-cl1': 'Carnival Lunch Pitch Deck'
         };
-        const templateName = templateNames[templateId] || 'Premium Pitch Deck';
+        const resolvedNames = templateIds.map(tid => templateNames[tid] || 'Premium Pitch Deck');
+        const templateName = resolvedNames.join(', ');
 
         const emailData = {
           from: `LoversAI <${process.env.FROM_EMAIL || 'noreply@loversai.com'}>`,
           to: user.email,
-          subject: `Invoice for ${templateName} Purchase - LoversAI`,
+          subject: `Invoice for ${templateIds.length === 1 ? templateName : 'Multiple Templates'} Purchase - LoversAI`,
           html: `
             <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px 20px; color: #333; line-height: 1.6;">
               <p style="font-size: 16px; margin-bottom: 20px;">Hi ${user.fullName || user.email.split('@')[0]},</p>
               
               <p style="font-size: 16px; margin-bottom: 20px;">Thank you for your purchase! 🎉</p>
               
-              <p style="font-size: 16px; margin-bottom: 20px;">We've successfully received your payment.</p>
+              <p style="font-size: 16px; margin-bottom: 20px;">We've successfully received your payment for: <strong>${templateName}</strong>.</p>
               
               <div style="background-color: #fcfbf9; border: 1px solid #f2edd5; border-radius: 12px; padding: 20px; margin: 25px 0;">
                 <h3 style="color: #1a1512; margin-top: 0; margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #f2edd5; padding-bottom: 8px;">Payment Details</h3>
@@ -303,7 +311,7 @@ router.post('/library/verify', protect, async (req, res) => {
                   </tr>
                   <tr>
                     <td style="padding: 6px 0; color: #666; font-weight: 500;">Amount Paid:</td>
-                    <td style="padding: 6px 0; color: #b89f79; font-weight: 600;">₹23,600 (Includes 18% GST)</td>
+                    <td style="padding: 6px 0; color: #b89f79; font-weight: 600;">${amountStr} (Includes 18% GST)</td>
                   </tr>
                   <tr>
                     <td style="padding: 6px 0; color: #666; font-weight: 500;">Payment Date:</td>

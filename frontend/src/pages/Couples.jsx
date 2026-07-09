@@ -5,7 +5,7 @@ function Couples() {
       <div
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{
-          backgroundImage: `url("/images/couples.jpg")`,
+          backgroundImage: `url("/images/couples.webp")`,
           filter: "brightness(0.3)",
         }}
       />

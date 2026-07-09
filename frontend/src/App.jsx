@@ -115,7 +115,7 @@ function AppContent() {
 
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-center" reverseOrder={false} containerStyle={{ zIndex: 99999 }} />
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Dashboard />} />

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { userAPI } from "../api/api";
 
 const sharedWeddingBackground = {
-  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.png")',
+  backgroundImage: 'url("/images/auth-wedding-bg.jpg"), url("/images/bridal.webp")',
 };
 
 export default function UserForm() {

@@ -5,22 +5,22 @@ import { useAuth } from "../../context/AuthContext";
 
 const carouselImages = [
   {
-    src: "/images/1.png",
+    src: "/images/1.webp",
     title: "Moonlit Mandap Moments",
     copy: "Layered florals, candlelit aisles, and a setting that feels made for cinema.",
   },
   {
-    src: "/images/2.png",
+    src: "/images/2.webp",
     title: "Golden Hour Vows",
     copy: "Soft sea light, sculpted decor, and a ceremony framed like a destination editorial.",
   },
   {
-    src: "/images/3.png",
+    src: "/images/3.webp",
     title: "Reception Afterglow",
     copy: "Romantic tablescapes and an atmosphere designed to feel intimate, grand, and alive.",
   },
   {
-    src: "/images/4.png",
+    src: "/images/4.webp",
     title: "Starlight Celebration",
     copy: "A breathtaking reception designed to make every moment feel unforgettable.",
   },
@@ -297,7 +297,7 @@ export default CoupleHome;
 const page = {
   width: "100%",
   minHeight: "100vh",
-  backgroundImage: "url('/images/signup.png')",
+  backgroundImage: "url('/images/signup.webp')",
   backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundAttachment: "fixed",

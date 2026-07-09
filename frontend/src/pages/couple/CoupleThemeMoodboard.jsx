@@ -830,7 +830,7 @@ export default function CoupleThemeMoodboard() {
       <div
         className="absolute inset-0 bg-cover bg-center -z-20 animate-scaleIn"
         style={{
-          backgroundImage: 'url("/images/signup.png")',
+          backgroundImage: 'url("/images/signup.webp")',
           filter: "brightness(0.75) contrast(1.05)",
         }}
       />

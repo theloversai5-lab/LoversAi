@@ -155,7 +155,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
   };
 
   const footerBackgroundStyle = {
-    "--footer-bg-image": "url('/images/footer.png')",
+    "--footer-bg-image": "url('/images/footer.webp')",
   };
   const plannerFooterOuterClass =
     "relative z-10 mx-auto w-full max-w-[1400px] rounded-[36px] bg-[linear-gradient(135deg,rgba(231,200,184,0.22),rgba(78,62,57,0.28))] p-0.5 shadow-[0_24px_90px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[28px]";

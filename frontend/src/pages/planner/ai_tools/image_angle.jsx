@@ -29,7 +29,7 @@ const AngleChangeComponent = ({ onClose }) => {
 
   // Added model type state
   const [modelType] = useState("flux-kontext-pro");
-  const RESULT_IMAGE_URL = "/images/ai_tools_img/image-2.png";
+  const RESULT_IMAGE_URL = "/images/ai_tools_img/image-2.webp";
 
   const fileInputRef = useRef(null);
 

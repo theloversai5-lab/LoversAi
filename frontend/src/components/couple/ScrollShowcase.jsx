@@ -9,7 +9,7 @@ const panels = [
     id: "panel2-left",
     label: "Panel 2",
     title: "",
-    image: "/images/couple/3.png",
+    image: "/images/couple/3.webp",
     variant: "side",
   },
   {
@@ -23,7 +23,7 @@ const panels = [
     id: "panel3-right",
     label: "Panel 3",
     title: "",
-    image: "/images/couple/1.jpg",
+    image: "/images/couple/1.webp",
     variant: "sideLarge",
   },
 ];
