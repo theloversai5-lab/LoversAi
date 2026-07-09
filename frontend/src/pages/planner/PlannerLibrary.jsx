@@ -10,7 +10,7 @@ const defaultTemplates = {
       id: 'ppt-cl1',
       title: 'Carnival Lunch Pitch Deck 1',
       description: 'Vibrant and colorful outdoor setups, bohemian-style details, and festive food stall presentation slide templates.',
-      price: 20000,
+      price: 16600,
       purchased: false,
       slides: [
         '/Carnival Lunch-1/Screenshot 2026-07-07 at 10.37.27 PM.webp',
@@ -28,7 +28,7 @@ const defaultTemplates = {
       id: 'ppt-m1',
       title: 'Mehndi Pitch Deck 1',
       description: 'Elegant custom mehndi stage setups, warm floral backdrops, and traditional henna lounge slide templates.',
-      price: 20000,
+      price: 13600,
       purchased: false,
       slides: [
         '/Mehndi-1/Screenshot 2026-07-07 at 10.48.38 PM.webp',
@@ -39,13 +39,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1A_Fo2xiqL5S0pJGmRRgbn3h9fj4_VMAA',
-      slideCount: 5
+      slideCount: 4
     },
     {
       id: 'ppt-m2',
       title: 'Mehndi Pitch Deck 2',
       description: 'Royal vibrant green floral mehendi lounge configurations, swing setup designs, and luxury canopy seating slides.',
-      price: 20000,
+      price: 16600,
       purchased: false,
       slides: [
         '/Mehndi-2/Screenshot 2026-07-07 at 10.58.08 PM.webp',
@@ -63,7 +63,7 @@ const defaultTemplates = {
       id: 'ppt-m3',
       title: 'Mehndi Pitch Deck 3',
       description: 'Boho-style marigold and mirror hanging mehndi backdrops, custom bride-groom seating configurations, and luxury presentation layout designs.',
-      price: 20000,
+      price: 18600,
       purchased: false,
       slides: [
         '/Mehndi-3/Screenshot 2026-07-07 at 11.04.25 PM.webp',
@@ -75,13 +75,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_3.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=15ng_pQ72_tLiR5vtqYe6q8AaWqvaVwtH',
-      slideCount: 6
+      slideCount: 8
     },
     {
       id: 'ppt-m4',
       title: 'Mehndi Pitch Deck 4',
       description: 'Premium floral dome configurations, bright yellow-and-green drapery, and luxury seating setups for mehndi ceremonies.',
-      price: 20000,
+      price: 18600,
       purchased: false,
       slides: [
         '/Mehndi-4/Screenshot 2026-07-07 at 11.06.46 PM.webp',
@@ -93,13 +93,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_4.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1irgadKjN7KHQQiV3eLtC9HUaMnFAPAtL',
-      slideCount: 6
+      slideCount: 8
     },
     {
       id: 'ppt-m5',
       title: 'Mehndi Pitch Deck 5',
       description: 'Modern fusion mehndi setups, pastel floral details, and bright marigold backdrop presentation slide layouts.',
-      price: 20000,
+      price: 13600,
       purchased: false,
       slides: [
         '/Mehndi-5/Screenshot 2026-07-07 at 11.12.14 PM.webp',
@@ -111,13 +111,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Mehndi_Pitch_Deck_5.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1TbgTa9rWP0p_58Ts2vwCJhL9zvNj2uYP',
-      slideCount: 6
+      slideCount: 4
     },
     {
       id: 'ppt-my1',
       title: 'Mayra Pitch Deck 1',
       description: 'Traditional royal Mayra setup configurations, marigold hangings, and premium guest welcoming seating configurations.',
-      price: 20000,
+      price: 18600,
       purchased: false,
       slides: [
         '/Myra-2/Screenshot 2026-07-07 at 11.16.15 PM.webp',
@@ -129,13 +129,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Mayra_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1gmvCap7DJ6nStFPLVFL3P5-KGPbxe2Kb',
-      slideCount: 6
+      slideCount: 8
     },
     {
       id: 'ppt-h1',
       title: 'Haldi Pitch Deck 1',
       description: 'Sunshine yellow themes, marigold backdrop designs, traditional brass vessel seating arrangements, and floral pathway setup presentation slides.',
-      price: 20000,
+      price: 13600,
       purchased: false,
       slides: [
         '/Haldi-1/Screenshot 2026-07-07 at 11.39.37 PM.webp',
@@ -147,13 +147,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Haldi_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=10D4QuEEdFbaXfeBr_pttNTGHbe6VrU85',
-      slideCount: 6
+      slideCount: 4
     },
     {
       id: 'ppt-h2',
       title: 'Haldi Pitch Deck 2',
       description: 'Premium outdoor poolside Haldi themes, vibrant yellow floral structures, marigold hangings, and modern lounge seating configurations.',
-      price: 20000,
+      price: 16600,
       purchased: false,
       slides: [
         '/Haldi-2/Screenshot 2026-07-07 at 11.41.51 PM.webp',
@@ -171,7 +171,7 @@ const defaultTemplates = {
       id: 'ppt-h3',
       title: 'Haldi Pitch Deck 3',
       description: 'Royal Marigold backdrops, traditional setup designs, hanging flower garlands, and elegant guest welcoming configurations.',
-      price: 20000,
+      price: 18600,
       purchased: false,
       slides: [
         '/Haldi-3/Screenshot 2026-07-07 at 11.45.00 PM.webp',
@@ -183,7 +183,7 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Haldi_Pitch_Deck_3.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1fd-JLq5lmT16bt0oHMCCEQaPPo7aUJ9u',
-      slideCount: 6
+      slideCount: 8
     }
   ],
   'Sangeet, Shaadi & Reception': [
@@ -191,7 +191,7 @@ const defaultTemplates = {
       id: 'ppt-sh1',
       title: 'Shaadi Pitch Deck 1',
       description: 'Vibrant and luxurious Shaadi mandap setups, starlit floral pathways, and traditional red-and-gold presentation slides.',
-      price: 20000,
+      price: 13600,
       purchased: false,
       slides: [
         '/Shaadi-1/Screenshot 2026-07-07 at 9.55.32 PM.webp',
@@ -203,13 +203,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Shaadi_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1gm5XzjZlFcZbk8Cw_6n6rpndhmMjs9xw',
-      slideCount: 6
+      slideCount: 4
     },
     {
       id: 'ppt-sh2',
       title: 'Shaadi Pitch Deck 2',
       description: 'Premium floral mandap configurations, royal aisle decorations, and premium banquet lounge slide designs.',
-      price: 20000,
+      price: 16600,
       purchased: false,
       slides: [
         '/Shaadi-2/Screenshot 2026-07-07 at 10.31.26 PM.webp',
@@ -227,7 +227,7 @@ const defaultTemplates = {
       id: 'ppt-s1',
       title: 'Sangeet Pitch Deck 1',
       description: 'Starlit musical night themes, neon stage configurations, and modern dance floor setup slides.',
-      price: 20000,
+      price: 18600,
       purchased: false,
       slides: [
         '/sangeet-1/Screenshot 2026-07-07 at 11.21.55 PM.webp',
@@ -239,13 +239,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Sangeet_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=17NV8JNyzU7nRrBb0xQ5-UJLN8OTr_sdp',
-      slideCount: 6
+      slideCount: 8
     },
     {
       id: 'ppt-s2',
       title: 'Sangeet Pitch Deck 2',
       description: 'Premium concert-style stages, led screen backdrops, disco lighting configurations, and dynamic performance layout presentation templates.',
-      price: 20000,
+      price: 13600,
       purchased: false,
       slides: [
         '/Sangeet-2/Screenshot 2026-07-07 at 11.23.56 PM.webp',
@@ -257,13 +257,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Sangeet_Pitch_Deck_2.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1k0wb04dUtalOZ4drIKcfQ9ygkZtbb7ng',
-      slideCount: 6
+      slideCount: 4
     },
     {
       id: 'ppt-s3',
       title: 'Sangeet Pitch Deck 3',
       description: 'Royal palaces background settings, traditional instrument setup graphics, and premium royal seating configurations for sangeet nights.',
-      price: 20000,
+      price: 16600,
       purchased: false,
       slides: [
         '/Sangeet-3/Screenshot 2026-07-07 at 11.28.44 PM.webp',
@@ -281,7 +281,7 @@ const defaultTemplates = {
       id: 'ppt-s4',
       title: 'Sangeet Pitch Deck 4',
       description: 'Modern floral stage designs, hanging crystal elements, elegant seating configurations, and luxury ballroom sangeet presentation slides.',
-      price: 20000,
+      price: 18600,
       purchased: false,
       slides: [
         '/sangeet-4/Screenshot 2026-07-07 at 11.34.07 PM.webp',
@@ -293,13 +293,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Sangeet_Pitch_Deck_4.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1AY66PCBnQ_HJrzOBpLZ1eyScH63VX-rj',
-      slideCount: 6
+      slideCount: 8
     },
     {
       id: 'ppt-r1',
       title: 'Reception Pitch Deck 1',
       description: 'Stunning Reception stage backdrops, grand entrance arch configurations, luxurious floral pillars, and modern reception lighting setup slides.',
-      price: 20000,
+      price: 13600,
       purchased: false,
       slides: [
         '/reception-1/Screenshot 2026-07-07 at 11.49.52 PM.webp',
@@ -311,13 +311,13 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Reception_Pitch_Deck_1.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=14cVNo_TwwtLALxWTKbSFvYXU297fSK1Q',
-      slideCount: 6
+      slideCount: 4
     },
     {
       id: 'ppt-r2',
       title: 'Reception Pitch Deck 2',
       description: 'Modern glasshouse reception layout designs, golden lighting accents, starlit ceiling structures, and luxury floral tabletop setups.',
-      price: 20000,
+      price: 16600,
       purchased: false,
       slides: [
         '/reception-2/Screenshot 2026-07-07 at 11.52.17 PM.webp',
@@ -335,7 +335,7 @@ const defaultTemplates = {
       id: 'ppt-r3',
       title: 'Reception Pitch Deck 3',
       description: 'Royal red and gold stage settings, elegant floral frame backdrops, premium seating designs, and velvet drapes layout templates.',
-      price: 20000,
+      price: 18600,
       purchased: false,
       slides: [
         '/reception-3/Screenshot 2026-07-07 at 11.55.22 PM.webp',
@@ -347,7 +347,7 @@ const defaultTemplates = {
       ],
       fileName: 'Wedding_Reception_Pitch_Deck_3.pptx',
       downloadUrl: 'https://docs.google.com/uc?export=download&id=1BNftLDLPFOCGZ5K6I3i60J-d7hbmwbAi',
-      slideCount: 6
+      slideCount: 8
     }
   ]
 };
@@ -395,9 +395,9 @@ export default function PlannerLibrary({ onClose }) {
     }
   };
 
-  const cartSubtotal = cart.reduce((sum, item) => sum + item.price, 0);
-  const cartGst = Math.round(cartSubtotal * 0.18);
-  const cartTotal = cartSubtotal + cartGst;
+  const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
+  const cartGst = Math.round(cartTotal - (cartTotal / 1.18));
+  const cartSubtotal = cartTotal - cartGst;
 
   // New PPT Form states
   const [newTitle, setNewTitle] = useState('');
@@ -465,7 +465,7 @@ export default function PlannerLibrary({ onClose }) {
       toast.loading("Initializing payment...", { id: "payment" });
       const orderData = await paymentAPI.createLibraryOrder({
         templateId: template.id,
-        price: Math.round(template.price * 1.18),
+        price: template.price, // Already includes GST
       });
 
       if (!orderData || !orderData.orderId) {
@@ -574,11 +574,9 @@ export default function PlannerLibrary({ onClose }) {
       
       const templateIds = cart.map(item => item.id).join(',');
       const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
-      const totalWithGst = Math.round(totalPrice * 1.18);
-
       const orderData = await paymentAPI.createLibraryOrder({
         templateId: templateIds,
-        price: totalWithGst,
+        price: totalPrice, // Already includes GST
       });
 
       if (!orderData || !orderData.orderId) {
@@ -993,7 +991,7 @@ export default function PlannerLibrary({ onClose }) {
                     <div>
                       <p className="text-[9px] text-white/30 uppercase tracking-widest leading-none">Price (Incl. GST)</p>
                       <p className={`font-semibold text-loverai-gold mt-1 leading-none ${isSingle ? 'text-lg' : 'text-sm'}`}>
-                        {asset.purchased ? 'Unlocked' : `\u20B9${Math.round(asset.price * 1.18).toLocaleString('en-IN')}`}
+                        {asset.purchased ? 'Unlocked' : `\u20B9${asset.price.toLocaleString('en-IN')}`}
                       </p>
                     </div>
 
@@ -1057,11 +1055,6 @@ export default function PlannerLibrary({ onClose }) {
           <div className="w-full flex items-center justify-between py-4 px-6 md:px-10 border-b border-white/5 z-50 bg-[#080605]">
             <div className="text-white/90 font-heading text-xl flex items-center gap-3">
               <span>{selectedTemplate.title}</span>
-              {selectedTemplate.slides.length > 1 && (
-                <span className="text-white/40 text-sm font-body font-light">
-                  (Slide {previewSlideIndex + 1} of {selectedTemplate.slides.length})
-                </span>
-              )}
             </div>
             
             <button 
@@ -1076,19 +1069,102 @@ export default function PlannerLibrary({ onClose }) {
             </button>
           </div>
 
-          {/* Core Content: Left Carousel (main focus) + Right Purchase Details */}
+          {/* Core Content: Left Thumbnails + Center Carousel + Right Purchase Details */}
           <div 
-            className="w-full flex-1 grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] overflow-hidden"
+            className="w-full flex-1 flex flex-col lg:flex-row overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
-            {/* Slide Preview Grid/Carousel */}
-            <div className="flex flex-col justify-center p-6 md:p-10 gap-4 h-full overflow-hidden bg-black">
+            {/* Left Slide Thumbnails Panel */}
+            <div className="w-full lg:w-36 border-b lg:border-b-0 lg:border-r border-white/5 bg-[#120D0A]/40 flex lg:flex-col p-4 gap-3.5 overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto shrink-0 select-none scrollbar-thin">
+              {(selectedTemplate.purchased ? selectedTemplate.slides : selectedTemplate.slides.slice(0, 6)).map((slideImg, idx) => {
+                const isSelected = previewSlideIndex === idx;
+                const isLocked = !selectedTemplate.purchased && (idx % 2 === 1);
+                
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setPreviewSlideIndex(idx)}
+                    className={`relative w-24 lg:w-full aspect-[16/9] rounded-xl overflow-hidden shrink-0 border transition-all active:scale-95 duration-200 text-left ${
+                      isSelected 
+                        ? 'border-loverai-gold shadow-lg shadow-loverai-gold/10 scale-[0.98]' 
+                        : 'border-white/10 hover:border-white/30'
+                    }`}
+                  >
+                    <img 
+                      src={slideImg} 
+                      alt={`Thumbnail ${idx + 1}`} 
+                      className={`w-full h-full object-cover ${isLocked ? 'blur-[4px] brightness-50' : ''}`}
+                    />
+                    
+                    {/* Alternate Lock Overlay */}
+                    {isLocked && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-loverai-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
+                    )}
+                    
+                    {/* Slide Number Indicator Badge */}
+                    <div className="absolute bottom-1 right-1 bg-black/60 px-1 py-0.5 rounded text-[8px] text-white/70 font-mono">
+                      {idx + 1}
+                    </div>
+                  </button>
+                );
+              })}
+
+              {/* 7th Overlapping Locked Bundle Item */}
+              {!selectedTemplate.purchased && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewSlideIndex('bundle');
+                  }}
+                  className={`relative w-24 lg:w-full aspect-[16/9] rounded-xl shrink-0 border transition-all active:scale-95 duration-200 text-left bg-transparent ${
+                    previewSlideIndex === 'bundle'
+                      ? 'border-loverai-gold shadow-lg shadow-loverai-gold/10 scale-[0.98]'
+                      : 'border-transparent hover:border-white/10'
+                  }`}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center p-1.5 lg:p-2">
+                    <div className="relative w-full h-full">
+                      {/* Layer 3 (Back) */}
+                      <div className="absolute inset-0 rounded-lg bg-[#2A1E17]/40 border border-white/5 transform -translate-x-2 -translate-y-1 -rotate-6 scale-95" />
+                      
+                      {/* Layer 2 (Middle) */}
+                      <div className="absolute inset-0 rounded-lg bg-[#3A2E27]/55 border border-white/5 transform translate-x-1 -translate-y-0.5 rotate-3 scale-[0.98]" />
+                      
+                      {/* Layer 1 (Front - Stacked overlapping card) */}
+                      <div className="absolute inset-0 rounded-lg bg-[#1F140E] border border-white/10 flex flex-col items-center justify-center gap-1 shadow-2xl">
+                        <svg className="w-4.5 h-4.5 text-loverai-gold animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <span className="text-[7px] lg:text-[9px] text-loverai-gold/90 font-bold uppercase tracking-wider">
+                          Buy to Unlock
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            {/* Center Carousel (Slide Preview) */}
+            <div className="flex-1 flex flex-col justify-center p-6 md:p-10 gap-4 h-full overflow-hidden bg-black relative">
               <div className="relative w-full flex-1 bg-black/20 rounded-2xl overflow-hidden flex items-center justify-center border border-white/5">
                 {/* Prev Arrow */}
                 {selectedTemplate.slides.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => setPreviewSlideIndex(p => (p - 1 + selectedTemplate.slides.length) % selectedTemplate.slides.length)}
+                    onClick={() => {
+                      if (previewSlideIndex === 'bundle') {
+                        const maxIndex = selectedTemplate.purchased ? selectedTemplate.slides.length - 1 : Math.min(selectedTemplate.slides.length - 1, 5);
+                        setPreviewSlideIndex(maxIndex);
+                      } else {
+                        setPreviewSlideIndex(p => (p - 1 + selectedTemplate.slides.length) % selectedTemplate.slides.length);
+                      }
+                    }}
                     className="absolute left-4 z-20 w-12 h-12 rounded-full border border-white/10 bg-black/60 hover:bg-black/85 text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-lg"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1097,61 +1173,111 @@ export default function PlannerLibrary({ onClose }) {
                   </button>
                 )}
 
-                {/* Selected Slide (Made bright with brightness-112 and saturate-108) */}
-                <img
-                  src={selectedTemplate.slides[previewSlideIndex]}
-                  alt={`Slide ${previewSlideIndex + 1}`}
-                  className={`max-w-full max-h-[70vh] object-contain select-none transition duration-300 ${
-                    !selectedTemplate.purchased
-                      ? (previewSlideIndex % 2 === 1)
-                        ? 'filter blur-[12px] brightness-[0.35] pointer-events-none'
-                        : 'filter brightness-[1.12] saturate-[1.08] contrast-[1.02]'
-                      : 'filter brightness-[1.12] saturate-[1.08] contrast-[1.02]'
-                  }`}
-                />
-
-                {/* Watermark Overlay for Unpurchased Templates */}
-                {!selectedTemplate.purchased && (
-                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center select-none z-10 overflow-hidden bg-black/5">
-                    <div 
-                      className="uppercase -rotate-12 font-heading font-black tracking-[0.25em] text-white/50 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] select-none text-center"
+                {previewSlideIndex === 'bundle' ? (
+                  <div className="relative w-full h-full flex flex-col items-center justify-center bg-black/60 p-6 text-center space-y-6 animate-fadeIn select-none">
+                    {/* Large 3D overlapping card graphic in center */}
+                    <div className="relative w-64 h-36 mx-auto mb-4">
+                      {/* Card Layer 3 */}
+                      <div className="absolute inset-0 rounded-2xl bg-[#2A1E17]/40 border border-white/5 transform -translate-x-6 -translate-y-3 -rotate-6 scale-95 shadow-lg" />
+                      {/* Card Layer 2 */}
+                      <div className="absolute inset-0 rounded-2xl bg-[#3A2E27]/55 border border-white/5 transform translate-x-4 -translate-y-1.5 rotate-3 scale-[0.98] shadow-lg" />
+                      {/* Card Layer 1 */}
+                      <div className="absolute inset-0 rounded-2xl bg-[#1C120C] border border-loverai-gold/20 flex flex-col items-center justify-center gap-2 shadow-2xl">
+                        <svg className="w-10 h-10 text-loverai-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <span className="text-xs text-loverai-gold font-bold uppercase tracking-widest">Remaining Slides Locked</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-white font-heading text-2xl" style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}>
+                        Unlock All Slides in this Template
+                      </h3>
+                      <p className="text-xs text-white/40 max-w-sm mx-auto leading-relaxed">
+                        Purchase this premium template to gain immediate access to edit, present, and download all layout configurations.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toast.success("Initiating template purchase...", { id: "purchase-direct" });
+                        handlePurchaseTemplate(selectedTemplate);
+                      }}
+                      className="px-6 py-2.5 bg-loverai-gold hover:brightness-105 text-[#201913] rounded-xl text-xs font-bold transition shadow-lg cursor-pointer"
                     >
-                      <div className={
-                        (previewSlideIndex % 2 === 0) 
-                          ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl opacity-100 font-extrabold' 
-                          : 'text-2xl sm:text-4xl md:text-5xl opacity-45 font-bold'
-                      }>
-                        @Lovers AI
-                      </div>
-                      <div className={`font-mono tracking-[0.15em] mt-2 opacity-95 ${
-                        (previewSlideIndex % 2 === 0) 
-                          ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' 
-                          : 'text-lg sm:text-xl md:text-2xl'
-                      }`}>
-                        9821640951
-                      </div>
-                    </div>
+                      Buy Template Now
+                    </button>
                   </div>
-                )}
+                ) : (
+                  <>
+                    {/* Selected Slide (Made bright with brightness-112 and saturate-108) */}
+                    <img
+                      src={selectedTemplate.slides[previewSlideIndex]}
+                      alt={`Slide ${previewSlideIndex + 1}`}
+                      className={`max-w-full max-h-[70vh] object-contain select-none transition duration-300 ${
+                        !selectedTemplate.purchased
+                          ? (previewSlideIndex % 2 === 1)
+                            ? 'filter blur-[12px] brightness-[0.35] pointer-events-none'
+                            : 'filter brightness-[1.12] saturate-[1.08] contrast-[1.02]'
+                          : 'filter brightness-[1.12] saturate-[1.08] contrast-[1.02]'
+                      }`}
+                    />
 
-                {(!selectedTemplate.purchased && (previewSlideIndex % 2 === 1)) && (
-                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-3 backdrop-blur-[2px] transition duration-300 z-20">
-                    <div className="w-14 h-14 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-loverai-gold shadow-lg animate-pulse">
-                      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                    <p className="text-white font-medium text-xs tracking-wide bg-black/80 px-4 py-2 rounded-full border border-white/10 shadow-md">
-                      Unlock full PPTX to view all slides
-                    </p>
-                  </div>
+                    {/* Watermark Overlay for Unpurchased Templates */}
+                    {!selectedTemplate.purchased && (
+                      <div className="absolute inset-0 pointer-events-none flex items-center justify-center select-none z-10 overflow-hidden bg-black/5">
+                        <div 
+                          className="uppercase -rotate-12 font-heading font-black tracking-[0.25em] text-white/50 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] select-none text-center"
+                        >
+                          <div className={
+                            (previewSlideIndex % 2 === 0) 
+                              ? 'text-4xl sm:text-6xl md:text-7xl lg:text-8xl opacity-100 font-extrabold' 
+                              : 'text-2xl sm:text-4xl md:text-5xl opacity-45 font-bold'
+                          }>
+                            @Lovers AI
+                          </div>
+                          <div className={`font-mono tracking-[0.15em] mt-2 opacity-95 ${
+                            (previewSlideIndex % 2 === 0) 
+                              ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl' 
+                              : 'text-lg sm:text-xl md:text-2xl'
+                          }`}>
+                            9821640951
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {(!selectedTemplate.purchased && (previewSlideIndex % 2 === 1)) && (
+                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-3 backdrop-blur-[2px] transition duration-300 z-20">
+                        <div className="w-14 h-14 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-loverai-gold shadow-lg animate-pulse">
+                          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                        </div>
+                        <p className="text-white font-medium text-xs tracking-wide bg-black/80 px-4 py-2 rounded-full border border-white/10 shadow-md">
+                          Unlock full PPTX to view all slides
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Next Arrow */}
                 {selectedTemplate.slides.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => setPreviewSlideIndex(p => (p + 1) % selectedTemplate.slides.length)}
+                    onClick={() => {
+                      if (previewSlideIndex === 'bundle') {
+                        setPreviewSlideIndex(0);
+                      } else {
+                        const maxIndex = selectedTemplate.purchased ? selectedTemplate.slides.length - 1 : Math.min(selectedTemplate.slides.length - 1, 5);
+                        if (!selectedTemplate.purchased && previewSlideIndex === maxIndex) {
+                          setPreviewSlideIndex('bundle');
+                        } else {
+                          setPreviewSlideIndex(p => (p + 1) % selectedTemplate.slides.length);
+                        }
+                      }
+                    }}
                     className="absolute right-4 z-20 w-12 h-12 rounded-full border border-white/10 bg-black/60 hover:bg-black/85 text-white flex items-center justify-center transition active:scale-95 cursor-pointer shadow-lg"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1160,26 +1286,10 @@ export default function PlannerLibrary({ onClose }) {
                   </button>
                 )}
               </div>
-
-              {/* Dots / Thumbnails row */}
-              {selectedTemplate.slides.length > 1 && (
-                <div className="flex justify-center gap-2">
-                  {selectedTemplate.slides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setPreviewSlideIndex(idx)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer ${
-                        previewSlideIndex === idx ? 'bg-loverai-gold scale-110 w-6' : 'bg-white/20'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Template Side Purchase Panel (Clean & Minimal) */}
-            <div className="flex flex-col justify-center p-6 md:p-10 text-left gap-6 border-t lg:border-t-0 lg:border-l border-white/5 bg-[#212121]">
+            {/* Template Side Purchase Panel (Clean, Smaller, Scrollable) */}
+            <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-white/5 bg-[#212121] flex flex-col justify-center p-6 md:p-8 text-left gap-6 shrink-0 overflow-y-auto scrollbar-thin">
               <div className="space-y-3">
                 <span className="text-[9px] text-loverai-gold/70 bg-loverai-gold/5 px-2 py-0.5 rounded-full border border-loverai-gold/10 font-bold uppercase tracking-widest">
                   PPT Deck Template
@@ -1196,7 +1306,7 @@ export default function PlannerLibrary({ onClose }) {
                     <span className="text-[10px] text-white/40 uppercase tracking-wider font-medium">Total Amount</span>
                     <div className="flex items-baseline gap-2">
                       <span className="text-3xl font-bold text-loverai-gold">
-                        ₹{(selectedTemplate.price * 1.18).toLocaleString('en-IN')}
+                        ₹{selectedTemplate.price.toLocaleString('en-IN')}
                       </span>
                       <span className="text-[10px] text-white/35">(Incl. 18% GST)</span>
                     </div>
@@ -1510,24 +1620,13 @@ export default function PlannerLibrary({ onClose }) {
                 <div className="bg-[#0B0806] border-t border-white/5 p-6 md:p-8 space-y-6">
                   {/* Pricing Details */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs text-white/40 font-light">
-                      <span>Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
-                      <span className="font-mono text-white/70">₹{cartSubtotal.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-white/40 font-light">
-                      <span>GST (18%)</span>
-                      <span className="font-mono text-white/70">₹{cartGst.toLocaleString('en-IN')}</span>
-                    </div>
-                    
-                    <div className="h-px bg-white/5 my-2" />
-                    
                     <div className="flex items-baseline justify-between">
-                      <span className="text-sm font-medium text-white/80">Total Amount</span>
+                      <span className="text-sm font-medium text-white/85">Total Price (Incl. GST)</span>
                       <div className="text-right">
                         <span className="text-2xl font-bold text-loverai-gold font-mono">
                           ₹{cartTotal.toLocaleString('en-IN')}
                         </span>
-                        <p className="text-[9px] text-white/30 mt-0.5">Includes 18% GST</p>
+                        <p className="text-[9px] text-white/30 mt-0.5">Includes 18% GST ({cart.length} {cart.length === 1 ? 'item' : 'items'})</p>
                       </div>
                     </div>
                   </div>

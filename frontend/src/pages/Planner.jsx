@@ -85,10 +85,11 @@ const PlannerPage = () => {
       {/* Hero Section */}
       <div className="relative w-full overflow-hidden min-h-screen">
         <div
-          className="absolute inset-0 bg-cover bg-center z-0"
+          className="absolute inset-0 bg-cover bg-center z-0 origin-center"
           style={{
             backgroundImage: 'url("/images/planner.webp")',
             filter: "brightness(1.45) saturate(1.15) contrast(0.95)",
+            transform: "rotate(-1.2deg) scale(1.1)",
           }}
         />
         {/* Soft dark overlay to make white text pop */}
@@ -145,14 +146,14 @@ const PlannerPage = () => {
             Everything you need to win more clients and deliver exceptional weddings
           </p>
 
-          <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {tools.map((tool, i) => (
               <button
                 type="button"
                 key={tool.title}
                 onClick={tool.onClick}
                 aria-label={tool.title}
-                className={`relative h-64 sm:h-72 md:h-[350px] rounded-2xl overflow-hidden group hover-lift animate-fadeInUp stagger-${i + 2} text-left ${loading ? 'cursor-wait opacity-80' : 'cursor-pointer'}`}
+                className={`relative h-80 sm:h-96 md:h-[450px] rounded-3xl overflow-hidden group hover-lift animate-fadeInUp stagger-${i + 2} text-left ${loading ? 'cursor-wait opacity-80' : 'cursor-pointer'}`}
               >
                 <img
                   src={tool.image}

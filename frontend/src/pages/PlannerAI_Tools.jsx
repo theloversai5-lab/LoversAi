@@ -382,7 +382,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               onClick={() => handleToolClick("library", () => setShowLibrary(true))}
               className="text-[clamp(2.1rem,5vw,4rem)] font-light text-white mb-12 heading-font text-left cursor-pointer hover:text-rose-300 transition"
             >
-              Pitch with Library ->
+              Pitch with Library
             </h2>
 
             <div
@@ -445,7 +445,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[clamp(2.1rem,5vw,4rem)] font-light text-white mb-12 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image Retexturing ->
+                Image Retexturing
               </h2>
             )}
 
@@ -513,7 +513,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image Angle ->
+                Image Angle
               </h2>
             )}
 
@@ -590,7 +590,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image to Video ->
+                Image to Video
               </h2>
               <div
                 className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
