@@ -22,7 +22,7 @@ export default function PlannerVenueAI() {
         description: "Download high-resolution mockups to share with clients or your team."
       }
     ],
-    redirectUrl: "https://venue-ai--sunitakeshari24.replit.app/",
+    redirectUrl: "https://venue-ai-liart.vercel.app/",
     buttonText: "Proceed to Venue AI"
   };
 
