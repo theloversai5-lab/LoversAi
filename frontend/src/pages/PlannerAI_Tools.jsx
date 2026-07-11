@@ -1,6 +1,6 @@
 // PlannerAI_tools.jsx
 import React, { useState, useEffect } from "react";
-import { openLemonCheckout } from "../utils/lemonCheckout";
+import { toast } from "react-hot-toast";
 import RetexturingTool from "./planner/ai_tools/retexturing";
 import AngleChangeComponent from "./planner/ai_tools/image_angle";
 import ImageToVideo from "./planner/ai_tools/image_to_video";
@@ -25,90 +25,109 @@ const RUPEE = "\u20B9";
 
 const pricingPlans = [
   {
-    name: "Free Plan",
-    price: "0",
-    description: "Perfect for getting started with AI creativity.",
-    features: [
-      "Retexturizing",
-      "Image upscaling",
-      "Image views",
-      "Standard quality output",
-      "Community support",
-    ],
-  },
-  {
     name: "Basic Plan",
     key: "basic",
-    price: "4,349",
-    description: "Great for individual creators and small projects.",
+    price: "32,999",
+    period: "Lifetime Access",
+    description: "Perfect for wedding planners and event professionals looking to create premium AI-powered visual content for clients.",
     features: [
-      "Credits per month: 1,300",
-      "Number of images: 130",
-      "Storage: 5GB",
-      "Retexturing",
-      "Image views",
-      "Image to video conversion",
-      "Generative image and video editing",
-      "High quality output",
+      "100 Premium AI Images",
+      "HD Image Downloads",
+      "10+ Professional AI Styles",
+      "AI Background Replacement",
+      "AI Object Removal",
+      "AI Face Enhancement",
+      "Commercial Usage Rights",
+      "No Watermark",
+      "Private Project Workspace",
+      "100 GB Cloud Storage",
+      "Priority Email Support",
     ],
+    buttonText: "Choose Basic",
   },
   {
     name: "Premium Plan",
     key: "premium",
-    price: "9,349",
-    description: "Unlock full creative potential and advanced tools.",
+    price: "63,999",
+    period: "Lifetime Access",
+    description: "Designed for growing agencies managing multiple clients, premium events, and large creative projects.",
     features: [
-      "Credits per month: 6,500",
-      "Number of images: 650",
-      "Storage: 15GB",
-      "Retexturing",
-      "Image views",
-      "Image to video conversion",
-      "Generative image and video editing",
-      "4D quality output",
-      "Priority email support",
-      "Community support",
+      "210 Premium AI Images",
+      "4K Ultra HD Downloads",
+      "30+ Premium AI Styles",
+      "AI Background & Scene Generation",
+      "AI Outfit & Decor Transformation",
+      "Unlimited Image Editing",
+      "Priority Rendering Queue",
+      "Team Collaboration (Up to 5 Members)",
+      "Unlimited Commercial Usage",
+      "Client Delivery Gallery",
+      "500 GB Cloud Storage",
+      "Priority Support",
     ],
+    buttonText: "Choose Premium",
     featured: true,
   },
   {
-    name: "Enterprise",
-    price: "Customisable",
-    description: "Unlock full creative potential and advanced tools.",
+    name: "Pro Plan",
+    key: "pro",
+    price: "99,999",
+    period: "Lifetime Access",
+    description: "Ultimate toolkit for professional studios and high-volume planners requiring maximum creative output.",
     features: [
-      "Unlimited conversions",
-      "Unlimited quality output",
-      "Retexturing",
-      "Image views",
-      "Image to video conversion",
-      "Advanced security features",
-      "Priority support",
-      "Generative image and video editing",
+      "400 Premium AI Images",
+      "4K Ultra HD Downloads",
+      "All Professional & Premium AI Styles",
+      "AI Mood Board Generator",
+      "AI Venue Visualization",
+      "AI Theme & Decor Generator",
+      "Unlimited Scene Transformation",
+      "Team Collaboration (Up to 10 Members)",
+      "Unlimited Commercial Usage",
+      "White Label Client Gallery",
+      "1 TB Cloud Storage",
+      "24×7 Priority Support",
     ],
-    cta: "Contact Us",
+    buttonText: "Choose Pro",
   },
-];
-
-const topUpPricing = [
-  { plan: "Free", credits: "10", pricePerCredit: "17.00" },
-  { plan: "Basic", credits: "10", pricePerCredit: "13.60" },
-  { plan: "Premium", credits: "10", pricePerCredit: "8.50" },
+  {
+    name: "Enterprise",
+    key: "enterprise",
+    price: "Custom Pricing",
+    period: "Contact Sales",
+    description: "Built for large studios, wedding companies, event agencies, and enterprise creative teams requiring unlimited scalability.",
+    features: [
+      "Unlimited Premium AI Images",
+      "Unlimited AI Image Editing",
+      "4K Ultra HD Downloads",
+      "Every Premium AI Style",
+      "Unlimited Background Generation",
+      "AI Mood Board Generator",
+      "AI Venue Visualization",
+      "AI Theme & Decor Generator",
+      "Unlimited Commercial Usage",
+      "White Label Client Gallery",
+      "Unlimited Team Members",
+      "Unlimited Cloud Storage",
+      "Dedicated Account Manager",
+      "24×7 VIP Support",
+    ],
+    buttonText: "Contact Sales",
+    cta: "Contact Sales",
+  },
 ];
 
 const featureComparisonRows = [
   { label: "Image Retexturing", plans: [true, true, true, true] },
   { label: "Image Views", plans: [true, true, true, true] },
   { label: "Image to Video Conversions", plans: [false, true, true, true] },
-  {
-    label: "Generative Image and Video Editing",
-    plans: [false, true, true, true],
-  },
-  { label: "Standard Quality Output", plans: [true, false, false, false] },
-  { label: "High Quality Output", plans: [false, true, false, false] },
-  { label: "HD Quality Output", plans: [false, false, true, true] },
-  { label: "Community Support", plans: [true, true, true, false] },
-  { label: "Priority Email Support", plans: [false, false, true, true] },
-  { label: "Custom AI Models", plans: [false, false, false, true] },
+  { label: "Generative Image & Video Editing", plans: [true, true, true, true] },
+  { label: "HD Quality Downloads", plans: [true, true, true, true] },
+  { label: "4K Ultra HD Downloads", plans: [false, true, true, true] },
+  { label: "Commercial Usage Rights", plans: [true, true, true, true] },
+  { label: "White Label Client Gallery", plans: [false, false, true, true] },
+  { label: "Team Collaboration", plans: [false, true, true, true] },
+  { label: "Priority VIP Support", plans: [false, false, true, true] },
 ];
 
 function StatusIcon({ enabled }) {
@@ -172,6 +191,15 @@ function PriceValue({ value }) {
     </div>
   );
 }
+
+const loadRazorpay = () =>
+  new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 
 const PitchAIPage = ({ navigateTo, onToggleTool }) => {
   const [showAngleChanger, setShowAngleChanger] = useState(false);
@@ -242,11 +270,16 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
   }, [showRetexturing, showAngleChanger, showImageToVideo, showLibrary, onToggleTool]);
 
   const handlePurchase = async (plan) => {
-    console.log("ðŸš€ handlePurchase called for plan:", plan);
+    console.log("🚀 handlePurchase called for plan:", plan);
+
+    if (plan === "enterprise") {
+      window.location.href = "mailto:support@loversai.com?subject=Enterprise Plan Inquiry";
+      return;
+    }
 
     // Check if user is authenticated
     if (!currentUser) {
-      console.log("âŒ User not authenticated, redirecting to login");
+      console.log("❌ User not authenticated, redirecting to login");
 
       // Store the current page to redirect back after login
       sessionStorage.setItem("redirectAfterLogin", "/planner-ai-tools");
@@ -262,50 +295,72 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
       return;
     }
 
-    // If user is authenticated, proceed with purchase
     try {
-      console.log("âœ… User authenticated, getting email...");
-
-      // Get user email
-      let userEmail = "";
-
-      if (currentUser.email) {
-        userEmail = currentUser.email;
-      } else if (currentUser.user?.email) {
-        userEmail = currentUser.user.email;
-      } else if (currentUser.profile?.email) {
-        userEmail = currentUser.profile.email;
-      }
-
-      console.log("ðŸ“§ User email found:", userEmail);
-
-      if (!userEmail || !isValidEmail(userEmail)) {
-        console.error("âŒ Invalid or missing email");
-        alert(
-          "Please complete your profile with a valid email address before purchasing",
-        );
-        navigate("/profile");
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        toast.error("Razorpay SDK failed to load. Are you online?");
         return;
       }
 
-      try {
-        const data = await paymentAPI.createCheckout(plan);
+      toast.loading("Initializing payment...", { id: "payment" });
+      const backendPlanId = plan.startsWith("planner_") ? plan : `planner_${plan}`;
+      const orderData = await paymentAPI.createOrder({ planId: backendPlanId });
 
-        if (data.success && data.checkoutUrl) {
-          console.log("âœ… Checkout URL received:", data.checkoutUrl);
-          window.location.href = data.checkoutUrl;
-        } else {
-          console.error("âŒ Failed to create checkout:", data);
-          alert("Failed to initiate checkout. Please try again.");
-        }
-      } catch (error) {
-        console.error("âŒ Error creating checkout:", error);
-        console.log("ðŸ”„ Using direct Lemon checkout as fallback");
-        openLemonCheckout(plan, userEmail);
+      if (!orderData || !orderData.orderId) {
+        toast.error("Server error: Could not create order", { id: "payment" });
+        return;
       }
+
+      toast.dismiss("payment");
+
+      const options = {
+        key: orderData.keyId || "rzp_test_replace_me",
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "LoversAI Platform",
+        description: `Upgrade to ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          try {
+            toast.loading("Verifying payment...", { id: "verify" });
+            const verifyRes = await paymentAPI.verifyPayment({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              planId: backendPlanId,
+            });
+
+            if (verifyRes.success) {
+              toast.success("Payment successful! Subscription activated.", {
+                id: "verify",
+              });
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
+            } else {
+              toast.error("Payment verification failed", { id: "verify" });
+            }
+          } catch (verifyErr) {
+            console.error("Verification error", verifyErr);
+            toast.error("Server connection lost during verification", {
+              id: "verify",
+            });
+          }
+        },
+        prefill: {
+          name: currentUser.displayName || "",
+          email: currentUser.email || currentUser.user?.email || "",
+        },
+        theme: {
+          color: "#d4a878",
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
     } catch (error) {
-      console.error("âŒ Error in handlePurchase:", error);
-      alert("An error occurred. Please try again.");
+      console.error("❌ Error in handlePurchase:", error);
+      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -651,7 +706,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
               </p>
 
               {/* Pricing cards */}
-              <div className="grid gap-6 mb-16 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-6 mb-16 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
                 {pricingPlans.map((plan) => (
                   <div
                     key={plan.name}
@@ -671,7 +726,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     </h3>
                     <PriceValue value={plan.price} />
                     <div className="mb-6 text-sm text-white/50">
-                      {plan.key ? "/month" : plan.price === "0" ? "/month" : ""}
+                      {plan.period}
                     </div>
                     <p className="mb-6 text-sm text-white/70">
                       {plan.description}
@@ -684,17 +739,17 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                         </li>
                       ))}
                     </ul>
-                    {plan.key ? (
+                    {plan.key && plan.key !== "enterprise" ? (
                       <button
                         onClick={() => handlePurchase(plan.key)}
-                        className="loverai-btn-primary mt-10 w-full rounded-full py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-300"
+                        className="loverai-btn-primary mt-10 w-full rounded-full py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-300 cursor-pointer"
                       >
-                        {currentUser ? "Buy Now" : "Login to Purchase"}
+                        {currentUser ? (plan.buttonText || "Choose Plan") : "Login to Purchase"}
                       </button>
                     ) : plan.cta ? (
                       <button
                         onClick={() => setShowContactPopup(true)}
-                        className="loverai-btn-primary mt-10 w-full rounded-full py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-300"
+                        className="loverai-btn-primary mt-10 w-full rounded-full py-3.5 text-sm font-semibold uppercase tracking-wide transition-all duration-300 cursor-pointer"
                       >
                         {plan.cta}
                       </button>
@@ -702,97 +757,122 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                   </div>
                 ))}
               </div>
-              {/* Rest of the component remains the same... */}
-              {showContactPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999]">
-                  <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-                    <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                      Contact Us
-                    </h2>
+                 {showContactPopup && (
+                <div 
+                  className="fixed inset-0 bg-[#080605]/85 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-fadeIn"
+                  onClick={() => setShowContactPopup(false)}
+                >
+                  <div 
+                    className="bg-[#140F0C] border border-loverai-gold/25 rounded-[32px] p-8 md:p-10 w-full max-w-lg relative text-left shadow-[0_0_50px_rgba(230,198,178,0.15)] animate-scaleUp text-white"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Close Icon button in top-right */}
+                    <button
+                      type="button"
+                      onClick={() => setShowContactPopup(false)}
+                      className="absolute top-6 right-6 w-8 h-8 rounded-full border border-white/10 hover:border-white/20 text-white/40 hover:text-white flex items-center justify-center transition cursor-pointer"
+                      aria-label="Close modal"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
 
-                    <p className="text-gray-700 mb-2">
-                      ðŸ“§ Email:{" "}
-                      <a
-                        href="mailto:aanssha@theloversai.co.in"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-blue-600 underline hover:text-blue-800"
+                    <div className="space-y-2 mb-8">
+                      <span className="text-[10px] text-loverai-gold/80 bg-loverai-gold/5 px-2.5 py-0.5 rounded-full border border-loverai-gold/10 font-bold uppercase tracking-widest">
+                        Enterprise Sales
+                      </span>
+                      <h2 
+                        className="text-white text-3xl font-semibold font-heading mt-2" 
+                        style={{ fontFamily: "'Dream Avenue', 'DM Serif Display', serif" }}
                       >
-                        aanssha@theloversai.co.in
+                        Contact Our Team
+                      </h2>
+                      <p className="text-xs text-white/50 leading-relaxed max-w-sm">
+                        Interested in custom volumes, white-labeled client galleries, or priority rendering? Get in touch to activate your plan.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Email Row */}
+                      <a 
+                        href="mailto:aanssha@theloversai.co.in?subject=Enterprise Plan Inquiry"
+                        className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-loverai-gold/25 hover:bg-white/8 transition duration-200"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-loverai-gold/10 border border-loverai-gold/20 flex items-center justify-center text-loverai-gold shrink-0">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Email Us</p>
+                          <p className="text-sm font-medium text-loverai-gold mt-0.5">aanssha@theloversai.co.in</p>
+                        </div>
                       </a>
-                    </p>
 
-                    <p className="text-gray-700 mb-2">
-                      ðŸ“ž Phone: +91 9821640951 | +91 9266355235
-                    </p>
+                      {/* Phone Row */}
+                      <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div className="w-10 h-10 rounded-xl bg-loverai-gold/10 border border-loverai-gold/20 flex items-center justify-center text-loverai-gold shrink-0">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Call or WhatsApp</p>
+                          <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-sm font-medium text-white/95">
+                            <a href="tel:+919821640951" className="hover:text-loverai-gold transition">+91 9821640951</a>
+                            <span className="text-white/20">|</span>
+                            <a href="tel:+919266355235" className="hover:text-loverai-gold transition">+91 9266355235</a>
+                          </div>
+                        </div>
+                      </div>
 
-                    {/* WhatsApp */}
-                    <p className="text-gray-700 mb-6">
-                      ðŸ’¬ WhatsApp:{" "}
-                      <a
+                      {/* WhatsApp Chat Link */}
+                      <a 
                         href="https://wa.me/919266355235"
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-green-600 underline hover:text-green-800"
+                        className="flex items-start gap-4 p-4 rounded-2xl bg-green-500/5 border border-green-500/10 hover:border-green-500/30 hover:bg-green-500/8 transition duration-200"
                       >
-                        Chat with us
+                        <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 shrink-0">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-green-400/60 uppercase tracking-wider font-semibold">Direct Message</p>
+                          <p className="text-sm font-semibold text-green-400 mt-0.5">Chat with us on WhatsApp</p>
+                        </div>
                       </a>
-                    </p>
 
-                    <p className="text-gray-700 mb-6">
-                      ðŸ“ Address: G-29, RG Trade Tower, NSP, Pitampura, Delhi
-                    </p>
+                      {/* Address Row */}
+                      <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div className="w-10 h-10 rounded-xl bg-loverai-gold/10 border border-loverai-gold/20 flex items-center justify-center text-loverai-gold shrink-0">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Our Office</p>
+                          <p className="text-xs text-white/80 mt-0.5 leading-relaxed">
+                            G-29, RG Trade Tower, NSP, Pitampura, Delhi
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
                     <button
+                      type="button"
                       onClick={() => setShowContactPopup(false)}
-                      className="mt-4 bg-black text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-800 transition"
+                      className="mt-8 w-full py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-bold transition active:scale-98 cursor-pointer text-center"
                     >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Top-Up Pricing Section */}
-              <div className="w-full px-4 sm:px-[6%] md:px-[10%] flex justify-center mb-20 transition-all duration-300">
-                <div className="w-full max-w-[1200px]">
-                  <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] text-white text-center mb-16 heading-font">
-                    Top-Up Pricing
-                  </h2>
-                  <div className="w-full max-w-[1200px] glass-card rounded-[40px] md:rounded-[48px] p-8 md:p-16 border border-white/10">
-                    <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-3 sm:gap-0">
-                      <div className="text-[16px] md:text-[18px] font-semibold text-white pb-6 border-b border-white/10">
-                        Current Plan
-                      </div>
-                      <div className="text-[16px] md:text-[18px] font-semibold text-white pb-6 border-b border-white/10">
-                        Number of Credits
-                      </div>
-                      <div className="text-[16px] md:text-[18px] font-semibold text-white pb-6 border-b border-white/10">
-                        Price per Credit
-                      </div>
-                    </div>
-                    <div>
-                      {topUpPricing.map((row, index) => (
-                        <div
-                          key={row.plan}
-                          className={`grid grid-cols-1 gap-2 py-6 text-center text-[15px] text-white/80 sm:grid-cols-3 sm:gap-0 sm:py-8 md:text-[18px] ${
-                            index < topUpPricing.length - 1
-                              ? "border-b border-white/5"
-                              : ""
-                          }`}
-                        >
-                          <div>{row.plan}</div>
-                          <div className="tabular-nums">{row.credits}</div>
-                          <div className="font-medium text-loverai-gold tabular-nums">
-                            {RUPEE}
-                            {row.pricePerCredit}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                      Close Window
+                  </button>
                 </div>
               </div>
+            )}
+
               {/* Features Comparison Table */}
               <div className="w-full px-4 sm:px-[6%] md:px-[10%] mt-32 transition-all duration-300">
                 <div className="w-full overflow-x-auto rounded-[8px] border border-gray-600">
@@ -801,13 +881,13 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                       Features
                     </div>
                     <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
-                      Free
-                    </div>
-                    <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
                       Basic
                     </div>
                     <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
                       Premium
+                    </div>
+                    <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
+                      Pro
                     </div>
                     <div className="bg-black p-4 md:p-6 text-center text-[16px] md:text-[18px] font-medium text-white">
                       Enterprise

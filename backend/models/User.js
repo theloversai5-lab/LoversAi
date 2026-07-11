@@ -147,7 +147,7 @@ const userSchema = new mongoose.Schema(
 
     plan: {
       type: String,
-      enum: ["free", "basic", "premium"],
+      enum: ["free", "basic", "premium", "pro", "enterprise", "planner_basic", "planner_premium", "planner_pro", "couple_basic", "couple_premium", "couple_elite", "couple_pro"],
       default: "free",
     },
     isPro: { type: Boolean, default: false },
@@ -169,7 +169,7 @@ const userSchema = new mongoose.Schema(
     checkoutSessionId: String,
     checkoutPlan: {
       type: String,
-      enum: ["basic", "premium", null],
+      enum: ["basic", "premium", "pro", "enterprise", "planner_basic", "planner_premium", "planner_pro", "couple_basic", "couple_premium", "couple_elite", "couple_pro", null],
       default: null,
     },
 

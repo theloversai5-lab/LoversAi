@@ -7,14 +7,34 @@ import Subscription from "../models/Subscription.js";
 const PLAN_CREDITS = {
   basic: 1300,
   premium: 6500,
-  free: 100
+  pro: 9999,
+  free: 100,
+
+  planner_basic: 1300,
+  planner_premium: 6500,
+  planner_pro: 9999,
+
+  couple_basic: 12,
+  couple_premium: 32,
+  couple_elite: 64,
+  couple_pro: 64
 };
 
 // Plan prices
 const PLAN_PRICES = {
   basic: 29,
   premium: 99,
-  free: 0
+  pro: 149,
+  free: 0,
+
+  planner_basic: 29,
+  planner_premium: 99,
+  planner_pro: 149,
+
+  couple_basic: 10,
+  couple_premium: 20,
+  couple_elite: 35,
+  couple_pro: 35
 };
 
 export const lemonWebhook = async (req, res) => {
@@ -126,6 +146,7 @@ async function handleSubscriptionCreated(data) {
     const variantNameLower = variantName.toLowerCase();
     let plan = "basic";
     if (variantNameLower.includes("premium")) plan = "premium";
+    else if (variantNameLower.includes("pro")) plan = "pro";
     else if (variantNameLower.includes("basic")) plan = "basic";
     
     const credits = PLAN_CREDITS[plan] || 0;
@@ -595,22 +616,24 @@ export const createCheckout = async (req, res) => {
     }
     
     // Validate plan
-    if (!["basic", "premium"].includes(plan)) {
+    if (!["basic", "premium", "pro", "planner_basic", "planner_premium", "planner_pro", "couple_basic", "couple_premium", "couple_elite", "couple_pro"].includes(plan)) {
       return res.status(400).json({ error: "Invalid plan" });
     }
     
     // Create checkout URL
     const plans = {
-      basic: { 
-        price: 29, 
-        credits: 1300, 
-        variant: "246e6b0e-526d-4a6b-8584-25e3f2340301" 
-      },
-      premium: { 
-        price: 99, 
-        credits: 6500, 
-        variant: "660a017c-a10a-4db4-b03d-04e2970382e5" 
-      },
+      basic: { price: 29, credits: 1300, variant: "246e6b0e-526d-4a6b-8584-25e3f2340301" },
+      premium: { price: 99, credits: 6500, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+      pro: { price: 149, credits: 9999, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+
+      planner_basic: { price: 29, credits: 1300, variant: "246e6b0e-526d-4a6b-8584-25e3f2340301" },
+      planner_premium: { price: 99, credits: 6500, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+      planner_pro: { price: 149, credits: 9999, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+
+      couple_basic: { price: 10, credits: 12, variant: "246e6b0e-526d-4a6b-8584-25e3f2340301" },
+      couple_premium: { price: 20, credits: 32, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+      couple_elite: { price: 35, credits: 64, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+      couple_pro: { price: 35, credits: 64, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" }
     };
     
     const planData = plans[plan];

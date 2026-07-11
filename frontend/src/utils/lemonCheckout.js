@@ -5,7 +5,14 @@ export const openLemonCheckout = (plan, email, userId = null) => {
   // Updated variant IDs with UUID format
   const variantIds = {
     basic: "246e6b0e-526d-4a6b-8584-25e3f2340301", // Basic Plan variant ID (UUID format)
-    premium: "660a017c-a10a-4db4-b03d-04e2970382e5", // You'll need to get this too
+    premium: "660a017c-a10a-4db4-b03d-04e2970382e5", // Premium Plan variant ID
+    pro: "660a017c-a10a-4db4-b03d-04e2970382e5", // Pro Plan variant ID fallback
+    planner_basic: "246e6b0e-526d-4a6b-8584-25e3f2340301",
+    planner_premium: "660a017c-a10a-4db4-b03d-04e2970382e5",
+    planner_pro: "660a017c-a10a-4db4-b03d-04e2970382e5",
+    couple_basic: "246e6b0e-526d-4a6b-8584-25e3f2340301",
+    couple_premium: "660a017c-a10a-4db4-b03d-04e2970382e5",
+    couple_elite: "660a017c-a10a-4db4-b03d-04e2970382e5"
   };
 
   const variantId = variantIds[plan];

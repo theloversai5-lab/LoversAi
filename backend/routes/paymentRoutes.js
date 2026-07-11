@@ -33,16 +33,23 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   console.warn('⚠️ Razorpay keys missing in .env. Payments will not work.');
 }
 
-// Fixed Plans & Credit Packages
 const PLANS = {
-  // Subscription Plans
-  basic: { name: 'Basic Plan', price: 1499, currency: 'INR', type: 'subscription', credits: 15 },
-  premium: { name: 'Premium Plan', price: 2499, currency: 'INR', type: 'subscription', credits: 9999 },
-  
-  // Credit Top-ups
-  credits_10: { name: '10 AI Credits', price: 99, currency: 'INR', type: 'credits', credits: 10 },
-  credits_50: { name: '50 AI Credits', price: 399, currency: 'INR', type: 'credits', credits: 50 },
-  credits_100: { name: '100 AI Credits', price: 699, currency: 'INR', type: 'credits', credits: 100 }
+  // Planner Subscription Plans
+  basic: { name: 'Basic Plan (Planner)', price: 32999, currency: 'INR', type: 'subscription', credits: 100 },
+  premium: { name: 'Premium Plan (Planner)', price: 63999, currency: 'INR', type: 'subscription', credits: 210 },
+  pro: { name: 'Pro Plan (Planner)', price: 99999, currency: 'INR', type: 'subscription', credits: 400 },
+  enterprise: { name: 'Enterprise', price: 0, currency: 'INR', type: 'subscription', credits: 99999 },
+
+  planner_basic: { name: 'Basic Plan (Planner)', price: 32999, currency: 'INR', type: 'subscription', credits: 100 },
+  planner_premium: { name: 'Premium Plan (Planner)', price: 63999, currency: 'INR', type: 'subscription', credits: 210 },
+  planner_pro: { name: 'Pro Plan (Planner)', price: 99999, currency: 'INR', type: 'subscription', credits: 400 },
+  planner_enterprise: { name: 'Enterprise (Planner)', price: 0, currency: 'INR', type: 'subscription', credits: 99999 },
+
+  // Couple Subscription Plans
+  couple_basic: { name: 'Basic Plan (Couple)', price: 4999, currency: 'INR', type: 'subscription', credits: 12 },
+  couple_premium: { name: 'Premium Plan (Couple)', price: 13499, currency: 'INR', type: 'subscription', credits: 32 },
+  couple_pro: { name: 'Pro Plan (Couple)', price: 26999, currency: 'INR', type: 'subscription', credits: 64 },
+  couple_elite: { name: 'Pro Plan (Couple)', price: 26999, currency: 'INR', type: 'subscription', credits: 64 } // Legacy fallback
 };
 
 /* ================================================================
@@ -72,7 +79,7 @@ router.post('/create-order', protect, async (req, res) => {
     const options = {
       amount: plan.price * 100,
       currency: plan.currency,
-      receipt: `rcpt_${req.user._id}_${Date.now()}`,
+      receipt: `rcpt_${String(req.user._id).substring(0, 15)}_${Date.now()}`,
       notes: {
         userId: req.user._id.toString(),
         planId: planId,
