@@ -22,7 +22,7 @@ export default function PlannerDecorAI() {
         description: "Create photorealistic renders of your personalized decor setup."
       }
     ],
-    redirectUrl: "https://decor.loversai.com",
+    redirectUrl: "https://wedding-studio2.vercel.app/",
     buttonText: "Proceed to Decor AI"
   };
 
