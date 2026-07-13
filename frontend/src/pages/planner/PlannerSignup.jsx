@@ -28,7 +28,11 @@ export default function PlannerSignup() {
 
       const data = await firebaseLogin(idToken, "planner");
       if (data.success) {
-        navigate("/planner/onboarding");
+        if (data.isNewUser) {
+          navigate("/planner/onboarding");
+        } else {
+          navigate("/planner");
+        }
       } else {
         setError(data.error || "Failed to sign up with Google");
       }

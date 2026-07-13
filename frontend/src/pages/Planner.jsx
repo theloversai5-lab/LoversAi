@@ -92,9 +92,7 @@ const PlannerPage = () => {
             transform: "rotate(-1.2deg) scale(1.1)",
           }}
         />
-        {/* Soft dark overlay to make white text pop */}
-        <div className="absolute inset-0 z-[1] bg-black/15" />
-        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/20 via-transparent to-transparent" />
+
 
         {/* Premium Hero Content */}
         <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center px-4 text-center">
@@ -120,7 +118,7 @@ const PlannerPage = () => {
               className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto mb-10 font-body font-normal leading-relaxed animate-fadeInUp stagger-2"
               style={{ textShadow: "0 2px 12px rgba(0, 0, 0, 0.85)" }}
             >
-              Transform the way you coordinate and design weddings. Access live couple leads, draft custom AI pitches, and connect with premier vendors—all in one elegant workspace.
+              Design and coordinate premium weddings, powered by AI.
             </p>
 
             {/* Call to Action Button */}

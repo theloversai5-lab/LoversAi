@@ -186,7 +186,7 @@ const couplePlans = [
   }
 ];
 
-export default function PricingCards() {
+export default function PricingCards({ showOnlyRole }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [currentPlan, setCurrentPlan] = useState("free");
@@ -323,6 +323,7 @@ export default function PricingCards() {
   };
 
   const [selectedRole, setSelectedRole] = useState(() => {
+    if (showOnlyRole) return showOnlyRole;
     const userRole = localStorage.getItem("userRole");
     if (userRole === "planner") return "planner";
     if (userRole === "couple") return "couple";
@@ -330,13 +331,17 @@ export default function PricingCards() {
   });
 
   useEffect(() => {
+    if (showOnlyRole) {
+      setSelectedRole(showOnlyRole);
+      return;
+    }
     const userRole = currentUser?.role || localStorage.getItem("userRole");
     if (userRole === "planner") {
       setSelectedRole("planner");
     } else if (userRole === "couple") {
       setSelectedRole("couple");
     }
-  }, [currentUser]);
+  }, [currentUser, showOnlyRole]);
 
   const serif = { fontFamily: "'Cormorant Garamond', serif" };
   const activePlans = selectedRole === "planner" ? plannerPlans : couplePlans;
@@ -344,32 +349,34 @@ export default function PricingCards() {
   return (
     <div className="space-y-12">
       {/* Role Switcher Toggle */}
-      <div className="flex justify-center">
-        <div className="bg-[#1c1410] border border-white/10 p-1.5 rounded-full flex gap-1 relative z-10">
-          <button 
-            type="button"
-            onClick={() => setSelectedRole("couple")}
-            className={`px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer ${
-              selectedRole === "couple" 
-                ? "bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] shadow-md" 
-                : "text-white/60 hover:text-white"
-            }`}
-          >
-            For Couples
-          </button>
-          <button 
-            type="button"
-            onClick={() => setSelectedRole("planner")}
-            className={`px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer ${
-              selectedRole === "planner" 
-                ? "bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] shadow-md" 
-                : "text-white/60 hover:text-white"
-            }`}
-          >
-            For Planners
-          </button>
+      {!showOnlyRole && (
+        <div className="flex justify-center">
+          <div className="bg-[#1c1410] border border-white/10 p-1.5 rounded-full flex gap-1 relative z-10">
+            <button 
+              type="button"
+              onClick={() => setSelectedRole("couple")}
+              className={`px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer ${
+                selectedRole === "couple" 
+                  ? "bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] shadow-md" 
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              For Couples
+            </button>
+            <button 
+              type="button"
+              onClick={() => setSelectedRole("planner")}
+              className={`px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-widest transition-all duration-300 cursor-pointer ${
+                selectedRole === "planner" 
+                  ? "bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] shadow-md" 
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              For Planners
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto items-stretch">
         {activePlans.map((plan) => {

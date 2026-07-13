@@ -31,7 +31,8 @@ const ProtectedRoute = ({
 
   if (!currentUser) {
     // Redirect to login with return URL
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    const loginPath = requiredRole ? `/login?role=${requiredRole}` : "/login";
+    return <Navigate to={loginPath} state={{ from: location.pathname }} replace />;
   }
 
   // Role-based access check

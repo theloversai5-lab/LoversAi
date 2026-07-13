@@ -13,7 +13,7 @@ export default function VendorAIOnboarding({ config }) {
 
   return (
     <div className="space-y-12 animate-fadeInUp pb-24">
-      {/* Top Bar: Back & Proceed */}
+      {/* Top Bar: Back */}
       <div className="flex justify-between items-center">
         <button
           onClick={() => navigate(-1)}
@@ -21,22 +21,23 @@ export default function VendorAIOnboarding({ config }) {
         >
           ← Back
         </button>
-        <button
-          onClick={handleProceed}
-          className="loverai-btn-primary px-8 py-3 rounded-full text-xs font-bold tracking-widest uppercase shadow-lg shadow-white/5 hover:shadow-white/10 transition-all"
-        >
-          {config.buttonText}
-        </button>
       </div>
 
       {/* SECTION 1 — HEADER */}
-      <div className="max-w-3xl">
+      <div className="max-w-3xl flex flex-col items-start">
         <h1 className="font-heading text-4xl text-white md:text-5xl lg:text-[56px] font-light" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
           {config.title}
         </h1>
         <p className="text-white/70 mt-4 leading-relaxed font-light text-sm md:text-base max-w-2xl">
           {config.description}
         </p>
+        <button
+          onClick={handleProceed}
+          className="mt-6 bg-gradient-to-r from-[#e6c6b2] via-[#e8cbba] to-[#d4a878] text-[#201913] font-extrabold text-[11px] md:text-xs tracking-widest uppercase px-8 py-3.5 rounded-full hover:brightness-110 shadow-lg shadow-[#d4a878]/25 transition-all duration-300 transform active:scale-95 cursor-pointer flex items-center gap-2"
+        >
+          {config.buttonText}
+          <ArrowRight className="w-4 h-4 text-[#201913]" strokeWidth={2.5} />
+        </button>
       </div>
 
       {/* SECTION 2 — INTERACTIVE GUIDE CAROUSEL */}
@@ -122,16 +123,17 @@ export default function VendorAIOnboarding({ config }) {
             Select the plan that best fits your needs to unlock the full potential of {config.title}.
           </p>
         </div>
-        <PricingCards />
+        <PricingCards showOnlyRole="planner" />
       </div>
 
       {/* SECTION 5 — PROCEED */}
       <div className="pt-12 pb-12 flex justify-center">
         <button
           onClick={handleProceed}
-          className="loverai-btn-primary px-12 py-4 rounded-full text-sm font-bold tracking-widest uppercase"
+          className="bg-gradient-to-r from-[#e6c6b2] via-[#e8cbba] to-[#d4a878] text-[#201913] font-extrabold text-xs md:text-sm tracking-widest uppercase px-12 py-4 rounded-full hover:brightness-110 shadow-lg shadow-[#d4a878]/25 transition-all duration-300 transform active:scale-95 cursor-pointer flex items-center gap-2.5"
         >
           {config.buttonText}
+          <ArrowRight className="w-4.5 h-4.5 text-[#201913]" strokeWidth={2.5} />
         </button>
       </div>
     </div>

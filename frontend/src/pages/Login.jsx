@@ -83,6 +83,9 @@ const Login = () => {
     if (typeof from === "string" && from.startsWith("/planner")) {
       return "planner";
     }
+    if (typeof from === "string" && from.startsWith("/vendor")) {
+      return "vendor";
+    }
     return "";
   };
 
@@ -195,7 +198,20 @@ const Login = () => {
         throw new Error("Firebase did not return a sign-in credential. Please try again.");
       }
 
-      const data = await firebaseLogin(firebaseIdToken, targetRole || "couple");
+      let defaultRole = "couple";
+      if (isPlannerExperience) {
+        defaultRole = "planner";
+      } else if (
+        (typeof location.state?.from === "string" && location.state.from.startsWith("/vendor")) ||
+        (typeof sessionStorage.getItem("redirectAfterLogin") === "string" &&
+          sessionStorage.getItem("redirectAfterLogin").startsWith("/vendor"))
+      ) {
+        defaultRole = "vendor";
+      } else if (isCoupleExperience) {
+        defaultRole = "couple";
+      }
+      const roleToUse = targetRole || defaultRole;
+      const data = await firebaseLogin(firebaseIdToken, roleToUse);
 
       if (!data.success) {
         return;
