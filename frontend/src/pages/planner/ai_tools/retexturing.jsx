@@ -43,11 +43,7 @@ const RetexturingTool = ({ onClose }) => {
     cocktail: "Cocktail Party",
   };
 
-  const THEME_PRESET_IMAGE_URLS = {
-    haldi: "/images/ai_tools_img/haldi.webp",
-    mehndi: "/images/ai_tools_img/mehendi.png.webp",
-    wedding: "/images/ai_tools_img/corridor1.webp",
-  };
+  const THEME_PRESET_IMAGE_URLS = {};
 
   const isPresetTheme = (themeKey) =>
     Boolean(themeKey && THEME_PRESET_IMAGE_URLS[themeKey]);

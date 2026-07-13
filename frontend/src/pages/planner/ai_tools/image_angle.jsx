@@ -244,24 +244,65 @@ const AngleChangeComponent = ({ onClose }) => {
     }
 
     setIsGenerating(true);
+    const loadingToast = toast.loading(
+      "Transforming image perspective... This may take 30-60 seconds."
+    );
 
     try {
+      const selectedAngleId = selectedAngles[0];
       const selectedAngleName =
-        angles.find((a) => a.id === selectedAngles[0])?.name || "Generated Result";
+        angles.find((a) => a.id === selectedAngleId)?.name || "Generated Result";
 
-      setGeneratedResult({
-        success: true,
-        url: RESULT_IMAGE_URL,
-        transformation: {
-          angleView: {
-            name: selectedAngleName,
+      const formData = new FormData();
+      formData.append("image", selectedImage);
+      formData.append("angle", selectedAngleId);
+      formData.append("imageCount", "1");
+
+      const result = await aiAPI.changeAngle(formData);
+
+      if (result.success) {
+        setGeneratedResult({
+          success: true,
+          url: result.url,
+          transformation: {
+            angleView: {
+              name: selectedAngleName,
+            },
+            modelType: result.generationProvider || "gemini",
           },
-          modelType: "preset",
-        },
-      });
+        });
 
-      toast.success("Image transformed successfully!");
+        // Add to history
+        const newHistoryItem = {
+          id: result.cacheId || Date.now(),
+          originalImage: imagePreview,
+          resultImage: result.url,
+          angle: selectedAngleName,
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        setGenerationHistory((prev) => [newHistoryItem, ...prev]);
+
+        // Refresh user credits
+        if (typeof paymentAPI?.getCredits === "function") {
+          try {
+            const creditData = await paymentAPI.getCredits();
+            if (creditData?.success) {
+              setUserCredits(creditData.credits || 0);
+            }
+          } catch (e) {
+            console.warn("Failed to refresh credits:", e);
+          }
+        }
+
+        toast.success("Image transformed successfully!");
+      } else {
+        throw new Error(result.error || "Failed to change image angle");
+      }
+    } catch (err) {
+      console.error("Change angle error:", err);
+      toast.error(err.message || "Failed to transform image angle.");
     } finally {
+      toast.dismiss(loadingToast);
       setIsGenerating(false);
     }
   };
