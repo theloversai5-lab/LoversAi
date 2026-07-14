@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { aiAPI, paymentAPI } from "../../../api/api";
+import { aiAPI, paymentAPI, getApiBaseUrl, getToken } from "../../../api/api";
 
 const AngleChangeComponent = ({ onClose }) => {
   // Authentication
@@ -276,8 +276,9 @@ const AngleChangeComponent = ({ onClose }) => {
         const newHistoryItem = {
           id: result.cacheId || Date.now(),
           originalImage: imagePreview,
-          resultImage: result.url,
-          angle: selectedAngleName,
+          url: result.url,
+          angleName: selectedAngleName,
+          angle: selectedAngleId,
           timestamp: new Date().toLocaleTimeString(),
         };
         setGenerationHistory((prev) => [newHistoryItem, ...prev]);
@@ -310,24 +311,46 @@ const AngleChangeComponent = ({ onClose }) => {
   // Download image
   const downloadImage = async (url, filename) => {
     try {
-      let blobUrl = url;
+      let blob;
+      // If it's a local static asset (like /images/...), fetch it directly
       if (url?.startsWith("/images/")) {
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error("Failed to fetch local image");
         }
-        const blob = await response.blob();
-        blobUrl = URL.createObjectURL(blob);
+        blob = await response.blob();
       } else {
-        // Use backend proxy to avoid CORS issues with external URLs
-        const data = await aiAPI.downloadImage({ imageUrl: url });
+        // Try direct fetch first (same origin or CORS allowed)
+        try {
+          const response = await fetch(url);
+          if (response.ok) {
+            blob = await response.blob();
+          }
+        } catch (e) {
+          console.warn("Direct fetch failed, falling back to proxy download:", e);
+        }
 
-        if (!data.success) throw new Error("Failed to download image");
+        // If direct fetch fails, use the server-side proxy
+        if (!blob) {
+          const base = getApiBaseUrl();
+          const response = await fetch(`${base}/api/ai/download-image`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify({ imageUrl: url }),
+          });
 
-        const blob = new Blob([data.imageData], { type: "image/jpeg" });
-        blobUrl = URL.createObjectURL(blob);
+          if (!response.ok) {
+            throw new Error("Failed to download image through proxy server");
+          }
+
+          blob = await response.blob();
+        }
       }
 
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = filename || "angle-transformed-image.jpg";
@@ -335,9 +358,7 @@ const AngleChangeComponent = ({ onClose }) => {
       link.click();
       document.body.removeChild(link);
 
-      if (blobUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(blobUrl);
-      }
+      URL.revokeObjectURL(blobUrl);
       toast.success("Image downloaded successfully");
     } catch (error) {
       console.error("Download error:", error);

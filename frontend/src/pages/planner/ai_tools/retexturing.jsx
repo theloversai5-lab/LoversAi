@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { aiAPI, paymentAPI } from "../../../api/api";
+import { aiAPI, paymentAPI, getApiBaseUrl, getToken } from "../../../api/api";
 
 const RetexturingTool = ({ onClose }) => {
   // Authentication
@@ -475,31 +475,35 @@ const RetexturingTool = ({ onClose }) => {
 
   const downloadImage = async (url, filename) => {
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        const data = await aiAPI.downloadImage({ imageUrl: url });
-        if (!data.success) throw new Error(data.error || "Failed to download image");
-
-        const fallbackBlob = new Blob([data.imageData], {
-          type: data.contentType || "image/jpeg",
-        });
-        const fallbackBlobUrl = URL.createObjectURL(fallbackBlob);
-
-        const fallbackLink = document.createElement("a");
-        fallbackLink.href = fallbackBlobUrl;
-        fallbackLink.download = filename || `venue-transformation-${Date.now()}.jpg`;
-        document.body.appendChild(fallbackLink);
-        fallbackLink.click();
-        document.body.removeChild(fallbackLink);
-
-        URL.revokeObjectURL(fallbackBlobUrl);
-        toast.success("Image downloaded successfully");
-        return;
+      let blob;
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          blob = await response.blob();
+        }
+      } catch (e) {
+        console.warn("Direct fetch failed, falling back to proxy download:", e);
       }
 
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      if (!blob) {
+        const base = getApiBaseUrl();
+        const response = await fetch(`${base}/api/ai/download-image`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify({ imageUrl: url }),
+        });
 
+        if (!response.ok) {
+          throw new Error("Failed to download image through proxy server");
+        }
+
+        blob = await response.blob();
+      }
+
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = filename || `venue-transformation-${Date.now()}.jpg`;

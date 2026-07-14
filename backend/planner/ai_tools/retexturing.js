@@ -863,7 +863,12 @@ router.post("/download-image", async (req, res) => {
     }
 
     const isAllowedExternalImage =
-      imageUrl.includes("bfldelivery") || imageUrl.includes("cdn");
+      imageUrl.includes("bfldelivery") ||
+      imageUrl.includes("cdn") ||
+      imageUrl.includes("cloudinary") ||
+      imageUrl.includes("localhost") ||
+      imageUrl.includes("loversai") ||
+      imageUrl.includes("theloversai");
 
     if (!isAllowedExternalImage) {
       return res.status(400).json({
