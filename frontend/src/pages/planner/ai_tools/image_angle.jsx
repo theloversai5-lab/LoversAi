@@ -401,7 +401,7 @@ const AngleChangeComponent = ({ onClose }) => {
         }}
       />
 
-      <div className="h-[100dvh] bg-[#0e0e10] text-white font-['Poppins'] relative overflow-hidden py-3 px-3 md:px-5 lg:px-6 flex flex-col">
+      <div className="min-h-[100dvh] lg:h-[100dvh] bg-[#0e0e10] text-white font-['Poppins'] relative lg:overflow-hidden overflow-y-auto py-3 px-3 md:px-5 lg:px-6 flex flex-col">
         {/* Modern ambient glassmorphic glows */}
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-yellow-500/5 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none"></div>
@@ -422,7 +422,7 @@ const AngleChangeComponent = ({ onClose }) => {
                   </button>
                 )}
                 <h1 className="text-[28px] md:text-[34px] font-bold text-white tracking-tight">
-                  Angle Changing AI
+                  REDESIGN INVENTORY 3D
                 </h1>
               </div>
               <p className="text-gray-400 font-medium text-[11px] md:text-xs pl-7 md:pl-8">
@@ -467,10 +467,10 @@ const AngleChangeComponent = ({ onClose }) => {
         </header>
 
         {/* Main Workspace White Card Panel */}
-        <main className="max-w-[1400px] mx-auto w-full flex-1 min-h-0 glass-card-strong text-white rounded-[28px] p-4 md:p-5 lg:p-6 mb-3">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 h-full min-h-0">
+        <main className="max-w-[1400px] mx-auto w-full flex-1 lg:min-h-0 glass-card-strong text-white rounded-[28px] p-4 md:p-5 lg:p-6 mb-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 lg:h-full lg:min-h-0">
             {/* Column 1: Upload Image (Step 1) */}
-            <div className="flex flex-col h-full min-h-0">
+            <div className="flex flex-col lg:h-full lg:min-h-0">
               <div className="flex flex-col items-center text-center mb-3 select-none">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-[11px] mb-1.5 select-none">
                   1
@@ -479,9 +479,9 @@ const AngleChangeComponent = ({ onClose }) => {
                 <p className="text-[11px] text-white/50">Add your venue photo</p>
               </div>
 
-              <div className="flex-1 min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col">
+              <div className="flex-1 lg:min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col">
                 <div
-                  className={`flex-1 min-h-0 border border-dashed rounded-[18px] flex flex-col items-center justify-center p-4 md:p-5 text-center cursor-pointer transition-all duration-300 ${
+                  className={`flex-1 lg:min-h-0 min-h-[260px] border border-dashed rounded-[18px] flex flex-col items-center justify-center p-4 md:p-5 text-center cursor-pointer transition-all duration-300 ${
                     imagePreview
                       ? "border-loverai-gold bg-loverai-gold/5"
                       : "border-white/10 bg-white/5 hover:border-white/30 hover:bg-white/10"
@@ -500,7 +500,7 @@ const AngleChangeComponent = ({ onClose }) => {
                   />
 
                   {imagePreview ? (
-                    <div className="relative w-full h-full min-h-0 rounded-[16px] overflow-hidden group">
+                    <div className="relative w-full h-full lg:min-h-0 min-h-[260px] rounded-[16px] overflow-hidden group">
                       <img
                         src={imagePreview}
                         alt="Selected venue"
@@ -545,7 +545,7 @@ const AngleChangeComponent = ({ onClose }) => {
             </div>
 
             {/* Column 2: Select Angle (Step 2) */}
-            <div className="flex flex-col h-full min-h-0">
+            <div className="flex flex-col lg:h-full lg:min-h-0">
               <div className="flex flex-col items-center text-center mb-3 select-none">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-[11px] mb-1.5 select-none">
                   2
@@ -554,7 +554,7 @@ const AngleChangeComponent = ({ onClose }) => {
                 <p className="text-[11px] text-white/50">Choose perspective view</p>
               </div>
 
-              <div className="flex-1 min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col justify-between">
+              <div className="flex-1 lg:min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col justify-between">
                 <div className="space-y-2.5">
                   {angles.map((angle) => {
                     const isSelected = selectedAngles.includes(angle.id);
@@ -645,7 +645,7 @@ const AngleChangeComponent = ({ onClose }) => {
             </div>
 
             {/* Column 3: Download Result (Step 3) */}
-            <div className="flex flex-col h-full min-h-0">
+            <div className="flex flex-col lg:h-full lg:min-h-0">
               <div className="flex flex-col items-center text-center mb-3 select-none">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-loverai-gold to-amber-700 text-loverai-dark flex items-center justify-center font-bold text-[11px] mb-1.5 select-none">
                   3
@@ -656,7 +656,7 @@ const AngleChangeComponent = ({ onClose }) => {
                 <p className="text-[11px] text-white/50">Your transformed view</p>
               </div>
 
-              <div className="flex-1 min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col">
+              <div className="flex-1 lg:min-h-0 glass-card rounded-[22px] p-3 md:p-4 flex flex-col">
                 {isGenerating ? (
                   /* Loading State */
                   <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-5 text-center">
@@ -717,7 +717,7 @@ const AngleChangeComponent = ({ onClose }) => {
                         ))}
                       </div>
                     ) : (
-                      <div className="flex flex-col justify-between h-full min-h-0">
+                      <div className="flex flex-col justify-between lg:h-full lg:min-h-0">
                         <div className="relative rounded-xl overflow-hidden h-[240px] lg:h-[260px] bg-white/5 mb-3 shadow-inner">
                           <img
                             src={generatedResult.url}

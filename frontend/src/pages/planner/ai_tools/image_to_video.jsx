@@ -624,7 +624,7 @@ const ImageToVideo = ({ onClose }) => {
                     isDarkTheme ? "text-white" : "text-[#161616]"
                   }`}
                 >
-                  Image to Video Generator
+                  DESIGN YOUR WALKTHROUGH
                 </h1>
               </div>
               <p className={`mt-1 pl-11 text-[11px] md:text-xs ${mutedTextClass}`}>

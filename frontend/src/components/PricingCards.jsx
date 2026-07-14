@@ -9,11 +9,11 @@ const RUPEE = "\u20B9";
 const plannerPlans = [
   {
     name: "Basic Plan",
-    price: "32,999",
-    period: "Lifetime Access",
+    price: "333",
+    period: "Per Credit • \u20B99,999 / month",
     description: "Perfect for wedding planners and event professionals looking to create premium AI-powered visual content for clients.",
     features: [
-      { bold: "100 Premium AI Images", regular: "" },
+      { bold: "30 Premium AI Images", regular: "" },
       { bold: "HD Image Downloads", regular: "" },
       { bold: "10+ Professional AI Styles", regular: "" },
       { bold: "AI Background Replacement", regular: "" },
@@ -30,11 +30,11 @@ const plannerPlans = [
   },
   {
     name: "Premium Plan",
-    price: "63,999",
-    period: "Lifetime Access",
+    price: "325",
+    period: "Per Credit • \u20B925,999 / month",
     description: "Designed for growing agencies managing multiple clients, premium events, and large creative projects.",
     features: [
-      { bold: "210 Premium AI Images", regular: "" },
+      { bold: "80 Premium AI Images", regular: "" },
       { bold: "4K Ultra HD Downloads", regular: "" },
       { bold: "30+ Premium AI Styles", regular: "" },
       { bold: "AI Background & Scene Generation", regular: "" },
@@ -53,11 +53,11 @@ const plannerPlans = [
   },
   {
     name: "Pro Plan",
-    price: "99,999",
-    period: "Lifetime Access",
+    price: "316",
+    period: "Per Credit • \u20B937,999 / month",
     description: "Ultimate toolkit for professional studios and high-volume planners requiring maximum creative output.",
     features: [
-      { bold: "400 Premium AI Images", regular: "" },
+      { bold: "120 Premium AI Images", regular: "" },
       { bold: "4K Ultra HD Downloads", regular: "" },
       { bold: "All Professional & Premium AI Styles", regular: "" },
       { bold: "AI Mood Board Generator", regular: "" },
@@ -411,9 +411,10 @@ export default function PricingCards({ showOnlyRole }) {
               <div className="mb-1 flex items-baseline gap-1 text-white" style={serif}>
                 {plan.price !== "Custom Pricing" && <span className="text-[28px] font-medium mr-1">{RUPEE}</span>}
                 <span className={plan.price === "Custom Pricing" ? "text-[38px] font-bold tracking-tight" : "text-[54px] font-bold tracking-tight"}>{plan.price}</span>
+                {plan.price !== "Custom Pricing" && <span className="text-[18px] font-medium text-white/60 ml-1">/ credit</span>}
               </div>
               
-              <div className="mb-6 text-[11px] font-medium tracking-[0.15em] text-white/50 uppercase">
+              <div className="mb-6 text-[11px] font-semibold tracking-[0.15em] text-[#d4a878] uppercase">
                 {plan.period}
               </div>
               

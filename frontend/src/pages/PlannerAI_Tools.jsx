@@ -27,11 +27,11 @@ const pricingPlans = [
   {
     name: "Basic Plan",
     key: "basic",
-    price: "32,999",
-    period: "Lifetime Access",
+    price: "333",
+    period: "Per Credit • \u20B99,999 / month",
     description: "Perfect for wedding planners and event professionals looking to create premium AI-powered visual content for clients.",
     features: [
-      "100 Premium AI Images",
+      "30 Premium AI Images",
       "HD Image Downloads",
       "10+ Professional AI Styles",
       "AI Background Replacement",
@@ -48,11 +48,11 @@ const pricingPlans = [
   {
     name: "Premium Plan",
     key: "premium",
-    price: "63,999",
-    period: "Lifetime Access",
+    price: "325",
+    period: "Per Credit • \u20B925,999 / month",
     description: "Designed for growing agencies managing multiple clients, premium events, and large creative projects.",
     features: [
-      "210 Premium AI Images",
+      "80 Premium AI Images",
       "4K Ultra HD Downloads",
       "30+ Premium AI Styles",
       "AI Background & Scene Generation",
@@ -71,11 +71,11 @@ const pricingPlans = [
   {
     name: "Pro Plan",
     key: "pro",
-    price: "99,999",
-    period: "Lifetime Access",
+    price: "316",
+    period: "Per Credit • \u20B937,999 / month",
     description: "Ultimate toolkit for professional studios and high-volume planners requiring maximum creative output.",
     features: [
-      "400 Premium AI Images",
+      "120 Premium AI Images",
       "4K Ultra HD Downloads",
       "All Professional & Premium AI Styles",
       "AI Mood Board Generator",
@@ -118,9 +118,9 @@ const pricingPlans = [
 ];
 
 const featureComparisonRows = [
-  { label: "Image Retexturing", plans: [true, true, true, true] },
+  { label: "REDESIGN YOUR INVENTORY", plans: [true, true, true, true] },
   { label: "Image Views", plans: [true, true, true, true] },
-  { label: "Image to Video Conversions", plans: [false, true, true, true] },
+  { label: "DESIGN YOUR WALKTHROUGH", plans: [false, true, true, true] },
   { label: "Generative Image & Video Editing", plans: [true, true, true, true] },
   { label: "HD Quality Downloads", plans: [true, true, true, true] },
   { label: "4K Ultra HD Downloads", plans: [false, true, true, true] },
@@ -188,6 +188,7 @@ function PriceValue({ value }) {
       <span className="text-[36px] font-semibold tracking-tight tabular-nums">
         {value}
       </span>
+      <span className="text-[16px] font-medium text-white/50 ml-1">/ credit</span>
     </div>
   );
 }
@@ -500,7 +501,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[clamp(2.1rem,5vw,4rem)] font-light text-white mb-12 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image Retexturing
+                REDESIGN YOUR INVENTORY
               </h2>
             )}
 
@@ -568,7 +569,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image Angle
+                REDESIGN INVENTORY 3D
               </h2>
             )}
 
@@ -645,7 +646,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                Image to Video
+                DESIGN YOUR WALKTHROUGH
               </h2>
               <div
                 className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 hover:border-loverai-gold/40 hover:shadow-[0_0_50px_rgba(230,198,178,0.1)] transition-all duration-300 group cursor-pointer"
