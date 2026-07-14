@@ -1,9 +1,11 @@
 import express from "express";
 import multer from "multer";
 import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
-import { Subscription } from "../../models/Subscription.js";
+import Subscription from "../../models/Subscription.js";
 import creditService from "../../services/creditService.js";
 import { OPERATION_COSTS, TRANSACTION_SOURCES } from "../../config/credits.js";
 import {
@@ -55,8 +57,9 @@ const isGeminiAuthError = (message = "") =>
 async function persistGeneratedMoodboardImages(
   images = [],
   functionType = "Wedding Vision",
+  req = null,
 ) {
-  if (!images.length || !isCloudinaryConfigured) return images;
+  if (!images.length) return images;
 
   const safeFolder =
     String(functionType || "wedding-vision")
@@ -65,51 +68,120 @@ async function persistGeneratedMoodboardImages(
       .replace(/^-|-$/g, "")
       .slice(0, 50) || "wedding-vision";
 
-  const uploadedImages = await Promise.all(
-    images.map(async (image, index) => {
-      if (!image?.url) return image;
+  if (isCloudinaryConfigured) {
+    const uploadedImages = await Promise.all(
+      images.map(async (image, index) => {
+        if (!image?.url) return image;
 
-      try {
-        const uploadResult = await uploadRemoteToCloudinary(image.url, {
-          folder: `loversai/generated-moodboards/${safeFolder}`,
-          resource_type: "image",
-          public_id: `${Date.now()}-${index}-${(image.label || "scene")
+        try {
+          const uploadResult = await uploadRemoteToCloudinary(image.url, {
+            folder: `loversai/generated-moodboards/${safeFolder}`,
+            resource_type: "image",
+            public_id: `${Date.now()}-${index}-${(image.label || "scene")
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .slice(0, 30)}`,
+          });
+
+          return {
+            ...image,
+            url: uploadResult?.secure_url || image.url,
+            cloudinaryPublicId: uploadResult?.public_id || null,
+          };
+        } catch (uploadErr) {
+          // Log and return the original image object so a single failure doesn't break Promise.all
+          console.error(
+            "⚠️ [Moodboard] uploadRemoteToCloudinary failed for image:",
+            image?.url,
+            uploadErr,
+          );
+          return {
+            ...image,
+            url: image.url,
+            cloudinaryPublicId: image.cloudinaryPublicId || null,
+          };
+        }
+      }),
+    );
+
+    return uploadedImages;
+  } else {
+    // Local persistence fallback
+    const uploadDir = path.join(process.cwd(), "uploads", "generated-moodboards", safeFolder);
+    try {
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+    } catch (dirErr) {
+      console.error("❌ [Moodboard] Failed to create local uploads directory:", dirErr);
+      return images;
+    }
+
+    const hostPrefix = req ? `${req.protocol}://${req.get("host")}` : "";
+
+    const savedImages = await Promise.all(
+      images.map(async (image, index) => {
+        if (!image?.url) return image;
+
+        try {
+          let buffer;
+          let ext = ".jpg";
+          
+          const matches = image.url.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+          if (matches) {
+            const mime = matches[1];
+            buffer = Buffer.from(matches[2], "base64");
+            if (mime.includes("png")) ext = ".png";
+            else if (mime.includes("webp")) ext = ".webp";
+            else if (mime.includes("gif")) ext = ".gif";
+          } else {
+            // It's a remote URL
+            const response = await fetch(image.url);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch remote image: ${response.status}`);
+            }
+            const mime = response.headers.get("content-type") || "";
+            if (mime.includes("png")) ext = ".png";
+            else if (mime.includes("webp")) ext = ".webp";
+            else if (mime.includes("gif")) ext = ".gif";
+            buffer = Buffer.from(await response.arrayBuffer());
+          }
+
+          const filename = `${Date.now()}-${index}-${(image.label || "scene")
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
-            .slice(0, 30)}`,
-        });
+            .slice(0, 30)}${ext}`;
+          
+          const filepath = path.join(uploadDir, filename);
+          fs.writeFileSync(filepath, buffer);
 
-        return {
-          ...image,
-          url: uploadResult?.secure_url || image.url,
-          cloudinaryPublicId: uploadResult?.public_id || null,
-        };
-      } catch (uploadErr) {
-        // Log and return the original image object so a single failure doesn't break Promise.all
-        console.error(
-          "⚠️ [Moodboard] uploadRemoteToCloudinary failed for image:",
-          image?.url,
-          uploadErr,
-        );
-        return {
-          ...image,
-          url: image.url,
-          cloudinaryPublicId: image.cloudinaryPublicId || null,
-        };
-      }
-    }),
-  );
+          const localUrl = `/uploads/generated-moodboards/${safeFolder}/${filename}`;
 
-  return uploadedImages;
+          return {
+            ...image,
+            url: hostPrefix ? `${hostPrefix}${localUrl}` : localUrl,
+            cloudinaryPublicId: null,
+          };
+        } catch (saveErr) {
+          console.error("⚠️ [Moodboard] Failed to save image locally:", saveErr);
+          return image;
+        }
+      })
+    );
+
+    return savedImages;
+  }
 }
 
 async function persistSingleGeneratedMoodboardImage(
   image,
   functionType = "Wedding Vision",
+  req = null,
 ) {
   const [persistedImage] = await persistGeneratedMoodboardImages(
     image ? [image] : [],
     functionType,
+    req,
   );
 
   return persistedImage || image;
@@ -589,7 +661,9 @@ function buildGroqMessages(
   const atmosDesc = SIDE_PANEL_RULES.atmosphere[atmosphere] || "";
   const timeDesc = SIDE_PANEL_RULES.timing[timing] || "";
 
-  const userText = `Analyze these two images and generate an optimized wedding image generation prompt.
+  let userText = "";
+  if (venueBase64 && decorBase64) {
+    userText = `Analyze these two images and generate an optimized wedding image generation prompt.
 
 Image 1 = VENUE PHOTO (the space to be decorated — structure must be preserved exactly)
 Image 2 = DECORATION REFERENCE (the style, decor, vibe to be applied to the venue)
@@ -602,28 +676,59 @@ User selections:
 ${userPrompt ? `- Additional instruction: ${userPrompt}` : ""}
 
 Generate the final image prompt now.`;
+  } else if (decorBase64) {
+    userText = `Analyze this design inspiration image and generate an optimized wedding image generation prompt.
+
+Inspiration Image = DECORATION REFERENCE (the style, decor, vibe, color scheme, florals, and structure to take inspiration from).
+
+User selections:
+- Style: ${style || "Traditional"} → ${styleDesc}
+- Function type: ${functionType || "Wedding Ceremony"} → ${fnDesc}
+- Atmosphere: ${atmosphere || "Warm & Festive"} → ${atmosDesc}
+- Timing: ${timing || "Evening (Warm Glow)"} → ${timeDesc}
+${userPrompt ? `- Additional instruction: ${userPrompt}` : ""}
+
+Analyze the image's layout, style, color scheme, floral arrangements, backdrop design, and lighting. Generate a detailed prompt to create a new wedding scene from scratch that is inspired by this image, matching its design elements, aesthetics, and vibe.`;
+  } else if (venueBase64) {
+    userText = `Analyze this venue image and generate an optimized wedding image generation prompt.
+
+Venue Image = THE PHYSICAL SPACE (the structure, layout, walls, floor, and ceiling to preserve).
+
+User selections:
+- Style: ${style || "Traditional"} → ${styleDesc}
+- Function type: ${functionType || "Wedding Ceremony"} → ${fnDesc}
+- Atmosphere: ${atmosphere || "Warm & Festive"} → ${atmosDesc}
+- Timing: ${timing || "Evening (Warm Glow)"} → ${timeDesc}
+${userPrompt ? `- Additional instruction: ${userPrompt}` : ""}
+
+Analyze the venue architecture. Generate a detailed prompt that decorates this venue in the selected style, atmosphere, and function type, while maintaining its physical layout and structure.`;
+  }
+
+  const userContent = [{ type: "text", text: userText }];
+  if (venueBase64) {
+    userContent.push({
+      type: "image_url",
+      image_url: {
+        url: `data:${venueMime || "image/jpeg"};base64,${venueBase64}`,
+        detail: "high",
+      },
+    });
+  }
+  if (decorBase64) {
+    userContent.push({
+      type: "image_url",
+      image_url: {
+        url: `data:${decorMime || "image/jpeg"};base64,${decorBase64}`,
+        detail: "high",
+      },
+    });
+  }
 
   return [
     { role: "system", content: SYSTEM_PROMPT },
     {
       role: "user",
-      content: [
-        { type: "text", text: userText },
-        {
-          type: "image_url",
-          image_url: {
-            url: `data:${venueMime || "image/jpeg"};base64,${venueBase64}`,
-            detail: "high",
-          },
-        },
-        {
-          type: "image_url",
-          image_url: {
-            url: `data:${decorMime || "image/jpeg"};base64,${decorBase64}`,
-            detail: "high",
-          },
-        },
-      ],
+      content: userContent,
     },
   ];
 }
@@ -640,8 +745,8 @@ async function analyzeWithGroq(
   timing,
   userPrompt,
 ) {
-  const venueBase64 = venueBuffer.toString("base64");
-  const decorBase64 = decorBuffer.toString("base64");
+  const venueBase64 = venueBuffer ? venueBuffer.toString("base64") : null;
+  const decorBase64 = decorBuffer ? decorBuffer.toString("base64") : null;
 
   const messages = buildGroqMessages(
     venueBase64,
@@ -1308,17 +1413,9 @@ router.post(
         });
       }
 
-      if (!isCloudinaryConfigured) {
-        return res.status(503).json({
-          success: false,
-          error:
-            "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
-        });
-      }
-
       const venueFile = req.files?.venueImage?.[0];
       const decorFile = req.files?.decorImage?.[0];
-      const hasImages = !!(venueFile && decorFile);
+      const hasImages = !!(venueFile || decorFile);
 
       const {
         style,
@@ -1363,9 +1460,10 @@ router.post(
 
       timer.mark("creditCheck");
 
-      // ─ Detect aspect ratio (from venue image or default landscape) ─
-      const dimensions = hasImages
-        ? await detectAspectRatio(venueFile.buffer)
+      // ─ Detect aspect ratio (from venue/decor image or default landscape) ─
+      const fileForAspect = venueFile || decorFile;
+      const dimensions = fileForAspect
+        ? await detectAspectRatio(fileForAspect.buffer)
         : { width: 1024, height: 768, label: "4:3" };
       timer.mark("aspectRatioDetection");
 
@@ -1376,10 +1474,10 @@ router.post(
       if (hasImages && isGroqEnabled()) {
         try {
           visionResult = await analyzeWithGroq(
-            venueFile.buffer,
-            decorFile.buffer,
-            venueFile.mimetype,
-            decorFile.mimetype,
+            venueFile ? venueFile.buffer : null,
+            decorFile ? decorFile.buffer : null,
+            venueFile ? venueFile.mimetype : null,
+            decorFile ? decorFile.mimetype : null,
             style,
             functionType,
             atmosphere,
@@ -1515,6 +1613,7 @@ router.post(
         generatedImages = await persistGeneratedMoodboardImages(
           rawGeneratedImages,
           functionType,
+          req,
         );
       } catch (persistErr) {
         console.error(
@@ -1638,14 +1737,6 @@ router.post(
         });
       }
 
-      if (!isCloudinaryConfigured) {
-        return res.status(503).json({
-          success: false,
-          error:
-            "Cloudinary is not configured. Generated images must be stored in Cloudinary.",
-        });
-      }
-
       if (!req.file) {
         return res
           .status(400)
@@ -1720,7 +1811,7 @@ router.post(
         throw apiErr; // let outer handler return an error response
       }
 
-      result = await persistSingleGeneratedMoodboardImage(result, functionType);
+      result = await persistSingleGeneratedMoodboardImage(result, functionType, req);
 
       return res.json({
         success: true,
