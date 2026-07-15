@@ -22,7 +22,7 @@ export default function PlannerCateringAI() {
         description: "Review generated menus and export beautifully formatted cards."
       }
     ],
-    redirectUrl: "https://catering-ai.vercel.app/",
+    redirectUrl: "https://catering-ai-git-main-pratikbths-projects.vercel.app/studio",
     buttonText: "Proceed to Catering AI"
   };
 
