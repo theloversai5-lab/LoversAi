@@ -3,6 +3,7 @@ import express from "express";
 import User from "../models/User.js";
 import { protect } from "../middleware/auth.js";
 import { WELCOME_CREDITS } from "../constants/credits.js";
+import creditService from "../services/creditService.js";
 
 const router = express.Router();
 
@@ -20,17 +21,16 @@ router.get("/user-credits", protect, async (req, res) => {
       });
     }
 
+    const productType = req.query.wallet || "couple";
+    const walletData = await creditService.getWallet(user._id, productType);
+
     res.json({
       success: true,
       user: {
         id: user._id,
         email: user.email,
-        firebaseUid: user.firebaseUid,
-        credits: user.credits,
-        creditTransactions: user.creditTransactions,
-        subscriptionStatus: user.subscriptionStatus,
-        isPro: user.isPro,
-        plan: user.plan,
+        credits: walletData.credits,
+        wallet: walletData.wallet,
       }
     });
   } catch (err) {
@@ -49,7 +49,11 @@ router.get("/user-credits", protect, async (req, res) => {
  */
 router.post("/gift-credits", protect, async (req, res) => {
   try {
-    const { amount = 101, reason = "Gift" } = req.body;
+    const { amount = 101, reason = "Gift", productType } = req.body;
+    
+    if (!productType) {
+      return res.status(400).json({ success: false, error: "Missing required 'productType'" });
+    }
 
     if (typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({ 
@@ -60,22 +64,14 @@ router.post("/gift-credits", protect, async (req, res) => {
 
     const user = req.user;
 
-    const oldCredits = user.credits;
-    user.credits = Math.max(0, user.credits + amount);
-
-    // Record transaction
-    user.creditTransactions.push({
-      type: 'credit',
-      amount: amount,
-      description: reason,
-      remainingBalance: user.credits,
-      reference: 'gift',
-      metadata: {
-        giftedAt: new Date().toISOString()
-      }
-    });
-
-    await user.save();
+    const result = await creditService.addCredits(
+      user._id,
+      amount,
+      'bonus',
+      `debug_gift_${Date.now()}`,
+      { reason },
+      productType
+    );
 
     res.json({
       success: true,
@@ -83,8 +79,7 @@ router.post("/gift-credits", protect, async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        oldCredits: oldCredits,
-        newCredits: user.credits,
+        newCredits: result.wallet.balance,
         creditsAdded: amount,
         reason: reason,
       }
@@ -106,30 +101,31 @@ router.post("/initialize-welcome-credits", protect, async (req, res) => {
   try {
     const user = req.user;
     const initialCredits = WELCOME_CREDITS;
+    const { productType } = req.body;
+    
+    if (!productType) {
+      return res.status(400).json({ success: false, error: "Missing required 'productType'" });
+    }
+
+    const walletData = await creditService.getWallet(user._id, productType);
 
     // Only initialize if user has 0 credits
-    if (user.credits > 0) {
+    if (walletData.credits > 0) {
       return res.status(400).json({ 
         success: false, 
-        error: `User already has ${user.credits} credits. Cannot initialize.`,
-        currentCredits: user.credits
+        error: `User already has ${walletData.credits} credits. Cannot initialize.`,
+        currentCredits: walletData.credits
       });
     }
 
-    user.credits = initialCredits;
-    
-    user.creditTransactions.push({
-      type: 'credit',
-      amount: initialCredits,
-      description: 'Welcome credits initialization',
-      remainingBalance: user.credits,
-      reference: 'welcome',
-      metadata: {
-        initializedAt: new Date().toISOString()
-      }
-    });
-
-    await user.save();
+    const result = await creditService.addCredits(
+      user._id,
+      initialCredits,
+      'free_plan',
+      `welcome_init_${Date.now()}`,
+      { initializedAt: new Date().toISOString() },
+      productType
+    );
 
     res.json({
       success: true,
@@ -137,7 +133,7 @@ router.post("/initialize-welcome-credits", protect, async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        credits: user.credits,
+        credits: result.wallet.balance,
       }
     });
   } catch (err) {

@@ -1,7 +1,8 @@
 import User from "../models/User.js";
+import creditService from "../services/creditService.js";
 
 export const getAdminProfile = async (req, res) => {
-  const user = req.adminUser || (await User.findOne({ firebaseUid: req.user.uid }));
+  const user = req.adminUser || (await User.findById(req.user._id));
 
   if (!user) {
     return res.status(404).json({ success: false, error: "Admin user not found" });
@@ -15,7 +16,7 @@ export const getAdminProfile = async (req, res) => {
       fullName: user.fullName,
       isAdmin: user.isAdmin,
       plan: user.plan,
-      credits: user.credits,
+      plan: user.plan,
       subscriptionStatus: user.subscriptionStatus,
     }
   });
@@ -33,7 +34,7 @@ export const getUserList = async (req, res) => {
       isPro: user.isPro,
       isAdmin: user.isAdmin,
       isBlocked: user.isBlocked,
-      credits: user.credits,
+      isBlocked: user.isBlocked,
       subscriptionStatus: user.subscriptionStatus,
       lastPaymentStatus: user.lastPaymentStatus,
       totalSpent: user.totalSpent,
@@ -65,7 +66,7 @@ export const getUserById = async (req, res) => {
         isBlocked: user.isBlocked,
         blockedAt: user.blockedAt,
         blockedReason: user.blockedReason,
-        credits: user.credits,
+        blockedReason: user.blockedReason,
         subscriptionStatus: user.subscriptionStatus,
         subscriptionRenewsAt: user.subscriptionRenewsAt,
         lastPaymentStatus: user.lastPaymentStatus,
@@ -85,7 +86,7 @@ export const getUserById = async (req, res) => {
 };
 
 export const updateUserById = async (req, res) => {
-  const allowed = ["plan", "isPro", "credits", "isAdmin", "subscriptionStatus", "fullName", "isBlocked", "blockedReason"];
+  const allowed = ["plan", "isPro", "isAdmin", "subscriptionStatus", "fullName", "isBlocked", "blockedReason"];
   const updates = Object.keys(req.body).reduce((acc, key) => {
     if (allowed.includes(key)) acc[key] = req.body[key];
     return acc;
@@ -96,9 +97,6 @@ export const updateUserById = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
     Object.assign(user, updates);
-    if (typeof updates.credits !== "undefined" && Number.isFinite(Number(updates.credits))) {
-      user.credits = Number(updates.credits);
-    }
 
     // Handle blocking/unblocking
     if (updates.isBlocked !== undefined) {
@@ -203,7 +201,12 @@ export const unblockUser = async (req, res) => {
 
 export const adjustCredits = async (req, res) => {
   try {
-    const { amount, reason } = req.body;
+    const { amount, reason, productType } = req.body;
+    
+    if (!productType) {
+      return res.status(400).json({ success: false, error: "Missing required 'productType' parameter" });
+    }
+    
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
@@ -212,25 +215,36 @@ export const adjustCredits = async (req, res) => {
       return res.status(400).json({ success: false, error: "Invalid credit amount" });
     }
 
-    const oldCredits = user.credits;
-    user.credits = Math.max(0, user.credits + creditAmount);
-
-    // Add transaction record
-    user.creditTransactions.push({
-      type: creditAmount > 0 ? 'credit' : 'debit',
-      amount: Math.abs(creditAmount),
-      description: reason || `Admin credit adjustment: ${creditAmount > 0 ? '+' : ''}${creditAmount}`,
-      reference: 'admin_adjustment',
-      remainingBalance: user.credits,
-      metadata: { adminAction: true, oldBalance: oldCredits }
-    });
-
-    await user.save();
+    let updatedWallet;
+    
+    if (creditAmount > 0) {
+      const result = await creditService.addCredits(
+        user._id,
+        creditAmount,
+        'admin_grant',
+        `admin_adj_${Date.now()}`,
+        { reason, adminAction: true },
+        productType
+      );
+      updatedWallet = result.wallet;
+    } else if (creditAmount < 0) {
+      const result = await creditService.deductCredits(
+        user._id,
+        Math.abs(creditAmount),
+        'admin_deduct',
+        `admin_adj_${Date.now()}`,
+        { reason, adminAction: true },
+        productType
+      );
+      updatedWallet = result.wallet;
+    } else {
+      return res.status(400).json({ success: false, error: "Amount cannot be zero" });
+    }
 
     res.json({
       success: true,
       message: `Credits ${creditAmount > 0 ? 'added' : 'deducted'} successfully`,
-      user: { id: user._id, credits: user.credits, oldCredits }
+      user: { id: user._id, credits: updatedWallet.balance }
     });
   } catch (err) {
     console.error("adjustCredits error:", err);

@@ -21,6 +21,7 @@ import authRoutes from "./routes/authRoutes.js"; // ✅ New JWT auth routes
 import creditRoutes from "./routes/creditRoutes.js"; // ✅ Credit System
 import debugRoutes from "./routes/debugRoutes.js";
 import adminRoutes from "./admin/adminRoutes.js";
+import plannerAdminRoutes from "./admin/plannerAdminRoutes.js";
 import quoteRoutes from "./routes/quoteRoutes.js"; // ✅ Quote/Bid routes
 import vendorRoutes from "./routes/vendorRoutes.js"; // ✅ Vendor System
 import bidRoutes from "./routes/bidRoutes.js"; // ✅ Bid System
@@ -453,6 +454,7 @@ async function startServer() {
     app.use("/api/moodboard", moodboardRoutes); // ✅ Couple Moodboard
     app.use("/api/debug", debugRoutes); // 🔍 Debug endpoints - REMOVE IN PRODUCTION
     app.use("/api/admin", adminRoutes); // 🔒 Admin panel backend APIs
+    app.use("/api/admin/planner", plannerAdminRoutes); // 🔒 Planner Admin panel backend APIs
 
     // Public vendor listing (no auth required)
     const vendorPublicRoutes = (await import("./routes/vendorRoutes.js"))

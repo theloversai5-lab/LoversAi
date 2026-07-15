@@ -82,14 +82,18 @@ router.post("/register", async (req, res) => {
 
     const user = await User.create(userData);
 
-    // Grant Initial Free Credits and create ledger entry
+    // Grant Initial Free Credits and create ledger entry for couple wallet
     await creditService.addCredits(
       user._id,
       PLAN_CREDITS.free,
       TRANSACTION_SOURCES.FREE_PLAN,
       "signup",
-      { message: "Initial free credits allocation" }
+      { message: "Initial free credits allocation" },
+      "couple"
     );
+
+    // Eagerly initialize Planner Wallet (grants 1 free credit automatically)
+    await creditService.getWallet(user._id, "planner");
 
     await syncPlannerUserFromAuth(user, "signup");
     
@@ -330,14 +334,18 @@ router.post("/google", async (req, res) => {
         loginCount: 1,
       });
 
-      // Grant Initial Free Credits and create ledger entry
+      // Grant Initial Free Credits and create ledger entry for couple wallet
       await creditService.addCredits(
         user._id,
         PLAN_CREDITS.free,
         TRANSACTION_SOURCES.FREE_PLAN,
-        "signup_google",
-        { message: "Initial free credits allocation" }
+        "google_signup",
+        { message: "Initial free credits allocation" },
+        "couple"
       );
+
+      // Eagerly initialize Planner Wallet (grants 1 free credit automatically)
+      await creditService.getWallet(user._id, "planner");
 
       await syncPlannerUserFromAuth(user, "signup");
 
@@ -549,14 +557,18 @@ router.post("/firebase-login", async (req, res) => {
         loginCount: 1,
       });
 
-      // Grant Initial Free Credits and create ledger entry
+      // Grant Initial Free Credits and create ledger entry for couple wallet
       await creditService.addCredits(
         user._id,
         PLAN_CREDITS.free,
         TRANSACTION_SOURCES.FREE_PLAN,
         "signup_firebase",
-        { message: "Initial free credits allocation" }
+        { message: "Initial free credits allocation" },
+        "couple"
       );
+
+      // Eagerly initialize Planner Wallet (grants 1 free credit automatically)
+      await creditService.getWallet(user._id, "planner");
 
       await syncPlannerUserFromAuth(user, "signup");
     } else {

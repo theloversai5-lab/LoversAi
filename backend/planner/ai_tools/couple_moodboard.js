@@ -1444,14 +1444,16 @@ router.post(
           cost,
           TRANSACTION_SOURCES.AI_GENERATION,
           `mb_${Date.now()}`,
-          { functionType, style, action: "generate" }
+          { functionType, style, action: "generate" },
+          "planner"
         );
       } catch (err) {
         if (err.code === "INSUFFICIENT_CREDITS") {
+          const currentWallet = await creditService.getWallet(user._id, "planner");
           return res.status(402).json({
             success: false,
             error: "Insufficient credits",
-            currentCredits: user.credits || 0,
+            currentCredits: currentWallet.credits,
             requiredCredits: cost,
           });
         }
@@ -1597,7 +1599,7 @@ router.post(
         }
 
         // REFUND: All generations failed
-        await creditService.refundCredits(user._id, cost, "generate_failed", { reason: "all_generations_failed", details: firstError }).catch(console.error);
+        await creditService.refundCredits(user._id, cost, "generate_failed", { reason: "all_generations_failed", details: firstError }, "planner").catch(console.error);
 
         return res.status(503).json({
           success: false,
@@ -1663,11 +1665,11 @@ router.post(
         }
         
         // Fetch fresh user balance to return in response
-        const freshUser = await User.findById(user._id).select("credits");
+        const freshWallet = await creditService.getWallet(user._id, "planner");
 
         responseData.creditInfo = {
           deducted: cost,
-          newBalance: freshUser ? freshUser.credits : 0,
+          newBalance: freshWallet.credits,
         };
       } catch (deductErr) {
         console.error("⚠️ [Moodboard] Subscription tracking error:", deductErr.message);
@@ -1686,7 +1688,7 @@ router.post(
       const cost = OPERATION_COSTS.COUPLE_MOODBOARD_GENERATION;
       try {
         if (req.user && req.user._id) {
-          await creditService.refundCredits(req.user._id, cost, "pipeline_crash", { reason: error.message });
+          await creditService.refundCredits(req.user._id, cost, "pipeline_crash", { reason: error.message }, "planner");
         }
       } catch (refundErr) {
         console.error("Failed to refund on crash:", refundErr);
@@ -1765,14 +1767,16 @@ router.post(
           cost,
           TRANSACTION_SOURCES.AI_GENERATION,
           `mb_edit_${Date.now()}`,
-          { functionType, action: "edit-image" }
+          { functionType, action: "edit-image" },
+          "planner"
         );
       } catch (err) {
         if (err.code === "INSUFFICIENT_CREDITS") {
+          const currentWallet = await creditService.getWallet(user._id, "planner");
           return res.status(402).json({
             success: false,
             error: "Insufficient credits for edit",
-            currentCredits: user.credits || 0,
+            currentCredits: currentWallet.credits,
             requiredCredits: cost,
           });
         }
@@ -1804,7 +1808,7 @@ router.post(
       } catch (apiErr) {
         // Refund on edit failure
         try {
-          await creditService.refundCredits(user._id, cost, "edit_failed", { action: "edit-image" });
+          await creditService.refundCredits(user._id, cost, "edit_failed", { action: "edit-image" }, "planner");
         } catch (rbErr) {
           console.error("⚠️ [Moodboard] Failed to refund credits after edit-image error:", rbErr);
         }

@@ -4,6 +4,7 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
+import creditService from '../services/creditService.js';
 import dotenv from 'dotenv';
 import { Resend } from 'resend';
 
@@ -134,9 +135,18 @@ router.post('/verify', protect, async (req, res) => {
     // Payment is valid — Provide the credits/subscription to the user
     const user = await User.findById(req.user._id);
     
-    // Add Credits
+    const productType = planId.startsWith('planner') ? 'planner' : 'couple';
+    
+    // Add Credits via CreditService
     if (plan.credits) {
-      user.credits = (user.credits || 0) + plan.credits;
+      await creditService.addCredits(
+        user._id,
+        plan.credits,
+        'purchased', // TRANSACTION_SOURCES.PURCHASED
+        `rzp_${razorpay_payment_id}`,
+        { planId, razorpay_order_id },
+        productType
+      );
     }
     
     // Upgrade subscription if applicable
@@ -158,7 +168,6 @@ router.post('/verify', protect, async (req, res) => {
       success: true,
       message: 'Payment successful',
       user: {
-        credits: user.credits,
         isPro: user.isPro,
         plan: user.plan
       }
@@ -400,8 +409,16 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         const plan = PLANS[planId];
 
         if (user && plan) {
+          const productType = planId.startsWith('planner') ? 'planner' : 'couple';
           if (plan.credits) {
-            user.credits = (user.credits || 0) + plan.credits;
+            await creditService.addCredits(
+              user._id,
+              plan.credits,
+              'purchased',
+              `webhook_${payment.id || Date.now()}`,
+              { planId },
+              productType
+            );
           }
           if (plan.type === 'subscription') {
             user.isPro = true;
@@ -428,10 +445,33 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 ================================================================ */
 router.get('/credits', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('credits');
-    res.json({ success: true, credits: user.credits || 0 });
+    const productType = req.query.wallet;
+    if (!productType) {
+      return res.status(400).json({ success: false, error: "Missing required 'wallet' query parameter. Must be one of: couple, planner, etc." });
+    }
+    const walletData = await creditService.getWallet(req.user._id, productType);
+    res.json({ success: true, credits: walletData.credits || 0, wallet: walletData.wallet, plan: walletData.plan, productType: walletData.productType });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to fetch credits' });
+  }
+});
+
+/* ================================================================
+   GET /api/payment/transactions — Get user transaction history
+================================================================ */
+router.get('/transactions', protect, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const type = req.query.type || null;
+    const source = req.query.source || null;
+    const productType = req.query.wallet || "couple";
+
+    const data = await creditService.getTransactionHistory(req.user._id, { page, limit, type, source, productType });
+    res.json({ success: true, ...data });
+  } catch (error) {
+    console.error('Transaction fetch error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch transactions' });
   }
 });
 

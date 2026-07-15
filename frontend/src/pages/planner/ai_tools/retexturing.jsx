@@ -5,6 +5,8 @@ import { Toaster, toast } from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { aiAPI, paymentAPI, getApiBaseUrl, getToken } from "../../../api/api";
+import PlannerWallet from "../PlannerWallet";
+import PlannerSubscriptionModal from "../PlannerSubscriptionModal";
 
 const RetexturingTool = ({ onClose }) => {
   // Authentication
@@ -23,6 +25,8 @@ const RetexturingTool = ({ onClose }) => {
   const [, setAvailableThemes] = useState({});
   const [userCredits, setUserCredits] = useState(0);
   const [loadingCredits, setLoadingCredits] = useState(true);
+  const [showWallet, setShowWallet] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [, setCreditCheckResult] = useState(null);
   const [, setCreditInfo] = useState({
     currentCredits: 0,
@@ -124,7 +128,7 @@ const RetexturingTool = ({ onClose }) => {
 
     try {
       setLoadingCredits(true);
-      const data = await paymentAPI.getCredits();
+      const data = await paymentAPI.getCredits('planner');
 
       if (data.success) {
         setUserCredits(data.credits || 0);
@@ -192,23 +196,12 @@ const RetexturingTool = ({ onClose }) => {
   };
 
   const calculateCreditCost = (
-    count = 1,
-    model = "flux-kontext-pro",
-    theme = "",
+    imageCount = 1,
+    modelType = "flux-kontext-pro",
+    theme = null,
   ) => {
-    if (isPresetTheme(theme)) {
-      return 0;
-    }
-
-    const baseCost = 10;
-    let totalCost = baseCost * count;
-
-    // Premium models cost more
-    if (model.includes("pro") || model.includes("max")) {
-      totalCost += 5 * count;
-    }
-
-    return totalCost;
+    const perImageCost = 1;
+    return perImageCost * parseInt(imageCount);
   };
 
   // Upload functions
@@ -294,17 +287,11 @@ const RetexturingTool = ({ onClose }) => {
     }
 
     // Check if user has enough credits
-    // const creditsNeeded = calculateCreditCost(imageCount, modelType);
-    // if (userCredits < creditsNeeded) {
-    //   toast.error(`Insufficient credits! You need ${creditsNeeded} credits but have only ${userCredits}.`);
-
-    //   // Show option to go to pricing page
-    //   if (window.confirm(`You need ${creditsNeeded - userCredits} more credits. Go to pricing page to purchase more?`)) {
-    //     sessionStorage.setItem('redirectAfterPurchase', window.location.pathname);
-    //     navigate('/pricing');
-    //   }
-    //   return;
-    // }
+    const creditsNeeded = calculateCreditCost(imageCount, modelType, selectedTheme);
+    if (userCredits < creditsNeeded) {
+      setShowWallet(true);
+      return;
+    }
 
     setIsGenerating(true);
 
@@ -519,11 +506,6 @@ const RetexturingTool = ({ onClose }) => {
     }
   };
 
-  const handleBuyCredits = () => {
-    sessionStorage.setItem("redirectAfterPurchase", window.location.pathname);
-    navigate("/pricing");
-  };
-
   const closeAndReset = () => {
     setSelectedImage(null);
     setSelectedTheme("");
@@ -635,11 +617,9 @@ const RetexturingTool = ({ onClose }) => {
               </span>
               
               {/* Dynamic Credits Display */}
-              <button
-                onClick={fetchUserCredits}
-                disabled={loadingCredits || isGenerating}
-                className="bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all text-white ml-1 cursor-pointer disabled:opacity-50"
-                title="Click to refresh credits"
+              <button 
+                onClick={() => setShowSubscriptionModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 text-[11px] font-medium text-amber-100 transition-all active:scale-95 select-none"
               >
                 <span>🎫</span>
                 <span>{loadingCredits ? "..." : userCredits.toLocaleString()} Credits</span>
@@ -649,8 +629,13 @@ const RetexturingTool = ({ onClose }) => {
           </div>
         </header>
 
-        {/* Main Workspace White Card Panel */}
+      {showWallet ? (
+        <div className="flex-1 flex flex-col h-full min-h-0 bg-[#0a0a0a] rounded-[32px] p-4 lg:p-6 shadow-2xl relative overflow-y-auto custom-scrollbar">
+          <PlannerWallet onClose={() => setShowWallet(false)} onUpgrade={() => navigate('/pricing')} />
+        </div>
+      ) : (
         <main className="max-w-[1400px] mx-auto w-full flex-1 lg:min-h-0 glass-card-strong text-white rounded-[28px] p-4 md:p-5 lg:p-6 mb-3">
+          {/* Main Workspace White Card Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 lg:h-full lg:min-h-0">
             
             {/* Column 1: Upload Image (Step 1) */}
@@ -912,14 +897,12 @@ const RetexturingTool = ({ onClose }) => {
                     disabled={
                       !selectedImage ||
                       isGenerating ||
-                      (apiStatus === "error" && !isPresetTheme(selectedTheme)) ||
-                      userCredits < currentCreditCost
+                      (apiStatus === "error" && !isPresetTheme(selectedTheme))
                     }
                     className={`w-full py-2 px-4 rounded-xl font-bold text-[12px] transition-all duration-300 cursor-pointer block text-center shadow-md ${
                       !selectedImage ||
                       isGenerating ||
-                      (apiStatus === "error" && !isPresetTheme(selectedTheme)) ||
-                      userCredits < currentCreditCost
+                      (apiStatus === "error" && !isPresetTheme(selectedTheme))
                         ? "bg-white/5 text-white/20 border border-white/5 cursor-not-allowed shadow-none"
                         : "bg-gradient-to-r from-loverai-gold to-amber-700 text-loverai-dark hover:brightness-110 shadow-lg hover:shadow-loverai-gold/20 transform active:scale-95"
                     }`}
@@ -940,19 +923,6 @@ const RetexturingTool = ({ onClose }) => {
                       <p className="text-[9px] text-gray-400 font-semibold">
                         Cost: {currentCreditCost} Credits
                       </p>
-                      {userCredits < currentCreditCost && (
-                        <div className="mt-1.5 p-1.5 bg-red-50 border border-red-200 rounded-lg max-w-[220px] mx-auto">
-                          <p className="text-[8px] text-red-600 font-bold leading-tight">
-                            Insufficient credits! (Need {currentCreditCost - userCredits} more)
-                          </p>
-                          <button
-                            onClick={handleBuyCredits}
-                            className="mt-1 text-[8px] bg-red-600 hover:bg-red-700 text-white font-bold px-2 py-0.5 rounded transition-colors cursor-pointer"
-                          >
-                            Buy Credits
-                          </button>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -1057,9 +1027,15 @@ const RetexturingTool = ({ onClose }) => {
 
           </div>
         </main>
-
-
+      )}
       </div>
+
+      {showSubscriptionModal && (
+        <PlannerSubscriptionModal 
+          isOpen={showSubscriptionModal} 
+          onClose={() => setShowSubscriptionModal(false)} 
+        />
+      )}
     </>
   );
 };

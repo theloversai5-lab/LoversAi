@@ -2,6 +2,7 @@
 import crypto from "crypto";
 import User from "../models/User.js";
 import Subscription from "../models/Subscription.js";
+import creditService from "../services/creditService.js";
 
 // PLAN → MONTHLY CREDITS
 const PLAN_CREDITS = {
@@ -10,9 +11,9 @@ const PLAN_CREDITS = {
   pro: 9999,
   free: 100,
 
-  planner_basic: 1300,
-  planner_premium: 6500,
-  planner_pro: 9999,
+  planner_basic: 30,
+  planner_premium: 80,
+  planner_pro: 120,
 
   couple_basic: 12,
   couple_premium: 32,
@@ -145,9 +146,19 @@ async function handleSubscriptionCreated(data) {
     // Detect plan from variant name
     const variantNameLower = variantName.toLowerCase();
     let plan = "basic";
-    if (variantNameLower.includes("premium")) plan = "premium";
-    else if (variantNameLower.includes("pro")) plan = "pro";
-    else if (variantNameLower.includes("basic")) plan = "basic";
+    
+    let prefix = "";
+    if (variantNameLower.includes("planner")) prefix = "planner_";
+    else if (variantNameLower.includes("couple")) prefix = "couple_";
+    
+    if (variantNameLower.includes("elite")) plan = prefix + "elite";
+    else if (variantNameLower.includes("premium")) plan = prefix + "premium";
+    else if (variantNameLower.includes("pro")) plan = prefix + "pro";
+    else if (variantNameLower.includes("basic")) plan = prefix + "basic";
+    else plan = prefix + "basic";
+    
+    // If no prefix matched but it's a generic plan (fallback)
+    if (plan === "_basic") plan = "basic";
     
     const credits = PLAN_CREDITS[plan] || 0;
     const price = PLAN_PRICES[plan] || 0;
@@ -406,8 +417,18 @@ async function handlePaymentSuccess(data) {
     // Update user credits
     const user = await User.findById(subscription.userId);
     if (user) {
-      const oldCredits = user.credits;
-      user.credits += creditsToAdd;
+      const oldCredits = user.credits || 0;
+      const productType = subscription.plan?.startsWith('planner') ? 'planner' : 'couple';
+      
+      await creditService.addCredits(
+        user._id,
+        creditsToAdd,
+        'purchased',
+        `ls_sub_${subscription._id}_${Date.now()}`,
+        { planId: subscription.plan },
+        productType
+      );
+      
       user.lastPaymentStatus = "success";
       user.lastPaymentAt = new Date();
       user.isPro = true;
@@ -426,8 +447,6 @@ async function handlePaymentSuccess(data) {
       console.log(`User: ${user.email}`);
       console.log(`Plan: ${subscription.plan}`);
       console.log(`Credits added: ${creditsToAdd}`);
-      console.log(`Old credits: ${oldCredits}`);
-      console.log(`New credits: ${user.credits}`);
       console.log(`Total spent: $${user.totalSpent || 0}`);
       console.log(`====================================\n`);
     } else {
@@ -547,10 +566,15 @@ async function handleOrderCreated(data) {
         console.log(`Updated user with lemonCustomerId: ${customerId}`);
       }
       
-      // Detect plan from order total
+      // Detect plan from custom_data or order total
       let plan = "basic";
-      if (total >= 99) plan = "premium";
-      else if (total >= 29) plan = "basic";
+      if (attributes.custom_data && attributes.custom_data.plan) {
+        plan = attributes.custom_data.plan;
+      } else {
+        if (total >= 149) plan = "pro";
+        else if (total >= 99) plan = "premium";
+        else if (total >= 29) plan = "basic";
+      }
       
       const credits = PLAN_CREDITS[plan] || 0;
       
@@ -578,9 +602,18 @@ async function handleOrderCreated(data) {
         await subscription.save();
         console.log(`✅ Created new subscription: ${subscription._id}`);
         
-        // If order is paid, add credits to user
         if (status === "paid") {
-          user.credits += credits;
+          const productType = plan.startsWith('planner') ? 'planner' : 'couple';
+          
+          await creditService.addCredits(
+            user._id,
+            credits,
+            'purchased',
+            `ls_order_${orderId}`,
+            { planId: plan },
+            productType
+          );
+          
           user.plan = plan;
           user.isPro = true;
           user.subscriptionStatus = "active";
@@ -626,9 +659,9 @@ export const createCheckout = async (req, res) => {
       premium: { price: 99, credits: 6500, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
       pro: { price: 149, credits: 9999, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
 
-      planner_basic: { price: 29, credits: 1300, variant: "246e6b0e-526d-4a6b-8584-25e3f2340301" },
-      planner_premium: { price: 99, credits: 6500, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
-      planner_pro: { price: 149, credits: 9999, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+      planner_basic: { price: 29, credits: 30, variant: "246e6b0e-526d-4a6b-8584-25e3f2340301" },
+      planner_premium: { price: 99, credits: 80, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
+      planner_pro: { price: 149, credits: 120, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
 
       couple_basic: { price: 10, credits: 12, variant: "246e6b0e-526d-4a6b-8584-25e3f2340301" },
       couple_premium: { price: 20, credits: 32, variant: "660a017c-a10a-4db4-b03d-04e2970382e5" },
@@ -648,6 +681,7 @@ export const createCheckout = async (req, res) => {
       `?checkout[email]=${encodeURIComponent(email)}` +
       `&checkout[custom][user_id]=${user._id}` +
       `&checkout[custom][firebase_uid]=${uid}` +
+      `&checkout[custom][plan]=${plan}` +
       `&checkout[name]=${encodeURIComponent(user.fullName || email)}` +
       `&checkout[custom][checkout_session]=${user.checkoutSessionId}`;
     

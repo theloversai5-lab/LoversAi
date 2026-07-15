@@ -16,7 +16,8 @@ export default function PlannerQuickMenu({
     currentUser?.email?.split("@")[0] ||
     "Planner";
 
-  const isPlannerUser = currentUser?.role === "planner";
+  const isAdmin = currentUser?.role === "admin" || currentUser?.isAdmin;
+  const isPlannerUser = currentUser?.role === "planner" || isAdmin;
   const buttonLabel = isPlannerUser ? userName.charAt(0).toUpperCase() : null;
 
   useEffect(() => {
@@ -48,6 +49,10 @@ export default function PlannerQuickMenu({
     { label: "Pitch with AI", to: "/planner-ai-tools" },
     { label: "Profile", to: "/planner/profile" },
   ];
+
+  if (isAdmin) {
+    plannerLinks.push({ label: "Admin Portal", to: "/admin/planner-subscriptions" });
+  }
 
   const menuLinks = isPlannerUser ? plannerLinks : guestLinks;
 

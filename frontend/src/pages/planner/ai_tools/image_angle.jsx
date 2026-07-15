@@ -5,6 +5,8 @@ import { Toaster, toast } from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { aiAPI, paymentAPI, getApiBaseUrl, getToken } from "../../../api/api";
+import PlannerWallet from "../PlannerWallet";
+import PlannerSubscriptionModal from "../PlannerSubscriptionModal";
 
 const AngleChangeComponent = ({ onClose }) => {
   // Authentication
@@ -19,17 +21,18 @@ const AngleChangeComponent = ({ onClose }) => {
   const [generatedResult, setGeneratedResult] = useState(null);
   const [generationHistory, setGenerationHistory] = useState([]);
   const [apiStatus, setApiStatus] = useState("checking");
+  const [showWallet, setShowWallet] = useState(false);
   const [userCredits, setUserCredits] = useState(0);
   const [loadingCredits, setLoadingCredits] = useState(true);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [creditInfo, setCreditInfo] = useState({
     currentCredits: 0,
-    creditsNeeded: 15, // Default 15 credits per angle change
+    creditsNeeded: 1, // 1 credit per image generation
     hasEnough: false,
   });
 
   // Added model type state
   const [modelType] = useState("flux-kontext-pro");
-  const RESULT_IMAGE_URL = "/images/ai_tools_img/image-2.webp";
 
   const fileInputRef = useRef(null);
 
@@ -40,28 +43,28 @@ const AngleChangeComponent = ({ onClose }) => {
       name: "Front View",
       desc: "Main entrance perspective",
       icon: "🏛️",
-      creditCost: 15,
+      creditCost: 1,
     },
     {
       id: "aerial",
       name: "Aerial View",
       desc: "Bird's eye view from above",
       icon: "🛰️",
-      creditCost: 15,
+      creditCost: 1,
     },
     {
       id: "side",
       name: "Side View",
       desc: "Side profile view",
       icon: "↔️",
-      creditCost: 15,
+      creditCost: 1,
     },
     {
       id: "corner",
       name: "Corner View",
       desc: "Diagonal corner perspective",
       icon: "↗️",
-      creditCost: 15,
+      creditCost: 1,
     },
   ];
 
@@ -117,7 +120,7 @@ const AngleChangeComponent = ({ onClose }) => {
     try {
       setLoadingCredits(true);
 
-      const data = await paymentAPI.getCredits();
+      const data = await paymentAPI.getCredits('planner');
 
       if (data.success) {
         setUserCredits(data.credits || 0);
@@ -147,19 +150,8 @@ const AngleChangeComponent = ({ onClose }) => {
     });
   };
 
-  const calculateCreditCost = (count = 1, model = "flux-kontext-pro") => {
-    let totalCost = count * 15; // 15 credits per angle change
-
-    // Premium models cost more (if applicable)
-    if (
-      model.includes("pro") ||
-      model.includes("max") ||
-      model === "flux-kontext-pro"
-    ) {
-      totalCost += 5 * count; // Add 5 credits per angle for premium
-    }
-
-    return totalCost;
+  const calculateCreditCost = (count = 1) => {
+    return count * 1; 
   };
 
   // Handle image upload
@@ -233,6 +225,12 @@ const AngleChangeComponent = ({ onClose }) => {
       return;
     }
 
+    // Step 1: Pre-generation credit check
+    if (!creditInfo.hasEnough) {
+      setShowWallet(true);
+      return;
+    }
+
     if (!selectedImage) {
       toast.error("Please select an image first");
       return;
@@ -286,7 +284,7 @@ const AngleChangeComponent = ({ onClose }) => {
         // Refresh user credits
         if (typeof paymentAPI?.getCredits === "function") {
           try {
-            const creditData = await paymentAPI.getCredits();
+            const creditData = await paymentAPI.getCredits('planner');
             if (creditData?.success) {
               setUserCredits(creditData.credits || 0);
             }
@@ -421,6 +419,7 @@ const AngleChangeComponent = ({ onClose }) => {
           },
         }}
       />
+      <Toaster position="bottom-right" reverseOrder={false} />
 
       <div className="min-h-[100dvh] lg:h-[100dvh] bg-[#0e0e10] text-white font-['Poppins'] relative lg:overflow-hidden overflow-y-auto py-3 px-3 md:px-5 lg:px-6 flex flex-col">
         {/* Modern ambient glassmorphic glows */}
@@ -465,30 +464,26 @@ const AngleChangeComponent = ({ onClose }) => {
 
               {/* Dynamic Credits Display */}
               <button
-                onClick={fetchUserCredits}
-                disabled={loadingCredits || isGenerating}
-                className="bg-white/10 hover:bg-white/20 border border-white/15 px-4 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 transition-all text-white ml-2 cursor-pointer disabled:opacity-50"
-                title="Click to refresh credits"
+                onClick={() => setShowSubscriptionModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 text-[11px] font-medium text-amber-100 transition-all active:scale-95 select-none"
               >
                 <span>🎫</span>
                 <span>
                   {loadingCredits ? "..." : userCredits.toLocaleString()}{" "}
                   Credits
                 </span>
-                <span
-                  className={
-                    loadingCredits ? "animate-spin text-[8px]" : "text-[8px]"
-                  }
-                >
-                  🔄
-                </span>
               </button>
             </div>
           </div>
         </header>
 
-        {/* Main Workspace White Card Panel */}
+      {showWallet ? (
+        <div className="flex-1 flex flex-col h-full min-h-0 bg-[#0a0a0a] rounded-[32px] p-4 lg:p-6 shadow-2xl relative overflow-y-auto custom-scrollbar">
+          <PlannerWallet onClose={() => setShowWallet(false)} onUpgrade={() => navigate('/pricing')} />
+        </div>
+      ) : (
         <main className="max-w-[1400px] mx-auto w-full flex-1 lg:min-h-0 glass-card-strong text-white rounded-[28px] p-4 md:p-5 lg:p-6 mb-3">
+          {/* Main Workspace White Card Panel */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 lg:h-full lg:min-h-0">
             {/* Column 1: Upload Image (Step 1) */}
             <div className="flex flex-col lg:h-full lg:min-h-0">
@@ -806,6 +801,7 @@ const AngleChangeComponent = ({ onClose }) => {
             </div>
           </div>
         </main>
+      )}
 
         {/* Previous Transformations History */}
         {generationHistory.length > 0 && (
@@ -886,6 +882,13 @@ const AngleChangeComponent = ({ onClose }) => {
           </div>
         )}
       </div>
+
+      {showSubscriptionModal && (
+        <PlannerSubscriptionModal 
+          isOpen={showSubscriptionModal} 
+          onClose={() => setShowSubscriptionModal(false)} 
+        />
+      )}
     </>
   );
 };

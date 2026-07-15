@@ -10,7 +10,8 @@ const router = express.Router();
  */
 router.get("/wallet", protect, async (req, res) => {
   try {
-    const walletData = await creditService.getWallet(req.user._id);
+    const productType = req.query.wallet || "couple";
+    const walletData = await creditService.getWallet(req.user._id, productType);
     res.json({
       success: true,
       data: walletData,
@@ -31,12 +32,14 @@ router.get("/history", protect, async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const type = req.query.type;
     const source = req.query.source;
+    const productType = req.query.wallet || "couple";
 
     const history = await creditService.getTransactionHistory(req.user._id, {
       page,
       limit,
       type,
-      source
+      source,
+      productType
     });
 
     res.json({

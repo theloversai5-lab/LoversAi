@@ -9,6 +9,12 @@ const creditTransactionSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    productType: {
+      type: String,
+      enum: ["couple", "planner", "vendor", "decor", "catering", "studio"],
+      default: "couple",
+      index: true,
+    },
     type: {
       type: String,
       enum: Object.values(TRANSACTION_TYPES),
@@ -53,7 +59,7 @@ const creditTransactionSchema = new mongoose.Schema(
 );
 
 // Indexes to support fast fetching and analytics
-creditTransactionSchema.index({ userId: 1, createdAt: -1 });
-creditTransactionSchema.index({ type: 1, source: 1, createdAt: -1 });
+creditTransactionSchema.index({ userId: 1, productType: 1, createdAt: -1 });
+creditTransactionSchema.index({ type: 1, source: 1, productType: 1, createdAt: -1 });
 
 export default mongoose.model("CreditTransaction", creditTransactionSchema);

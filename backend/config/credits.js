@@ -9,6 +9,9 @@ export const PLAN_CREDITS = {
   basic: 12,
   premium: 32,
   pro: 64,
+  planner_basic: 100,
+  planner_premium: 210,
+  planner_pro: 400,
 };
 
 /**
@@ -18,7 +21,8 @@ export const PLAN_CREDITS = {
 export const OPERATION_COSTS = {
   COUPLE_MOODBOARD_GENERATION: 1, // Generate a moodboard
   COUPLE_MOODBOARD_EDIT: 1,       // Edit/modify a moodboard image
-  // Future costs can be added here (e.g. AI_VIDEO: 5)
+  PLANNER_IMAGE_GENERATION: 1,    // Planner AI Image Tools (Angle, Retexture, etc.)
+  PLANNER_VIDEO_GENERATION: 5,    // Planner AI Video Generation (Configurable placeholder)
 };
 
 /**

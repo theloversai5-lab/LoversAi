@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
 import { protect, authorize } from "../middleware/auth.js";
+import creditService from "../services/creditService.js";
 
 const router = express.Router();
 
@@ -81,7 +82,6 @@ router.post("/save-form", protect, async (req, res) => {
         profileCompleted: user.profileCompleted,
         role: user.role,
         plan: user.plan,
-        credits: user.credits,
       },
     });
   } catch (err) {
@@ -182,7 +182,6 @@ router.get("/profile", protect, async (req, res) => {
         weddingProfile: user.weddingProfile,
         plan: user.plan,
         isPro: user.isPro,
-        credits: user.credits,
         subscriptionStatus: user.subscriptionStatus,
         subscriptionRenewsAt: user.subscriptionRenewsAt,
         lastPaymentStatus: user.lastPaymentStatus,
@@ -202,42 +201,49 @@ router.get("/profile", protect, async (req, res) => {
 ================================================================ */
 router.put("/update-credits", protect, async (req, res) => {
   try {
-    const { credits, action } = req.body;
+    const { credits, action, productType } = req.body;
+
+    if (!productType) {
+      return res.status(400).json({ success: false, error: "Missing required 'productType'" });
+    }
 
     if (typeof credits !== "number") {
       return res.status(400).json({ success: false, error: "Credits must be a number" });
     }
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
-    }
-
-    let newCredits = user.credits;
-
+    let updatedWallet;
+    
     if (action === "add") {
-      newCredits += credits;
+      const result = await creditService.addCredits(
+        req.user._id, 
+        credits, 
+        "admin_grant", 
+        `admin_add_${Date.now()}`, 
+        {}, 
+        productType
+      );
+      updatedWallet = result.wallet;
     } else if (action === "subtract") {
-      if (user.credits < credits) {
-        return res.status(400).json({ success: false, error: "Insufficient credits" });
-      }
-      newCredits = Math.max(0, newCredits - credits);
-    } else if (action === "set") {
-      newCredits = credits;
+      const result = await creditService.deductCredits(
+        req.user._id, 
+        credits, 
+        "admin_deduct", 
+        `admin_sub_${Date.now()}`, 
+        {}, 
+        productType
+      );
+      updatedWallet = result.wallet;
     } else {
       return res.status(400).json({
         success: false,
-        error: "Invalid action. Use 'add', 'subtract', or 'set'",
+        error: "Invalid action. Use 'add' or 'subtract'",
       });
     }
-
-    user.credits = newCredits;
-    await user.save();
 
     res.json({
       success: true,
       message: `Credits ${action}ed successfully`,
-      credits: user.credits,
+      credits: updatedWallet.balance,
     });
   } catch (err) {
     console.error("Update credits error:", err);
@@ -259,7 +265,6 @@ router.get("/stats", protect, async (req, res) => {
         user: {
           plan: user.plan,
           isPro: user.isPro,
-          credits: user.credits,
           profileCompleted: user.profileCompleted,
           joined: user.createdAt,
         },

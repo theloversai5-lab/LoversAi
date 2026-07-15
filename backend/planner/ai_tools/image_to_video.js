@@ -4,6 +4,8 @@ import fetch from "node-fetch";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
+import creditService from "../../services/creditService.js";
+import { OPERATION_COSTS, TRANSACTION_SOURCES } from "../../config/credits.js";
 import {
   isCloudinaryConfigured,
   uploadRemoteToCloudinary,
@@ -243,19 +245,32 @@ router.post(
         });
       }
 
-      // Video generation costs 25 credits
-      const creditsNeeded = 25;
+      // Video generation costs
+      const creditsNeeded = OPERATION_COSTS.PLANNER_VIDEO_GENERATION;
 
-      // Verify user is handled by protect middleware
-      const user = req.user;
-
-      if (user.credits < creditsNeeded) {
+      // Deduct credits BEFORE generation
+      const walletData = await creditService.getWallet(req.user._id, "planner");
+      if (walletData.credits < creditsNeeded) {
         return res.status(402).json({
           success: false,
           error: "Insufficient credits",
-          currentCredits: user.credits,
+          currentCredits: walletData.credits,
           requiredCredits: creditsNeeded,
         });
+      }
+
+      let deductedData;
+      try {
+        deductedData = await creditService.deductCredits(
+          req.user._id,
+          creditsNeeded,
+          TRANSACTION_SOURCES.AI_GENERATION,
+          `video_generation_${style}_${Date.now()}`,
+          { style, tool: 'image_to_video' },
+          "planner"
+        );
+      } catch (err) {
+        return res.status(503).json({ success: false, error: "Failed to process credits for video generation. Please try again." });
       }
 
       const styleConfig = VIDEO_STYLES[style];
@@ -274,67 +289,34 @@ router.post(
       result.url = persistedVideo.url;
       result.cloudinaryPublicId = persistedVideo.cloudinaryPublicId;
 
-      // Deduct credits after successful generation
-      try {
-        const oldCredits = user.credits;
-        user.deductCredits(
-          creditsNeeded,
-          `Video generation - ${style}`,
-          "video_generation",
-          {
-            style,
-            videoUrl: result.url,
-          },
-        );
-
-        const subscription = await Subscription.findOne({
-          userId: user._id,
-        }).sort({ createdAt: -1 });
-        if (subscription) {
-          subscription.creditsUsed =
-            (subscription.creditsUsed || 0) + creditsNeeded;
-          await subscription.save();
-        }
-
-        await user.save();
-
-        return res.json({
-          success: true,
-          style: style,
-          styleName: styleConfig.name,
-          styleDescription: styleConfig.description,
-          videoUrl: result.url,
-          cloudinaryPublicId: result.cloudinaryPublicId,
-          format: result.format,
-          duration: result.duration,
-          timestamp: new Date().toISOString(),
-          creditInfo: {
-            oldBalance: oldCredits,
-            deducted: creditsNeeded,
-            newBalance: user.credits,
-          },
-        });
-      } catch (deductErr) {
-        console.error(
-          "Failed to deduct credits for video generation:",
-          deductErr,
-        );
-        return res.json({
-          success: true,
-          style: style,
-          styleName: styleConfig.name,
-          styleDescription: styleConfig.description,
-          videoUrl: result.url,
-          cloudinaryPublicId: result.cloudinaryPublicId,
-          format: result.format,
-          duration: result.duration,
-          timestamp: new Date().toISOString(),
-          creditWarning:
-            "Video generated but failed to deduct credits. Please contact support.",
-        });
-      }
+      res.json({
+        success: true,
+        style: style,
+        styleName: styleConfig.name,
+        url: result.url,
+        cloudinaryPublicId: result.cloudinaryPublicId,
+        timestamp: new Date().toISOString(),
+        creditInfo: {
+          deducted: creditsNeeded,
+          newBalance: deductedData.credits,
+        },
+      });
     } catch (err) {
       console.error("❌ Video generation error:", err);
+      // Refund on failure
+      if (err.message !== "Insufficient credits" && err.message !== "Failed to process credits for video generation. Please try again.") {
+        try {
+          await creditService.refundCredits(
+            req.user._id,
+            OPERATION_COSTS.PLANNER_VIDEO_GENERATION, // Use the same amount as deducted
+            `refund_video_generation_${req.body.style || 'unknown'}_${Date.now()}`,
+            { reason: "generation_failed", error: err.message },
+            "planner"
+          );
+        } catch (refundErr) {
+          console.error("Failed to refund video generation credits:", refundErr);
+        }
+      }
       res.status(500).json({
         success: false,
         error: "Video generation failed",
@@ -350,7 +332,7 @@ router.get("/video-styles", (req, res) => {
       id: key,
       name: VIDEO_STYLES[key].name,
       description: VIDEO_STYLES[key].description,
-      creditCost: 25,
+      creditCost: 1,
     }));
 
     res.json({

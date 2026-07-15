@@ -40,6 +40,25 @@ const subscriptionSchema = new mongoose.Schema(
       required: true,
     },
 
+    source: {
+      type: String,
+      enum: [
+        "Paid",
+        "Admin Granted",
+        "Founder",
+        "Internal Team",
+        "Developer",
+        "QA",
+        "Marketing",
+        "Support",
+        "Demo",
+        "Beta",
+        "Promotional",
+        "Investor",
+      ],
+      default: "Paid",
+    },
+
     status: {
       type: String,
       enum: ["pending", "active", "cancelled", "expired", "past_due"],

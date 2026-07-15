@@ -2,15 +2,14 @@ import User from "../models/User.js";
 
 export const verifyAdmin = async (req, res, next) => {
   try {
-    if (!req.user?.uid) {
-      return res.status(401).json({ success: false, error: "Missing user token" });
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ success: false, error: "Not authorized" });
     }
 
-    const user = await User.findOne({ firebaseUid: req.user.uid });
     const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim()).filter(Boolean);
 
-    if (user?.isAdmin || adminEmails.includes(req.user.email)) {
-      req.adminUser = user;
+    if (req.user.isAdmin || adminEmails.includes(req.user.email)) {
+      req.adminUser = req.user;
       return next();
     }
 

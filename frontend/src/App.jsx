@@ -40,6 +40,7 @@ import AdminUsers from "./admin/AdminUsers";
 import AdminLayout from "./admin/AdminLayout";
 import AdminAILogs from "./admin/AdminAILogs";
 import AdminSubscriptions from "./admin/AdminSubscriptions";
+import PlannerSubscriptions from "./admin/PlannerSubscriptions";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./context/AuthContext";
@@ -186,6 +187,7 @@ function AppContent() {
           <Route path="/admin/analytics" element={<AdminDashboard />} />
           <Route path="/admin/ai-logs" element={<AdminAILogs />} />
           <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+          <Route path="/admin/planner-subscriptions" element={<PlannerSubscriptions />} />
           <Route path="/admin/vendors" element={<AdminUsers />} />
         </Route>
 

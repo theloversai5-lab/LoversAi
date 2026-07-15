@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const configuredApiBaseUrl = process.env.REACT_APP_API_BASE_URL?.trim();
 const normalizeApiBaseUrl = (value) => value.replace(/\/api\/?$/, '').replace(/\/$/, '');
-let apiBaseUrl = normalizeApiBaseUrl(configuredApiBaseUrl || 'http://localhost:5000');
+let apiBaseUrl = normalizeApiBaseUrl(configuredApiBaseUrl || 'http://localhost:5001');
 
 const api = axios.create({
   baseURL: `${apiBaseUrl}/api`,
@@ -95,9 +95,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-      error.message = 'Connection timed out. Please verify that your backend server is running on port 5000.';
+      error.message = 'Connection timed out. Please verify that your backend server is running on port 5001.';
     } else if (error.message === 'Network Error') {
-      error.message = 'Network Error: Cannot connect to backend server. Please verify that the backend is running on port 5000 and has not crashed.';
+      error.message = 'Network Error: Cannot connect to backend server. Please verify that the backend is running on port 5001 and has not crashed.';
     }
 
     if (error.response) {
@@ -150,7 +150,7 @@ export const authAPI = {
 
 // ─── Credit & Wallet API ───
 export const creditAPI = {
-  getWallet: () => api.get('/credits/wallet').then((res) => res.data),
+  getWallet: (wallet = 'couple') => api.get(`/credits/wallet?wallet=${wallet}`).then((res) => res.data),
   getHistory: (params) => api.get('/credits/history', { params }).then((res) => res.data),
 };
 
@@ -189,9 +189,13 @@ export const paymentAPI = {
     apiFetch('/payment/create-order', { method: 'POST', data }),
   verifyPayment: (data) =>
     apiFetch('/payment/verify', { method: 'POST', data }),
-  getCredits: () => apiFetch('/payment/credits'),
+  getCredits: (wallet) => apiFetch(`/payment/credits?wallet=${wallet}`),
   getPlans: () => apiFetch('/payment/plans'),
   getHistory: () => apiFetch('/payment/payment-history'),
+  getTransactions: (params) => {
+    const query = new URLSearchParams(params || {}).toString();
+    return apiFetch(`/payment/transactions${query ? `?${query}` : ''}`);
+  },
   getPaymentStatus: () => apiFetch('/payment/payment-status'),
   createLibraryOrder: (data) =>
     apiFetch('/payment/library/create-order', { method: 'POST', data }),
@@ -215,6 +219,21 @@ export const adminAPI = {
     apiFetch(`/admin/users/${id}/unblock`, { method: 'POST' }),
   adjustCredits: (id, amount, reason) =>
     apiFetch(`/admin/users/${id}/credits`, { method: 'POST', data: { amount, reason } }),
+};
+
+// ─── Planner Admin APIs ───
+export const plannerAdminAPI = {
+  getUsers: (params) => {
+    const query = new URLSearchParams(params || {}).toString();
+    return apiFetch(`/admin/planner/users${query ? `?${query}` : ''}`);
+  },
+  getUser: (id) => apiFetch(`/admin/planner/users/${id}`),
+  grantSubscription: (id, data) => 
+    apiFetch(`/admin/planner/users/${id}/subscription`, { method: 'POST', data }),
+  modifySubscription: (id, data) =>
+    apiFetch(`/admin/planner/users/${id}/subscription`, { method: 'PUT', data }),
+  manageCredits: (id, data) =>
+    apiFetch(`/admin/planner/users/${id}/credits`, { method: 'POST', data }),
 };
 
 // ─── Vendor APIs ───

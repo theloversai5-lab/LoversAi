@@ -5,6 +5,8 @@ import Replicate from "replicate";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
+import creditService from "../../services/creditService.js";
+import { OPERATION_COSTS, TRANSACTION_SOURCES } from "../../config/credits.js";
 
 const router = express.Router();
 
@@ -506,93 +508,80 @@ router.post(
         `🔄 Generating ${angle} view with prompt: ${angleConfig.prompt.substring(0, 100)}...`,
       );
 
-      // Compute credits (angle change costs 15 credits per transformation)
+      // Compute credits
       const imageCountNum = parseInt(req.body.imageCount) || 1;
-      const creditsNeeded = 15 * imageCountNum;
+      const creditsNeeded = OPERATION_COSTS.PLANNER_IMAGE_GENERATION * imageCountNum;
 
-      // Verify user is already handled by protect middleware
-      const user = req.user;
-
-      if (user.credits < creditsNeeded) {
+      // Deduct credits BEFORE generation
+      const walletData = await creditService.getWallet(req.user._id, "planner");
+      if (walletData.credits < creditsNeeded) {
         return res.status(402).json({
           success: false,
           error: "Insufficient credits",
-          currentCredits: user.credits,
+          currentCredits: walletData.credits,
           requiredCredits: creditsNeeded,
         });
       }
 
-      // Generate the transformed image with Gemini first; fall back to legacy Replicate only if enabled
-      const generatedImage = await generateAngleImagePayload(
-        req.file.buffer,
-        angleConfig.prompt,
-        angleConfig.negativePrompt,
-        req.file.mimetype || "image/jpeg",
-      );
+      let deductedData;
+      try {
+        deductedData = await creditService.deductCredits(
+          req.user._id,
+          creditsNeeded,
+          TRANSACTION_SOURCES.AI_GENERATION,
+          `angle_change_${angle}_${Date.now()}`,
+          { angle, angleName: angleConfig.name, imageCount: imageCountNum, tool: 'angle_change' },
+          "planner"
+        );
+      } catch (err) {
+        return res.status(503).json({ success: false, error: "Failed to process credits for angle change. Please try again." });
+      }
+
+      let generatedImage;
+      try {
+        // Generate the transformed image with Gemini first; fall back to legacy Replicate only if enabled
+        generatedImage = await generateAngleImagePayload(
+          req.file.buffer,
+          angleConfig.prompt,
+          angleConfig.negativePrompt,
+          req.file.mimetype || "image/jpeg",
+        );
+      } catch (geminiError) {
+        // Refund 100% on failure
+        await creditService.refundCredits(
+          req.user._id,
+          creditsNeeded,
+          `refund_angle_change_${angle}_${Date.now()}`,
+          { reason: "generation_failed", error: geminiError.message },
+          "planner"
+        );
+        throw geminiError; // Let the outer catch handle it
+      }
+
       const cachedImage = await cacheGeneratedAngleImage(
         generatedImage,
         angle,
       );
       const cachedImageUrl = `${req.protocol}://${req.get("host")}${cachedImage.url}`;
 
-      // Deduct credits after successful generation
-      try {
-        const oldCredits = user.credits;
-        user.deductCredits(
-          creditsNeeded,
-          `Angle change - ${angle}`,
-          "ai_generation",
-          { angle, imageCount: imageCountNum },
-        );
-        const subscription = await Subscription.findOne({
-          userId: user._id,
-        }).sort({ createdAt: -1 });
-        if (subscription) {
-          subscription.creditsUsed =
-            (subscription.creditsUsed || 0) + creditsNeeded;
-          await subscription.save();
-        }
-        await user.save();
-
-        res.json({
-          success: true,
-          angle: angle,
-          angleName: angleConfig.name,
-          angleDescription: angleConfig.description,
-          url: cachedImageUrl,
-          cloudinaryPublicId: cachedImage.cloudinaryPublicId,
-          cacheId: cachedImage.cacheId || null,
-          seed: generatedImage.seed,
-          generationProvider: generatedImage.provider,
-          generationFallbackReason: generatedImage.fallbackReason || null,
-          promptUsed: angleConfig.prompt.substring(0, 200) + "...",
-          timestamp: new Date().toISOString(),
-          creditInfo: {
-            oldBalance: oldCredits,
-            deducted: creditsNeeded,
-            newBalance: user.credits,
-          },
-        });
-      } catch (err) {
-        console.error("Failed to deduct credits for angle change:", err);
-        // still return result but with warning
-        res.json({
-          success: true,
-          angle: angle,
-          angleName: angleConfig.name,
-          angleDescription: angleConfig.description,
-          url: cachedImageUrl,
-          cloudinaryPublicId: cachedImage.cloudinaryPublicId,
-          cacheId: cachedImage.cacheId || null,
-          seed: generatedImage.seed,
-          generationProvider: generatedImage.provider,
-          generationFallbackReason: generatedImage.fallbackReason || null,
-          promptUsed: angleConfig.prompt.substring(0, 200) + "...",
-          timestamp: new Date().toISOString(),
-          creditWarning:
-            "Generation succeeded but failed to deduct credits. Please contact support.",
-        });
-      }
+      res.json({
+        success: true,
+        angle: angle,
+        angleName: angleConfig.name,
+        angleDescription: angleConfig.description,
+        url: cachedImageUrl,
+        cloudinaryPublicId: cachedImage.cloudinaryPublicId,
+        cacheId: cachedImage.cacheId || null,
+        seed: generatedImage.seed,
+        generationProvider: generatedImage.provider,
+        generationFallbackReason: generatedImage.fallbackReason || null,
+        promptUsed: angleConfig.prompt.substring(0, 200) + "...",
+        timestamp: new Date().toISOString(),
+        creditInfo: {
+          deducted: creditsNeeded,
+          newBalance: deductedData.credits,
+        },
+      });
     } catch (err) {
       console.error("❌ Angle change error:", err);
       const isGeminiError = /gemini|GEMINI_AUTH_ERROR/i.test(

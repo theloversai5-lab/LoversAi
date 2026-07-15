@@ -4,37 +4,39 @@ import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { aiAPI, paymentAPI } from "../../../api/api";
+import PlannerSubscriptionModal from "../PlannerSubscriptionModal";
+import PlannerWallet from "../PlannerWallet";
 
 const FALLBACK_STYLES = [
   {
     id: "slow-pan",
     name: "Slow Pan",
     description: "Smooth panning movement across the frame.",
-    creditCost: 25,
+    creditCost: 1,
   },
   {
     id: "zoom-in",
     name: "Zoom In",
     description: "Focuses on details with a gradual push-in.",
-    creditCost: 25,
+    creditCost: 1,
   },
   {
     id: "zoom-out",
     name: "Zoom Out",
     description: "Reveals the full scene with a gentle pull-back.",
-    creditCost: 25,
+    creditCost: 1,
   },
   {
     id: "360-rotate",
     name: "360 Rotate",
     description: "Creates a sweeping orbit effect around the scene.",
-    creditCost: 25,
+    creditCost: 1,
   },
   {
     id: "cinematic",
     name: "Cinematic",
     description: "Professional movement with a polished reveal feel.",
-    creditCost: 25,
+    creditCost: 1,
   },
 ];
 
@@ -334,6 +336,8 @@ const ImageToVideo = ({ onClose }) => {
   const [apiStatus, setApiStatus] = useState("checking");
   const [userCredits, setUserCredits] = useState(0);
   const [loadingCredits, setLoadingCredits] = useState(true);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -355,7 +359,7 @@ const ImageToVideo = ({ onClose }) => {
     );
   }, [selectedStyle, videoStyles]);
 
-  const creditsNeeded = activeStyle?.creditCost || 25;
+  const creditsNeeded = activeStyle?.creditCost || 1;
   const hasEnoughCredits = userCredits >= creditsNeeded;
   const canGenerate =
     !!selectedImage &&
@@ -420,7 +424,7 @@ const ImageToVideo = ({ onClose }) => {
   const fetchUserCredits = async () => {
     try {
       setLoadingCredits(true);
-      const data = await paymentAPI.getCredits();
+      const data = await paymentAPI.getCredits('planner');
       if (data.success) {
         setUserCredits(data.credits || 0);
       }
@@ -487,7 +491,7 @@ const ImageToVideo = ({ onClose }) => {
     }
 
     if (!hasEnoughCredits) {
-      toast.error("Not enough credits for video generation");
+      setShowWallet(true);
       return;
     }
 
@@ -633,15 +637,16 @@ const ImageToVideo = ({ onClose }) => {
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              <div
-                className={`hidden rounded-full border px-3 py-1 text-[11px] font-medium md:block ${
+              <button
+                onClick={() => setShowSubscriptionModal(true)}
+                className={`hidden rounded-full border px-3 py-1 text-[11px] font-medium md:block transition-all hover:bg-white/10 active:scale-95 ${
                   isDarkTheme
-                    ? "border-white/15 bg-white/5 text-white/70"
-                    : "border-black/10 bg-white/70 text-black/70"
+                    ? "border-white/15 bg-white/5 text-white/70 hover:text-white"
+                    : "border-black/10 bg-white/70 text-black/70 hover:text-black"
                 }`}
               >
                 {loadingCredits ? "Credits: ..." : `Credits: ${userCredits}`}
-              </div>
+              </button>
 
               <button
                 type="button"
@@ -661,6 +666,11 @@ const ImageToVideo = ({ onClose }) => {
             </div>
           </header>
 
+          {showWallet ? (
+            <div className={`flex flex-1 flex-col rounded-[28px] p-3 md:p-4 ${panelClass} relative overflow-y-auto custom-scrollbar`}>
+              <PlannerWallet onClose={() => setShowWallet(false)} onUpgrade={() => navigate('/pricing')} />
+            </div>
+          ) : (
           <main
             className={`flex flex-1 flex-col rounded-[28px] p-3 md:p-4 ${panelClass}`}
           >
@@ -1066,8 +1076,16 @@ const ImageToVideo = ({ onClose }) => {
               </div>
             </div>
           </main>
+          )}
         </div>
       </section>
+
+      {showSubscriptionModal && (
+        <PlannerSubscriptionModal 
+          isOpen={showSubscriptionModal} 
+          onClose={() => setShowSubscriptionModal(false)} 
+        />
+      )}
     </>
   );
 };

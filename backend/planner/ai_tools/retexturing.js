@@ -5,6 +5,8 @@ import Replicate from "replicate";
 import { protect } from "../../middleware/auth.js";
 import User from "../../models/User.js";
 import Subscription from "../../models/Subscription.js";
+import creditService from "../../services/creditService.js";
+import { OPERATION_COSTS, TRANSACTION_SOURCES } from "../../config/credits.js";
 
 const router = express.Router();
 
@@ -62,7 +64,7 @@ const upload = multer({
 const WEDDING_THEMES = {
   haldi: {
     name: "Haldi Ceremony",
-    creditCost: 10,
+    creditCost: 1,
     prompt:
       "Transform this venue into a vibrant traditional Haldi ceremony with cascading bright yellow and orange marigold flower arrangements, golden yellow fabric draping with intricate borders, traditional brass kalash and vessels filled with turmeric, scattered turmeric powder creating beautiful patterns, warm yellow lighting with traditional lanterns, colorful silk cushions and low seating arrangements, decorative rangoli patterns on the floor, festive yellow umbrellas and canopies, traditional Indian music setup area, and abundant fresh flower garlands creating a joyous celebratory atmosphere",
     negativePrompt:
@@ -70,7 +72,7 @@ const WEDDING_THEMES = {
   },
   mehendi: {
     name: "Mehendi Ceremony",
-    creditCost: 10,
+    creditCost: 1,
     prompt:
       "Transform this venue into an enchanting Mehendi ceremony with intricate henna-inspired decorative patterns adorning walls and drapes, lush green and vibrant orange color palette, traditional low seating with ornate cushions and bolsters, cascading marigold and jasmine flower arrangements, decorative henna cones and traditional mehndi supplies as centerpieces, warm fairy lights intertwined with green foliage, colorful Rajasthani umbrellas and canopies, traditional brass artifacts and vessels, beautiful rangoli designs, peacock feather decorations, and cozy intimate lighting creating a feminine and festive atmosphere",
     negativePrompt:
@@ -78,7 +80,7 @@ const WEDDING_THEMES = {
   },
   sangeet: {
     name: "Sangeet Ceremony",
-    creditCost: 10,
+    creditCost: 1,
     prompt:
       "Transform this venue into an electrifying Sangeet night celebration with dramatic stage lighting in red, gold, and purple hues, professional dance floor with spotlights, vibrant fabric draping with sequins and mirrors, musical instruments as decorative elements, colorful LED lighting effects, traditional and modern seating areas, energetic party decorations with streamers and balloons, sound system and DJ setup area, disco balls and party lights, festive banners, and dynamic entertainment space setup creating a high-energy celebration atmosphere",
     negativePrompt:
@@ -86,7 +88,7 @@ const WEDDING_THEMES = {
   },
   wedding: {
     name: "Wedding Ceremony",
-    creditCost: 10,
+    creditCost: 1,
     prompt:
       "Transform this venue into a magnificent traditional Indian wedding ceremony with an ornate wooden mandap decorated with fresh jasmine, rose, and marigold garlands, rich red and gold fabric draping with intricate embroidery, traditional brass diyas and oil lamps creating warm lighting, sacred fire pit (havan kund) at the center, decorative kalash with coconuts and mango leaves, elaborate floral arrangements in traditional brass urns, red carpet aisle with rose petals, traditional wedding props like bamboo decorations, golden throne-like seating for the couple, priest seating area with ceremonial items, and divine spiritual ambiance with incense and traditional elements",
     negativePrompt:
@@ -94,7 +96,7 @@ const WEDDING_THEMES = {
   },
   reception: {
     name: "Reception Party",
-    creditCost: 10,
+    creditCost: 1,
     prompt:
       "Transform this venue into a luxurious wedding reception with elegant crystal chandeliers and warm ambient lighting, sophisticated round tables with pristine white linens and gold accents, elaborate floral centerpieces with roses, lilies, and greenery, professional stage setup for speeches and entertainment, dance floor with elegant lighting, champagne and cocktail service areas, beautiful backdrop for photography with floral arrangements, refined place settings with gold chargers and crystal glasses, elegant draping in cream and gold tones, and upscale celebratory atmosphere perfect for dining and dancing",
     negativePrompt:
@@ -102,7 +104,7 @@ const WEDDING_THEMES = {
   },
   engagement: {
     name: "Engagement Ceremony",
-    creditCost: 10,
+    creditCost: 1,
     prompt:
       "Transform this venue into a romantic engagement celebration with soft pink and gold color scheme, elegant floral arrangements with roses and peonies, fairy lights creating magical ambiance, decorative engagement ring displays, romantic candle arrangements, beautiful backdrop for ring ceremony photos, elegant seating areas for intimate gathering, champagne service setup, romantic music corner, delicate fabric draping, and intimate romantic atmosphere perfect for the special moment",
     negativePrompt:
@@ -428,7 +430,7 @@ router.get("/themes", (req, res) => {
   Object.keys(WEDDING_THEMES).forEach((key) => {
     themesWithCredits[key] = {
       ...WEDDING_THEMES[key],
-      creditCost: WEDDING_THEMES[key].creditCost || 10,
+      creditCost: WEDDING_THEMES[key].creditCost || 1,
     };
   });
 
@@ -460,19 +462,12 @@ router.post("/check-credits", protect, async (req, res) => {
       });
     }
 
-    // Calculate credit cost
-    const perImageCost =
-      theme && WEDDING_THEMES[theme] && WEDDING_THEMES[theme].creditCost
-        ? WEDDING_THEMES[theme].creditCost
-        : modelType === "flux-pro-1.1"
-          ? 15
-          : 10;
+    const perImageCost = 1;
     const creditsNeeded = perImageCost * parseInt(imageCount);
 
-    // Get user is handled by protect middleware
-    const user = req.user;
-
-    const currentCredits = user.credits || 0;
+    // Get user wallet
+    const walletData = await creditService.getWallet(req.user._id, "planner");
+    const currentCredits = walletData.credits || 0;
     const hasEnoughCredits = currentCredits >= creditsNeeded;
 
     res.json({
@@ -595,26 +590,31 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
       : 1;
 
     // Calculate credit cost
-    const perImageCost =
-      theme && WEDDING_THEMES[theme] && WEDDING_THEMES[theme].creditCost
-        ? WEDDING_THEMES[theme].creditCost
-        : modelType === "flux-pro-1.1"
-          ? 15
-          : 10;
-    const creditsNeeded = perImageCost * validImageCount;
+    const creditsNeeded = OPERATION_COSTS.PLANNER_IMAGE_GENERATION * validImageCount;
 
-    // Ensure authenticated user (middleware provides req.user)
-    const user = req.user;
+    // Deduct credits BEFORE generation
+    const walletData = await creditService.getWallet(req.user._id, "planner");
+    if (walletData.credits < creditsNeeded) {
+      return res.status(402).json({
+        success: false,
+        error: "Insufficient credits",
+        currentCredits: walletData.credits,
+        requiredCredits: creditsNeeded,
+      });
+    }
 
-    if (user.credits < creditsNeeded) {
-      return res
-        .status(402)
-        .json({
-          success: false,
-          error: "Insufficient credits",
-          currentCredits: user.credits,
-          requiredCredits: creditsNeeded,
-        });
+    let deductedData;
+    try {
+      deductedData = await creditService.deductCredits(
+        req.user._id,
+        creditsNeeded,
+        TRANSACTION_SOURCES.AI_GENERATION,
+        `retexture_${theme || "custom"}_${Date.now()}`,
+        { theme: theme || "custom", modelType, imageCount: validImageCount, tool: 'retexturing' },
+        "planner"
+      );
+    } catch (err) {
+      return res.status(503).json({ success: false, error: "Failed to process credits for retexturing. Please try again." });
     }
 
     // Build enhanced prompt
@@ -689,46 +689,11 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
             fileName: req.file.originalname,
           },
         };
-        // Deduct credits now that generation succeeded
-        try {
-          const oldCredits = user.credits;
-          user.deductCredits(
-            creditsNeeded,
-            `AI generation - ${theme || "custom"}`,
-            "ai_generation",
-            {
-              theme: theme || "custom",
-              modelType,
-              imageCount: validImageCount,
-              generationId: result.generationId,
-            },
-          );
-
-          // Update subscription usage if exists
-          const subscription = await Subscription.findOne({
-            userId: user._id,
-          }).sort({ createdAt: -1 });
-          if (subscription) {
-            subscription.creditsUsed =
-              (subscription.creditsUsed || 0) + creditsNeeded;
-            await subscription.save();
-          }
-
-          await user.save();
-
-          responseData.creditInfo = {
-            deducted: creditsNeeded,
-            oldBalance: oldCredits,
-            newBalance: user.credits,
-          };
-        } catch (deductErr) {
-          console.error(
-            "Failed to deduct credits after generation:",
-            deductErr,
-          );
-          responseData.creditWarning =
-            "Generation succeeded but failed to deduct credits. Please contact support.";
-        }
+        // Update credit info in response
+        responseData.creditInfo = {
+          deducted: creditsNeeded,
+          newBalance: deductedData.credits,
+        };
 
         res.json(responseData);
       } else {
@@ -736,6 +701,14 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
       }
     } catch (apiError) {
       console.error("❌ Image generation API Error in generation:", apiError);
+      // Refund 100% on failure
+      await creditService.refundCredits(
+        req.user._id,
+        creditsNeeded,
+        `retexture_${theme || "custom"}_${Date.now()}`,
+        { reason: apiError.message },
+        "planner"
+      );
       throw apiError;
     }
   } catch (error) {

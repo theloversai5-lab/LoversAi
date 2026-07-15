@@ -1,8 +1,17 @@
 import User from "../models/User.js";
+import Wallet from "../models/Wallet.js";
 import CreditTransaction from "../models/CreditTransaction.js";
 import { CONSUMPTION_PRIORITY, TRANSACTION_TYPES, TRANSACTION_SOURCES } from "../config/credits.js";
 
+const ALLOWED_PRODUCTS = ["couple", "planner", "vendor", "decor", "catering", "studio"];
+
 class CreditService {
+  
+  _validateProduct(productType) {
+    if (!productType || !ALLOWED_PRODUCTS.includes(productType)) {
+      throw new Error(`Invalid product type: ${productType}. Must be one of: ${ALLOWED_PRODUCTS.join(', ')}`);
+    }
+  }
   
   /**
    * Maps a transaction source to its appropriate wallet bucket
@@ -28,66 +37,101 @@ class CreditService {
   /**
    * Retrieves a user's wallet and current balance.
    */
-  async getWallet(userId) {
-    const user = await User.findById(userId).select("credits wallet plan");
-    if (!user) throw new Error("User not found");
+  async getWallet(userId, productType) {
+    this._validateProduct(productType);
+    let wallet = await Wallet.findOne({ userId, productType });
+    if (!wallet) {
+      // Lazy initialization of the wallet if it doesn't exist
+      const defaultData = { userId, productType };
+      if (productType === "planner") {
+         defaultData.balance = 1;
+         defaultData.freeCredits = 1;
+         defaultData.lifetimeAdded = 1;
+      } else if (productType === "couple") {
+         // Fallback to legacy User wallet for backward compatibility
+         const legacyUser = await User.findById(userId).select("credits wallet");
+         if (legacyUser) {
+           defaultData.balance = legacyUser.credits || 0;
+           if (legacyUser.wallet) {
+             defaultData.freeCredits = legacyUser.wallet.freeCredits || 0;
+             defaultData.subscriptionCredits = legacyUser.wallet.subscriptionCredits || 0;
+             defaultData.purchasedCredits = legacyUser.wallet.purchasedCredits || 0;
+             defaultData.bonusCredits = legacyUser.wallet.bonusCredits || 0;
+             defaultData.promotionalCredits = legacyUser.wallet.promotionalCredits || 0;
+             defaultData.lifetimeAdded = legacyUser.wallet.lifetimeAdded || 0;
+             defaultData.lifetimeUsed = legacyUser.wallet.lifetimeUsed || 0;
+           }
+         }
+      }
+      wallet = await Wallet.create(defaultData);
+    }
+    
     return {
-      credits: user.credits,
-      wallet: user.wallet,
-      plan: user.plan
+      credits: wallet.balance,
+      wallet,
+      productType
     };
   }
 
   /**
    * Adds credits to a user's wallet atomically.
    */
-  async addCredits(userId, amount, source, reference, metadata = {}) {
+  async addCredits(userId, amount, source, reference, metadata = {}, productType) {
+    this._validateProduct(productType);
     if (amount <= 0) throw new Error("Amount must be positive");
     
     const bucket = this._getBucketForSource(source);
     
+    // Ensure wallet exists before atomic update
+    await this.getWallet(userId, productType);
+
     const updateQuery = {
       $inc: {
-        credits: amount,
-        [`wallet.${bucket}`]: amount,
-        "wallet.lifetimeAdded": amount,
+        balance: amount,
+        [bucket]: amount,
+        lifetimeAdded: amount,
       },
       $set: {
-        "wallet.lastUpdated": new Date(),
+        lastUpdated: new Date(),
       }
     };
 
-    const user = await User.findByIdAndUpdate(userId, updateQuery, { new: true });
-    if (!user) throw new Error("User not found");
+    const wallet = await Wallet.findOneAndUpdate({ userId, productType }, updateQuery, { new: true });
+    if (!wallet) throw new Error("Wallet not found");
 
     await CreditTransaction.create({
       userId,
+      productType,
       type: TRANSACTION_TYPES.CREDIT,
       amount,
       source,
       bucketAffected: bucket,
       reference,
-      balanceAfter: user.credits,
+      balanceAfter: wallet.balance,
       metadata,
     });
 
-    return { credits: user.credits, wallet: user.wallet };
+    return { credits: wallet.balance, wallet, productType };
   }
 
   /**
    * Deducts credits safely using Optimistic Concurrency Control (CAS).
    * Prevents race conditions from multiple tabs or rapid clicks.
    */
-  async deductCredits(userId, amount, source, reference, metadata = {}) {
+  async deductCredits(userId, amount, source, reference, metadata = {}, productType) {
+    this._validateProduct(productType);
     if (amount <= 0) throw new Error("Amount must be positive");
     
+    // Ensure wallet exists
+    await this.getWallet(userId, productType);
+
     const maxRetries = 3;
     
     for (let attempt = 0; attempt < maxRetries; attempt++) {
-      const user = await User.findById(userId).select("credits wallet");
-      if (!user) throw new Error("User not found");
+      const wallet = await Wallet.findOne({ userId, productType });
+      if (!wallet) throw new Error("Wallet not found");
       
-      if (user.credits < amount) {
+      if (wallet.balance < amount) {
         const error = new Error("Insufficient credits");
         error.code = "INSUFFICIENT_CREDITS";
         throw error;
@@ -100,23 +144,22 @@ class CreditService {
       for (const bucket of CONSUMPTION_PRIORITY) {
         if (remainingToDeduct <= 0) break;
         
-        const bucketBalance = user.wallet[bucket] || 0;
+        const bucketBalance = wallet[bucket] || 0;
         if (bucketBalance > 0) {
           const deductFromBucket = Math.min(bucketBalance, remainingToDeduct);
-          updateBuckets[`wallet.${bucket}`] = bucketBalance - deductFromBucket;
+          updateBuckets[bucket] = bucketBalance - deductFromBucket;
           remainingToDeduct -= deductFromBucket;
         }
       }
 
       // Prepare the update
-      updateBuckets.credits = user.credits - amount;
-      updateBuckets["wallet.lifetimeUsed"] = (user.wallet.lifetimeUsed || 0) + amount;
-      updateBuckets["wallet.lastUpdated"] = new Date();
-      updateBuckets.totalCreditsUsed = (user.totalCreditsUsed || 0) + amount;
+      updateBuckets.balance = wallet.balance - amount;
+      updateBuckets.lifetimeUsed = (wallet.lifetimeUsed || 0) + amount;
+      updateBuckets.lastUpdated = new Date();
 
       // Atomic Compare-And-Swap (CAS) update
-      const result = await User.findOneAndUpdate(
-        { _id: userId, credits: user.credits }, // Condition: credits must exactly match our fetched value
+      const result = await Wallet.findOneAndUpdate(
+        { _id: wallet._id, balance: wallet.balance }, // CAS condition
         { $set: updateBuckets },
         { new: true }
       );
@@ -125,16 +168,22 @@ class CreditService {
         // Success! Transaction recorded.
         await CreditTransaction.create({
           userId,
+          productType,
           type: TRANSACTION_TYPES.DEBIT,
           amount,
           source,
           bucketAffected: "mixed", // Reflects that it may span multiple buckets
           reference,
-          balanceAfter: result.credits,
+          balanceAfter: result.balance,
           metadata,
         });
         
-        return { credits: result.credits, wallet: result.wallet };
+        // Also update legacy User totalCreditsUsed for backwards compatibility if couple
+        if (productType === "couple") {
+           await User.updateOne({ _id: userId }, { $inc: { totalCreditsUsed: amount } });
+        }
+        
+        return { credits: result.balance, wallet: result, productType };
       }
       
       // If result is null, a concurrent request modified the balance.
@@ -147,44 +196,50 @@ class CreditService {
   /**
    * Refunds credits for failed generations or administrative actions.
    */
-  async refundCredits(userId, amount, originalReference, metadata = {}) {
+  async refundCredits(userId, amount, originalReference, metadata = {}, productType) {
+    this._validateProduct(productType);
     if (amount <= 0) return;
     
     // Refunds go back into the bonus bucket by default to ensure they are used first next time
     const bucket = "bonusCredits";
     
+    // Ensure wallet exists
+    await this.getWallet(userId, productType);
+
     const updateQuery = {
       $inc: {
-        credits: amount,
-        [`wallet.${bucket}`]: amount,
+        balance: amount,
+        [bucket]: amount,
       },
       $set: {
-        "wallet.lastUpdated": new Date(),
+        lastUpdated: new Date(),
       }
     };
 
-    const user = await User.findByIdAndUpdate(userId, updateQuery, { new: true });
-    if (!user) throw new Error("User not found");
+    const wallet = await Wallet.findOneAndUpdate({ userId, productType }, updateQuery, { new: true });
+    if (!wallet) throw new Error("Wallet not found");
 
     await CreditTransaction.create({
       userId,
+      productType,
       type: TRANSACTION_TYPES.CREDIT,
       amount,
       source: TRANSACTION_SOURCES.REFUND,
       bucketAffected: bucket,
       reference: `refund_${originalReference}`,
-      balanceAfter: user.credits,
+      balanceAfter: wallet.balance,
       metadata: { originalReference, ...metadata },
     });
 
-    return { credits: user.credits, wallet: user.wallet };
+    return { credits: wallet.balance, wallet, productType };
   }
 
   /**
    * Gets paginated transaction history for a user
    */
-  async getTransactionHistory(userId, { page = 1, limit = 20, type = null, source = null } = {}) {
-    const query = { userId };
+  async getTransactionHistory(userId, { page = 1, limit = 20, type = null, source = null, productType } = {}) {
+    this._validateProduct(productType);
+    const query = { userId, productType };
     if (type) query.type = type;
     if (source) query.source = source;
 
