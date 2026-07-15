@@ -40,6 +40,7 @@ import AdminUsers from "./admin/AdminUsers";
 import AdminLayout from "./admin/AdminLayout";
 import AdminAILogs from "./admin/AdminAILogs";
 import AdminSubscriptions from "./admin/AdminSubscriptions";
+import Maintenance from "./pages/Maintenance";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./context/AuthContext";
@@ -112,6 +113,12 @@ function AppContent() {
       !location.pathname.startsWith("/couple/moodboard") &&
       location.pathname !== "/couple/cart") ||
     location.pathname === "/user-form";
+
+  const MAINTENANCE_MODE = true; // 🚧 Toggle maintenance shutdown here (set to false to bring website online)
+
+  if (MAINTENANCE_MODE && !location.pathname.startsWith("/admin") && location.pathname !== "/login") {
+    return <Maintenance />;
+  }
 
   return (
     <>
