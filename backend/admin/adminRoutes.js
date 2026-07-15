@@ -13,6 +13,8 @@ import {
   adjustCredits,
   verifyVendor,
   rejectVendor,
+  getAILogs,
+  getRazorpayLedger,
 } from "./adminController.js";
 
 const router = express.Router();
@@ -23,6 +25,8 @@ router.use(verifyAdmin);
 router.get("/me", getAdminProfile);
 router.get("/stats", getAdminStats);
 router.get("/users", getUserList);
+router.get("/ai-logs", getAILogs);
+router.get("/razorpay-ledger", getRazorpayLedger);
 router.get("/users/:id", getUserById);
 router.patch("/users/:id", updateUserById);
 router.delete("/users/:id", deleteUser);

@@ -158,11 +158,14 @@ router.post('/verify', protect, async (req, res) => {
     }
     
     // Update payment metadata
+    const amountPaid = (plan.price || 0) / 100;
+    user.totalSpent = (user.totalSpent || 0) + amountPaid;
+    user.totalPayments = (user.totalPayments || 0) + 1;
     user.lastPaymentStatus = 'paid';
     user.lastPaymentAt = new Date();
     await user.save();
 
-    console.log(`✅ Payment verified for ${user.email}. Added ${plan.credits} credits.`);
+    console.log(`✅ Payment verified for ${user.email}. Added ${plan.credits} credits. Total spent: ₹${user.totalSpent}`);
 
     res.json({
       success: true,
@@ -256,31 +259,39 @@ router.post('/library/verify', protect, async (req, res) => {
         user.purchasedTemplates.push(id);
       }
     }
-    
+
+    let paymentMethod = 'Razorpay Online';
+    let amountStr = '₹23,600';
+    let amountPaid = 236; // Fallback default cost if fetch fails (23,600 paise / 100)
+
+    if (razorpay) {
+      try {
+        const payment = await razorpay.payments.fetch(razorpay_payment_id);
+        if (payment) {
+          if (payment.method) {
+            paymentMethod = payment.method.toUpperCase();
+          }
+          if (payment.amount) {
+            amountPaid = payment.amount / 100;
+            amountStr = `₹${(payment.amount / 100).toLocaleString('en-IN')}`;
+          }
+        }
+      } catch (fetchErr) {
+        console.error("Failed to fetch payment details from Razorpay:", fetchErr);
+      }
+    }
+
+    user.totalSpent = (user.totalSpent || 0) + amountPaid;
+    user.totalPayments = (user.totalPayments || 0) + 1;
     user.lastPaymentStatus = 'success';
     user.lastPaymentAt = new Date();
     await user.save();
 
-    console.log(`✅ Templates [${templateIds.join(', ')}] purchased successfully by ${user.email}`);
+    console.log(`✅ Templates [${templateIds.join(', ')}] purchased successfully by ${user.email}. Total spent: ₹${user.totalSpent}`);
 
     // Send Invoice Email via Resend
     if (resend) {
       try {
-        let paymentMethod = 'Razorpay Online';
-        let amountStr = '₹23,600';
-        if (razorpay) {
-          try {
-            const payment = await razorpay.payments.fetch(razorpay_payment_id);
-            if (payment && payment.method) {
-              paymentMethod = payment.method.toUpperCase();
-            }
-            if (payment && payment.amount) {
-              amountStr = `₹${(payment.amount / 100).toLocaleString('en-IN')}`;
-            }
-          } catch (fetchErr) {
-            console.error("Failed to fetch payment details from Razorpay:", fetchErr);
-          }
-        }
 
         const templateNames = {
           'ppt-m1': 'Mehndi Luxury Pitch Deck',
@@ -425,10 +436,13 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             user.plan = planId;
             user.subscriptionRenewsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
           }
+          const amountPaid = (payment.amount || 0) / 100;
+          user.totalSpent = (user.totalSpent || 0) + amountPaid;
+          user.totalPayments = (user.totalPayments || 0) + 1;
           user.lastPaymentStatus = 'paid';
           user.lastPaymentAt = new Date();
           await user.save();
-          console.log(`✅ Webhook: Payment captured for ${user.email}. Plan: ${planId}`);
+          console.log(`✅ Webhook: Payment captured for ${user.email}. Plan: ${planId}. Total spent: ₹${user.totalSpent}`);
         }
       }
     }

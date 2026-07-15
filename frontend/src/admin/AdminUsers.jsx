@@ -25,6 +25,7 @@ const AdminUsers = () => {
   const [filterAdmin, setFilterAdmin] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [activeRoleTab, setActiveRoleTab] = useState("all");
 
   const loadUsers = async () => {
     setLoading(true);
@@ -46,6 +47,14 @@ const AdminUsers = () => {
   // Filter and search users
   useEffect(() => {
     let filtered = [...users];
+
+    if (activeRoleTab !== "all") {
+      if (activeRoleTab === "admin") {
+        filtered = filtered.filter((user) => user.isAdmin || user.role === "admin");
+      } else {
+        filtered = filtered.filter((user) => user.role === activeRoleTab);
+      }
+    }
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -101,6 +110,7 @@ const AdminUsers = () => {
     filterAdmin,
     sortBy,
     sortOrder,
+    activeRoleTab,
   ]);
 
   const handleAction = async (action, userId, ...args) => {
@@ -687,9 +697,14 @@ const AdminUsers = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
-                User Management
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
+                  User Management
+                </h1>
+                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                  {filteredUsers.length === users.length ? `${users.length} Users` : `${filteredUsers.length} of ${users.length} Users`}
+                </span>
+              </div>
               <p className="mt-1 text-sm text-gray-400">
                 Manage user accounts, credits, and access controls
               </p>
@@ -741,6 +756,37 @@ const AdminUsers = () => {
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Role Tabs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div className="flex border-b border-white/10 space-x-8">
+          {[
+            { id: "all", name: "All Users" },
+            { id: "couple", name: "Couples" },
+            { id: "planner", name: "Planners" },
+            { id: "vendor", name: "Vendors" },
+            { id: "admin", name: "Admins" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveRoleTab(tab.id);
+                setSelectedUsers(new Set());
+              }}
+              className={`pb-3 text-[13px] font-semibold transition-all duration-300 relative uppercase tracking-wider ${
+                activeRoleTab === tab.id
+                  ? "text-amber-400 font-bold"
+                  : "text-white/50 hover:text-white"
+              }`}
+            >
+              {tab.name}
+              {activeRoleTab === tab.id && (
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-amber-400 rounded-full" />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -904,7 +950,13 @@ const AdminUsers = () => {
                       Plan
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Credits
+                      Credit Given
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Credit Used
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Remaining
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Status
@@ -954,7 +1006,13 @@ const AdminUsers = () => {
                           {user.plan}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium text-emerald-400">
+                        {user.creditsGiven || 0}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-medium text-rose-400">
+                        {user.creditsUsed || 0}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-bold text-amber-300">
                         {user.credits || 0}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

@@ -51,7 +51,7 @@ export default function PlannerQuickMenu({
   ];
 
   if (isAdmin) {
-    plannerLinks.push({ label: "Admin Portal", to: "/admin/planner-subscriptions" });
+    plannerLinks.push({ label: "Admin Portal", to: "/admin" });
   }
 
   const menuLinks = isPlannerUser ? plannerLinks : guestLinks;

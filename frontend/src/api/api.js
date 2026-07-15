@@ -219,6 +219,8 @@ export const adminAPI = {
     apiFetch(`/admin/users/${id}/unblock`, { method: 'POST' }),
   adjustCredits: (id, amount, reason) =>
     apiFetch(`/admin/users/${id}/credits`, { method: 'POST', data: { amount, reason } }),
+  getAILogs: () => apiFetch('/admin/ai-logs'),
+  getRazorpayLedger: () => apiFetch('/admin/razorpay-ledger'),
 };
 
 // ─── Planner Admin APIs ───

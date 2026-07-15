@@ -1,4 +1,4 @@
-// server.js
+// server.js - loaded new Gemini Ia key
 import dotenv from "dotenv";
 dotenv.config(); // ✅ Load .env BEFORE any other imports
 
