@@ -52,42 +52,42 @@ export const vendorGuides = {
   decor: {
     slides: [
       {
-        image: "/images/d1.webp",
+        image: "/d-no-watermark/d1-no-watermark.webp",
         title: "Define Decor Style",
         description: "Select the decor themes, color palettes, and overall aesthetic."
       },
       {
-        image: "/images/d2.webp",
+        image: "/d-no-watermark/d2-no-watermark.webp",
         title: "Upload References",
         description: "Provide reference images of specific decor elements you love."
       },
       {
-        image: "/images/d3.webp",
+        image: "/d-no-watermark/d1-3-without-watermark.webp",
         title: "Generate Decor Concepts",
         description: "Our AI creates multiple decor layouts tailored to your inputs."
       },
       {
-        image: "/images/d4.webp",
+        image: "/d-no-watermark/d4-no-watermark.webp",
         title: "Review Setups",
         description: "Compare different AI-generated setups and choose your favorite."
       },
       {
-        image: "/images/d5.webp",
+        image: "/d-no-watermark/d5-no-watermark.webp",
         title: "Adjust Elements",
         description: "Refine specific pieces like floral arrangements or table settings."
       },
       {
-        image: "/images/d6.webp",
+        image: "/d-no-watermark/d6-no-watermark.webp",
         title: "Export Mockups",
         description: "Download high-quality visual outputs."
       },
       {
-        image: "/images/d7.webp",
+        image: "/d-no-watermark/d7-no-watermark.webp",
         title: "Start Decorating",
         description: "You are now ready to use Decor AI."
       },
       {
-        image: "/images/d8.webp",
+        image: "/d-no-watermark/d8-no-watermark.webp",
         title: "Bring Your Vision to Life",
         description: "Unlock infinite possibilities and start creating your dream decor."
       }
