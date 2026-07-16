@@ -81,6 +81,20 @@ class CreditService {
     if (amount <= 0) throw new Error("Amount must be positive");
     
     const bucket = this._getBucketForSource(source);
+
+    // Validate transaction details first to prevent out-of-sync updates if validation fails (e.g. enum validation)
+    const txPlaceholder = new CreditTransaction({
+      userId,
+      productType,
+      type: TRANSACTION_TYPES.CREDIT,
+      amount,
+      source,
+      bucketAffected: bucket,
+      reference,
+      balanceAfter: 0,
+      metadata,
+    });
+    await txPlaceholder.validate();
     
     // Ensure wallet exists before atomic update
     await this.getWallet(userId, productType);
@@ -122,6 +136,20 @@ class CreditService {
     this._validateProduct(productType);
     if (amount <= 0) throw new Error("Amount must be positive");
     
+    // Validate transaction details first to prevent out-of-sync updates if validation fails (e.g. enum validation)
+    const txPlaceholder = new CreditTransaction({
+      userId,
+      productType,
+      type: TRANSACTION_TYPES.DEBIT,
+      amount,
+      source,
+      bucketAffected: "mixed",
+      reference,
+      balanceAfter: 0,
+      metadata,
+    });
+    await txPlaceholder.validate();
+
     // Ensure wallet exists
     await this.getWallet(userId, productType);
 
@@ -206,10 +234,25 @@ class CreditService {
     // Ensure wallet exists
     await this.getWallet(userId, productType);
 
+    // Validate transaction details first to prevent out-of-sync updates if validation fails (e.g. enum validation)
+    const txPlaceholder = new CreditTransaction({
+      userId,
+      productType,
+      type: TRANSACTION_TYPES.CREDIT,
+      amount,
+      source: TRANSACTION_SOURCES.REFUND,
+      bucketAffected: bucket,
+      reference: `refund_${originalReference}`,
+      balanceAfter: 0,
+      metadata: { originalReference, ...metadata },
+    });
+    await txPlaceholder.validate();
+
     const updateQuery = {
       $inc: {
         balance: amount,
         [bucket]: amount,
+        lifetimeUsed: -amount, // Decrement lifetimeUsed on refund!
       },
       $set: {
         lastUpdated: new Date(),
