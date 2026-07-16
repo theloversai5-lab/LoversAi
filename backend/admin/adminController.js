@@ -129,6 +129,10 @@ export const updateUserById = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
+    // Track if user is being promoted to admin
+    const wasAdmin = user.isAdmin;
+    const isNowAdmin = updates.isAdmin;
+
     Object.assign(user, updates);
 
     // Handle blocking/unblocking
@@ -143,6 +147,29 @@ export const updateUserById = async (req, res) => {
     }
 
     await user.save();
+
+    // Award 20 credits if promoted to admin
+    if (!wasAdmin && isNowAdmin) {
+      const targetProductType = ["couple", "planner", "vendor"].includes(user.role) ? user.role : "couple";
+      try {
+        console.log(`[Admin Promotion] 🎁 Adding 20 promotional credits to newly promoted admin ${user.email} (${targetProductType} wallet)`);
+        await creditService.addCredits(
+          user._id,
+          20,
+          "promotional",
+          "admin_initial_bonus",
+          { reason: "User promoted to administrator" },
+          targetProductType
+        );
+        
+        // Sync user model cached field
+        const walletInfo = await creditService.getWallet(user._id, targetProductType);
+        await User.updateOne({ _id: user._id }, { $set: { credits: walletInfo.credits || 0 } });
+        user.credits = walletInfo.credits || 0;
+      } catch (creditErr) {
+        console.error("❌ [Admin Promotion] Failed to award credits on promotion:", creditErr);
+      }
+    }
 
     res.json({ success: true, message: "User updated", user });
   } catch (err) {
@@ -260,7 +287,7 @@ export const adjustCredits = async (req, res) => {
       const result = await creditService.addCredits(
         user._id,
         creditAmount,
-        'admin_grant',
+        'admin_adjustment',
         `admin_adj_${Date.now()}`,
         { reason, adminAction: true },
         productType
@@ -270,7 +297,7 @@ export const adjustCredits = async (req, res) => {
       const result = await creditService.deductCredits(
         user._id,
         Math.abs(creditAmount),
-        'admin_deduct',
+        'admin_adjustment',
         `admin_adj_${Date.now()}`,
         { reason, adminAction: true },
         productType

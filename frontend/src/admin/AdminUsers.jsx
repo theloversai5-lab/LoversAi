@@ -240,7 +240,7 @@ const AdminUsers = () => {
     }
   };
 
-  const UserDetailsModal = () => (
+  const renderUserDetailsModal = () => (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
         className="rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
@@ -444,7 +444,7 @@ const AdminUsers = () => {
     </div>
   );
 
-  const CreditModal = () => (
+  const renderCreditModal = () => (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
         className="rounded-2xl max-w-md w-full"
@@ -522,7 +522,7 @@ const AdminUsers = () => {
     </div>
   );
 
-  const BulkActionModal = () => (
+  const renderBulkActionModal = () => (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
         className="rounded-2xl max-w-md w-full"
@@ -620,7 +620,7 @@ const AdminUsers = () => {
     </div>
   );
 
-  const BlockModal = () => (
+  const renderBlockModal = () => (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
         className="rounded-2xl max-w-md w-full"
@@ -1086,10 +1086,10 @@ const AdminUsers = () => {
       </div>
 
       {/* Modals */}
-      {showUserModal && <UserDetailsModal />}
-      {showCreditModal && <CreditModal />}
-      {showBlockModal && <BlockModal />}
-      {showBulkModal && <BulkActionModal />}
+      {showUserModal && renderUserDetailsModal()}
+      {showCreditModal && renderCreditModal()}
+      {showBlockModal && renderBlockModal()}
+      {showBulkModal && renderBulkActionModal()}
     </div>
   );
 };

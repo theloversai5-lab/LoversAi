@@ -29,6 +29,9 @@ import chatRoutes from "./routes/chatRoutes.js"; // ✅ Real-time Chat
 import uploadRoutes from "./routes/uploadRoutes.js"; // ✅ Cloudinary Uploads
 import cartRoutes from "./routes/cartRoutes.js"; // ✅ Wedding Cart
 import moodboardRoutes from "./routes/moodboardRoutes.js"; // ✅ Couple Moodboard
+import User from "./models/User.js";
+import creditService from "./services/creditService.js";
+import CreditTransaction from "./models/CreditTransaction.js";
 
 dotenv.config();
 
@@ -786,9 +789,49 @@ async function startServer() {
     });
 
     /* ============================================================
+       Admin Credits Initialization Logic (Idempotent)
+    ============================================================ */
+    async function initializeAdminCredits() {
+      try {
+        const adminUsers = await User.find({ isAdmin: true });
+        console.log(`[Admin Credits Init] Found ${adminUsers.length} admin user(s) to verify.`);
+        for (const adminUser of adminUsers) {
+          const targetProductType = ["couple", "planner", "vendor"].includes(adminUser.role) ? adminUser.role : "couple";
+          
+          const existingTx = await CreditTransaction.findOne({
+            userId: adminUser._id,
+            reference: "admin_initial_bonus",
+            productType: targetProductType
+          });
+          
+          if (!existingTx) {
+            console.log(`[Admin Credits Init] 🎁 Granting 20 promotional credits to admin ${adminUser.email} (${targetProductType} wallet)`);
+            await creditService.addCredits(
+              adminUser._id,
+              20,
+              "promotional",
+              "admin_initial_bonus",
+              { reason: "Initial admin credits allocation" },
+              targetProductType
+            );
+            
+            // Sync user model cached field
+            const walletInfo = await creditService.getWallet(adminUser._id, targetProductType);
+            await User.updateOne({ _id: adminUser._id }, { $set: { credits: walletInfo.credits || 0 } });
+          }
+        }
+      } catch (err) {
+        console.error("❌ [Admin Credits Init] Failed to initialize admin credits:", err);
+      }
+    }
+
+    /* ============================================================
        Start Server
     ============================================================ */
     const activePort = await listenOnAvailablePort(server, PORT);
+    
+    // 🎁 Grant 20 initial promotional credits to any admins who haven't received them yet
+    await initializeAdminCredits();
     {
       console.log(`
 ✨ ===========================================

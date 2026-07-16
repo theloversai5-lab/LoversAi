@@ -393,7 +393,7 @@ export const modifyPlannerSubscription = async (req, res) => {
         const result = await creditService.addCredits(
           user._id,
           creditDifference,
-          "admin_grant",
+          "admin_adjustment",
           `admin_upgrade_sub_${activeSub._id}`,
           { reason, adminAction: true, subscriptionId: activeSub._id },
           "planner"
@@ -406,7 +406,7 @@ export const modifyPlannerSubscription = async (req, res) => {
           const result = await creditService.deductCredits(
             user._id,
             amountToDeduct,
-            "admin_deduct",
+            "admin_adjustment",
             `admin_downgrade_sub_${activeSub._id}`,
             { reason, adminAction: true, subscriptionId: activeSub._id },
             "planner"
@@ -480,7 +480,7 @@ export const managePlannerCredits = async (req, res) => {
       const result = await creditService.addCredits(
         user._id,
         creditAmount,
-        "admin_grant",
+        "admin_adjustment",
         `admin_add_credits_${Date.now()}`,
         { reason, adminAction: true, subscriptionId: activeSub?._id },
         "planner"
@@ -494,7 +494,7 @@ export const managePlannerCredits = async (req, res) => {
       const result = await creditService.deductCredits(
         user._id,
         creditAmount,
-        "admin_deduct",
+        "admin_adjustment",
         `admin_remove_credits_${Date.now()}`,
         { reason, adminAction: true, subscriptionId: activeSub?._id },
         "planner"
@@ -505,7 +505,7 @@ export const managePlannerCredits = async (req, res) => {
         const result = await creditService.deductCredits(
           user._id,
           previousCredits,
-          "admin_deduct",
+          "admin_adjustment",
           `admin_reset_credits_${Date.now()}`,
           { reason, adminAction: true, subscriptionId: activeSub?._id },
           "planner"
