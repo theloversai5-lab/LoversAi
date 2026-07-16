@@ -114,7 +114,7 @@ function AppContent() {
       location.pathname !== "/couple/cart") ||
     location.pathname === "/user-form";
 
-  const MAINTENANCE_MODE = true; // 🚧 Toggle maintenance shutdown here (set to false to bring website online)
+  const MAINTENANCE_MODE = false; // 🚧 Toggle maintenance shutdown here (set to false to bring website online)
 
   if (MAINTENANCE_MODE && !location.pathname.startsWith("/admin") && location.pathname !== "/login") {
     return <Maintenance />;
