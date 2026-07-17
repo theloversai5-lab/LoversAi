@@ -442,7 +442,7 @@ const AngleChangeComponent = ({ onClose }) => {
                   </button>
                 )}
                 <h1 className="text-[28px] md:text-[34px] font-bold text-white tracking-tight">
-                  REDESIGN INVENTORY 3D
+                  DESIGN 3D
                 </h1>
               </div>
               <p className="text-gray-400 font-medium text-[11px] md:text-xs pl-7 md:pl-8">

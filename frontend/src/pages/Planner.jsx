@@ -37,7 +37,7 @@ const PlannerPage = () => {
       title: "Find Leads",
       image: "/images/Occluded text _ Sand dune.gif",
       onClick: () => {},
-      badge: "Under Maintenance",
+      badge: "Coming Soon",
       badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
       isLocked: true,
     },
@@ -180,10 +180,10 @@ const PlannerPage = () => {
                       </svg>
                     </div>
                     <span className="text-sm font-bold uppercase tracking-[4px] text-amber-400/90 drop-shadow-md">
-                      Under Maintenance
+                      Coming Soon
                     </span>
                     <span className="text-[10px] text-white/50 mt-1 uppercase tracking-widest">
-                      Offline temporarily
+                      Stay Tuned
                     </span>
                   </div>
                 )}

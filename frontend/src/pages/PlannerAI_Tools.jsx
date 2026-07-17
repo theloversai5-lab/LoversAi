@@ -569,7 +569,7 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                 }
                 className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left cursor-pointer hover:text-rose-300 transition"
               >
-                REDESIGN INVENTORY 3D
+                DESIGN 3D
               </h2>
             )}
 
@@ -691,10 +691,10 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                     </svg>
                   </div>
                   <span className="text-xl font-bold uppercase tracking-[4px] text-amber-400/90 drop-shadow-md">
-                    Under Maintenance
+                    Coming Soon
                   </span>
                   <span className="text-xs text-white/50 mt-1 uppercase tracking-widest">
-                    This feature is temporarily offline
+                    Stay Tuned
                   </span>
                 </div>
               </div>
