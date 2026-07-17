@@ -36,9 +36,10 @@ const PlannerPage = () => {
     {
       title: "Find Leads",
       image: "/images/Occluded text _ Sand dune.gif",
-      onClick: () => handleNavigate('/planner/bids'),
-      badge: "Live",
-      badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+      onClick: () => {},
+      badge: "Under Maintenance",
+      badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+      isLocked: true,
     },
     {
       title: "Pitch with AI",
@@ -149,21 +150,46 @@ const PlannerPage = () => {
               <button
                 type="button"
                 key={tool.title}
-                onClick={tool.onClick}
+                onClick={tool.isLocked ? undefined : tool.onClick}
                 aria-label={tool.title}
-                className={`relative h-80 sm:h-96 md:h-[450px] rounded-3xl overflow-hidden group hover-lift animate-fadeInUp stagger-${i + 2} text-left ${loading ? 'cursor-wait opacity-80' : 'cursor-pointer'}`}
+                className={`relative h-80 sm:h-96 md:h-[450px] rounded-3xl overflow-hidden group animate-fadeInUp stagger-${i + 2} text-left ${
+                  tool.isLocked 
+                    ? 'cursor-not-allowed opacity-90' 
+                    : loading 
+                      ? 'cursor-wait opacity-80' 
+                      : 'cursor-pointer hover-lift'
+                }`}
               >
                 <img
                   src={tool.image}
                   alt={tool.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  className={`w-full h-full object-cover transition-transform duration-700 ${
+                    tool.isLocked ? 'filter grayscale contrast-75' : 'group-hover:scale-110'
+                  }`}
                 />
                 
                 {/* Glass overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                 
+                {/* Lock Overlay for locked tools */}
+                {tool.isLocked && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 z-10 animate-pulse duration-[3000ms]">
+                    <div className="p-4 rounded-full bg-black/40 border border-white/10 backdrop-blur-md mb-3">
+                      <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-bold uppercase tracking-[4px] text-amber-400/90 drop-shadow-md">
+                      Under Maintenance
+                    </span>
+                    <span className="text-[10px] text-white/50 mt-1 uppercase tracking-widest">
+                      Offline temporarily
+                    </span>
+                  </div>
+                )}
+
                 {/* Badge */}
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-4 right-4 z-20">
                   <span className={`text-[10px] font-bold px-3 py-1 rounded-full border backdrop-blur-sm ${tool.badgeColor}`}>
                     {tool.badge}
                   </span>

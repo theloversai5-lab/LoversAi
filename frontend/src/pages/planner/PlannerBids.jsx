@@ -19,7 +19,13 @@ export default function PlannerBids() {
   const [selectedBid, setSelectedBid] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const UNDER_MAINTENANCE = true; // 🚧 Toggle Leads Maintenance mode here
+
   useEffect(() => {
+    if (UNDER_MAINTENANCE) {
+      setLoading(false);
+      return;
+    }
     const fetchBids = () => {
       quoteAPI
         .getAvailable()
@@ -76,6 +82,28 @@ export default function PlannerBids() {
       String(bid.status || "").toLowerCase() === filterStatus.toLowerCase();
     return matchSearch && matchStatus;
   });
+
+  if (UNDER_MAINTENANCE) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md max-w-xl mx-auto my-8">
+        <div className="p-4 rounded-full bg-amber-500/10 border border-amber-500/20 mb-4 animate-bounce duration-[4000ms]">
+          <svg className="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h2 className="font-heading text-xl text-white mb-2">Find Leads is Offline</h2>
+        <p className="text-xs text-white/50 max-w-sm mx-auto mb-6">
+          This section is currently undergoing upgrades. We'll be back soon with improved matching and lead discovery.
+        </p>
+        <button 
+          onClick={() => navigate('/planner')} 
+          className="px-6 py-2 rounded-full bg-white/10 text-white font-semibold hover:bg-white/20 transition-all duration-300 hover:scale-105"
+        >
+          Back to Planner Tools
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 animate-fadeInUp">

@@ -78,6 +78,14 @@ const WEDDING_THEMES = {
     negativePrompt:
       "formal setup, dark colors, western style, minimal decorations, modern furniture, harsh lighting, masculine colors",
   },
+  mehndi: {
+    name: "Mehendi Ceremony",
+    creditCost: 1,
+    prompt:
+      "Transform this venue into an enchanting Mehendi ceremony with intricate henna-inspired decorative patterns adorning walls and drapes, lush green and vibrant orange color palette, traditional low seating with ornate cushions and bolsters, cascading marigold and jasmine flower arrangements, decorative henna cones and traditional mehndi supplies as centerpieces, warm fairy lights intertwined with green foliage, colorful Rajasthani umbrellas and canopies, traditional brass artifacts and vessels, beautiful rangoli designs, peacock feather decorations, and cozy intimate lighting creating a feminine and festive atmosphere",
+    negativePrompt:
+      "formal setup, dark colors, western style, minimal decorations, modern furniture, harsh lighting, masculine colors",
+  },
   sangeet: {
     name: "Sangeet Ceremony",
     creditCost: 1,
@@ -109,6 +117,14 @@ const WEDDING_THEMES = {
       "Transform this venue into a romantic engagement celebration with soft pink and gold color scheme, elegant floral arrangements with roses and peonies, fairy lights creating magical ambiance, decorative engagement ring displays, romantic candle arrangements, beautiful backdrop for ring ceremony photos, elegant seating areas for intimate gathering, champagne service setup, romantic music corner, delicate fabric draping, and intimate romantic atmosphere perfect for the special moment",
     negativePrompt:
       "overly formal, dark colors, minimal romance, harsh lighting, impersonal setup",
+  },
+  cocktail: {
+    name: "Cocktail Party",
+    creditCost: 1,
+    prompt:
+      "Transform this venue into a sophisticated cocktail party space with elegant lounge seating, high-top cocktail tables, stunning modern lighting featuring purple, indigo, and cyan hues, sleek bar areas with premium glassware and cocktail setups, stylish backdrops, and a chic contemporary celebratory atmosphere",
+    negativePrompt:
+      "traditional wedding setups, overly bright lighting, simple decorations, basic furniture, dull colors",
   },
 };
 
@@ -622,9 +638,35 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
     let negativePrompt =
       "blurry, low quality, distorted, ugly, bad anatomy, dark lighting, poor composition, cluttered space, messy arrangement";
 
-    if (theme && WEDDING_THEMES[theme]) {
-      const themeData = WEDDING_THEMES[theme];
-      finalPrompt = themeData.prompt;
+    // Normalize theme key
+    let normalizedTheme = theme ? theme.toLowerCase().trim() : "";
+    if (normalizedTheme === "mehndi") {
+      normalizedTheme = "mehendi";
+    }
+
+    // High-priority color palettes instruction
+    const THEME_COLORS = {
+      haldi: "Yellow, Marigold Orange, and Warm Orange",
+      mehendi: "Emerald Green, Forest Green, and Orange",
+      mehndi: "Emerald Green, Forest Green, and Orange",
+      sangeet: "Deep Red, Golden Yellow, and Dark Red",
+      wedding: "Royal Red, Gold, and White",
+      reception: "Navy Blue, Royal Blue, and Sky Blue",
+      engagement: "Pink, White, and Light Pink",
+      cocktail: "Purple, Indigo, and Cyan"
+    };
+
+    const selectedColors = THEME_COLORS[theme ? theme.toLowerCase().trim() : ""] || THEME_COLORS[normalizedTheme] || "";
+    let colorInstruction = "";
+    if (selectedColors) {
+      colorInstruction = `CRITICAL INSTRUCTION: Redesign the color scheme of this venue. Replace all original decor colors with the selected wedding theme color palette: **${selectedColors}**. Dominant colors MUST be **${selectedColors}**. Preserve the entire layout, structure, stage, furniture placement, decorations, and overall composition of the original reference image unchanged, and only change the color palette of the draperies, flowers, lighting, and decor elements to match the new color scheme. `;
+    }
+
+    const resolvedThemeKey = WEDDING_THEMES[normalizedTheme] ? normalizedTheme : (WEDDING_THEMES[theme] ? theme : null);
+
+    if (resolvedThemeKey && WEDDING_THEMES[resolvedThemeKey]) {
+      const themeData = WEDDING_THEMES[resolvedThemeKey];
+      finalPrompt = `${colorInstruction}${themeData.prompt}`;
       negativePrompt = `${negativePrompt}, ${themeData.negativePrompt}`;
 
       if (customPrompt.trim()) {
@@ -677,7 +719,7 @@ router.post("/generate", protect, upload.single("image"), async (req, res) => {
           generationFallbackReason: result.fallbackReason || null,
           promptUsed: finalPrompt,
           transformation: {
-            theme: theme ? WEDDING_THEMES[theme].name : null,
+            theme: resolvedThemeKey ? WEDDING_THEMES[resolvedThemeKey].name : null,
             customPrompt: customPrompt.trim() || null,
             modelType,
             imageCount: validImageCount,
