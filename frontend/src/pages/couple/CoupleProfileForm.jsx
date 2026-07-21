@@ -192,7 +192,7 @@ export default function CoupleProfileForm() {
       localStorage.removeItem(PROFILE_STORAGE_KEY);
       localStorage.removeItem(PROFILE_STEP_KEY);
       localStorage.removeItem("isNewUser");
-      navigate("/love-story");
+      navigate("/couple/pending");
     } catch (error) {
       const status = error?.response?.status;
       if (status === 401) {
