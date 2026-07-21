@@ -25,13 +25,13 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID || undefined);
 ================================================================ */
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, fullName, role, partnerName, companyName } = req.body;
+    const { email, password, fullName, phone, role, partnerName, companyName } = req.body;
 
     // ─── Validation ───
-    if (!email || !password) {
+    if (!email || !password || !phone) {
       return res.status(400).json({
         success: false,
-        error: "Email and password are required",
+        error: "Email, password, and phone number are required",
       });
     }
 
@@ -64,6 +64,7 @@ router.post("/register", async (req, res) => {
       email: email.toLowerCase().trim(),
       password,
       fullName: fullName?.trim() || "",
+      phone: phone?.trim() || "",
       role: userRole,
       authProvider: "local",
       credits: 0, // Initialized to 0, added via creditService

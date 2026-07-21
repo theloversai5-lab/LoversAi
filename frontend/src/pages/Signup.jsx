@@ -26,6 +26,7 @@ export default function Signup() {
 
   const [role, setRole] = useState(initialRole);
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [email, setEmail] = useState("");
@@ -84,6 +85,7 @@ export default function Signup() {
     const validation = plannerSignupSchema.safeParse({
       role,
       fullName: name,
+      phone,
       companyName,
       partnerName,
       email,
@@ -102,6 +104,7 @@ export default function Signup() {
         email: validated.email,
         password: validated.password,
         fullName: validated.fullName,
+        phone: validated.phone,
         role: validated.role.toLowerCase(),
         partnerName:
           validated.role === "Couple" ? validated.partnerName : undefined,
@@ -293,6 +296,18 @@ export default function Signup() {
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 className="planner-auth-input"
+              />
+            </div>
+
+            <label>Contact Number</label>
+            <div className="planner-auth-input-wrap">
+              <input
+                type="tel"
+                placeholder="Phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="planner-auth-input"
+                required
               />
             </div>
 
@@ -617,6 +632,37 @@ export default function Signup() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/35"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+                          Contact Number
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg
+                              className="w-5 h-5 text-white/25"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                              />
+                            </svg>
+                          </div>
+                          <input
+                            type="tel"
+                            placeholder="+91 9876543210"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/35"
+                            required
                           />
                         </div>
                       </div>

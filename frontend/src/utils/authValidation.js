@@ -20,6 +20,11 @@ export const plannerSignupSchema = z
       .string()
       .trim()
       .email("Please enter a valid email address."),
+    phone: z
+      .string()
+      .trim()
+      .min(10, "Please enter a valid phone number.")
+      .max(15, "Phone number is too long."),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters long.")
