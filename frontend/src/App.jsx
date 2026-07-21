@@ -87,10 +87,12 @@ function AppContent() {
     if (!loading && currentUser) {
       const isCouple = currentUser.role === "couple";
       const isProfileCompleted = currentUser.weddingProfile?.completed === true;
+      const isPending = currentUser.coupleVerificationStatus === "pending";
 
       if (
         isCouple &&
         isProfileCompleted &&
+        isPending &&
         location.pathname !== "/couple/pending" &&
         !location.pathname.startsWith("/login") &&
         !location.pathname.startsWith("/signup")

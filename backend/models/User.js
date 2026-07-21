@@ -115,6 +115,11 @@ const userSchema = new mongoose.Schema(
       default: "pending",
     },
     vendorVerifiedAt: Date,
+    coupleVerificationStatus: {
+      type: String,
+      enum: ["pending", "approved"],
+      default: "pending",
+    },
     blockedReason: String,
 
     // ─── Profile ───
