@@ -804,7 +804,6 @@ async function startServer() {
             isAdmin: true,
             emailVerified: true,
             profileCompleted: true,
-            verificationStatus: "approved",
           });
           console.log(`[Admin Init] Created default admin: admin@loversai.com / adminpassword123`);
           adminUsers = [defaultAdmin];
@@ -840,17 +839,17 @@ async function startServer() {
       }
     }
 
-    async function approveExistingUsers() {
+    async function approveExistingCouples() {
       try {
         const result = await User.updateMany(
-          { verificationStatus: { $exists: false } },
-          { $set: { verificationStatus: "approved" } }
+          { role: "couple", coupleVerificationStatus: { $exists: false } },
+          { $set: { coupleVerificationStatus: "approved" } }
         );
         if (result.modifiedCount > 0) {
-          console.log(`[User Init] Approved ${result.modifiedCount} existing user(s) without verification status.`);
+          console.log(`[Couple Init] Approved ${result.modifiedCount} existing couple(s) without verification status.`);
         }
       } catch (err) {
-        console.error("❌ [User Init] Failed to approve existing users:", err);
+        console.error("❌ [Couple Init] Failed to approve existing couples:", err);
       }
     }
 
@@ -861,7 +860,7 @@ async function startServer() {
     
     // 🎁 Grant 20 initial promotional credits to any admins who haven't received them yet
     await initializeAdminCredits();
-    await approveExistingUsers();
+    await approveExistingCouples();
     {
       console.log(`
 ✨ ===========================================

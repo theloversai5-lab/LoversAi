@@ -120,11 +120,6 @@ const userSchema = new mongoose.Schema(
       enum: ["pending", "approved"],
       default: "pending",
     },
-    verificationStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
     blockedReason: String,
 
     // ─── Profile ───
