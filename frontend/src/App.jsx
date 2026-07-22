@@ -6,7 +6,6 @@ import {
   Route,
   useLocation,
   Navigate,
-  useNavigate,
 } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
@@ -18,7 +17,6 @@ import CoupleMoodboard from "./pages/couple/CoupleMoodboard";
 import CoupleThemeMoodboard from "./pages/couple/CoupleThemeMoodboard";
 import CoupleProfileForm from "./pages/couple/CoupleProfileForm";
 import CoupleProfile from "./pages/couple/CoupleProfile";
-import CouplePending from "./pages/couple/CouplePending";
 
 import WeddingCart from "./pages/couple/WeddingCart";
 import CoupleBidPlaced from "./pages/couple/CoupleBidPlaced";
@@ -45,7 +43,7 @@ import AdminSubscriptions from "./admin/AdminSubscriptions";
 import Maintenance from "./pages/Maintenance";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 
 // Planner Pages
@@ -78,27 +76,7 @@ import VendorMessages from "./pages/vendor/VendorMessages";
 import VendorProfile from "./pages/vendor/VendorProfile";
 function AppContent() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { currentUser, loading } = useAuth();
   const [isAIToolOpen, setIsAIToolOpen] = useState(false);
-
-  // Redirection guard to temporary pause services for couples with completed profile
-  React.useEffect(() => {
-    if (!loading && currentUser) {
-      const isCouple = currentUser.role === "couple";
-      const isProfileCompleted = currentUser.weddingProfile?.completed === true;
-
-      if (
-        isCouple &&
-        isProfileCompleted &&
-        location.pathname !== "/couple/pending" &&
-        !location.pathname.startsWith("/login") &&
-        !location.pathname.startsWith("/signup")
-      ) {
-        navigate("/couple/pending", { replace: true });
-      }
-    }
-  }, [currentUser, loading, location.pathname, navigate]);
 
   // Reset active tool state when routing changes
   React.useEffect(() => {
@@ -119,7 +97,6 @@ function AppContent() {
     location.pathname.startsWith("/vendor/") ||
     location.pathname.startsWith("/vendor-ai") ||
     location.pathname === "/couple/onboarding" ||
-    location.pathname === "/couple/pending" ||
     location.pathname === "/love-story" ||
     location.pathname.startsWith("/couple/moodboard") ||
     location.pathname === "/couple/cart" ||
@@ -272,14 +249,6 @@ function AppContent() {
         </Route>
 
         {/* Couple Routes */}
-        <Route
-          path="/couple/pending"
-          element={
-            <ProtectedRoute requiredRole="couple">
-              <CouplePending />
-            </ProtectedRoute>
-          }
-        />
         <Route path="/couples" element={<CoupleHome />} />
         <Route
           path="/couple/profile"
