@@ -1268,28 +1268,7 @@ async function callGeminiImageAPI(
   return await callFluxAPI(imageBuffer, prompt, "flux-2-pro", dimensions, seed);
 }
 
-// Keep the model-specific call function just in case or for reference
-async function callGeminiImageAPIWithModel(
-        imageBuffer,
-        prompt,
-        candidateModel,
-        dimensions,
-      );
-    } catch (error) {
-      lastError = error;
 
-      if (/GEMINI_AUTH_ERROR/i.test(String(error?.message || ""))) {
-        throw error;
-      }
-
-      if (!/GEMINI_MODEL_ERROR/i.test(String(error?.message || ""))) {
-        throw error;
-      }
-    }
-  }
-
-  throw lastError || new Error("Gemini returned no image output");
-}
 
 async function callGeminiImageAPIWithModel(
   imageBuffer,
