@@ -18,7 +18,7 @@ import CoupleMoodboard from "./pages/couple/CoupleMoodboard";
 import CoupleThemeMoodboard from "./pages/couple/CoupleThemeMoodboard";
 import CoupleProfileForm from "./pages/couple/CoupleProfileForm";
 import CoupleProfile from "./pages/couple/CoupleProfile";
-import CouplePending from "./pages/couple/CouplePending";
+import PendingVerification from "./pages/PendingVerification";
 
 import WeddingCart from "./pages/couple/WeddingCart";
 import CoupleBidPlaced from "./pages/couple/CoupleBidPlaced";
@@ -82,22 +82,22 @@ function AppContent() {
   const { currentUser, loading } = useAuth();
   const [isAIToolOpen, setIsAIToolOpen] = useState(false);
 
-  // Redirection guard to temporary pause services for couples with completed profile
+  // Redirection guard to temporary pause services for all pending users
   React.useEffect(() => {
     if (!loading && currentUser) {
-      const isCouple = currentUser.role === "couple";
-      const isProfileCompleted = currentUser.weddingProfile?.completed === true;
-      const isPending = currentUser.coupleVerificationStatus === "pending";
+      const isAdmin = currentUser.role === "admin" || currentUser.isAdmin === true;
+      const isProfileCompleted = currentUser.profileCompleted === true || currentUser.weddingProfile?.completed === true;
+      const isPending = currentUser.verificationStatus === "pending";
 
       if (
-        isCouple &&
+        !isAdmin &&
         isProfileCompleted &&
         isPending &&
-        location.pathname !== "/couple/pending" &&
+        location.pathname !== "/pending" &&
         !location.pathname.startsWith("/login") &&
         !location.pathname.startsWith("/signup")
       ) {
-        navigate("/couple/pending", { replace: true });
+        navigate("/pending", { replace: true });
       }
     }
   }, [currentUser, loading, location.pathname, navigate]);
@@ -121,7 +121,7 @@ function AppContent() {
     location.pathname.startsWith("/vendor/") ||
     location.pathname.startsWith("/vendor-ai") ||
     location.pathname === "/couple/onboarding" ||
-    location.pathname === "/couple/pending" ||
+    location.pathname === "/pending" ||
     location.pathname === "/love-story" ||
     location.pathname.startsWith("/couple/moodboard") ||
     location.pathname === "/couple/cart" ||
@@ -275,10 +275,10 @@ function AppContent() {
 
         {/* Couple Routes */}
         <Route
-          path="/couple/pending"
+          path="/pending"
           element={
-            <ProtectedRoute requiredRole="couple">
-              <CouplePending />
+            <ProtectedRoute>
+              <PendingVerification />
             </ProtectedRoute>
           }
         />

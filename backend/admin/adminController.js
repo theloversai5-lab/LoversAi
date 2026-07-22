@@ -119,7 +119,7 @@ export const getUserById = async (req, res) => {
 };
 
 export const updateUserById = async (req, res) => {
-  const allowed = ["plan", "isPro", "isAdmin", "subscriptionStatus", "fullName", "isBlocked", "blockedReason", "coupleVerificationStatus"];
+  const allowed = ["plan", "isPro", "isAdmin", "subscriptionStatus", "fullName", "isBlocked", "blockedReason", "coupleVerificationStatus", "verificationStatus"];
   const updates = Object.keys(req.body).reduce((acc, key) => {
     if (allowed.includes(key)) acc[key] = req.body[key];
     return acc;

@@ -122,14 +122,14 @@ const AdminUsers = () => {
             isAdmin: !users.find((u) => u.id === userId).isAdmin,
           });
           break;
-        case "approveCouple":
+        case "approveUser":
           result = await adminAPI.updateUser(userId, {
-            coupleVerificationStatus: "approved",
+            verificationStatus: "approved",
           });
           break;
-        case "disapproveCouple":
+        case "disapproveUser":
           result = await adminAPI.updateUser(userId, {
-            coupleVerificationStatus: "pending",
+            verificationStatus: "pending",
           });
           break;
         case "block":
@@ -1035,15 +1035,15 @@ const AdminUsers = () => {
                         >
                           {user.isBlocked ? "Blocked" : "Active"}
                         </span>
-                        {user.role === "couple" && (
+                        {user.role !== "admin" && !user.isAdmin && (
                           <span
                             className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                              user.coupleVerificationStatus === "approved"
+                              user.verificationStatus === "approved"
                                 ? "bg-sky-500/20 text-sky-300 font-semibold"
                                 : "bg-amber-500/20 text-amber-300 font-semibold"
                             }`}
                           >
-                            {user.coupleVerificationStatus === "approved" ? "Approved" : "Pending"}
+                            {user.verificationStatus === "approved" ? "Approved" : "Pending"}
                           </span>
                         )}
                       </td>
@@ -1057,23 +1057,23 @@ const AdminUsers = () => {
                         >
                           View
                         </button>
-                        {user.role === "couple" && (
+                        {user.role !== "admin" && !user.isAdmin && (
                           <button
                             onClick={() =>
                               handleAction(
-                                user.coupleVerificationStatus === "approved"
-                                  ? "disapproveCouple"
-                                  : "approveCouple",
+                                user.verificationStatus === "approved"
+                                  ? "disapproveUser"
+                                  : "approveUser",
                                 user.id,
                               )
                             }
                             className={`${
-                              user.coupleVerificationStatus === "approved"
+                              user.verificationStatus === "approved"
                                 ? "text-rose-400 hover:text-rose-300"
                                 : "text-sky-400 hover:text-sky-300"
                             } transition-colors`}
                           >
-                            {user.coupleVerificationStatus === "approved"
+                            {user.verificationStatus === "approved"
                               ? "Disapprove"
                               : "Approve"}
                           </button>
