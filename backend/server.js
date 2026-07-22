@@ -793,7 +793,21 @@ async function startServer() {
     ============================================================ */
     async function initializeAdminCredits() {
       try {
-        const adminUsers = await User.find({ isAdmin: true });
+        let adminUsers = await User.find({ isAdmin: true });
+        if (adminUsers.length === 0) {
+          console.log("[Admin Init] No admin users found. Seeding default admin account...");
+          const defaultAdmin = await User.create({
+            email: "admin@loversai.com",
+            password: "adminpassword123",
+            fullName: "LoversAI Admin",
+            role: "admin",
+            isAdmin: true,
+            emailVerified: true,
+            profileCompleted: true,
+          });
+          console.log(`[Admin Init] Created default admin: admin@loversai.com / adminpassword123`);
+          adminUsers = [defaultAdmin];
+        }
         console.log(`[Admin Credits Init] Found ${adminUsers.length} admin user(s) to verify.`);
         for (const adminUser of adminUsers) {
           const targetProductType = ["couple", "planner", "vendor"].includes(adminUser.role) ? adminUser.role : "couple";
