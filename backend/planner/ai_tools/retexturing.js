@@ -23,7 +23,7 @@ const GEMINI_IMAGE_MODEL_FALLBACKS = [
   "gemini-2.5-flash-image",
   "gemini-3-pro-image-preview",
 ];
-const LEGACY_FLUX_ENABLED = process.env.LEGACY_FLUX_ENABLED === "true";
+const LEGACY_FLUX_ENABLED = true;
 
 const generatedImageCache = new Map();
 const GENERATED_IMAGE_CACHE_TTL_MS =
@@ -169,6 +169,98 @@ function extractGeminiImageParts(responseData = {}) {
     });
 }
 
+async function callFluxAPI(
+  imageBuffer,
+  prompt,
+  modelType = "flux-2-pro",
+  dimensions = null,
+  seed = null,
+) {
+  if (!process.env.BFL_API_KEY) {
+    throw new Error("BFL API key not configured for Flux calls");
+  }
+
+  const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
+  const dim = dimensions || { width: 1024, height: 1024 };
+
+  const body = {
+    prompt: prompt,
+    width: dim.width,
+    height: dim.height,
+    safety_tolerance: 2,
+    output_format: "jpeg",
+  };
+
+  // Determine the correct model. If there is an input image buffer, use depth controlnet or canny controlnet.
+  // We'll use "flux-2-pro-canny" for control/structure preservation in retexturing when image is present.
+  let targetModel = modelType;
+  if (imageBuffer) {
+    targetModel = "flux-2-pro-canny";
+    body.control_image = imageBuffer.toString("base64");
+  } else {
+    targetModel = "flux-2-pro";
+  }
+
+  console.log(`🎨 [Retexturing] Calling BFL Flux (${targetModel}) at ${dim.width}x${dim.height}...`);
+
+  const response = await fetch(`${baseUrl}/v1/${targetModel}`, {
+    method: "POST",
+    headers: {
+      "x-key": process.env.BFL_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Flux BFL error ${response.status}: ${errorText.substring(0, 200)}`);
+  }
+
+  const result = await response.json();
+  if (result.id) return pollForResult(result.id, result.polling_url);
+
+  return {
+    url: result.result?.sample || result.url,
+    seed: result.result?.seed || Math.floor(Math.random() * 1e6),
+    generationId: `flux_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+  };
+}
+
+async function pollForResult(taskId, customPollingUrl) {
+  const maxAttempts = parseInt(process.env.MAX_POLL_ATTEMPTS) || 30;
+  const pollInterval = parseInt(process.env.POLL_INTERVAL) || 5000;
+  const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
+
+  for (let i = 0; i < maxAttempts; i++) {
+    console.log(`⏳ [Retexturing] Poll ${i + 1}/${maxAttempts}`);
+    try {
+      const url = customPollingUrl || `${baseUrl}/v1/get_result?id=${taskId}`;
+      const res = await fetch(url, {
+        headers: { "x-key": process.env.BFL_API_KEY },
+      });
+      if (!res.ok) {
+        await new Promise((r) => setTimeout(r, pollInterval));
+        continue;
+      }
+      const data = await res.json();
+      if (data.status === "Ready") {
+        return {
+          url: data.result.sample,
+          seed: data.result.seed || Math.floor(Math.random() * 1e6),
+          generationId: `flux_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+      }
+      if (data.status === "Error")
+        throw new Error(`Flux processing error: ${data.details || data.error}`);
+    } catch (e) {
+      console.warn("Poll attempt failed:", e.message);
+    }
+    await new Promise((r) => setTimeout(r, pollInterval));
+  }
+  throw new Error("Flux generation timed out after polling limit reached");
+}
+
 async function callGeminiImageAPI(
   imageBuffer,
   prompt,
@@ -176,15 +268,11 @@ async function callGeminiImageAPI(
   mimeType = "image/jpeg",
   modelType = GEMINI_IMAGE_MODEL,
 ) {
-  const candidateModels = [
-    ...new Set([modelType, ...GEMINI_IMAGE_MODEL_FALLBACKS]),
-  ];
+  console.log("🔄 [Retexturing] Routing generation request directly to BFL Flux API...");
+  return await callFluxAPI(imageBuffer, prompt, "flux-2-pro", null, null);
+}
 
-  let lastError = null;
-
-  for (const candidateModel of candidateModels) {
-    try {
-      return await callGeminiImageAPIWithModel(
+async function callGeminiImageAPIWithModel(
         imageBuffer,
         prompt,
         negativePrompt,

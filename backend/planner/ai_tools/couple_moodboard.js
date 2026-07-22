@@ -33,7 +33,7 @@ const GEMINI_IMAGE_MODEL_FALLBACKS = [
   "gemini-3-pro-image-preview",
 ];
 
-const LEGACY_FLUX_ENABLED = process.env.LEGACY_FLUX_ENABLED === "true";
+const LEGACY_FLUX_ENABLED = true;
 const isAIEnabled = () =>
   !!(
     (process.env.GEMINI_API_KEY &&
@@ -1262,13 +1262,14 @@ async function callGeminiImageAPI(
   prompt,
   modelType = GEMINI_IMAGE_MODEL,
   dimensions = null,
+  seed = null,
 ) {
-  const candidateModels = [...new Set([modelType, ...GEMINI_IMAGE_MODEL_FALLBACKS])];
-  let lastError = null;
+  console.log("🔄 [Moodboard] Routing generation request directly to BFL Flux API...");
+  return await callFluxAPI(imageBuffer, prompt, "flux-2-pro", dimensions, seed);
+}
 
-  for (const candidateModel of candidateModels) {
-    try {
-      return await callGeminiImageAPIWithModel(
+// Keep the model-specific call function just in case or for reference
+async function callGeminiImageAPIWithModel(
         imageBuffer,
         prompt,
         candidateModel,
