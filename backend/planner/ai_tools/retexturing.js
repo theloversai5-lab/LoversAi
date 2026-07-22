@@ -183,25 +183,27 @@ async function callFluxAPI(
   const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
   const dim = dimensions || { width: 1024, height: 1024 };
 
+  const roundedWidth = Math.round(dim.width / 16) * 16;
+  const roundedHeight = Math.round(dim.height / 16) * 16;
+
   const body = {
     prompt: prompt,
-    width: dim.width,
-    height: dim.height,
+    width: roundedWidth,
+    height: roundedHeight,
     safety_tolerance: 2,
     output_format: "jpeg",
   };
 
-  // Determine the correct model. If there is an input image buffer, use depth controlnet or canny controlnet.
-  // We'll use "flux-2-pro-canny" for control/structure preservation in retexturing when image is present.
+  // Determine the correct model. If there is an input image buffer, use BFL Kontext for image-to-image.
   let targetModel = modelType;
   if (imageBuffer) {
-    targetModel = "flux-2-pro-canny";
-    body.control_image = imageBuffer.toString("base64");
+    targetModel = "flux-kontext-pro";
+    body.input_image = imageBuffer.toString("base64");
   } else {
     targetModel = "flux-2-pro";
   }
 
-  console.log(`🎨 [Retexturing] Calling BFL Flux (${targetModel}) at ${dim.width}x${dim.height}...`);
+  console.log(`🎨 [Retexturing] Calling BFL Flux (${targetModel}) at ${roundedWidth}x${roundedHeight}...`);
 
   const response = await fetch(`${baseUrl}/v1/${targetModel}`, {
     method: "POST",

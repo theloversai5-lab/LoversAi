@@ -882,17 +882,20 @@ async function callFluxAPI(
   const baseUrl = process.env.FLUX_API_BASE_URL || "https://api.bfl.ai";
   const dim = dimensions || { width: 1024, height: 1024 };
 
+  const roundedWidth = Math.round(dim.width / 16) * 16;
+  const roundedHeight = Math.round(dim.height / 16) * 16;
+
   // Detect if model supports input_image (kontext models = image-to-image, others = text-to-image)
   const isKontextModel = modelType.includes("kontext");
 
   console.log(
-    `🎨 [Moodboard] Calling Flux (${modelType}) at ${dim.width}x${dim.height} [${isKontextModel ? "img2img" : "txt2img"}]...`,
+    `🎨 [Moodboard] Calling Flux (${modelType}) at ${roundedWidth}x${roundedHeight} [${isKontextModel ? "img2img" : "txt2img"}]...`,
   );
 
   const body = {
     prompt: prompt,
-    width: dim.width,
-    height: dim.height,
+    width: roundedWidth,
+    height: roundedHeight,
     safety_tolerance: 2,
     output_format: "jpeg",
   };
