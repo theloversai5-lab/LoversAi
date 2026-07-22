@@ -122,16 +122,6 @@ const AdminUsers = () => {
             isAdmin: !users.find((u) => u.id === userId).isAdmin,
           });
           break;
-        case "approveCouple":
-          result = await adminAPI.updateUser(userId, {
-            coupleVerificationStatus: "approved",
-          });
-          break;
-        case "disapproveCouple":
-          result = await adminAPI.updateUser(userId, {
-            coupleVerificationStatus: "pending",
-          });
-          break;
         case "block":
           result = await adminAPI.blockUser(userId, args[0]);
           break;
@@ -1035,17 +1025,6 @@ const AdminUsers = () => {
                         >
                           {user.isBlocked ? "Blocked" : "Active"}
                         </span>
-                        {user.role === "couple" && (
-                          <span
-                            className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                              user.coupleVerificationStatus === "approved"
-                                ? "bg-sky-500/20 text-sky-300 font-semibold"
-                                : "bg-amber-500/20 text-amber-300 font-semibold"
-                            }`}
-                          >
-                            {user.coupleVerificationStatus === "approved" ? "Approved" : "Pending"}
-                          </span>
-                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         ${user.totalSpent?.toFixed(2) || "0.00"}
@@ -1057,27 +1036,6 @@ const AdminUsers = () => {
                         >
                           View
                         </button>
-                        {user.role === "couple" && (
-                          <button
-                            onClick={() =>
-                              handleAction(
-                                user.coupleVerificationStatus === "approved"
-                                  ? "disapproveCouple"
-                                  : "approveCouple",
-                                user.id,
-                              )
-                            }
-                            className={`${
-                              user.coupleVerificationStatus === "approved"
-                                ? "text-rose-400 hover:text-rose-300"
-                                : "text-sky-400 hover:text-sky-300"
-                            } transition-colors`}
-                          >
-                            {user.coupleVerificationStatus === "approved"
-                              ? "Disapprove"
-                              : "Approve"}
-                          </button>
-                        )}
                         <button
                           onClick={() => {
                             setSelectedUser(user);

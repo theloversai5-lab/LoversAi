@@ -839,20 +839,6 @@ async function startServer() {
       }
     }
 
-    async function approveExistingCouples() {
-      try {
-        const result = await User.updateMany(
-          { role: "couple", coupleVerificationStatus: { $exists: false } },
-          { $set: { coupleVerificationStatus: "approved" } }
-        );
-        if (result.modifiedCount > 0) {
-          console.log(`[Couple Init] Approved ${result.modifiedCount} existing couple(s) without verification status.`);
-        }
-      } catch (err) {
-        console.error("❌ [Couple Init] Failed to approve existing couples:", err);
-      }
-    }
-
     /* ============================================================
        Start Server
     ============================================================ */
@@ -860,7 +846,6 @@ async function startServer() {
     
     // 🎁 Grant 20 initial promotional credits to any admins who haven't received them yet
     await initializeAdminCredits();
-    await approveExistingCouples();
     {
       console.log(`
 ✨ ===========================================
