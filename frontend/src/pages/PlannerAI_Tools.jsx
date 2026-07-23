@@ -639,15 +639,15 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
           <div className="bg-black py-20 px-4">
             <div className="w-full px-4 sm:px-[6%] md:px-[10%] mt-16 transition-all duration-300">
               <h2
-                className="text-[clamp(2.1rem,5vw,4rem)] text-white mb-16 heading-font text-left"
+                className="text-[clamp(2.1rem,5vw,4rem)] text-white/40 mb-16 heading-font text-left cursor-not-allowed select-none"
               >
                 DESIGN YOUR WALKTHROUGH
               </h2>
               <div
-                className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 relative overflow-hidden group"
+                className="w-full rounded-[40px] md:rounded-[56px] p-8 md:p-16 glass-card border border-white/10 relative overflow-hidden group cursor-not-allowed select-none"
               >
                 {/* Images with grayscale filter */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-14 filter grayscale opacity-55 pointer-events-none">
                   <div className="relative">
                     <div className="absolute top-6 left-6 bg-black/60 border border-white/10 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium z-10">
                       Before
@@ -683,6 +683,20 @@ const PitchAIPage = ({ navigateTo, onToggleTool }) => {
                   </div>
                 </div>
 
+                {/* Lock Overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-10 animate-pulse duration-[3000ms]">
+                  <div className="p-4 rounded-full bg-black/45 border border-white/10 backdrop-blur-md mb-3">
+                    <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <span className="text-xl font-bold uppercase tracking-[4px] text-amber-400/90 drop-shadow-md">
+                    Coming Soon
+                  </span>
+                  <span className="text-xs text-white/50 mt-1 uppercase tracking-widest">
+                    Stay Tuned
+                  </span>
+                </div>
               </div>
             </div>
           </div>
