@@ -2,11 +2,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PortfolioSection from '../components/PortfolioSection';
+import TestimonialSection from '../components/TestimonialSection';
 import PlannerQuickMenu from '../components/PlannerQuickMenu';
 import Footer from '../components/Footer';
 
 const SafePortfolioSection =
   typeof PortfolioSection === 'function' ? PortfolioSection : () => null;
+const SafeTestimonialSection =
+  typeof TestimonialSection === 'function' ? TestimonialSection : () => null;
 const SafePlannerQuickMenu =
   typeof PlannerQuickMenu === 'function' ? PlannerQuickMenu : () => null;
 
@@ -202,6 +205,9 @@ const PlannerPage = () => {
 
       {/* Portfolio Section */}
       <SafePortfolioSection />
+
+      {/* Testimonials Section */}
+      <SafeTestimonialSection />
 
       {/* Planner Footer */}
       <Footer />
