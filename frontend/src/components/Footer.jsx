@@ -197,7 +197,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                   />
 
                   <p className="footer-text-font mt-4 text-[11px] text-white/40 tracking-wider">
-                    &copy;2025 LoversAI. Planner growth, simplified.
+                    &copy;2026 Aanssha proprietorship (LoversAI). Planner growth, simplified.
                   </p>
                 </div>
               </div>
@@ -363,7 +363,7 @@ const Footer = ({ navigateTo, openContactPopup }) => {
                   />
 
                   <p className="footer-text-font mt-4 text-[11px] text-white/40 tracking-wider">
-                    &copy;2025 LoversAI. All rights reserved.
+                    &copy;2026 Aanssha proprietorship (LoversAI). All rights reserved.
                   </p>
                 </div>
               </div>
