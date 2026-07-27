@@ -23,9 +23,14 @@ const Login = () => {
   const [error, setError] = useState("");
   const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
+  const [tempUser, setTempUser] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [socialLink, setSocialLink] = useState("");
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, firebaseLogin, currentUser, logout, resendOTP } = useAuth();
+  const { login, firebaseLogin, currentUser, logout, resendOTP, completeProfile } = useAuth();
 
   useEffect(() => {
     if (currentUser) {
@@ -128,6 +133,12 @@ const Login = () => {
       const data = await login(validation.data.email, validation.data.password);
 
       if (data.success) {
+        if (!data.user.phone || !data.user.socialLink) {
+          setTempUser(data);
+          setNeedsProfileCompletion(true);
+          return;
+        }
+
         sessionStorage.removeItem("redirectAfterLogin");
 
         const actualRole = (data.user?.role || localStorage.getItem("userRole") || "").toLowerCase();
@@ -217,6 +228,12 @@ const Login = () => {
         return;
       }
 
+      if (!data.user.phone || !data.user.socialLink) {
+        setTempUser(data);
+        setNeedsProfileCompletion(true);
+        return;
+      }
+
       sessionStorage.removeItem("redirectAfterLogin");
 
       const actualRole = (data.user?.role || localStorage.getItem("userRole") || "").toLowerCase();
@@ -246,6 +263,90 @@ const Login = () => {
       setLoading(false);
     }
   };
+  const handleCompleteProfile = async (e) => {
+    e.preventDefault();
+    if (!phone.trim() || phone.length < 10) {
+      setError("Please enter a valid contact number.");
+      return;
+    }
+    if (!socialLink.trim()) {
+      setError("Please provide a valid LinkedIn or Instagram profile URL.");
+      return;
+    }
+    try {
+      setLoading(true);
+      setError("");
+      const res = await completeProfile(phone, socialLink);
+      if (res.success) {
+        if (tempUser?.isNewUser) {
+          if (tempUser.user.role === "planner") navigate("/planner/onboarding");
+          else if (tempUser.user.role === "vendor") navigate("/vendor/onboarding");
+          else navigate("/couples");
+        } else {
+          handleRedirectByRole(tempUser.user);
+        }
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to complete profile.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const needsProfileCompletionContent = (
+    <div className="flex flex-col items-center justify-center w-full min-h-[400px]">
+      <div className="w-full max-w-md">
+        <h2 className="text-2xl font-semibold mb-2 text-center">Complete Your Profile</h2>
+        <p className="text-sm text-white/60 mb-6 text-center">
+          Just a few more details to get you started!
+        </p>
+
+        {error && (
+          <div className="mb-6 glass-card rounded-lg px-4 py-3 border-red-500/20 bg-red-500/10">
+            <p className="font-medium text-red-400 text-sm">Error</p>
+            <p className="text-sm mt-1 text-red-300/80">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleCompleteProfile} className="space-y-4">
+          <div>
+            <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+              Contact Number
+            </label>
+            <input
+              type="tel"
+              placeholder="+1 (555) 000-0000"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full glass-input rounded-xl px-4 py-3.5 text-sm placeholder-white/35 text-white"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+              LinkedIn or Instagram Profile
+            </label>
+            <input
+              type="url"
+              placeholder="https://..."
+              value={socialLink}
+              onChange={(e) => setSocialLink(e.target.value)}
+              className="w-full glass-input rounded-xl px-4 py-3.5 text-sm placeholder-white/35 text-white"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-6 loverai-btn-primary text-[15px] disabled:opacity-50 py-3.5"
+          >
+            {loading ? "Saving..." : "Continue"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 
   const authContent = (
     <>
@@ -290,6 +391,8 @@ const Login = () => {
             </button>
           </div>
         </div>
+      ) : needsProfileCompletion ? (
+        needsProfileCompletionContent
       ) : (
         <>
           <form onSubmit={handleLogin} className="space-y-5">

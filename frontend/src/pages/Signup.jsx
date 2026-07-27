@@ -29,6 +29,7 @@ export default function Signup() {
   const [phone, setPhone] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [partnerName, setPartnerName] = useState("");
+  const [socialLink, setSocialLink] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,10 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-  const { register, logout, currentUser, firebaseLogin } = useAuth(); // Assume logout is available if they are already logged in to another role
+  const { register, logout, currentUser, firebaseLogin, completeProfile } = useAuth(); // Assume logout is available if they are already logged in to another role
+
+  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
+  const [tempUser, setTempUser] = useState(null);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -86,6 +90,7 @@ export default function Signup() {
       role,
       fullName: name,
       phone,
+      socialLink,
       companyName,
       partnerName,
       email,
@@ -105,6 +110,7 @@ export default function Signup() {
         password: validated.password,
         fullName: validated.fullName,
         phone: validated.phone,
+        socialLink: validated.socialLink,
         role: validated.role.toLowerCase(),
         partnerName:
           validated.role === "Couple" ? validated.partnerName : undefined,
@@ -191,6 +197,12 @@ export default function Signup() {
         return;
       }
 
+      if (!data.user.phone || !data.user.socialLink) {
+        setTempUser(data);
+        setNeedsProfileCompletion(true);
+        return;
+      }
+
       handleGoogleSignupRedirect(data.user, Boolean(data.isNewUser));
     } catch (err) {
       console.error("Google signup error:", err);
@@ -199,6 +211,30 @@ export default function Signup() {
           err.message ||
           "Google sign-up failed.",
       );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteProfile = async (e) => {
+    e.preventDefault();
+    if (!phone.trim() || phone.length < 10) {
+      setError("Please enter a valid contact number.");
+      return;
+    }
+    if (!socialLink.trim()) {
+      setError("Please provide a valid LinkedIn or Instagram profile URL.");
+      return;
+    }
+    try {
+      setLoading(true);
+      setError("");
+      const res = await completeProfile(phone, socialLink);
+      if (res.success) {
+        handleGoogleSignupRedirect(res.user, Boolean(tempUser?.isNewUser));
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to complete profile.");
     } finally {
       setLoading(false);
     }
@@ -311,6 +347,18 @@ export default function Signup() {
               />
             </div>
 
+            <label>LinkedIn or Instagram Profile</label>
+            <div className="planner-auth-input-wrap">
+              <input
+                type="url"
+                placeholder="https://..."
+                value={socialLink}
+                onChange={(e) => setSocialLink(e.target.value)}
+                className="planner-auth-input"
+                required
+              />
+            </div>
+
             <label>Email</label>
             <div className="planner-auth-input-wrap">
               <input
@@ -394,6 +442,60 @@ export default function Signup() {
     </>
   );
 
+  const needsProfileCompletionContent = (
+    <div className="flex flex-col items-center justify-center w-full min-h-[400px]">
+      <div className="w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 p-8 rounded-2xl text-center">
+        <h2 className="text-2xl font-semibold text-white mb-2">Complete Your Profile</h2>
+        <p className="text-sm text-gray-400 mb-8">
+          Please provide your contact details to finish setting up your account.
+        </p>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleCompleteProfile} className="space-y-4 text-left">
+          <div>
+            <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+              Contact Number
+            </label>
+            <input
+              type="tel"
+              placeholder="+91 9876543210"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full glass-input rounded-xl px-4 py-3.5 text-sm placeholder-white/35 text-white"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+              LinkedIn or Instagram Profile
+            </label>
+            <input
+              type="url"
+              placeholder="https://..."
+              value={socialLink}
+              onChange={(e) => setSocialLink(e.target.value)}
+              className="w-full glass-input rounded-xl px-4 py-3.5 text-sm placeholder-white/35 text-white"
+              required
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-6 loverai-btn-primary text-[15px] disabled:opacity-50 py-3.5"
+          >
+            {loading ? "Saving..." : "Continue"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+
   return (
     isPlannerExperience ? (
       <div className="planner-auth-shell">
@@ -402,7 +504,7 @@ export default function Signup() {
             <div className="planner-auth-copy">
               <h1>Sign up</h1>
               <p>Create your planner account to manage projects and access your workspace.</p>
-              {plannerSignupContent}
+              {needsProfileCompletion ? needsProfileCompletionContent : plannerSignupContent}
             </div>
 
             <div className="planner-auth-visual">
@@ -528,7 +630,11 @@ export default function Signup() {
                       </div>
                     )}
 
-                    <form onSubmit={handleSignup} className="space-y-4">
+                {needsProfileCompletion ? (
+                  needsProfileCompletionContent
+                ) : (
+                  <>
+                  <form onSubmit={handleSignup} className="space-y-4 md:space-y-5">
                       <div>
                         <label className="block text-white/60 text-[13px] font-medium mb-1.5">
                           Full Name
@@ -669,6 +775,37 @@ export default function Signup() {
 
                       <div>
                         <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+                          LinkedIn or Instagram Profile
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg
+                              className="w-5 h-5 text-white/25"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={1.5}
+                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                              />
+                            </svg>
+                          </div>
+                          <input
+                            type="url"
+                            placeholder="https://..."
+                            value={socialLink}
+                            onChange={(e) => setSocialLink(e.target.value)}
+                            className="w-full glass-input rounded-xl pl-11 pr-4 py-3.5 text-sm placeholder-white/35"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-white/60 text-[13px] font-medium mb-1.5">
                           Password
                         </label>
                         <div className="relative">
@@ -794,6 +931,8 @@ export default function Signup() {
                         </Link>
                       </p>
                     </div>
+                  </>
+                )}
                   </>
                 )}
               </div>

@@ -74,6 +74,7 @@ const userSchema = new mongoose.Schema(
     },
 
     phone: { type: String, trim: true },
+    socialLink: { type: String, trim: true },
 
     // ─── OAuth ───
     googleId: {

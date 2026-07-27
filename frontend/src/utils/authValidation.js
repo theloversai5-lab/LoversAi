@@ -25,6 +25,10 @@ export const plannerSignupSchema = z
       .trim()
       .min(10, "Please enter a valid phone number.")
       .max(15, "Phone number is too long."),
+    socialLink: z
+      .string()
+      .trim()
+      .min(5, "Please enter your LinkedIn or Instagram profile URL."),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters long.")

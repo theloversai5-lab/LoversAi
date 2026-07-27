@@ -26,9 +26,8 @@ const FeedbackCarousel = ({ images = [], caption = "Recent Client Love", title =
         {images.map((img, idx) => (
           <div
             key={idx}
-            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out ${
-              idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-            }`}
+            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-in-out ${idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
           >
             <img
               src={img}
@@ -57,11 +56,10 @@ const FeedbackCarousel = ({ images = [], caption = "Recent Client Love", title =
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
-                className={`transition-all duration-300 rounded-full ${
-                  idx === currentIndex
+                className={`transition-all duration-300 rounded-full ${idx === currentIndex
                     ? "w-6 h-1.5 bg-[#e6c6b2] shadow-[0_0_8px_rgba(230,198,178,0.8)]"
                     : "w-1.5 h-1.5 bg-white/40 hover:bg-white/70"
-                }`}
+                  }`}
               />
             ))}
           </div>

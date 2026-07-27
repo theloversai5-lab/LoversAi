@@ -25,13 +25,13 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID || undefined);
 ================================================================ */
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, fullName, phone, role, partnerName, companyName } = req.body;
+    const { email, password, fullName, phone, socialLink, role, partnerName, companyName } = req.body;
 
     // ─── Validation ───
-    if (!email || !password || !phone) {
+    if (!email || !password || !phone || !socialLink) {
       return res.status(400).json({
         success: false,
-        error: "Email, password, and phone number are required",
+        error: "Email, password, phone number, and LinkedIn/Instagram profile link are required",
       });
     }
 
@@ -65,6 +65,7 @@ router.post("/register", async (req, res) => {
       password,
       fullName: fullName?.trim() || "",
       phone: phone?.trim() || "",
+      socialLink: socialLink?.trim() || "",
       role: userRole,
       authProvider: "local",
       credits: 0, // Initialized to 0, added via creditService
@@ -495,6 +496,37 @@ router.post("/resend-otp", async (req, res) => {
 });
 
 /* ================================================================
+   POST /api/auth/complete-profile — Add missing phone/social info
+================================================================ */
+router.post("/complete-profile", protect, async (req, res) => {
+  try {
+    const { phone, socialLink } = req.body;
+
+    if (!phone || !socialLink) {
+      return res.status(400).json({ success: false, error: "Phone and social link are required" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    user.phone = phone.trim();
+    user.socialLink = socialLink.trim();
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Profile completed successfully",
+      user: sanitizeUser(user),
+    });
+  } catch (err) {
+    console.error("Complete profile error:", err);
+    res.status(500).json({ success: false, error: "Failed to complete profile" });
+  }
+});
+
+/* ================================================================
    GET /api/auth/me — Get current authenticated user
 ================================================================ */
 router.get("/me", protect, async (req, res) => {
@@ -533,7 +565,9 @@ router.post("/firebase-login", async (req, res) => {
       return res.status(401).json({ success: false, error: "No token provided" });
     }
 
+    console.log("[DEBUG] Verifying Firebase token...");
     const decoded = await admin.auth().verifyIdToken(fbToken);
+    console.log("[DEBUG] Token verified!", decoded.uid);
     const validRoles = ["couple", "planner", "vendor"];
     const userRole = validRoles.includes(role) ? role : "couple";
 
@@ -541,6 +575,7 @@ router.post("/firebase-login", async (req, res) => {
     let user = await User.findOne({
       $or: [{ firebaseUid: decoded.uid }, { email: decoded.email?.toLowerCase() }],
     });
+    console.log("[DEBUG] User found:", user ? "yes" : "no");
 
     let isNewUser = false;
 
@@ -558,7 +593,7 @@ router.post("/firebase-login", async (req, res) => {
         loginCount: 1,
       });
 
-      // Grant Initial Free Credits and create ledger entry for couple wallet
+      console.log("[DEBUG] Adding free credits...");
       await creditService.addCredits(
         user._id,
         PLAN_CREDITS.free,
@@ -568,10 +603,13 @@ router.post("/firebase-login", async (req, res) => {
         "couple"
       );
 
+      console.log("[DEBUG] Initializing planner wallet...");
       // Eagerly initialize Planner Wallet (grants 1 free credit automatically)
       await creditService.getWallet(user._id, "planner");
 
+      console.log("[DEBUG] Syncing planner user...");
       await syncPlannerUserFromAuth(user, "signup");
+      console.log("[DEBUG] Planner user sync complete.");
     } else {
       User.updateOne(
         { _id: user._id },
@@ -604,7 +642,9 @@ router.post("/firebase-login", async (req, res) => {
     }
 
     // Issue a proper JWT token
+    console.log("[DEBUG] Generating token...");
     const token = generateToken(user);
+    console.log("[DEBUG] Returning response...");
 
     res.json({
       success: true,

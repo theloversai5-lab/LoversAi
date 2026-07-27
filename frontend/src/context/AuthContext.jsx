@@ -121,6 +121,16 @@ export function AuthProvider({ children }) {
     return await authAPI.resendOTP({ email });
   }, []);
 
+  // Complete Profile
+  const completeProfile = useCallback(async (phone, socialLink) => {
+    const data = await authAPI.completeProfile({ phone, socialLink });
+    if (data.success && data.user) {
+      setCurrentUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
+    return data;
+  }, []);
+
   // Logout
   const logout = useCallback(() => {
     removeToken();
@@ -155,6 +165,7 @@ export function AuthProvider({ children }) {
     firebaseLogin,
     verifyEmail,
     resendOTP,
+    completeProfile,
     logout,
     refreshUser,
   };

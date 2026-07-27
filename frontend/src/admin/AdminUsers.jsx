@@ -295,6 +295,20 @@ const AdminUsers = () => {
                     {selectedUser.fullName || "N/A"}
                   </div>
                   <div>
+                    <span className="font-medium text-gray-400">Phone:</span>{" "}
+                    {selectedUser.phone || "N/A"}
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-400">Social Link:</span>{" "}
+                    {selectedUser.socialLink ? (
+                      <a href={selectedUser.socialLink} target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline break-all">
+                        {selectedUser.socialLink}
+                      </a>
+                    ) : (
+                      "N/A"
+                    )}
+                  </div>
+                  <div>
                     <span className="font-medium text-gray-400">Plan:</span>
                     <span
                       className={`ml-2 px-2 py-1 text-xs rounded-full ${

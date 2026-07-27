@@ -145,6 +145,9 @@ export const authAPI = {
   resendOTP: (data) =>
     apiFetch('/auth/resend-otp', { method: 'POST', data }),
 
+  completeProfile: (data) =>
+    apiFetch('/auth/complete-profile', { method: 'POST', data }),
+
   getMe: () => apiFetch('/auth/me'),
 };
 

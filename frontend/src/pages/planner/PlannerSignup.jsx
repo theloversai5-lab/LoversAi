@@ -7,11 +7,15 @@ import { formatZodErrors, plannerSignupSchema } from "../../utils/authValidation
 
 export default function PlannerSignup() {
   const navigate = useNavigate();
-  const { firebaseLogin, register } = useAuth();
+  const { firebaseLogin, register, completeProfile } = useAuth();
+  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
+  const [tempUser, setTempUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [name, setName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [socialLink, setSocialLink] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -28,6 +32,12 @@ export default function PlannerSignup() {
 
       const data = await firebaseLogin(idToken, "planner");
       if (data.success) {
+        if (!data.user.phone || !data.user.socialLink) {
+          setTempUser(data);
+          setNeedsProfileCompletion(true);
+          return;
+        }
+
         if (data.isNewUser) {
           navigate("/planner/onboarding");
         } else {
@@ -44,6 +54,34 @@ export default function PlannerSignup() {
     }
   };
 
+  const handleCompleteProfile = async (e) => {
+    e.preventDefault();
+    if (!phone.trim() || phone.length < 10) {
+      setError("Please enter a valid contact number.");
+      return;
+    }
+    if (!socialLink.trim()) {
+      setError("Please provide a valid LinkedIn or Instagram profile URL.");
+      return;
+    }
+    try {
+      setLoading(true);
+      setError("");
+      const res = await completeProfile(phone, socialLink);
+      if (res.success) {
+        if (tempUser?.isNewUser) {
+          navigate("/planner/onboarding");
+        } else {
+          navigate("/planner");
+        }
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to complete profile.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEmailSignup = async (e) => {
     e.preventDefault();
     setError("");
@@ -52,6 +90,8 @@ export default function PlannerSignup() {
       role: "Planner",
       fullName: name,
       companyName,
+      phone,
+      socialLink,
       partnerName: "",
       email,
       password,
@@ -69,6 +109,8 @@ export default function PlannerSignup() {
         email: validated.email,
         password: validated.password,
         fullName: validated.fullName,
+        phone: validated.phone,
+        socialLink: validated.socialLink,
         role: "planner",
         companyName: validated.companyName,
       });
@@ -86,20 +128,70 @@ export default function PlannerSignup() {
     }
   };
 
+  const needsProfileCompletionContent = (
+    <div className="flex flex-col items-center justify-center w-full">
+      <h2 className="text-2xl font-semibold text-white mb-2">Complete Your Profile</h2>
+      <p className="text-sm text-gray-400 mb-8 text-center">
+        Please provide your contact details to finish setting up your account.
+      </p>
+
+      <form onSubmit={handleCompleteProfile} className="space-y-4 w-full text-left">
+        <div>
+          <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+            Contact Number
+          </label>
+          <input
+            type="tel"
+            placeholder="+91 9876543210"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full glass-input rounded-xl px-4 py-3.5 text-sm placeholder-white/35 text-white"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-white/60 text-[13px] font-medium mb-1.5">
+            LinkedIn or Instagram Profile
+          </label>
+          <input
+            type="url"
+            placeholder="https://..."
+            value={socialLink}
+            onChange={(e) => setSocialLink(e.target.value)}
+            className="w-full glass-input rounded-xl px-4 py-3.5 text-sm placeholder-white/35 text-white"
+            required
+          />
+        </div>
+        
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full mt-6 bg-amber-500 hover:bg-amber-400 text-black font-semibold py-3.5 rounded-xl transition-all disabled:opacity-50"
+        >
+          {loading ? "Saving..." : "Continue"}
+        </button>
+      </form>
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f0c0a] text-white">
       <div className="w-full max-w-md p-8">
         <div className="glass-card-strong p-6 rounded-2xl">
-          <h2 className="text-2xl font-semibold mb-2">Planner Signup</h2>
-          <p className="text-sm text-white/60 mb-6">
-            Create your planner account with Google or email
-          </p>
-
           {error && (
             <div className="mb-4 rounded-md bg-red-600/10 p-3 text-red-300">
               {error}
             </div>
           )}
+
+          {needsProfileCompletion ? (
+            needsProfileCompletionContent
+          ) : (
+            <>
+              <h2 className="text-2xl font-semibold mb-2">Planner Signup</h2>
+              <p className="text-sm text-white/60 mb-6">
+                Create your planner account with Google or email
+              </p>
 
           <button
             onClick={handleGoogle}
@@ -160,6 +252,32 @@ export default function PlannerSignup() {
               className="w-full glass-input rounded-xl px-4 py-3 text-sm"
             />
 
+            <label htmlFor="planner-phone" className="sr-only">
+              Contact Number
+            </label>
+            <input
+              id="planner-phone"
+              aria-label="Contact Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Phone number"
+              type="tel"
+              className="w-full glass-input rounded-xl px-4 py-3 text-sm"
+            />
+
+            <label htmlFor="planner-social" className="sr-only">
+              LinkedIn or Instagram Profile
+            </label>
+            <input
+              id="planner-social"
+              aria-label="LinkedIn or Instagram Profile"
+              value={socialLink}
+              onChange={(e) => setSocialLink(e.target.value)}
+              placeholder="LinkedIn or Instagram Profile Link"
+              type="url"
+              className="w-full glass-input rounded-xl px-4 py-3 text-sm"
+            />
+
             <label htmlFor="planner-email" className="sr-only">
               Email address
             </label>
@@ -194,7 +312,9 @@ export default function PlannerSignup() {
             >
               {loading ? "Creating..." : "Create Planner Account"}
             </button>
-          </form>
+            </form>
+            </>
+          )}
         </div>
       </div>
     </div>

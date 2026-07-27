@@ -116,7 +116,18 @@ const PlannerUserModal = ({ user, onClose, onRefresh }) => {
             <h2 className="text-xl font-semibold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
               Manage Planner AI User
             </h2>
-            <p className="text-sm text-gray-400 mt-1">{user.fullName || "N/A"} ({user.email})</p>
+            <p className="text-sm text-gray-400 mt-1">
+              {user.fullName || "N/A"} ({user.email})
+              {user.phone && ` • ${user.phone}`}
+              {user.socialLink && (
+                <>
+                  {" • "}
+                  <a href={user.socialLink} target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">
+                    Profile
+                  </a>
+                </>
+              )}
+            </p>
           </div>
           <button
             onClick={onClose}

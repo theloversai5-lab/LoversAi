@@ -26,7 +26,7 @@ const ProjectGallery = ({ project }) => {
 
   const handleNavigate = (direction) => {
     if (lightboxIndex === null) return;
-    
+
     if (direction === "next") {
       setLightboxIndex((prev) => (prev + 1) % allImages.length);
     } else {
@@ -56,14 +56,14 @@ const ProjectGallery = ({ project }) => {
               )}
             </div>
           )}
-          
+
           {section.images && section.images.length > 0 && (
             <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
               {section.images.map((img, imgIdx) => {
                 const globalIndex = getGlobalIndex(sectionIdx, imgIdx);
                 return (
-                  <div 
-                    key={imgIdx} 
+                  <div
+                    key={imgIdx}
                     className="relative w-full break-inside-avoid overflow-hidden bg-[#1a100b] rounded-xl group cursor-pointer border border-white/5"
                     onClick={(e) => { e.stopPropagation(); setLightboxIndex(globalIndex); }}
                   >
@@ -72,7 +72,11 @@ const ProjectGallery = ({ project }) => {
                       alt={`${section.label || 'Project Image'} ${imgIdx + 1}`}
                       className="w-full h-auto transition-transform duration-700 ease-out group-hover:scale-105"
                     />
-                    
+                    <div className="absolute bottom-3 right-3 pointer-events-none z-20 flex flex-col items-center opacity-90">
+                      <span className="text-white text-[12px] md:text-[14px] font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wider">@lovers ai</span>
+                      <span className="text-white text-[14px] md:text-[16px] font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-widest leading-none mt-1">9821640951</span>
+                    </div>
+
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center pointer-events-none">
                       <div className="opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all duration-300 text-[#e6c6b2] bg-[#1c120c]/90 rounded-full p-3 shadow-lg border border-[#e6c6b2]/20">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
@@ -87,7 +91,7 @@ const ProjectGallery = ({ project }) => {
       ))}
 
       {lightboxIndex !== null && (
-        <Lightbox 
+        <Lightbox
           images={allImages}
           currentIndex={lightboxIndex}
           onClose={(e) => { e?.stopPropagation(); setLightboxIndex(null); }}
@@ -103,7 +107,7 @@ export default function ProjectModal({ project, onClose }) {
 
   let finalFeedbackSection = null;
   let gallerySections = [];
-  
+
   if (project.sections) {
     finalFeedbackSection = project.sections.find(s => s.label === "Final Feedback" || s.label?.toLowerCase().includes("final feedback"));
     gallerySections = project.sections.filter(s => s !== finalFeedbackSection);
@@ -113,16 +117,16 @@ export default function ProjectModal({ project, onClose }) {
   const heroImage = project.cover || project.sections?.[0]?.images?.[0] || '/images/mandap-image.webp';
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-10"
       onClick={onClose}
     >
-      <div 
+      <div
         className="w-full max-w-7xl h-[90vh] bg-[#0a0604] overflow-y-auto rounded-[2rem] border border-white/10 shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-6 z-[110] w-full flex justify-end px-6 h-0 pointer-events-none">
-          <button 
+          <button
             onClick={onClose}
             className="pointer-events-auto text-white/70 hover:text-[#e6c6b2] transition-all p-2 hover:scale-110 drop-shadow-xl"
             aria-label="Close Project"
@@ -134,14 +138,14 @@ export default function ProjectModal({ project, onClose }) {
         {/* Immersive Hero Section */}
         <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center overflow-hidden mb-16 rounded-t-[2rem]">
           <div className="absolute inset-0 z-0">
-            <img 
+            <img
               src={heroImage}
               alt={project.title}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/60"></div>
           </div>
-          
+
           <FadeIn className="relative z-10 text-center text-white px-4">
             <h1 className="text-4xl md:text-7xl font-serif tracking-wide mb-6">{project.title}</h1>
             {project.location && (
@@ -157,7 +161,7 @@ export default function ProjectModal({ project, onClose }) {
               <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1a100b] px-6 py-2 rounded-full border border-[#e6c6b2]/30">
                 <span className="text-[#e6c6b2] text-sm uppercase tracking-widest font-semibold">Client Love</span>
               </div>
-              
+
               {finalFeedbackSection.caption && finalFeedbackSection.caption.toLowerCase() !== 'final feedback' && (
                 <p className="text-xl md:text-2xl font-serif italic text-white leading-relaxed mt-4 mb-8">
                   "{finalFeedbackSection.caption}"
@@ -182,7 +186,7 @@ export default function ProjectModal({ project, onClose }) {
         )}
 
         <ProjectGallery project={galleryProject} />
-        
+
         {/* Bottom padding spacing for scrollable modal */}
         <div className="pb-24"></div>
       </div>
