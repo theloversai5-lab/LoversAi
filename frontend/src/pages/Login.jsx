@@ -32,13 +32,6 @@ const Login = () => {
   const location = useLocation();
   const { login, firebaseLogin, currentUser, logout, resendOTP, completeProfile } = useAuth();
 
-  useEffect(() => {
-    if (currentUser) {
-      setIsLoggedIn(true);
-      setError("");
-    }
-  }, [currentUser]);
-
   const queryParams = new URLSearchParams(location.search);
   const targetRole = queryParams.get("role") || "";
   const mismatch = queryParams.get("mismatch") === "true";
@@ -115,6 +108,21 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   };
+
+  useEffect(() => {
+    if (currentUser) {
+      setIsLoggedIn(true);
+      setError("");
+      
+      const actualRole = (currentUser?.role || localStorage.getItem("userRole") || "").toLowerCase();
+      const expectedRole = targetRole ? targetRole.toLowerCase() : "";
+      
+      if (!expectedRole || actualRole === expectedRole) {
+        handleRedirectByRole(currentUser);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, targetRole]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
