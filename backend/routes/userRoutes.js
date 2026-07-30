@@ -131,6 +131,7 @@ router.post("/save-wedding-profile", protect, async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user._id,
       {
+        fullName: partnerName1?.trim() || req.user.fullName,
         weddingProfile,
         profileCompleted: true,
       },

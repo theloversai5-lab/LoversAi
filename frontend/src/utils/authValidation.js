@@ -6,16 +6,21 @@ export const plannerSignupSchema = z
     fullName: z
       .string()
       .trim()
-      .min(2, "Please enter your full name.")
-      .max(80, "Full name is too long."),
+      .max(80, "Full name is too long.")
+      .optional()
+      .or(z.literal("")),
     companyName: z
       .string()
       .trim()
-      .max(120, "Company name is too long."),
+      .max(120, "Company name is too long.")
+      .optional()
+      .or(z.literal("")),
     partnerName: z
       .string()
       .trim()
-      .max(80, "Partner name is too long."),
+      .max(80, "Partner name is too long.")
+      .optional()
+      .or(z.literal("")),
     email: z
       .string()
       .trim()
@@ -38,20 +43,21 @@ export const plannerSignupSchema = z
       .regex(/[^A-Za-z0-9]/, "Password must include a symbol."),
   })
   .superRefine((values, context) => {
-    if (values.role === "Planner" && !values.companyName.trim()) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["companyName"],
-        message: "Please enter your company name.",
-      });
-    }
-
-    if (values.role === "Couple" && !values.partnerName.trim()) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["partnerName"],
-        message: "Please enter your partner's name.",
-      });
+    if (values.role === "Planner") {
+      if (!values.companyName?.trim()) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyName"],
+          message: "Please enter your company name.",
+        });
+      }
+      if (!values.fullName?.trim() || values.fullName.trim().length < 2) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["fullName"],
+          message: "Please enter your full name.",
+        });
+      }
     }
   });
 
