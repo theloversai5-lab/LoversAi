@@ -480,7 +480,7 @@ export default function CoupleWeddingVision() {
       await new Promise((resolve) => setTimeout(resolve, 300));
       setProgress("Analyzing your wedding direction...");
       await new Promise((resolve) => setTimeout(resolve, 300));
-      setProgress("Generating wedding scenes with Gemini AI...");
+      setProgress("Generating your moodboard with Lovers AI...");
 
       const result = await coupleMoodboardAPI.generate(formData);
 
