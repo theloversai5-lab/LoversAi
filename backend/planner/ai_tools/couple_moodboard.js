@@ -885,11 +885,16 @@ async function callFluxAPI(
   const roundedWidth = Math.round(dim.width / 16) * 16;
   const roundedHeight = Math.round(dim.height / 16) * 16;
 
-  // Detect if model supports input_image (kontext models = image-to-image, others = text-to-image)
-  const isKontextModel = modelType.includes("kontext");
+  // If there is an image buffer, use BFL Kontext for image-to-image.
+  let targetModel = modelType;
+  if (imageBuffer) {
+    targetModel = "flux-kontext-pro";
+  }
+
+  const isKontextModel = targetModel.includes("kontext");
 
   console.log(
-    `🎨 [Moodboard] Calling Flux (${modelType}) at ${roundedWidth}x${roundedHeight} [${isKontextModel ? "img2img" : "txt2img"}]...`,
+    `🎨 [Moodboard] Calling Flux (${targetModel}) at ${roundedWidth}x${roundedHeight} [${isKontextModel ? "img2img" : "txt2img"}]...`,
   );
 
   const body = {
@@ -909,7 +914,7 @@ async function callFluxAPI(
     body.seed = seed;
   }
 
-  const response = await fetch(`${baseUrl}/v1/${modelType}`, {
+  const response = await fetch(`${baseUrl}/v1/${targetModel}`, {
     method: "POST",
     headers: {
       "x-key": process.env.BFL_API_KEY,
@@ -1529,7 +1534,7 @@ router.post(
 
       const imageGenerationPromises = variationPrompts.map((v, idx) => {
         const variationSeed = parsedSeed ? parsedSeed + idx : null;
-        return callGeminiImageAPI(null, v.prompt, modelType, dimensions)
+        return callGeminiImageAPI(decorFile?.buffer || venueFile?.buffer, v.prompt, modelType, dimensions)
           .then((result) => ({ success: true, label: v.label, ...result }))
           .catch((err) => {
             console.error(
