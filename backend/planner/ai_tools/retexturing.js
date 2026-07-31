@@ -32,8 +32,10 @@ const GENERATED_IMAGE_CACHE_PREFIX = "/api/ai/cache";
 
 const isGeminiConfigured = () =>
   !!(
-    process.env.GEMINI_API_KEY &&
-    process.env.GEMINI_API_KEY !== "your_gemini_api_key_here"
+    (process.env.NANNO_BANANA &&
+      process.env.NANNO_BANANA !== "your_gemini_api_key_here") ||
+    (process.env.GEMINI_API_KEY &&
+      process.env.GEMINI_API_KEY !== "your_gemini_api_key_here")
   );
 
 const isLegacyFluxConfigured = () =>
@@ -270,7 +272,24 @@ async function callGeminiImageAPI(
   mimeType = "image/jpeg",
   modelType = GEMINI_IMAGE_MODEL,
 ) {
-  console.log("🔄 [Retexturing] Routing generation request directly to BFL Flux API...");
+  // Try Gemini first (Nano Banana key or default Gemini key)
+  if (isGeminiConfigured()) {
+    try {
+      console.log("🔄 [Retexturing] Trying primary image generation with Gemini API (Nano Banana)...");
+      const result = await callGeminiImageAPIWithModel(
+        imageBuffer,
+        prompt,
+        negativePrompt,
+        mimeType,
+        modelType,
+      );
+      return { ...result, provider: "gemini" };
+    } catch (err) {
+      console.warn("⚠️ [Retexturing] Gemini generation failed, falling back to BFL Flux API:", err.message);
+    }
+  }
+
+  // Fallback to BFL Flux API
   return await callFluxAPI(imageBuffer, prompt, "flux-2-pro", null, null);
 }
 
@@ -298,7 +317,7 @@ async function callGeminiImageAPIWithModel(
     {
       method: "POST",
       headers: {
-        "x-goog-api-key": process.env.GEMINI_API_KEY,
+        "x-goog-api-key": process.env.NANNO_BANANA || process.env.GEMINI_API_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
