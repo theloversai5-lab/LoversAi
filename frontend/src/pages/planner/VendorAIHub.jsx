@@ -8,10 +8,42 @@ export default function VendorAIHub() {
   const vendors = [
     {
       id: "venue",
-      title: "Venue AI",
+      title: "Fairmount X Lover's AI",
       description: "Generate venue concepts and visualize event spaces using AI.",
       icon: <Wand2 className="h-6 w-6 text-loverai-gold" />,
       path: "/vendor-ai/venue",
+      active: true
+    },
+    {
+      id: "taj",
+      title: "Taj X Lover's AI",
+      description: "Generate venue concepts and visualize event spaces using AI.",
+      icon: <Wand2 className="h-6 w-6 text-loverai-gold" />,
+      path: "/vendor-ai/taj",
+      active: true
+    },
+    {
+      id: "itc-mughal",
+      title: "ITC Mughal X Lover's AI",
+      description: "Generate venue concepts and visualize event spaces using AI.",
+      icon: <Wand2 className="h-6 w-6 text-loverai-gold" />,
+      path: "/vendor-ai/itc-mughal",
+      active: true
+    },
+    {
+      id: "jaypee",
+      title: "Jaypee X Lover's AI",
+      description: "Generate venue concepts and visualize event spaces using AI.",
+      icon: <Wand2 className="h-6 w-6 text-loverai-gold" />,
+      path: "/vendor-ai/jaypee",
+      active: true
+    },
+    {
+      id: "base-venue",
+      title: "Venue AI",
+      description: "Generate venue concepts and visualize event spaces using AI.",
+      icon: <Wand2 className="h-6 w-6 text-loverai-gold" />,
+      path: "/vendor-ai/base-venue",
       active: true
     },
     {

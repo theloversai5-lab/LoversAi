@@ -2,12 +2,12 @@ import React from "react";
 import VendorAIOnboarding from "../../components/VendorAIOnboarding";
 import { vendorGuides } from "../../data/vendorGuides";
 
-export default function PlannerVenueAI() {
+export default function PlannerBaseVenueAI() {
   const config = {
-    title: "Fairmount X Lover's AI",
-    description: "Learn how Fairmount X Lover's AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
-    slides: vendorGuides.venue.slides,
-    quickTips: vendorGuides.venue.quickTips,
+    title: "Venue AI",
+    description: "Learn how Venue AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
+    slides: vendorGuides.baseVenue.slides,
+    quickTips: vendorGuides.baseVenue.quickTips,
     steps: [
       {
         title: "Upload Your Venue",
@@ -22,10 +22,9 @@ export default function PlannerVenueAI() {
         description: "Download high-resolution mockups to share with clients or your team."
       }
     ],
-    redirectUrl: "https://fairmont-x-loversai.vercel.app/",
-    buttonText: "Proceed to Fairmount X Lover's AI"
+    redirectUrl: "https://venue-ai-liart.vercel.app/",
+    buttonText: "Proceed to Venue AI"
   };
 
   return <VendorAIOnboarding config={config} />;
 }
-

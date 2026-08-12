@@ -34,10 +34,210 @@ export const vendorGuides = {
       {
         image: "/images/s7.webp",
         title: "Start Designing",
-        description: "You are now ready to use Venue AI."
+        description: "You are now ready to use Fairmount X Lover's AI."
       },
       {
         image: "/images/s8.webp",
+        title: "Bring Your Vision to Life",
+        description: "Unlock infinite possibilities and start creating your dream venue."
+      }
+    ],
+    quickTips: [
+      "Use high-quality images for the best AI results.",
+      "Provide accurate event details.",
+      "Review multiple AI-generated concepts before making a decision.",
+      "You can refine your inputs to generate new variations."
+    ]
+  },
+  taj: {
+    slides: [
+      {
+        image: "",
+        title: "Upload Your Venue",
+        description: "Upload venue images or provide venue details to begin."
+      },
+      {
+        image: "",
+        title: "Select Event Preferences",
+        description: "Choose your preferred style, theme, colors and requirements."
+      },
+      {
+        image: "",
+        title: "Generate AI Concepts",
+        description: "Our AI creates multiple venue concepts tailored to your inputs."
+      },
+      {
+        image: "",
+        title: "Review Concepts",
+        description: "Compare different AI-generated concepts and choose your favorite."
+      },
+      {
+        image: "",
+        title: "Refine Results",
+        description: "Adjust settings and regenerate improved venue concepts."
+      },
+      {
+        image: "",
+        title: "Download",
+        description: "Download high-quality outputs or continue editing."
+      },
+      {
+        image: "",
+        title: "Start Designing",
+        description: "You are now ready to use Taj X Lover's AI."
+      },
+      {
+        image: "",
+        title: "Bring Your Vision to Life",
+        description: "Unlock infinite possibilities and start creating your dream venue."
+      }
+    ],
+    quickTips: [
+      "Use high-quality images for the best AI results.",
+      "Provide accurate event details.",
+      "Review multiple AI-generated concepts before making a decision.",
+      "You can refine your inputs to generate new variations."
+    ]
+  },
+  itcMughal: {
+    slides: [
+      {
+        image: "",
+        title: "Upload Your Venue",
+        description: "Upload venue images or provide venue details to begin."
+      },
+      {
+        image: "",
+        title: "Select Event Preferences",
+        description: "Choose your preferred style, theme, colors and requirements."
+      },
+      {
+        image: "",
+        title: "Generate AI Concepts",
+        description: "Our AI creates multiple venue concepts tailored to your inputs."
+      },
+      {
+        image: "",
+        title: "Review Concepts",
+        description: "Compare different AI-generated concepts and choose your favorite."
+      },
+      {
+        image: "",
+        title: "Refine Results",
+        description: "Adjust settings and regenerate improved venue concepts."
+      },
+      {
+        image: "",
+        title: "Download",
+        description: "Download high-quality outputs or continue editing."
+      },
+      {
+        image: "",
+        title: "Start Designing",
+        description: "You are now ready to use ITC Mughal X Lover's AI."
+      },
+      {
+        image: "",
+        title: "Bring Your Vision to Life",
+        description: "Unlock infinite possibilities and start creating your dream venue."
+      }
+    ],
+    quickTips: [
+      "Use high-quality images for the best AI results.",
+      "Provide accurate event details.",
+      "Review multiple AI-generated concepts before making a decision.",
+      "You can refine your inputs to generate new variations."
+    ]
+  },
+  jaypee: {
+    slides: [
+      {
+        image: "",
+        title: "Upload Your Venue",
+        description: "Upload venue images or provide venue details to begin."
+      },
+      {
+        image: "",
+        title: "Select Event Preferences",
+        description: "Choose your preferred style, theme, colors and requirements."
+      },
+      {
+        image: "",
+        title: "Generate AI Concepts",
+        description: "Our AI creates multiple venue concepts tailored to your inputs."
+      },
+      {
+        image: "",
+        title: "Review Concepts",
+        description: "Compare different AI-generated concepts and choose your favorite."
+      },
+      {
+        image: "",
+        title: "Refine Results",
+        description: "Adjust settings and regenerate improved venue concepts."
+      },
+      {
+        image: "",
+        title: "Download",
+        description: "Download high-quality outputs or continue editing."
+      },
+      {
+        image: "",
+        title: "Start Designing",
+        description: "You are now ready to use Jaypee X Lover's AI."
+      },
+      {
+        image: "",
+        title: "Bring Your Vision to Life",
+        description: "Unlock infinite possibilities and start creating your dream venue."
+      }
+    ],
+    quickTips: [
+      "Use high-quality images for the best AI results.",
+      "Provide accurate event details.",
+      "Review multiple AI-generated concepts before making a decision.",
+      "You can refine your inputs to generate new variations."
+    ]
+  },
+  baseVenue: {
+    slides: [
+      {
+        image: "",
+        title: "Upload Your Venue",
+        description: "Upload venue images or provide venue details to begin."
+      },
+      {
+        image: "",
+        title: "Select Event Preferences",
+        description: "Choose your preferred style, theme, colors and requirements."
+      },
+      {
+        image: "",
+        title: "Generate AI Concepts",
+        description: "Our AI creates multiple venue concepts tailored to your inputs."
+      },
+      {
+        image: "",
+        title: "Review Concepts",
+        description: "Compare different AI-generated concepts and choose your favorite."
+      },
+      {
+        image: "",
+        title: "Refine Results",
+        description: "Adjust settings and regenerate improved venue concepts."
+      },
+      {
+        image: "",
+        title: "Download",
+        description: "Download high-quality outputs or continue editing."
+      },
+      {
+        image: "",
+        title: "Start Designing",
+        description: "You are now ready to use Venue AI."
+      },
+      {
+        image: "",
         title: "Bring Your Vision to Life",
         description: "Unlock infinite possibilities and start creating your dream venue."
       }
