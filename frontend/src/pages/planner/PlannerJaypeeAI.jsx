@@ -4,8 +4,8 @@ import { vendorGuides } from "../../data/vendorGuides";
 
 export default function PlannerJaypeeAI() {
   const config = {
-    title: "Jaypee X Lover's AI",
-    description: "Learn how Jaypee X Lover's AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
+    title: "Jaypee Palace Agra X Lover's AI",
+    description: "Learn how Jaypee Palace Agra X Lover's AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
     slides: vendorGuides.jaypee.slides,
     quickTips: vendorGuides.jaypee.quickTips,
     steps: [
@@ -23,7 +23,7 @@ export default function PlannerJaypeeAI() {
       }
     ],
     redirectUrl: "https://jaypee-palace-x-lovers-ai.vercel.app/",
-    buttonText: "Proceed to Jaypee X Lover's AI"
+    buttonText: "Proceed to Jaypee Palace Agra X Lover's AI"
   };
 
   return <VendorAIOnboarding config={config} />;

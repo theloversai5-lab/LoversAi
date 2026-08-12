@@ -4,8 +4,8 @@ import { vendorGuides } from "../../data/vendorGuides";
 
 export default function PlannerBaseVenueAI() {
   const config = {
-    title: "Venue AI",
-    description: "Learn how Venue AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
+    title: "MasterVenue AI",
+    description: "Learn how MasterVenue AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
     slides: vendorGuides.baseVenue.slides,
     quickTips: vendorGuides.baseVenue.quickTips,
     steps: [
@@ -23,7 +23,7 @@ export default function PlannerBaseVenueAI() {
       }
     ],
     redirectUrl: "https://venue-ai-liart.vercel.app/",
-    buttonText: "Proceed to Venue AI"
+    buttonText: "Proceed to MasterVenue AI"
   };
 
   return <VendorAIOnboarding config={config} />;

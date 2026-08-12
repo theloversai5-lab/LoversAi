@@ -4,8 +4,8 @@ import { vendorGuides } from "../../data/vendorGuides";
 
 export default function PlannerItcMughalAI() {
   const config = {
-    title: "ITC Mughal X Lover's AI",
-    description: "Learn how ITC Mughal X Lover's AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
+    title: "ITC Mughal Agra X Lover's AI",
+    description: "Learn how ITC Mughal Agra X Lover's AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
     slides: vendorGuides.itcMughal.slides,
     quickTips: vendorGuides.itcMughal.quickTips,
     steps: [
@@ -23,7 +23,7 @@ export default function PlannerItcMughalAI() {
       }
     ],
     redirectUrl: "https://itc-mughal-x-lovers-ai.vercel.app/",
-    buttonText: "Proceed to ITC Mughal X Lover's AI"
+    buttonText: "Proceed to ITC Mughal Agra X Lover's AI"
   };
 
   return <VendorAIOnboarding config={config} />;

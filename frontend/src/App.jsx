@@ -61,6 +61,7 @@ import PlannerTajAI from "./pages/planner/PlannerTajAI";
 import PlannerItcMughalAI from "./pages/planner/PlannerItcMughalAI";
 import PlannerJaypeeAI from "./pages/planner/PlannerJaypeeAI";
 import PlannerBaseVenueAI from "./pages/planner/PlannerBaseVenueAI";
+import PlannerVenueOptions from "./pages/planner/PlannerVenueOptions";
 import VendorAIHub from "./pages/planner/VendorAIHub";
 import PlannerDecorAI from "./pages/planner/PlannerDecorAI";
 import PlannerCateringAI from "./pages/planner/PlannerCateringAI";
@@ -215,6 +216,7 @@ function AppContent() {
           <Route path="/planner/messages" element={<PlannerMessages />} />
           <Route path="/planner/deals" element={<PlannerDeals />} />
           <Route path="/vendor-ai" element={<VendorAIHub />} />
+          <Route path="/vendor-ai/venue-options" element={<PlannerVenueOptions />} />
           <Route path="/vendor-ai/venue" element={<PlannerVenueAI />} />
           <Route path="/vendor-ai/taj" element={<PlannerTajAI />} />
           <Route path="/vendor-ai/itc-mughal" element={<PlannerItcMughalAI />} />

@@ -34,7 +34,7 @@ export const vendorGuides = {
       {
         image: "/images/s7.webp",
         title: "Start Designing",
-        description: "You are now ready to use Fairmount X Lover's AI."
+        description: "You are now ready to use FairMount Mumbai X Lover's AI."
       },
       {
         image: "/images/s8.webp",
@@ -84,7 +84,7 @@ export const vendorGuides = {
       {
         image: "",
         title: "Start Designing",
-        description: "You are now ready to use Taj X Lover's AI."
+        description: "You are now ready to use Taj Agra X Lover's AI."
       },
       {
         image: "",
@@ -134,7 +134,7 @@ export const vendorGuides = {
       {
         image: "",
         title: "Start Designing",
-        description: "You are now ready to use ITC Mughal X Lover's AI."
+        description: "You are now ready to use ITC Mughal Agra X Lover's AI."
       },
       {
         image: "",
@@ -184,7 +184,7 @@ export const vendorGuides = {
       {
         image: "",
         title: "Start Designing",
-        description: "You are now ready to use Jaypee X Lover's AI."
+        description: "You are now ready to use Jaypee Palace Agra X Lover's AI."
       },
       {
         image: "",
@@ -234,7 +234,7 @@ export const vendorGuides = {
       {
         image: "",
         title: "Start Designing",
-        description: "You are now ready to use Venue AI."
+        description: "You are now ready to use MasterVenue AI."
       },
       {
         image: "",

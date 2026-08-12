@@ -4,8 +4,8 @@ import { vendorGuides } from "../../data/vendorGuides";
 
 export default function PlannerTajAI() {
   const config = {
-    title: "Taj X Lover's AI",
-    description: "Learn how Taj X Lover's AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
+    title: "Taj Agra X Lover's AI",
+    description: "Learn how Taj Agra X Lover's AI works before getting started. This short guide will help you understand the workflow so you can generate better results.",
     slides: vendorGuides.taj.slides,
     quickTips: vendorGuides.taj.quickTips,
     steps: [
@@ -23,7 +23,7 @@ export default function PlannerTajAI() {
       }
     ],
     redirectUrl: "https://taj-x-lovers-ai.vercel.app/",
-    buttonText: "Proceed to Taj X Lover's AI"
+    buttonText: "Proceed to Taj Agra X Lover's AI"
   };
 
   return <VendorAIOnboarding config={config} />;
