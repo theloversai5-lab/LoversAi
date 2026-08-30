@@ -8,6 +8,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import GlobalBackButton from "./components/GlobalBackButton";
 import Dashboard from "./pages/Dashboard";
 import Footer from "./components/Footer";
 import Feature1 from "./pages/Feature1";
@@ -103,6 +104,8 @@ function AppContent() {
     location.pathname.startsWith("/vendor-ai") ||
     location.pathname === "/couple/onboarding" ||
     location.pathname === "/love-story" ||
+    location.pathname === "/couple/studio" ||
+    location.pathname === "/couple/wedding-vision" ||
     location.pathname.startsWith("/couple/moodboard") ||
     location.pathname === "/couple/cart" ||
     location.pathname === "/couple/bid-placed" ||
@@ -128,6 +131,7 @@ function AppContent() {
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} containerStyle={{ zIndex: 99999 }} />
+      <GlobalBackButton />
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/" element={<Dashboard />} />
@@ -311,6 +315,22 @@ function AppContent() {
         />
         <Route
           path="/love-story"
+          element={
+            <ProtectedRoute requiredRole="couple">
+              <CoupleWeddingVision />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/couple/studio"
+          element={
+            <ProtectedRoute requiredRole="couple">
+              <CoupleWeddingVision />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/couple/wedding-vision"
           element={
             <ProtectedRoute requiredRole="couple">
               <CoupleWeddingVision />

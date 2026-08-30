@@ -19,7 +19,7 @@ const router = express.Router();
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_VISION_MODEL =
   process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
-const CREDIT_COST = 15;
+const CREDIT_COST = OPERATION_COSTS.COUPLE_MOODBOARD_GENERATION || 1;
 const MAX_RETRIES = parseInt(process.env.MOODBOARD_MAX_RETRIES) || 1;
 const VALIDATION_ENABLED =
   (process.env.MOODBOARD_VALIDATION_ENABLED || "true") === "true";
@@ -1444,6 +1444,7 @@ router.post(
 
       // Credit check and immediate deduction
       const cost = OPERATION_COSTS.COUPLE_MOODBOARD_GENERATION;
+      const productType = user.role === "planner" ? "planner" : "couple";
       try {
         await creditService.deductCredits(
           user._id,
@@ -1451,11 +1452,11 @@ router.post(
           TRANSACTION_SOURCES.AI_GENERATION,
           `mb_${Date.now()}`,
           { functionType, style, action: "generate" },
-          "planner"
+          productType
         );
       } catch (err) {
         if (err.code === "INSUFFICIENT_CREDITS") {
-          const currentWallet = await creditService.getWallet(user._id, "planner");
+          const currentWallet = await creditService.getWallet(user._id, productType);
           return res.status(402).json({
             success: false,
             error: "Insufficient credits",
@@ -1605,7 +1606,7 @@ router.post(
         }
 
         // REFUND: All generations failed
-        await creditService.refundCredits(user._id, cost, "generate_failed", { reason: "all_generations_failed", details: firstError }, "planner").catch(console.error);
+        await creditService.refundCredits(user._id, cost, "generate_failed", { reason: "all_generations_failed", details: firstError }, productType).catch(console.error);
 
         return res.status(503).json({
           success: false,
@@ -1671,7 +1672,7 @@ router.post(
         }
         
         // Fetch fresh user balance to return in response
-        const freshWallet = await creditService.getWallet(user._id, "planner");
+        const freshWallet = await creditService.getWallet(user._id, productType);
 
         responseData.creditInfo = {
           deducted: cost,
@@ -1694,7 +1695,8 @@ router.post(
       const cost = OPERATION_COSTS.COUPLE_MOODBOARD_GENERATION;
       try {
         if (req.user && req.user._id) {
-          await creditService.refundCredits(req.user._id, cost, "pipeline_crash", { reason: error.message }, "planner");
+          const productType = req.user.role === "planner" ? "planner" : "couple";
+          await creditService.refundCredits(req.user._id, cost, "pipeline_crash", { reason: error.message }, productType);
         }
       } catch (refundErr) {
         console.error("Failed to refund on crash:", refundErr);
@@ -1766,6 +1768,7 @@ router.post(
       // Credit check & deduction for edit operation
       const user = req.user;
       const cost = OPERATION_COSTS.COUPLE_MOODBOARD_EDIT;
+      const productType = user.role === "planner" ? "planner" : "couple";
       
       try {
         await creditService.deductCredits(
@@ -1774,11 +1777,11 @@ router.post(
           TRANSACTION_SOURCES.AI_GENERATION,
           `mb_edit_${Date.now()}`,
           { functionType, action: "edit-image" },
-          "planner"
+          productType
         );
       } catch (err) {
         if (err.code === "INSUFFICIENT_CREDITS") {
-          const currentWallet = await creditService.getWallet(user._id, "planner");
+          const currentWallet = await creditService.getWallet(user._id, productType);
           return res.status(402).json({
             success: false,
             error: "Insufficient credits for edit",
@@ -1814,7 +1817,7 @@ router.post(
       } catch (apiErr) {
         // Refund on edit failure
         try {
-          await creditService.refundCredits(user._id, cost, "edit_failed", { action: "edit-image" }, "planner");
+          await creditService.refundCredits(user._id, cost, "edit_failed", { action: "edit-image" }, productType);
         } catch (rbErr) {
           console.error("⚠️ [Moodboard] Failed to refund credits after edit-image error:", rbErr);
         }
