@@ -32,10 +32,8 @@ const CreditWalletBadge = () => {
 
   if (!currentUser || loading) return null;
 
-  const rawPlan = currentUser?.plan || wallet?.plan || "Free";
-  const cleanPlan = String(rawPlan).replace(/^couple_|^planner_/, "");
-  const planName = cleanPlan.charAt(0).toUpperCase() + cleanPlan.slice(1);
-  const credits = wallet?.credits ?? currentUser?.credits ?? 0;
+  const planName = wallet?.plan || "Free";
+  const credits = wallet?.credits || 0;
 
   return (
     <>

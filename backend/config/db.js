@@ -15,7 +15,8 @@ const connectDB = async () => {
         mongoUri = memoryServer.getUri();
         console.log("🧪 In-memory MongoDB started for development");
       } catch (err) {
-        console.warn("⚠️ Could not start in-memory MongoDB (" + err.message + "). Proceeding without active MongoDB connection.");
+        console.error("❌ Failed to start in-memory MongoDB:", err.message);
+        process.exit(1);
       }
     } else {
       console.error(
@@ -25,17 +26,24 @@ const connectDB = async () => {
     }
   }
 
-  if (mongoUri) {
-    try {
-      await mongoose.connect(mongoUri);
-      console.log("✅ MongoDB Connected");
-    } catch (err) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn("⚠️ Failed to connect to MongoDB. Falling back without DB: " + err.message);
-      } else {
-        console.error("❌ MongoDB Error:", err.message);
+  try {
+    await mongoose.connect(mongoUri);
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("⚠️ Failed to connect to MongoDB Atlas. Falling back to in-memory MongoDB...");
+      try {
+        memoryServer = await MongoMemoryServer.create();
+        mongoUri = memoryServer.getUri();
+        await mongoose.connect(mongoUri);
+        console.log("🧪 In-memory MongoDB started and connected as fallback");
+      } catch (memErr) {
+        console.error("❌ Failed to start in-memory MongoDB fallback:", memErr.message);
         process.exit(1);
       }
+    } else {
+      console.error("❌ MongoDB Error:", err.message);
+      process.exit(1);
     }
   }
 

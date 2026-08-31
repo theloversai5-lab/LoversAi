@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import Wallet from "../models/Wallet.js";
 import CreditTransaction from "../models/CreditTransaction.js";
-import { CONSUMPTION_PRIORITY, TRANSACTION_TYPES, TRANSACTION_SOURCES, PLAN_CREDITS } from "../config/credits.js";
+import { CONSUMPTION_PRIORITY, TRANSACTION_TYPES, TRANSACTION_SOURCES } from "../config/credits.js";
 
 const ALLOWED_PRODUCTS = ["couple", "planner", "vendor", "decor", "catering", "studio"];
 
@@ -48,9 +48,9 @@ class CreditService {
          defaultData.freeCredits = 1;
          defaultData.lifetimeAdded = 1;
       } else if (productType === "couple") {
-         // Fallback to legacy User wallet for backward compatibility or initialize default free credits
+         // Fallback to legacy User wallet for backward compatibility
          const legacyUser = await User.findById(userId).select("credits wallet");
-         if (legacyUser && (legacyUser.credits > 0 || (legacyUser.wallet && legacyUser.wallet.lifetimeAdded > 0))) {
+         if (legacyUser) {
            defaultData.balance = legacyUser.credits || 0;
            if (legacyUser.wallet) {
              defaultData.freeCredits = legacyUser.wallet.freeCredits || 0;
@@ -61,17 +61,9 @@ class CreditService {
              defaultData.lifetimeAdded = legacyUser.wallet.lifetimeAdded || 0;
              defaultData.lifetimeUsed = legacyUser.wallet.lifetimeUsed || 0;
            }
-         } else {
-           const freeCredits = PLAN_CREDITS.free || 4;
-           defaultData.balance = freeCredits;
-           defaultData.freeCredits = freeCredits;
-           defaultData.lifetimeAdded = freeCredits;
          }
       }
       wallet = await Wallet.create(defaultData);
-      if (productType === "couple") {
-        await User.updateOne({ _id: userId }, { $set: { credits: wallet.balance } });
-      }
     }
     
     return {
@@ -132,10 +124,6 @@ class CreditService {
       balanceAfter: wallet.balance,
       metadata,
     });
-
-    if (productType === "couple") {
-      await User.updateOne({ _id: userId }, { $set: { credits: wallet.balance } });
-    }
 
     return { credits: wallet.balance, wallet, productType };
   }
@@ -218,9 +206,9 @@ class CreditService {
           metadata,
         });
         
-        // Also update legacy User totalCreditsUsed and credits for backwards compatibility if couple
+        // Also update legacy User totalCreditsUsed for backwards compatibility if couple
         if (productType === "couple") {
-           await User.updateOne({ _id: userId }, { $inc: { totalCreditsUsed: amount }, $set: { credits: result.balance } });
+           await User.updateOne({ _id: userId }, { $inc: { totalCreditsUsed: amount } });
         }
         
         return { credits: result.balance, wallet: result, productType };
@@ -285,10 +273,6 @@ class CreditService {
       balanceAfter: wallet.balance,
       metadata: { originalReference, ...metadata },
     });
-
-    if (productType === "couple") {
-      await User.updateOne({ _id: userId }, { $set: { credits: wallet.balance } });
-    }
 
     return { credits: wallet.balance, wallet, productType };
   }

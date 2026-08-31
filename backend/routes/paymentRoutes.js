@@ -158,7 +158,7 @@ router.post('/verify', protect, async (req, res) => {
     }
     
     // Update payment metadata
-    const amountPaid = plan.price || 0;
+    const amountPaid = (plan.price || 0) / 100;
     user.totalSpent = (user.totalSpent || 0) + amountPaid;
     user.totalPayments = (user.totalPayments || 0) + 1;
     user.lastPaymentStatus = 'paid';

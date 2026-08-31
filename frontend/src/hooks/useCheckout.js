@@ -45,16 +45,16 @@ export function useCheckout() {
       const orderData = await paymentAPI.createOrder({ planId: planKey });
 
       if (!orderData.success) {
-        throw new Error(orderData.error || orderData.message || "Failed to create order");
+        throw new Error(orderData.message || "Failed to create order");
       }
 
       const options = {
-        key: orderData.keyId || process.env.REACT_APP_RAZORPAY_KEY_ID,
-        amount: orderData.amount || orderData.order?.amount,
-        currency: orderData.currency || orderData.order?.currency || "INR",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.order.amount,
+        currency: orderData.order.currency,
         name: "Lovers AI",
         description: `Subscription to ${planKey.replace("_", " ")}`,
-        order_id: orderData.orderId || orderData.order?.id,
+        order_id: orderData.order.id,
         handler: async (response) => {
           try {
             toast.loading("Verifying payment...", { id: "payment" });

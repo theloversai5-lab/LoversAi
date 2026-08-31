@@ -153,11 +153,8 @@ export const authAPI = {
 
 // ─── Credit & Wallet API ───
 export const creditAPI = {
-  getWallet: (wallet = 'couple') => apiFetch(`/credits/wallet?wallet=${wallet}`),
-  getHistory: (params) => {
-    const query = new URLSearchParams(params || {}).toString();
-    return apiFetch(`/credits/history${query ? `?${query}` : ''}`);
-  },
+  getWallet: (wallet = 'couple') => api.get(`/credits/wallet?wallet=${wallet}`).then((res) => res.data),
+  getHistory: (params) => api.get('/credits/history', { params }).then((res) => res.data),
 };
 
 // ─── User APIs ───

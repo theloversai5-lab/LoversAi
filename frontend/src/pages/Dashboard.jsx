@@ -73,18 +73,18 @@ function Home() {
       >
         {/* Navigation Buttons - Only show for unauthenticated users */}
         {!loading && !currentUser && (
-          <div className="absolute inset-x-0 z-20 bottom-8 sm:bottom-12 md:bottom-[16%] flex items-center justify-between px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-none">
-            {/* Couples - Far Left */}
+          <div className="absolute inset-x-0 z-20 bottom-8 flex flex-col items-stretch gap-4 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-8 md:bottom-[15%] md:px-16">
+            {/* Couples - Left Side */}
             <div
-              className="relative cursor-pointer pointer-events-auto transition-transform duration-500 hover:scale-105"
+              className="relative cursor-pointer flex-1"
               onMouseEnter={() => setHovered("couples")}
               onMouseLeave={() => setHovered(null)}
               onClick={() => handleNavigate("/couples")}
             >
               <button
-                className={`text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl whitespace-nowrap ${
+                className={`w-full text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl ${
                   hovered === "couples"
-                    ? "glass-card-strong text-loverai-gold"
+                    ? "glass-card-strong text-loverai-gold scale-105"
                     : "hover:text-loverai-gold/70"
                 }`}
                 style={{ fontWeight: 300 }}
@@ -93,17 +93,17 @@ function Home() {
               </button>
             </div>
 
-            {/* Planners - Far Right */}
+            {/* Planners - Right Side */}
             <div
-              className="relative cursor-pointer pointer-events-auto transition-transform duration-500 hover:scale-105"
+              className="relative cursor-pointer flex-1"
               onMouseEnter={() => setHovered("planner")}
               onMouseLeave={() => setHovered(null)}
               onClick={() => handleNavigate("/planner")}
             >
               <button
-                className={`text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl whitespace-nowrap ${
+                className={`w-full text-white font-heading transition-all duration-500 cursor-pointer relative z-30 px-6 sm:px-10 py-3 sm:py-5 rounded-2xl text-2xl sm:text-3xl md:text-5xl ${
                   hovered === "planner"
-                    ? "glass-card-strong text-loverai-gold"
+                    ? "glass-card-strong text-loverai-gold scale-105"
                     : "hover:text-loverai-gold/70"
                 }`}
                 style={{ fontWeight: 300 }}

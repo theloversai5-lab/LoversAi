@@ -12,7 +12,6 @@ export const openLemonCheckout = (plan, email, userId = null) => {
     planner_pro: "660a017c-a10a-4db4-b03d-04e2970382e5",
     couple_basic: "246e6b0e-526d-4a6b-8584-25e3f2340301",
     couple_premium: "660a017c-a10a-4db4-b03d-04e2970382e5",
-    couple_pro: "660a017c-a10a-4db4-b03d-04e2970382e5",
     couple_elite: "660a017c-a10a-4db4-b03d-04e2970382e5"
   };
 

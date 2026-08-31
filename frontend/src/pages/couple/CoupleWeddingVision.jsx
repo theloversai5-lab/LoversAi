@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { coupleMoodboardAPI, moodboardAPI } from "../../api/api";
+import { coupleMoodboardAPI } from "../../api/api";
 import CreditWalletBadge from "../../components/couple/CreditWalletBadge";
+import { saveThemeMoodboard } from "./CoupleThemeMoodboard";
 import { useAuth } from "../../context/AuthContext";
-import toast from "react-hot-toast";
 
 const FUNCTION_OPTIONS = [
   "Haldi",
@@ -15,1005 +14,1687 @@ const FUNCTION_OPTIONS = [
   "Small Function (Birthday, Engagement)",
 ];
 
-const VENUE_OPTIONS = [
-  "Outdoor Lawn",
-  "Banquet Hall",
-  "Palace / Heritage",
-  "Beachfront",
-  "Poolside",
-  "Rooftop",
+const ATMOSPHERE_OPTIONS = [
+  "Warm & Festive",
+  "Romantic & Intimate",
+  "Grand & Opulent",
+  "Minimal & Elegant",
+  "Bohemian & Free-spirited",
+  "Royal & Regal",
 ];
 
-const DEFAULT_PALETTES = {
-  Haldi: ["#F59E0B", "#EAB308", "#FEF08A", "#84CC16", "#166534"],
-  Mehndi: ["#059669", "#10B981", "#6EE7B7", "#F59E0B", "#D97706"],
-  Sangeet: ["#4F46E5", "#7C3AED", "#EC4899", "#F59E0B", "#1E1B4B"],
-  "Wedding Ceremony": ["#DC2626", "#B91C1C", "#F59E0B", "#FEF08A", "#7F1D1D"],
-  Reception: ["#1E293B", "#334155", "#E2E8F0", "#F59E0B", "#0F172A"],
-  "Small Function (Birthday, Engagement)": ["#EC4899", "#F472B6", "#FDE047", "#60A5FA", "#3B82F6"],
+const TIMING_OPTIONS = [
+  "Morning (Day light)",
+  "Afternoon (Bright)",
+  "Sunset (Golden Hour)",
+  "Evening (Warm Glow)",
+  "Night (Under Stars)",
+];
+
+const PLANNING_OPTIONS = ["Decor / Planning / Venue", "Fashion / Photography", "Sounds / Lights / Entertainment"];
+const VENUE_OPTIONS = ["Banquet", "Open Lawn"];
+const THEME_OPTIONS = ["Carnival", "Royal", "Pastel", "Garden", "Minimal Luxe"];
+
+const TITLE_MAP = {
+  Haldi: "Golden Dreams of Haldi",
+  Mehndi: "Henna Garden Reverie",
+  "Wedding Ceremony": "Eternal Sacred Vows",
+  Reception: "A Night to Remember",
+  Sangeet: "Rhythms of Celebration",
+  Engagement: "Promise of Forever",
+  Nikah: "Blessings of Nikkah",
+  "Small Function (Birthday, Engagement)": "Intimate Celebration of Love",
 };
+
+const getBentoCardTitleAndDesc = (functionType, planningType, cardKey) => {
+  const func = (() => {
+    if (!functionType) return "Wedding";
+    const text = functionType.toLowerCase();
+    if (text.includes("haldi")) return "Haldi";
+    if (text.includes("mehndi") || text.includes("mehendi") || text.includes("mehandi")) return "Mehndi";
+    if (text.includes("sangeet")) return "Sangeet";
+    if (text.includes("reception")) return "Reception";
+    if (text.includes("wedding")) return "Wedding";
+    if (text.includes("engagement") || text.includes("birthday")) return "Function";
+    return functionType;
+  })();
+
+  const plan = planningType || "Decor / Planning / Venue";
+
+  if (plan === "Fashion / Photography") {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Fashion Scene`,
+          description: "Key couples look & fashion style"
+        };
+      case "decor":
+        return {
+          title: `${func} Bridal Wear & Styling`,
+          description: "Details of bride's attire & style"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Groom Wear & Styling`,
+          description: "Details of groom's attire & portraits"
+        };
+      case "venue":
+        return {
+          title: `${func} Photography & Portrait Setup`,
+          description: "Photography theme & shoot setup"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  } else if (plan === "Sounds / Lights / Entertainment") {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Sound & Light Scene`,
+          description: "Key audio-visual & stage setup"
+        };
+      case "decor":
+        return {
+          title: `${func} Stage & Lighting Design`,
+          description: "Stage design, lighting truss, & screens"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Performance & Entertainment`,
+          description: "DJ booth, dancefloor, & artist setup"
+        };
+      case "venue":
+        return {
+          title: `${func} Special Effects & Ambient Lights`,
+          description: "Special effects, dry ice, & lasers"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  } else {
+    switch (cardKey) {
+      case "primary":
+        return {
+          title: `Primary ${func} Scene`,
+          description: "Key generated vision scene"
+        };
+      case "decor":
+        return {
+          title: `${func} Decor & Detailing`,
+          description: "Table settings & floral design"
+        };
+      case "ceremony":
+        return {
+          title: `${func} Ceremony & Theme Detail`,
+          description: "Specific ritual & ceremonial setup"
+        };
+      case "venue":
+        return {
+          title: `${func} Venue Atmosphere`,
+          description: "Atmospheric lighting & scale"
+        };
+      default:
+        return { title: "", description: "" };
+    }
+  }
+};
+
+
+const getThemeFromFunction = (value = "") => {
+  const text = value.toLowerCase();
+  if (text.includes("haldi")) return "haldi";
+  if (text.includes("mehndi") || text.includes("mehendi") || text.includes("mehandi")) return "mehndi";
+  if (text.includes("sangeet")) return "sangeet";
+  return "wedding";
+};
+
+const formatBudgetLabel = (budget) => {
+  if (budget >= 100) return "1 Cr";
+  return `${budget} L`;
+};
+
+const getColorToneColor = (tone) => {
+  switch (tone) {
+    case "Warm Gold": return "#e6c6b2";
+    case "Pastel Rose": return "#dcaea8";
+    case "Royal Cream": return "#f5eada";
+    case "Emerald Forest": return "#2d5a27";
+    case "Midnight Blue": return "#1a365d";
+    default: return null;
+  }
+};
+
+const getLightingIcon = (lighting) => {
+  switch (lighting) {
+    case "Golden Hour":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="5" />
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M5.64 18.36l-1.42 1.42M19.78 4.22l-1.42 1.42" />
+        </svg>
+      );
+    case "Candlelit Glow":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2c-.5 2.5-2 3.5-2 5.5 0 2 1.5 3.5 2 3.5s2-1.5 2-3.5c0-2-1.5-3-2-5.5z" />
+          <path d="M9 18h6v3H9z" />
+        </svg>
+      );
+    case "Bright Daylight":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="6" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+        </svg>
+      );
+    case "Moody & Dramatic":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      );
+    case "Fairy Light Sparkle":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" />
+        </svg>
+      );
+    default:
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" />
+        </svg>
+      );
+  }
+};
+
+const getThemeIcon = (themeStyle) => {
+  switch (themeStyle) {
+    case "Traditional Luxe":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2s-8 6-8 12h16c0-6-8-12-8-12Z" />
+          <path d="M4 18v3h16v-3" />
+        </svg>
+      );
+    case "Modern Minimalist":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <path d="M9 3v18" />
+        </svg>
+      );
+    case "Bohemian Garden":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2c1.5 3 0 6-3 6s-6-1.5-6-3 4.5-3 9-3Zm0 0c-1.5 3 0 6 3 6s6-1.5 6-3-4.5-3-9-3ZM12 2v20" />
+        </svg>
+      );
+    case "Vintage Royal":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7Z" />
+          <circle cx="12" cy="18" r="2" />
+        </svg>
+      );
+    case "Bollywood Glam":
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="2" ry="2" />
+          <line x1="7" y1="2" x2="7" y2="22" />
+          <line x1="17" y1="2" x2="17" y2="22" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <line x1="2" y1="7" x2="7" y2="7" />
+          <line x1="2" y1="17" x2="7" y2="17" />
+          <line x1="17" y1="17" x2="22" y2="17" />
+          <line x1="17" y1="7" x2="22" y2="7" />
+        </svg>
+      );
+    default:
+      return (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m12 3-1.9 5.1L5 10l5.1 1.9L12 17l1.9-5.1L19 10l-5.1-1.9L12 3Z" />
+        </svg>
+      );
+  }
+};
+
+const getPlaceholderText = (id) => {
+  switch (id) {
+    case "primary": return "Describe couple pose, outfits, or primary scene setup...";
+    case "decor": return "Describe floral colors, table detailing, or centerpieces...";
+    case "ceremony": return "Describe altar, mandap structures, or ceremonial backdrop...";
+    case "venue": return "Describe architectural scale, lighting setup, or scenery views...";
+    default: return "Refine every detail of this wedding vision card...";
+  }
+};
+
+const PhotoIcon = () => (
+  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <circle cx="8.5" cy="10" r="1.5" />
+    <path d="m21 15-5-5L5 21" />
+  </svg>
+);
+
+const SparkIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z" />
+    <path d="M19 16v5" />
+    <path d="M21.5 18.5h-5" />
+  </svg>
+);
+
+const UploadIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
 
 export default function CoupleWeddingVision() {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
 
-  // Sidebar Filters State
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [referenceFile, setReferenceFile] = useState(null);
-  const [referencePreview, setReferencePreview] = useState(null);
+  const [venueImage, setVenueImage] = useState(null);
+  const [venuePreview, setVenuePreview] = useState(null);
+  const [decorImage, setDecorImage] = useState(null);
+  const [decorPreview, setDecorPreview] = useState(null);
+
+  const [style, setStyle] = useState("Modern");
   const [functionType, setFunctionType] = useState("Haldi");
-  const [guestCount, setGuestCount] = useState(0);
-  const [theme, setTheme] = useState("Modern");
-  const [venueType, setVenueType] = useState("Outdoor Lawn");
-  const [activePalette, setActivePalette] = useState(DEFAULT_PALETTES["Haldi"]);
-
-  // Custom Color Picker input ref
-  const colorInputRef = useRef(null);
-  const fileInputRef = useRef(null);
-
-  // Top Search/Prompt Bar
+  const [atmosphere, setAtmosphere] = useState("Warm & Festive");
+  const [timing, setTiming] = useState("Morning (Day light)");
   const [userPrompt, setUserPrompt] = useState("");
-
-  // AI Generated Results mapped across budget tiers: { low: [...], medium: [...], high: [...] }
-  const [generatedTiers, setGeneratedTiers] = useState({
-    low: { decor: [], styling: [], entertainment: [] },
-    medium: { decor: [], styling: [], entertainment: [] },
-    high: { decor: [], styling: [], entertainment: [] },
-  });
+  const [budget, setBudget] = useState(11);
+  const [guestCount, setGuestCount] = useState(0);
+  const [planningType, setPlanningType] = useState("Decor / Planning / Venue");
+  const [venueType, setVenueType] = useState("Banquet");
+  const [theme, setTheme] = useState("Carnival");
 
   const [generating, setGenerating] = useState(false);
-  const [generationStep, setGenerationStep] = useState("");
-  const [hasGenerated, setHasGenerated] = useState(false);
+  const [progress, setProgress] = useState("");
+  const [generatedImages, setGeneratedImages] = useState([]);
+  const [moodboardTitle, setMoodboardTitle] = useState("");
+  const [generationMeta, setGenerationMeta] = useState(null);
   const [error, setError] = useState(null);
-
-  // Lightbox / Modal State
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [editPrompt, setEditPrompt] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Menu Dropdown
+  const [activeMobileCard, setActiveMobileCard] = useState(0);
+  const [savedTheme, setSavedTheme] = useState("");
+  const [savedToMoodboard, setSavedToMoodboard] = useState(false);
+  const [showMoodboardModal, setShowMoodboardModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Auto-close sidebar on small screens
+  const [editingCard, setEditingCard] = useState(null);
+  const [activeModalDropdown, setActiveModalDropdown] = useState(null);
+  const [refinements, setRefinements] = useState({
+    primary: { prompt: "", colorTone: "Original", lighting: "Original", theme: "Original" },
+    decor: { prompt: "", colorTone: "Original", lighting: "Original", theme: "Original" },
+    ceremony: { prompt: "", colorTone: "Original", lighting: "Original", theme: "Original" },
+    venue: { prompt: "", colorTone: "Original", lighting: "Original", theme: "Original" }
+  });
+
+  const [modalPrompt, setModalPrompt] = useState("");
+  const [modalColorTone, setModalColorTone] = useState("Original");
+  const [modalLighting, setModalLighting] = useState("Original");
+  const [modalTheme, setModalTheme] = useState("Original");
+
   useEffect(() => {
-    if (window.innerWidth < 1024) {
+    if (editingCard) {
+      const current = refinements[editingCard.id] || { prompt: "", colorTone: "Original", lighting: "Original", theme: "Original" };
+      setModalPrompt(current.prompt);
+      setModalColorTone(current.colorTone);
+      setModalLighting(current.lighting);
+      setModalTheme(current.theme);
+    }
+  }, [editingCard, refinements]);
+
+  useEffect(() => {
+    if (window.innerWidth < 768) {
       setSidebarOpen(false);
     }
   }, []);
 
-  // Update palette when functionType changes
-  useEffect(() => {
-    setActivePalette(DEFAULT_PALETTES[functionType] || DEFAULT_PALETTES["Haldi"]);
-  }, [functionType]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
+  const venueInputRef = useRef(null);
+  const decorInputRef = useRef(null);
+  const sidebarScrollRef = useRef(null);
+
+  useEffect(() => {
+    if (activeDropdown === "timing" || activeDropdown === "venue") {
+      const timer = setTimeout(() => {
+        if (sidebarScrollRef.current) {
+          sidebarScrollRef.current.scrollTo({
+            top: sidebarScrollRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [activeDropdown]);
+
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+    return () => document.head.removeChild(link);
+  }, []);
+
+  const handleFileSelect = (file, type) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
+      setError("Please select an image file.");
       return;
     }
     if (file.size > 50 * 1024 * 1024) {
-      toast.error("File size must be under 50MB");
+      setError("File too large. Maximum size is 50MB.");
       return;
     }
-    setReferenceFile(file);
+
     const reader = new FileReader();
-    reader.onload = () => setReferencePreview(reader.result);
+    reader.onloadend = () => {
+      if (type === "venue") {
+        setVenueImage(file);
+        setVenuePreview(reader.result);
+      } else {
+        setDecorImage(file);
+        setDecorPreview(reader.result);
+      }
+    };
     reader.readAsDataURL(file);
+    setError(null);
   };
 
-  const handleAddCustomColor = (e) => {
-    const newColor = e.target.value;
-    if (newColor && !activePalette.includes(newColor)) {
-      setActivePalette((prev) => [...prev.slice(0, 5), newColor]);
+  const buildVisionPrompt = () => {
+    const chips = [
+      `${style} styling`,
+      functionType,
+      atmosphere,
+      timing,
+      `${venueType} venue`,
+      `${theme} theme`,
+      `${planningType.toLowerCase()} focus`,
+      `budget around ${formatBudgetLabel(budget)}`,
+      guestCount > 0 ? `${guestCount} guests` : null,
+    ].filter(Boolean);
+
+    let base = userPrompt.trim() || "Create a cinematic wedding scene with layered decor details.";
+
+    const customRefinementTexts = [];
+    Object.entries(refinements).forEach(([key, value]) => {
+      const cardTitle = {
+        primary: "Primary Scene",
+        decor: "Decor Detail",
+        ceremony: "Ceremony Detail",
+        venue: "Venue Atmosphere"
+      }[key];
+      
+      const parts = [];
+      if (value.prompt.trim()) parts.push(value.prompt.trim());
+      if (value.colorTone !== "Original") parts.push(`color tone: ${value.colorTone}`);
+      if (value.lighting !== "Original") parts.push(`lighting: ${value.lighting}`);
+      if (value.theme !== "Original") parts.push(`style: ${value.theme}`);
+      
+      if (parts.length > 0) {
+        customRefinementTexts.push(`For ${cardTitle}: ${parts.join(", ")}`);
+      }
+    });
+
+    if (customRefinementTexts.length > 0) {
+      base = `${base} ${customRefinementTexts.join(". ")}.`;
     }
+
+    return `${base}. ${chips.join(", ")}. Keep the result premium, photoreal, editorial, and celebration-ready.`;
   };
 
   const handleGenerate = async () => {
     setGenerating(true);
     setError(null);
-    setGenerationStep("Analyzing wedding parameters & inspirations...");
-    const loadingToast = toast.loading("Generating your 3-Tier AI Wedding Vision...");
+    setSavedToMoodboard(false);
+    setSavedTheme("");
+    setGeneratedImages([]);
+    setGenerationMeta(null);
+    setMoodboardTitle("");
+    setProgress("Preparing your wedding vision...");
 
     try {
-      const basePrompt = userPrompt.trim() ||
-        `Create a complete 3-tier luxury wedding concept for ${functionType} at ${venueType} with ${theme} styling, color palette ${activePalette.join(", ")}, guest count ${guestCount > 0 ? guestCount : "150"}.`;
-
       const formData = new FormData();
-      if (referenceFile) {
-        formData.append("venueImage", referenceFile);
-      }
-      formData.append("style", theme);
+      if (venueImage) formData.append("venueImage", venueImage);
+      if (decorImage) formData.append("decorImage", decorImage);
+      formData.append("style", style);
       formData.append("functionType", functionType);
-      formData.append("atmosphere", `${theme} Luxury Wedding`);
-      formData.append("timing", "Evening (Warm Glow)");
-      formData.append("userPrompt", basePrompt);
+      formData.append("atmosphere", atmosphere);
+      formData.append("timing", timing);
+      formData.append("userPrompt", buildVisionPrompt());
 
-      setGenerationStep("Synthesizing Low, Medium & High Budget Concepts...");
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setProgress("Analyzing your wedding direction...");
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setProgress("Generating your moodboard with Lovers AI...");
+
       const result = await coupleMoodboardAPI.generate(formData);
 
-      if (result.success && (result.generatedImages?.length > 0 || result.generatedImageUrl)) {
-        const rawImages = result.generatedImages?.length > 0 
-          ? result.generatedImages 
-          : [{ url: result.generatedImageUrl, label: "Generated Scene" }];
-
-        // Map generated AI images into the 3 tiers (Low, Medium, High) dynamically
-        const newTiers = {
-          low: {
-            decor: [],
-            styling: [],
-            entertainment: [],
+      if (result.success && result.generatedImages?.length > 0) {
+        setGeneratedImages(result.generatedImages);
+        setMoodboardTitle(result.moodboardTitle || TITLE_MAP[functionType] || "Wedding Vision");
+        setGenerationMeta(result);
+      } else if (result.success && result.generatedImageUrl) {
+        setGeneratedImages([
+          {
+            url: result.generatedImageUrl,
+            label: "Generated",
+            seed: result.seed,
           },
-          medium: {
-            decor: [],
-            styling: [],
-            entertainment: [],
-          },
-          high: {
-            decor: [],
-            styling: [],
-            entertainment: [],
-          },
-        };
-
-        rawImages.forEach((img, idx) => {
-          const item = {
-            url: img.url,
-            title: img.label || `${functionType} Vision ${idx + 1}`,
-            seed: img.seed,
-          };
-
-          // Distribute across tiers and categories
-          if (idx === 0) {
-            newTiers.medium.decor.push({ ...item, title: `${theme} Mandap & Decor` });
-          } else if (idx === 1) {
-            newTiers.low.decor.push({ ...item, title: `Intimate ${functionType} Canopy` });
-          } else if (idx === 2) {
-            newTiers.high.decor.push({ ...item, title: `Grand Palace ${functionType} Setup` });
-          } else if (idx === 3) {
-            newTiers.medium.styling.push({ ...item, title: `Designer Couple Attire` });
-          } else if (idx === 4) {
-            newTiers.low.styling.push({ ...item, title: `Coordinated Couple Look` });
-          } else if (idx === 5) {
-            newTiers.high.styling.push({ ...item, title: `Royal Haute Couture` });
-          } else if (idx % 3 === 0) {
-            newTiers.medium.entertainment.push({ ...item, title: `Live Entertainment & Dining` });
-          } else if (idx % 3 === 1) {
-            newTiers.low.entertainment.push({ ...item, title: `Traditional Activities` });
-          } else {
-            newTiers.high.entertainment.push({ ...item, title: `Gala Feast & Performance` });
-          }
-        });
-
-        // Ensure at least each tier receives visual concepts
-        if (rawImages.length === 1) {
-          const single = rawImages[0];
-          newTiers.medium.decor.push({ url: single.url, title: `${functionType} Main Vision` });
-        }
-
-        setGeneratedTiers(newTiers);
-        setHasGenerated(true);
-        toast.success("AI Wedding Visions Generated!", { id: loadingToast });
+        ]);
+        setMoodboardTitle(TITLE_MAP[functionType] || "Wedding Vision");
+        setGenerationMeta(result);
       } else {
         throw new Error(result.error || "Generation failed");
       }
     } catch (err) {
-      console.error("Moodboard generation error:", err);
-      toast.dismiss(loadingToast);
-      if (err.response?.status === 402) {
-        toast.error("Insufficient Credits! Please upgrade your plan.");
+      if (err.response && err.response.status === 402) {
         setError(
-          <div className="flex flex-col items-center gap-2 p-4 bg-red-950/40 border border-red-500/30 rounded-2xl text-center">
-            <span className="font-bold text-red-200">Insufficient Credits</span>
-            <span className="text-xs text-red-300/80">You have used all your AI credits. Please upgrade your plan to continue generating.</span>
-            <button
+          <div className="flex flex-col items-center">
+            <span className="font-bold text-lg mb-1">Insufficient Credits</span>
+            <span className="text-sm opacity-90">You have used all your AI generation credits. Please upgrade your plan to continue generating!</span>
+            <button 
               onClick={() => navigate("/pricing")}
-              className="mt-2 px-5 py-2 bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] text-xs font-bold uppercase rounded-full hover:brightness-110"
+              className="mt-3 px-4 py-1.5 bg-white text-rose-500 rounded-full text-sm font-semibold hover:bg-rose-50 transition-colors shadow-sm"
             >
               Upgrade Plan
             </button>
           </div>
         );
       } else {
-        toast.error(err.response?.data?.error || err.message || "Failed to generate moodboard");
+        setError(
+          err.response?.data?.error || err.message || "Generation failed. Please try again."
+        );
       }
+      console.error("Moodboard generation error:", err);
     } finally {
+      setProgress("");
       setGenerating(false);
-      setGenerationStep("");
     }
   };
 
-  const handleEditImage = async () => {
-    if (!selectedImage || !editPrompt.trim()) return;
-    setIsEditing(true);
-    const toastId = toast.loading("Refining image with AI...");
+  const handleAddToMoodboard = () => {
+    if (generatedImages.length === 0) return;
 
-    try {
-      const response = await fetch(selectedImage.url);
-      const blob = await response.blob();
-      const file = new File([blob], "edit-target.jpg", { type: "image/jpeg" });
+    const boardTheme = saveThemeMoodboard({
+      title: moodboardTitle || TITLE_MAP[functionType] || "Wedding Vision",
+      images: generatedImages,
+      style,
+      functionType,
+      atmosphere,
+      timing,
+      prompt: generationMeta?.finalPrompt || buildVisionPrompt(),
+      details: {
+        budget,
+        guestCount,
+        planningType,
+        venueType,
+        theme,
+      },
+    });
 
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("editPrompt", editPrompt);
-      formData.append("functionType", functionType);
-      formData.append("style", theme);
-
-      const result = await coupleMoodboardAPI.editImage(formData);
-
-      if (result.success && result.image?.url) {
-        setSelectedImage((prev) => ({
-          ...prev,
-          url: result.image.url,
-          title: `Refined: ${editPrompt}`,
-        }));
-        toast.success("Image refined successfully!", { id: toastId });
-        setEditPrompt("");
-      } else {
-        throw new Error(result.error || "Failed to refine image");
-      }
-    } catch (err) {
-      console.error("Edit image error:", err);
-      toast.error(err.response?.data?.error || err.message || "Failed to refine image", { id: toastId });
-    } finally {
-      setIsEditing(false);
-    }
+    setSavedTheme(boardTheme);
+    setSavedToMoodboard(true);
+    setShowMoodboardModal(true);
   };
 
-  const handleSaveToMoodboard = async (imgObj) => {
-    try {
-      const payload = {
-        boardId: `mb_${Date.now()}`,
-        theme: functionType.toLowerCase(),
-        title: `${functionType} Vision`,
-        style: theme,
-        functionType: functionType,
-        prompt: userPrompt || `${functionType} ${theme} Wedding Scene`,
-        images: [{ url: imgObj.url, title: imgObj.title }],
-        details: { venueType, guestCount, theme },
-      };
-      await moodboardAPI.saveMoodboard(payload);
-      toast.success("Saved to Moodboard!");
-    } catch (err) {
-      console.error("Save moodboard error:", err);
-      toast.error("Failed to save to moodboard");
-    }
+  const openThemeBoard = () => {
+    const boardTheme = savedTheme || getThemeFromFunction(functionType);
+    navigate(`/couple/moodboard/${boardTheme}`);
   };
 
-  const handleAddToCart = (imgObj) => {
-    try {
-      const existing = JSON.parse(localStorage.getItem("loversai_cart") || "[]");
-      const newItem = {
-        id: `cart_${Date.now()}`,
-        title: imgObj.title || `${functionType} Wedding Scene`,
-        functionType: functionType,
-        imageUrl: imgObj.url,
-        budget: "Custom",
-        category: "Decor & Vision",
-        price: 15000,
-      };
-      localStorage.setItem("loversai_cart", JSON.stringify([...existing, newItem]));
-      toast.success("Added to Wedding Cart!");
-    } catch (e) {
-      toast.error("Failed to add to cart");
+  const planAnotherFunction = () => {
+    setShowMoodboardModal(false);
+    setGeneratedImages([]);
+    setGenerationMeta(null);
+    setMoodboardTitle("");
+    setSavedToMoodboard(false);
+  };
+
+  const coupleName =
+    currentUser?.fullName ||
+    currentUser?.displayName ||
+    currentUser?.email?.split("@")[0] ||
+    "Couple";
+
+  const coupleInitial = coupleName.charAt(0).toUpperCase();
+
+  const renderCustomSelect = (id, label, value, onChange, options, openDirection = "down") => {
+    const isOpen = activeDropdown === id;
+    
+    return (
+      <div className="rounded-[8px] border border-white/10 bg-white/5 pt-2.5 pb-3 px-3 flex flex-col justify-between h-[84px] flex-shrink-0 relative">
+        <span className="text-[15px] font-semibold uppercase tracking-[0.12em] text-[#ebd8c7] select-none">
+          {label}
+        </span>
+        <div className="relative w-full">
+          <button
+            type="button"
+            onClick={() => setActiveDropdown(isOpen ? null : id)}
+            className="w-full flex items-center justify-between rounded-lg bg-[#f2dad0] text-[#251f1b] font-semibold px-2.5 py-1.5 text-[15px] outline-none transition text-left"
+          >
+            <span className="truncate">{value}</span>
+            <span className="ml-1 flex-shrink-0">
+              <svg
+                className={`w-3 h-3 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </span>
+          </button>
+          
+          {isOpen && (
+            <div
+              className={`absolute right-0 left-0 z-50 w-full rounded-lg border border-white/10 bg-[#1d1714] p-1.5 shadow-xl flex flex-col gap-1 max-h-[160px] overflow-y-auto loverai-scrollbar ${
+                openDirection === "up" ? "bottom-[calc(100%+6px)]" : "top-[calc(100%+6px)]"
+              }`}
+            >
+              {options.map((option) => {
+                const isSelected = value === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      onChange(option);
+                      setActiveDropdown(null);
+                    }}
+                    className="w-full flex items-center justify-between rounded-md px-2.5 py-1 text-left text-[15px] font-semibold hover:bg-white/5 transition text-white"
+                  >
+                    <span className={isSelected ? 'text-[#ebd8c7]' : 'text-white/85'}>{option}</span>
+                    {isSelected && (
+                      <span className="text-[#e6c6b2] flex-shrink-0 ml-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const FilterSection = ({ title, children }) => (
+    <div className="rounded-[8px] border border-white/10 bg-[#2a241f] p-2.5">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/70">
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+
+  const SelectField = ({ value, onChange, options }) => (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full loverai-select-peach"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  );
+
+  const renderModalSelect = (id, label, value, onChange, options) => {
+    const isOpen = activeModalDropdown === id;
+    
+    return (
+      <div className="flex flex-col gap-1.5 text-left w-full relative">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#ebd8c7]/60 select-none">
+          {label}
+        </span>
+        <div className="relative w-full">
+          <button
+            type="button"
+            onClick={() => setActiveModalDropdown(isOpen ? null : id)}
+            className="w-full flex items-center justify-between rounded-full border border-white/10 bg-[#251e1b]/60 hover:bg-black/40 hover:border-white/20 text-white font-medium px-4 py-2 text-xs outline-none transition duration-150 text-left cursor-pointer"
+          >
+            <div className="flex items-center gap-2 truncate">
+              {id === "colorTone" && (
+                <span
+                  className="w-3 h-3 rounded-full border border-white/25 flex-shrink-0"
+                  style={{
+                    backgroundColor: getColorToneColor(value) || "transparent",
+                    background: value === "Original" ? "linear-gradient(135deg, #555, #999)" : undefined
+                  }}
+                />
+              )}
+              {id === "lighting" && (
+                <span className="text-[#ebd8c7] flex-shrink-0">
+                  {getLightingIcon(value)}
+                </span>
+              )}
+              {id === "themeStyle" && (
+                <span className="text-[#ebd8c7] flex-shrink-0">
+                  {getThemeIcon(value)}
+                </span>
+              )}
+              <span className="truncate">{value}</span>
+            </div>
+            <span className="ml-1 flex-shrink-0 text-white/40">
+              <svg
+                className={`w-3.5 h-3.5 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </span>
+          </button>
+          
+          {isOpen && (
+            <div className="absolute right-0 left-0 z-[120] w-full rounded-2xl border border-white/15 bg-[#17110e] p-1.5 shadow-2xl flex flex-col gap-0.5 max-h-[160px] overflow-y-auto loverai-scrollbar top-[calc(100%+4px)]">
+              {options.map((option) => {
+                const isSelected = value === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      onChange(option);
+                      setActiveModalDropdown(null);
+                    }}
+                    className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-left text-[11px] font-semibold hover:bg-white/5 transition text-white cursor-pointer ${
+                      isSelected ? 'bg-white/10 text-[#ebd8c7]' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      {id === "colorTone" && (
+                        <span
+                          className="w-2.5 h-2.5 rounded-full border border-white/20 flex-shrink-0"
+                          style={{
+                            backgroundColor: getColorToneColor(option) || "transparent",
+                            background: option === "Original" ? "linear-gradient(135deg, #555, #999)" : undefined
+                          }}
+                        />
+                      )}
+                      {id === "lighting" && (
+                        <span className={`flex-shrink-0 ${isSelected ? 'text-[#ebd8c7]' : 'text-white/60'}`}>
+                          {getLightingIcon(option)}
+                        </span>
+                      )}
+                      {id === "themeStyle" && (
+                        <span className={`flex-shrink-0 ${isSelected ? 'text-[#ebd8c7]' : 'text-white/60'}`}>
+                          {getThemeIcon(option)}
+                        </span>
+                      )}
+                      <span className={isSelected ? 'text-[#ebd8c7]' : 'text-white/85'}>{option}</span>
+                    </div>
+                    {isSelected && (
+                      <span className="text-[#ebd8c7] flex-shrink-0 ml-1">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const PencilIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  );
+
+  const renderCard = (title, description, imageObj, planningFocus, heightClass, cardId) => {
+    const hasImage = !!imageObj?.url;
+    
+    return (
+      <div className={`relative rounded-[14px] border border-white/10 overflow-hidden group transition-all duration-300 ${heightClass} ${hasImage ? '' : 'loverai-glass-card flex flex-col items-center justify-center text-center p-4'}`}>
+        {hasImage ? (
+          <>
+            <img src={imageObj.url} alt={title} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4">
+              <p className="font-['Cormorant_Garamond'] text-lg md:text-[20px] font-semibold text-[#f4e3c1] leading-tight">
+                {title}
+              </p>
+              <p className="text-xs md:text-[13px] text-white/60 mt-0.5">
+                {description}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center bg-white/5 mb-3 text-white/50">
+              <PhotoIcon />
+            </div>
+            <p className="font-['Cormorant_Garamond'] text-base md:text-lg font-medium text-[#f4e3c1]">
+              {title}
+            </p>
+            <p className="text-xs md:text-[12px] text-white/40 mt-1 max-w-[80%] mx-auto leading-normal">
+              {description}
+            </p>
+          </div>
+        )}
+        
+        {/* Edit Button in Top-Right */}
+        <button
+          type="button"
+          onClick={() => {
+            setEditingCard({
+              id: cardId,
+              title,
+              description,
+              imageObj,
+              planningFocus
+            });
+          }}
+          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/50 border border-white/15 flex items-center justify-center text-white/80 hover:bg-black/70 hover:text-white transition-all duration-200 cursor-pointer"
+          aria-label={`Edit ${title}`}
+        >
+          <PencilIcon />
+        </button>
+      </div>
+    );
+  };
+
+  const renderCanvas = () => {
+    if (generating) {
+      return (
+        <div className="flex flex-col items-center justify-center text-center text-white/75 h-full flex-1">
+          <div className="h-12 w-12 animate-spin rounded-full border-2 border-[#e6c6b2]/30 border-t-[#e6c6b2]" />
+          <p className="mt-4 font-['Cormorant_Garamond'] text-[24px] md:text-[28px] font-semibold text-[#ebd8c7]">
+            Creating Your Wedding Vision
+          </p>
+          <p className="mt-1.5 text-xs text-white/60">
+            {progress || "Preparing your wedding moodboard..."}
+          </p>
+        </div>
+      );
     }
+
+    return (
+      <div className="flex flex-col flex-1 min-h-0 h-full justify-between overflow-hidden">
+        {/* Mobile View: Carousel Slider */}
+        <div className="flex flex-col md:hidden flex-1 min-h-0 justify-between h-full overflow-hidden">
+          <div className="flex-1 min-h-0 relative flex items-center justify-center p-1 overflow-hidden">
+            {activeMobileCard === 0 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").description,
+              generatedImages[0],
+              "Theme",
+              "w-full h-full absolute inset-0",
+              "primary"
+            )}
+            {activeMobileCard === 1 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").description,
+              generatedImages[1],
+              "Decoration",
+              "w-full h-full absolute inset-0",
+              "decor"
+            )}
+            {activeMobileCard === 2 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").description,
+              generatedImages[2],
+              "Functions",
+              "w-full h-full absolute inset-0",
+              "ceremony"
+            )}
+            {activeMobileCard === 3 && renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").description,
+              generatedImages[3],
+              "Venue",
+              "w-full h-full absolute inset-0",
+              "venue"
+            )}
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center justify-between mt-3 px-3 py-2 flex-shrink-0 bg-white/5 border border-white/10 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setActiveMobileCard(prev => Math.max(0, prev - 1))}
+              disabled={activeMobileCard === 0}
+              className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-[#ebd8c7] text-[#251f1b] font-bold text-xs hover:bg-white hover:text-black transition disabled:opacity-30 disabled:pointer-events-none"
+            >
+              ← Prev
+            </button>
+            <span className="text-[11px] font-bold tracking-widest text-[#ebd8c7]">
+              {activeMobileCard + 1} OF 4
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveMobileCard(prev => Math.min(3, prev + 1))}
+              disabled={activeMobileCard === 3}
+              className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-[#ebd8c7] text-[#251f1b] font-bold text-xs hover:bg-white hover:text-black transition disabled:opacity-30 disabled:pointer-events-none"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop View: Bento Grid */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-4 flex-1 min-h-0">
+          {/* Column 1 (Wider) */}
+          <div className="flex flex-col gap-4 min-h-0 justify-between">
+            {renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "primary").description,
+              generatedImages[0],
+              "Theme",
+              "flex-[1.2] min-h-0",
+              "primary"
+            )}
+            {renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "ceremony").description,
+              generatedImages[2],
+              "Functions",
+              "flex-[0.8] min-h-0",
+              "ceremony"
+            )}
+          </div>
+          
+          {/* Column 2 */}
+          <div className="flex flex-col gap-4 min-h-0 justify-between">
+            {renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "decor").description,
+              generatedImages[1],
+              "Decoration",
+              "flex-[0.75] min-h-0",
+              "decor"
+            )}
+            {renderCard(
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").title,
+              getBentoCardTitleAndDesc(functionType, planningType, "venue").description,
+              generatedImages[3],
+              "Venue",
+              "flex-[1.25] min-h-0",
+              "venue"
+            )}
+          </div>
+        </div>
+
+        {/* Move to Moodboard Button Centered */}
+        <div className="mt-3.5 flex-shrink-0 flex justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (generatedImages.length === 0) {
+                setError("Please generate wedding scenes first before moving them to the moodboard.");
+                return;
+              }
+              handleAddToMoodboard();
+            }}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition duration-250 loverai-btn-moodboard"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            {savedToMoodboard ? "Added to Moodboard" : "Move to Moodboard"}
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen bg-[#120c09] text-[#F9F7F5] font-['Poppins',sans-serif] selection:bg-[#d4a878]/30 selection:text-white">
-      {/* ─── TOP HEADER BAR ─── */}
-      <header className="sticky top-0 z-40 bg-[#150d0a]/90 backdrop-blur-2xl border-b border-white/10 px-4 sm:px-8 py-4 flex items-center justify-between shadow-2xl">
-        {/* Left Actions */}
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => navigate("/couples")}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#201612] hover:bg-white/10 border border-white/15 text-white/90 transition-all active:scale-95 cursor-pointer shadow-md"
-          >
-            <span>{"←"}</span> Back
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/couple/moodboard")}
-            className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#201612] hover:bg-white/10 border border-white/15 text-white/90 transition-all active:scale-95 cursor-pointer shadow-md"
-          >
-            Moodboards
-          </button>
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#201612] hover:bg-white/10 border border-white/15 text-white/90 transition-all active:scale-95 cursor-pointer shadow-md"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <line x1="9" y1="3" x2="9" y2="21" />
-            </svg>
-            <span>{sidebarOpen ? "Hide Filters" : "Show Filters"}</span>
-          </button>
-        </div>
-
-        {/* Center Title */}
-        <div className="text-center px-2">
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-white font-['Cormorant_Garamond',serif] tracking-wide">
-            Create Your Wedding Vision
-          </h1>
-          <p className="text-[9px] sm:text-[10px] md:text-[11px] font-semibold tracking-[0.24em] text-[#e6c6b2]/80 uppercase mt-0.5">
-            See Your Unique Wedding Design Come to Life
-          </p>
-        </div>
-
-        {/* Right Actions */}
-        <div className="flex items-center gap-3 relative">
-          <CreditWalletBadge />
-
-          <button
-            type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="w-10 h-10 rounded-full bg-[#201612] hover:bg-white/10 border border-white/15 flex items-center justify-center text-white transition-all active:scale-95 cursor-pointer shadow-md"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
-
-          {/* User Menu Dropdown */}
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 top-14 w-52 bg-[#18110e]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl p-2 z-50 space-y-1 text-xs"
-              >
-                <button
-                  type="button"
-                  onClick={() => { setMenuOpen(false); navigate("/couples"); }}
-                  className="w-full text-left px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 flex items-center gap-2 font-medium"
-                >
-                  <span>{"🏡"}</span> Home
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setMenuOpen(false); navigate("/couple/profile"); }}
-                  className="w-full text-left px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 flex items-center gap-2 font-medium"
-                >
-                  <span>{"👤"}</span> Profile
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setMenuOpen(false); navigate("/couple/moodboard"); }}
-                  className="w-full text-left px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 flex items-center gap-2 font-medium"
-                >
-                  <span>{"🎨"}</span> Saved Moodboards
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setMenuOpen(false); navigate("/couple/cart"); }}
-                  className="w-full text-left px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 flex items-center gap-2 font-medium"
-                >
-                  <span>{"🛒"}</span> Wedding Cart
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setMenuOpen(false); navigate("/pricing"); }}
-                  className="w-full text-left px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 flex items-center gap-2 font-medium"
-                >
-                  <span>{"⚡"}</span> Upgrade Plan
-                </button>
-                <div className="h-px bg-white/10 my-1" />
-                <button
-                  type="button"
-                  onClick={() => { setMenuOpen(false); logout(); navigate("/login"); }}
-                  className="w-full text-left px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 font-medium"
-                >
-                  <span>{"🚪"}</span> Logout
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </header>
-
-      {/* ─── MAIN LAYOUT CONTAINER ─── */}
-      <main className="max-w-[1750px] mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 items-start">
-        {/* ─── LEFT SIDEBAR: STYLE FILTERS ─── */}
-        <AnimatePresence>
-          {sidebarOpen && (
-            <motion.aside
-              initial={{ opacity: 0, x: -30, width: 0 }}
-              animate={{ opacity: 1, x: 0, width: "auto" }}
-              exit={{ opacity: 0, x: -30, width: 0 }}
-              className="w-full lg:w-[320px] shrink-0 bg-[#18110e]/95 backdrop-blur-2xl border border-white/10 rounded-[28px] p-5 sm:p-6 space-y-6 shadow-2xl"
-            >
-              <h2 className="text-xs font-bold tracking-[0.22em] text-white uppercase flex items-center gap-2 border-b border-white/10 pb-3">
-                Style Filters
-              </h2>
-
-              {/* Reference Uploads */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold tracking-[0.18em] text-white/60 uppercase">
-                  Reference Uploads
-                </label>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-
-                {referencePreview ? (
-                  <div className="relative rounded-2xl overflow-hidden border border-white/20 aspect-video group">
-                    <img src={referencePreview} alt="Reference" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-3 py-1 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-lg text-xs font-semibold"
-                      >
-                        Change
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setReferenceFile(null); setReferencePreview(null); }}
-                        className="p-1 bg-rose-500/80 hover:bg-rose-600 rounded-lg text-xs font-bold"
-                      >
-                        {"✕"}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border border-dashed border-white/20 hover:border-[#d4a878]/60 bg-white/[0.02] hover:bg-white/[0.04] rounded-2xl p-3.5 flex items-center justify-between gap-3 cursor-pointer transition-all group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-white/5 group-hover:bg-[#d4a878]/20 flex items-center justify-center text-white/70 group-hover:text-[#d4a878] transition-all shrink-0">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-white">Upload Inspiration</p>
-                        <p className="text-[10px] text-white/40">Reels, Pinterest, screenshots</p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="px-3 py-1.5 rounded-lg bg-[#291e18] group-hover:bg-[#382821] border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider"
-                    >
-                      Browse
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Functions */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold tracking-[0.18em] text-white/60 uppercase">
-                  Functions
-                </label>
-                <div className="relative">
-                  <select
-                    value={functionType}
-                    onChange={(e) => setFunctionType(e.target.value)}
-                    className="w-full appearance-none bg-[#f2dad0] text-[#201913] font-bold text-xs rounded-xl p-3 px-4 pr-10 cursor-pointer shadow-md focus:outline-none"
-                  >
-                    {FUNCTION_OPTIONS.map((func) => (
-                      <option key={func} value={func} className="bg-[#241a16] text-white font-medium">
-                        {func}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#201913]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Guest (Pax) */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-bold tracking-[0.18em] text-white/60 uppercase">
-                  <span>Guest (Pax)</span>
-                  <span className="text-white text-xs font-bold">{guestCount}</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1000"
-                  step="25"
-                  value={guestCount}
-                  onChange={(e) => setGuestCount(Number(e.target.value))}
-                  className="w-full accent-[#d4a878] bg-white/10 h-1.5 rounded-full cursor-pointer"
-                />
-                <div className="flex justify-between text-[9px] text-white/40 font-semibold">
-                  <span>0</span>
-                  <span>1000</span>
-                </div>
-              </div>
-
-              {/* Theme */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold tracking-[0.18em] text-white/60 uppercase">
-                  Theme
-                </label>
-                <div className="grid grid-cols-2 gap-2 bg-[#201612] p-1 rounded-2xl border border-white/10">
-                  <button
-                    type="button"
-                    onClick={() => setTheme("Modern")}
-                    className={`py-2 text-xs font-bold rounded-xl transition-all ${
-                      theme === "Modern"
-                        ? "bg-[#f2dad0] text-[#201913] shadow-md"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Modern
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTheme("Traditional")}
-                    className={`py-2 text-xs font-bold rounded-xl transition-all ${
-                      theme === "Traditional"
-                        ? "bg-[#f2dad0] text-[#201913] shadow-md"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Traditional
-                  </button>
-                </div>
-              </div>
-
-              {/* Venue */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold tracking-[0.18em] text-white/60 uppercase">
-                  Venue
-                </label>
-                <div className="relative">
-                  <select
-                    value={venueType}
-                    onChange={(e) => setVenueType(e.target.value)}
-                    className="w-full appearance-none bg-[#f2dad0] text-[#201913] font-bold text-xs rounded-xl p-3 px-4 pr-10 cursor-pointer shadow-md focus:outline-none"
-                  >
-                    {VENUE_OPTIONS.map((v) => (
-                      <option key={v} value={v} className="bg-[#241a16] text-white font-medium">
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#201913]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* Color Palette */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold tracking-[0.18em] text-white/60 uppercase">
-                  Color Palette
-                </label>
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  {activePalette.map((color, idx) => (
-                    <div
-                      key={idx}
-                      style={{ backgroundColor: color }}
-                      className="w-8 h-8 rounded-full border-2 border-white/20 shadow-md hover:scale-110 transition-all cursor-pointer"
-                      title={color}
-                    />
-                  ))}
-                  <input
-                    type="color"
-                    ref={colorInputRef}
-                    onChange={handleAddCustomColor}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => colorInputRef.current?.click()}
-                    className="w-8 h-8 rounded-full border border-dashed border-white/40 hover:border-white text-white/60 hover:text-white flex items-center justify-center text-sm font-bold transition-all cursor-pointer"
-                    title="Add Custom Color"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </motion.aside>
-          )}
-        </AnimatePresence>
-
-        {/* ─── MAIN STAGE / CONTENT AREA ─── */}
-        <section className="flex-1 w-full space-y-6">
-          {/* Error Alert */}
-          {error && <div className="mb-4">{error}</div>}
-
-          {/* Top Prompt / Generation Bar */}
-          <div className="bg-[#18110e]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 sm:p-2.5 px-4 flex items-center gap-3 shadow-2xl">
-            <span className="text-[#d4a878] text-base shrink-0">{"✦"}</span>
-            <input
-              type="text"
-              value={userPrompt}
-              onChange={(e) => setUserPrompt(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
-              placeholder="Describe your Wedding Scene..."
-              className="w-full bg-transparent text-white placeholder-white/40 text-xs sm:text-sm focus:outline-none"
-            />
-            <span className="text-[#d4a878] text-base shrink-0 mr-2">{"✦"}</span>
+    <main className="loverai-wedding-shell min-h-screen text-white px-3 md:px-6 flex flex-col items-center justify-center overflow-visible py-4">
+      <div
+        className="loverai-wedding-bg"
+        style={{ backgroundImage: 'url("/images/signup.webp")' }}
+      />
+      <div className="loverai-wedding-overlay" />
+      
+      {/* Outer Container with Premium Glassmorphism */}
+      <div className="relative z-10 mx-auto max-w-[1380px] w-full h-[calc(100vh-32px)] max-h-[960px] bg-white/5 backdrop-blur-2xl border border-white/15 rounded-[24px] shadow-[0_30px_70px_rgba(0,0,0,0.45)] p-3 md:p-6 lg:p-7 flex flex-col overflow-hidden">
+        
+        {/* Header Section Inside Outer Container */}
+        <header className="mb-3 md:mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between px-1 relative flex-shrink-0">
+          {/* Left Side: Navigation Pill Buttons */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap flex-shrink-0 overflow-x-auto loverai-scrollbar-hide">
             <button
               type="button"
-              disabled={generating}
-              onClick={handleGenerate}
-              className="bg-gradient-to-r from-[#f2dad0] to-[#e6c6b2] text-[#201913] px-5 sm:px-7 py-2.5 rounded-full text-xs font-extrabold uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#d4a878]/10 flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
+              onClick={() => navigate(-1)}
+              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-2.5 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200 flex-shrink-0"
             >
-              {generating ? (
-                <>
-                  <svg className="animate-spin h-3.5 w-3.5 text-[#201913]" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <span>{"✦"}</span>
-                  <span>Generate</span>
-                </>
-              )}
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/couple/moodboard/wedding")}
+              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-2.5 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200 flex-shrink-0"
+            >
+              Moodboards
+            </button>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-2.5 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-white/90 transition duration-200 flex items-center gap-1 flex-shrink-0"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-3 sm:h-3">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+              </svg>
+              {sidebarOpen ? "Hide Filters" : "Show Filters"}
             </button>
           </div>
 
-          {/* ─── 3 BUDGET TIERS GRID ─── */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
-            {/* Low Budget Column */}
-            <BudgetColumn
-              tierTitle="LOW BUDGET"
-              budgetEstimate="₹ 6 - 8 Lakhs"
-              decorImages={generatedTiers.low.decor}
-              stylingImages={generatedTiers.low.styling}
-              entertainmentImages={generatedTiers.low.entertainment}
-              isGenerating={generating}
-              generationStep={generationStep}
-              functionType={functionType}
-              onImageClick={(img) => setSelectedImage(img)}
-              onQuickGenerate={handleGenerate}
-            />
-
-            {/* Medium Budget Column (Highlighted) */}
-            <BudgetColumn
-              tierTitle="MEDIUM BUDGET"
-              isHighlighted={true}
-              budgetEstimate="₹ 12 - 18 Lakhs"
-              decorImages={generatedTiers.medium.decor}
-              stylingImages={generatedTiers.medium.styling}
-              entertainmentImages={generatedTiers.medium.entertainment}
-              isGenerating={generating}
-              generationStep={generationStep}
-              functionType={functionType}
-              onImageClick={(img) => setSelectedImage(img)}
-              onQuickGenerate={handleGenerate}
-            />
-
-            {/* High Budget Column */}
-            <BudgetColumn
-              tierTitle="HIGH BUDGET"
-              budgetEstimate="₹ 20 Lakhs+"
-              decorImages={generatedTiers.high.decor}
-              stylingImages={generatedTiers.high.styling}
-              entertainmentImages={generatedTiers.high.entertainment}
-              isGenerating={generating}
-              generationStep={generationStep}
-              functionType={functionType}
-              onImageClick={(img) => setSelectedImage(img)}
-              onQuickGenerate={handleGenerate}
-            />
+          {/* Center: Title & Subtitle */}
+          <div className="text-center md:absolute md:left-1/2 md:-translate-x-1/2">
+            <h1 className="font-['Cormorant_Garamond'] text-2xl md:text-[30px] font-semibold tracking-wide text-white">
+              Create Your Wedding Vision
+            </h1>
+            <span className="text-[11px] tracking-[0.2em] font-semibold text-white/70 block mt-1 uppercase">
+              SEE YOUR UNIQUE WEDDING DESIGN COME TO LIFE
+            </span>
           </div>
 
-          {/* ─── BOTTOM DISCLAIMER CAPSULE ─── */}
-          <div className="bg-[#18110e]/80 border border-white/10 rounded-2xl p-4 px-5 flex items-center gap-3 text-xs text-white/60 backdrop-blur-xl">
-            <span className="text-amber-400 text-base shrink-0">{"💡"}</span>
-            <p className="leading-relaxed">
-              These designs are AI-generated inspirations based on your inputs and reference images. Final execution may vary based on venue, availability and customization.
-            </p>
-          </div>
-        </section>
-      </main>
-
-      {/* ─── IMAGE INSPECTION / ACTION LIGHTBOX MODAL ─── */}
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
-            onClick={() => setSelectedImage(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#18110e] border border-white/15 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-6"
+          {/* Right Side: Round Hamburger Menu Button */}
+          <div className="flex items-center justify-end relative z-50">
+            <CreditWalletBadge />
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-10 h-10 rounded-full border border-white/20 bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition relative cursor-pointer"
+              aria-label="Toggle Menu"
             >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <h3 className="text-xl font-light text-white font-['Cormorant_Garamond',serif]">
-                    {selectedImage.title || `${functionType} Design Scene`}
-                  </h3>
-                  <p className="text-[11px] text-white/50 tracking-wider uppercase font-semibold">
-                    {functionType} • {theme} Theme
-                  </p>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+              </svg>
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 top-[calc(100%+12px)] z-[100] w-[240px] rounded-2xl border border-white/12 bg-[#1b1310] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col gap-3">
+                {/* Profile Header section */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-base select-none bg-gradient-to-tr from-[#c57e44] to-[#ebd8c7]">
+                    {coupleInitial}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[14px] font-bold text-white truncate leading-tight select-none">
+                      {coupleName}
+                    </span>
+                    <span className="text-[11px] text-white/50 truncate leading-snug select-none">
+                      {currentUser?.email || "piyu@gmail.com"}
+                    </span>
+                  </div>
                 </div>
+
+                <div className="h-px bg-white/10 w-full my-0.5" />
+
+                {/* Navigation Links */}
                 <button
                   type="button"
-                  onClick={() => setSelectedImage(null)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm cursor-pointer"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    navigate("/couple/cart");
+                  }}
+                  className="w-full text-left text-[14px] font-semibold text-white/90 hover:text-white transition py-1 cursor-pointer select-none"
                 >
-                  {"✕"}
+                  My Cart
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    navigate("/couple/profile");
+                  }}
+                  className="w-full text-left text-[14px] font-semibold text-white/90 hover:text-white transition py-1 cursor-pointer select-none"
+                >
+                  Profile
+                </button>
+
+                <div className="h-px bg-white/10 w-full my-0.5" />
+
+                {/* Logout Action */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setMenuOpen(false);
+                    try {
+                      await logout();
+                      navigate("/login");
+                    } catch (err) {
+                      console.error("Logout failed:", err);
+                    }
+                  }}
+                  className="w-full text-left text-[14px] font-semibold text-[#ff7b7b] hover:text-[#ff9b9b] transition py-1 cursor-pointer select-none"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Content Split Layout: Sliding sidebar (left) and 1fr (right panel) */}
+        <div className="flex gap-6 items-stretch flex-1 min-h-0 relative overflow-hidden">
+          
+          {/* Left Sidebar: Style Filters */}
+          <aside className={`absolute md:relative z-30 md:z-auto bg-[#201915]/95 md:bg-[#201915]/40 backdrop-blur-lg md:backdrop-blur-md border border-white/10 rounded-[20px] p-3 flex flex-col h-[calc(100%-32px)] md:h-full overflow-hidden transition-all duration-300 ease-in-out flex-shrink-0 ${sidebarOpen ? 'w-[290px] sm:w-[320px] md:w-[360px] opacity-100 left-4 top-4 bottom-4 md:left-auto md:top-auto md:bottom-auto' : 'w-0 opacity-0 pointer-events-none p-0 border-0 -left-96 md:left-auto'}`}>
+            <div className="pb-2.5 flex items-center justify-between flex-shrink-0 border-b border-white/10 mb-3">
+              <p className="text-[15px] font-bold uppercase tracking-[0.22em] text-[#ebd8c7]">
+                Style Filters
+              </p>
+            </div>
+
+            {/* 1. Reference Uploads (Pinned at Top) */}
+            <div className="rounded-[8px] border border-white/10 bg-white/5 pt-2.5 pb-3 px-3 flex flex-col justify-between h-[114px] flex-shrink-0 mb-3 relative">
+              <span className="text-[15px] font-semibold uppercase tracking-[0.12em] text-[#ebd8c7] select-none">
+                Reference Uploads
+              </span>
+              <div className="hidden">
+                <input
+                  ref={venueInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileSelect(e.target.files[0], "venue")}
+                />
+                <input
+                  ref={decorInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileSelect(e.target.files[0], "decor")}
+                />
+              </div>
+
+              {/* Upload Dashed Container */}
+              <div className="border border-dashed border-white/20 rounded-lg bg-[#ebd8c7]/5 flex items-center justify-between px-3 py-2 h-[60px] min-h-[60px]">
+                {!(venuePreview || decorPreview) ? (
+                  <div className="flex-1 flex items-center gap-3 min-w-0 pr-2">
+                    <span className="text-[#ebd8c7] flex-shrink-0">
+                      <UploadIcon />
+                    </span>
+                    <div className="flex flex-col text-left min-w-0">
+                      <span className="text-[11.5px] font-medium text-white/95 leading-tight select-none">
+                        Upload Inspiration
+                      </span>
+                      <span className="text-[9.5px] text-[#ebd8c7]/60 leading-tight select-none truncate">
+                        Reels, Pinterest, screenshots
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex gap-2 justify-start items-center min-w-0 pr-2">
+                    {venuePreview && (
+                      <div className="relative h-9 w-9 rounded overflow-hidden border border-white/10 group">
+                        <img src={venuePreview} alt="venue" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => { setVenueImage(null); setVenuePreview(null); }}
+                          className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs font-bold"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {decorPreview && (
+                      <div className="relative h-9 w-9 rounded overflow-hidden border border-white/10 group">
+                        <img src={decorPreview} alt="decor" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => { setDecorImage(null); setDecorPreview(null); }}
+                          className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs font-bold"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    <span className="text-[12px] font-semibold text-[#ebd8c7] ml-1 select-none truncate">Inspiration added</span>
+                  </div>
+                )}
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!venuePreview) {
+                      venueInputRef.current?.click();
+                    } else {
+                      decorInputRef.current?.click();
+                    }
+                  }}
+                  className="border border-white/15 bg-white/5 hover:bg-white/10 px-3 py-1 rounded-md text-[11px] uppercase font-bold tracking-wider text-[#ebd8c7] transition flex-shrink-0"
+                >
+                  Browse
+                </button>
+              </div>
+            </div>
+
+            <div
+              ref={sidebarScrollRef}
+              className={`flex flex-col gap-3 overflow-y-auto loverai-scrollbar pr-3 flex-1 min-h-0 transition-all duration-300 ${
+                activeDropdown === "timing" || activeDropdown === "venue" ? "pb-40" : "pb-8"
+              }`}
+            >
+
+              {/* 2. Budget (in Rupees) */}
+              <div className="rounded-[8px] border border-white/10 bg-white/5 pt-2.5 pb-3 px-3 flex flex-col justify-between h-[84px] flex-shrink-0 relative">
+                <div className="flex justify-between items-center">
+                  <span className="text-[15px] font-semibold uppercase tracking-[0.12em] text-[#ebd8c7]">
+                    Budget
+                  </span>
+                  <span className="text-sm font-semibold text-white/95">
+                    {formatBudgetLabel(budget)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/40">
+                    1L
+                  </span>
+                  <input
+                    type="range"
+                    min="1"
+                    max="100"
+                    value={budget}
+                    onChange={(e) => setBudget(Number(e.target.value))}
+                    className="loverai-range-slider flex-1"
+                  />
+                  <span className="text-xs text-white/40">
+                    1Cr
+                  </span>
+                </div>
+              </div>
+
+              {/* 3. Functions */}
+              {renderCustomSelect("functions", "Functions", functionType, setFunctionType, FUNCTION_OPTIONS, "down")}
+
+              {/* 4. Guest (PAX) */}
+              <div className="rounded-[8px] border border-white/10 bg-white/5 pt-2.5 pb-3 px-3 flex flex-col justify-between h-[84px] flex-shrink-0 relative">
+                <div className="flex justify-between items-center">
+                  <span className="text-[15px] font-semibold uppercase tracking-[0.12em] text-[#ebd8c7]">
+                    Guest (PAX)
+                  </span>
+                  <span className="text-sm font-semibold text-white/95">
+                    {guestCount}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/40">
+                    0
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    value={guestCount}
+                    onChange={(e) => setGuestCount(Number(e.target.value))}
+                    className="loverai-range-slider flex-1"
+                  />
+                  <span className="text-xs text-white/40">
+                    1000
+                  </span>
+                </div>
+              </div>
+
+              {/* 5. Theme */}
+              <div className="rounded-[8px] border border-white/10 bg-white/5 pt-2.5 pb-3 px-3 flex flex-col justify-between h-[84px] flex-shrink-0 relative">
+                <span className="text-[15px] font-semibold uppercase tracking-[0.12em] text-[#ebd8c7]">
+                  Theme
+                </span>
+                <div className="grid grid-cols-2 gap-1.5 w-full">
+                  {["Modern", "Traditional"].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setStyle(option)}
+                      className={`rounded-[6px] py-1.5 text-[15px] font-semibold transition text-center w-full ${
+                        style === option
+                          ? "loverai-btn-accent text-[#3D1B2D]"
+                          : "border border-white/10 bg-white/5 text-white/70 hover:border-white/20"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 6. Event Flow */}
+              {renderCustomSelect("eventFlow", "Event Flow", planningType, setPlanningType, PLANNING_OPTIONS, "down")}
+
+              {/* 7. Venue */}
+              {renderCustomSelect("venue", "Venue", venueType, setVenueType, VENUE_OPTIONS, "down")}
+
+              {/* 8. Timing */}
+              {renderCustomSelect("timing", "Timing", timing, setTiming, TIMING_OPTIONS, "down")}
+
+            </div>
+          </aside>
+
+          {/* Right Panel: Prompt & Bento Canvas */}
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-[20px] p-3 md:p-4 flex flex-col flex-1 h-full min-h-0 overflow-hidden">
+            
+            {/* Top Prompt Row */}
+            <div className="flex gap-2 items-center flex-shrink-0">
+              <div className="flex flex-1 items-center gap-2.5 rounded-[12px] border border-white/10 px-3 py-1.5 bg-black/10 h-[40px] sm:h-auto">
+                <span className="text-[#ebd8c7]">
+                  <SparkIcon />
+                </span>
+                <input
+                  value={userPrompt}
+                  onChange={(e) => setUserPrompt(e.target.value)}
+                  placeholder="Describe your Wedding Scene..."
+                  className="w-full bg-transparent text-xs sm:text-sm text-white outline-none placeholder:text-white/35 font-sans"
+                />
+                <button
+                  type="button"
+                  className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-[#e6c6b2] transition duration-200 flex-shrink-0"
+                  title="Improve Prompt"
+                >
+                  <SparkIcon />
                 </button>
               </div>
 
-              {/* Large Image Preview */}
-              <div className="rounded-2xl overflow-hidden border border-white/10 bg-black max-h-[50vh] flex items-center justify-center">
-                <img
-                  src={selectedImage.url}
-                  alt={selectedImage.title}
-                  className="max-h-[50vh] w-auto object-contain"
-                />
+              <button
+                type="button"
+                onClick={handleGenerate}
+                disabled={generating}
+                className="inline-flex items-center justify-center gap-1.5 rounded-[12px] loverai-btn-accent px-4 py-2 hover:bg-[#ebd0be] transition duration-200 disabled:opacity-60 disabled:cursor-not-allowed text-[#3D1B2D] font-semibold text-xs sm:text-sm h-[40px] sm:h-auto flex-shrink-0"
+              >
+                <SparkIcon />
+                Generate
+              </button>
+            </div>
+
+            {error && (
+              <div className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-2 text-xs text-red-200 mt-2 flex-shrink-0">
+                {error}
+              </div>
+            )}
+
+            {/* Bento Grid Canvas */}
+            <section className="rounded-[14px] border border-white/5 bg-white/5 p-3 md:p-4 flex flex-col flex-1 mt-3 md:mt-4 min-h-0 overflow-hidden">
+              {renderCanvas()}
+            </section>
+          </div>
+
+        </div>
+      </div>
+
+        {showMoodboardModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-[360px] rounded-[10px] bg-[#f7f2eb] p-5 text-center text-[#1e1815] shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+              <button
+                type="button"
+                onClick={() => setShowMoodboardModal(false)}
+                className="absolute right-3 top-3 text-sm text-[#1e1815]/70 transition hover:text-[#1e1815]"
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[#3BFF47] text-white shadow-[0_12px_30px_rgba(59,255,71,0.25)]">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              </div>
+              <h2 className="font-['Cormorant_Garamond'] text-[24px] font-semibold">
+                Added to Moodboard
+              </h2>
+              <div className="mt-5 grid gap-2">
+                <button
+                  type="button"
+                  onClick={planAnotherFunction}
+                  className="rounded-[6px] bg-[#1d1714] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                >
+                  Plan Another Function
+                </button>
+                <button
+                  type="button"
+                  onClick={openThemeBoard}
+                  className="rounded-[6px] bg-[#1d1714] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+                >
+                  Go To Moodboard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editingCard && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
+            {/* Modal Box: Precise replica of shared mockup UI */}
+            <div className="relative max-w-[960px] w-full bg-[#160f0d] border border-white/20 rounded-[32px] shadow-[0_30px_70px_rgba(0,0,0,0.85)] p-6 md:p-8 flex flex-col gap-6 text-white animate-scaleIn">
+              
+              {/* Radial background glows */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[32px]">
+                <div className="absolute top-[-10%] left-[20%] w-[60%] h-[30%] bg-gradient-to-b from-[#ebd8c7]/8 to-transparent blur-[80px]" />
+                <div className="absolute bottom-[-10%] right-[20%] w-[50%] h-[30%] bg-gradient-to-t from-[#c57e44]/8 to-transparent blur-[80px]" />
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                <div className="flex items-center gap-2">
+              {/* Content Header */}
+              <div className="relative z-10 flex flex-col gap-4">
+                {/* Top Actions Row */}
+                <div className="flex items-center justify-between w-full">
+                  {/* Back button - circular thin-border outline shape */}
                   <button
                     type="button"
-                    onClick={() => handleAddToCart(selectedImage)}
-                    className="px-5 py-2.5 bg-gradient-to-r from-[#e6c6b2] to-[#d4a878] text-[#201913] text-xs font-bold uppercase rounded-full hover:brightness-110 shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => setEditingCard(null)}
+                    className="w-10 h-10 rounded-full border border-white/20 bg-black/40 hover:bg-white/10 flex items-center justify-center text-white transition-all duration-200 cursor-pointer"
+                    aria-label="Back"
                   >
-                    <span>{"🛒"}</span> Add to Cart
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="19" y1="12" x2="5" y2="12" />
+                      <polyline points="12 19 5 12 12 5" />
+                    </svg>
                   </button>
+
+                  {/* Save button - pill shape matching mockup exactly */}
                   <button
                     type="button"
-                    onClick={() => handleSaveToMoodboard(selectedImage)}
-                    className="px-5 py-2.5 bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold uppercase rounded-full transition-all flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => {
+                      setRefinements(prev => ({
+                        ...prev,
+                        [editingCard.id]: {
+                          prompt: modalPrompt,
+                          colorTone: modalColorTone,
+                          lighting: modalLighting,
+                          theme: modalTheme
+                        }
+                      }));
+                      setEditingCard(null);
+                    }}
+                    className="bg-[#f5e1d3] text-[#1e1815] font-bold px-6 py-2 rounded-full text-xs uppercase hover:bg-[#ebd0be] transition duration-200 flex items-center gap-1.5 cursor-pointer shadow-lg"
                   >
-                    <span>{"💾"}</span> Save Moodboard
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 10 12 15 7 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Save
                   </button>
                 </div>
 
-                <a
-                  href={selectedImage.url}
-                  download="loversai-wedding-vision.jpg"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 hover:text-white text-xs font-medium rounded-full transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>{"⬇️"}</span> Download
-                </a>
-              </div>
+                {/* Title and Subtitle */}
+                <div className="text-center flex flex-col items-center">
+                  <h2 className="font-['Cormorant_Garamond'] text-3xl md:text-[36px] font-semibold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#ebd8c7] via-white to-[#ebd8c7] drop-shadow-sm">
+                    Love lies in the details ~
+                  </h2>
+                  <span className="text-[10px] tracking-[0.25em] font-bold text-[#ebd8c7]/60 block mt-1.5 uppercase select-none">
+                    LET'S EDIT THEM
+                  </span>
+                </div>
 
-              {/* AI Image Refinement Box */}
-              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-3">
-                <label className="text-[11px] font-bold text-[#d4a878] uppercase tracking-wider flex items-center gap-1.5">
-                  <span>{"✦"}</span> Refine / Edit this scene with AI
-                </label>
-                <div className="flex gap-2">
+                {/* Refinement Prompt Bar - Pill shape with pencil and circular white button */}
+                <div className="mx-auto max-w-[550px] w-full flex items-center gap-3 rounded-full border border-white/25 px-5 py-2 bg-black/40 focus-within:border-white/50 transition-all duration-300">
+                  <span className="text-white/60 flex-shrink-0">
+                    <PencilIcon />
+                  </span>
                   <input
-                    type="text"
-                    value={editPrompt}
-                    onChange={(e) => setEditPrompt(e.target.value)}
-                    placeholder="e.g. Change floral colors to royal red, add fairy lights..."
-                    className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder-white/40 focus:outline-none"
+                    value={modalPrompt}
+                    onChange={(e) => setModalPrompt(e.target.value)}
+                    placeholder="Refine every detail..."
+                    className="w-full bg-transparent text-xs text-white outline-none placeholder:text-white/35 font-sans"
                   />
                   <button
                     type="button"
-                    disabled={isEditing || !editPrompt.trim()}
-                    onClick={handleEditImage}
-                    className="px-5 py-2 bg-gradient-to-r from-[#f2dad0] to-[#e6c6b2] text-[#201913] text-xs font-bold uppercase rounded-xl hover:brightness-110 disabled:opacity-40 transition-all shrink-0 cursor-pointer"
+                    onClick={() => {
+                      setRefinements(prev => ({
+                        ...prev,
+                        [editingCard.id]: {
+                          prompt: modalPrompt,
+                          colorTone: modalColorTone,
+                          lighting: modalLighting,
+                          theme: modalTheme
+                        }
+                      }));
+                      setEditingCard(null);
+                    }}
+                    className="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center transition flex-shrink-0 cursor-pointer shadow hover:bg-[#f5e1d3]"
                   >
-                    {isEditing ? "Refining..." : "Refine"}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+
+              {/* Split Body Layout (Mockup aspect ratio layout) */}
+              <div className="relative z-10 flex flex-col md:flex-row gap-6 items-stretch flex-1 min-h-0 mt-5">
+                {/* Left side parameters - Card form with rounded-[24px] and exact labels */}
+                <div className="w-full md:w-[260px] rounded-[24px] border border-white/10 bg-black/25 p-5 flex flex-col gap-5 justify-center flex-shrink-0">
+                  {renderModalSelect(
+                    "colorTone",
+                    "COLOR TONE",
+                    modalColorTone,
+                    setModalColorTone,
+                    ["Original", "Warm Gold", "Pastel Rose", "Royal Cream", "Emerald Forest", "Midnight Blue"]
+                  )}
+                  {renderModalSelect(
+                    "lighting",
+                    "LIGHTING",
+                    modalLighting,
+                    setModalLighting,
+                    ["Original", "Golden Hour", "Candlelit Glow", "Bright Daylight", "Moody & Dramatic", "Fairy Light Sparkle"]
+                  )}
+                  {renderModalSelect(
+                    "themeStyle",
+                    "THEME",
+                    modalTheme,
+                    setModalTheme,
+                    ["Original", "Traditional Luxe", "Modern Minimalist", "Bohemian Garden", "Vintage Royal", "Bollywood Glam"]
+                  )}
+                </div>
+
+                {/* Right side Image / Preview block */}
+                <div className="flex-1 relative rounded-[24px] border border-dashed border-white/15 bg-black/25 flex flex-col items-center justify-center p-6 text-center overflow-hidden min-h-[320px]">
+                  {(() => {
+                    const isVenueCard = editingCard.id === "primary" || editingCard.id === "venue";
+                    const refPreview = isVenueCard ? venuePreview : decorPreview;
+                    const hasGeneratedImage = !!editingCard.imageObj?.url;
+                    const hasReferenceImage = !!refPreview;
+
+                    if (hasGeneratedImage) {
+                      return (
+                        <>
+                          {/* Main Generated Image */}
+                          <img
+                            src={editingCard.imageObj.url}
+                            alt={editingCard.title}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+                          
+                          {/* Floating Reference Thumbnail Overlay */}
+                          {hasReferenceImage && (
+                            <div className="absolute top-3 right-3 z-20 flex flex-col items-end gap-1 animate-scaleIn">
+                              <span className="text-[8px] uppercase tracking-wider bg-black/80 px-2 py-0.5 border border-white/20 text-white font-bold select-none">
+                                Reference
+                              </span>
+                              <div className="relative w-20 h-20 border-2 border-white bg-black shadow-2xl group/thumb overflow-hidden rounded-[8px]">
+                                <img
+                                  src={refPreview}
+                                  alt="Reference Thumbnail"
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (isVenueCard) {
+                                      setVenueImage(null);
+                                      setVenuePreview(null);
+                                    } else {
+                                      setDecorImage(null);
+                                      setDecorPreview(null);
+                                    }
+                                  }}
+                                  className="absolute inset-0 bg-black/75 flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition duration-150 text-white text-[10px] font-bold cursor-pointer"
+                                  title="Remove Reference"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Labeled Badge */}
+                          <div className="absolute bottom-16 left-4 z-10">
+                            <span className="text-[9px] uppercase tracking-widest bg-black/70 border border-white/10 px-2.5 py-1 font-bold text-[#ebd8c7] select-none">
+                              AI Generated
+                            </span>
+                          </div>
+                        </>
+                      );
+                    } else if (hasReferenceImage) {
+                      return (
+                        <>
+                          {/* Main Reference Image (When no generated image exists) */}
+                          <img
+                            src={refPreview}
+                            alt="Reference Inspiration"
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+                          
+                          {/* Labeled Badge */}
+                          <div className="absolute bottom-16 left-4 z-10">
+                            <span className="text-[9px] uppercase tracking-widest bg-white text-black border border-white px-2.5 py-1 font-bold select-none">
+                              Inspiration Reference
+                            </span>
+                          </div>
+                        </>
+                      );
+                    } else {
+                      return (
+                        /* Empty State matching mockup image */
+                        <div className="flex flex-col items-center justify-center text-center p-4 select-none mb-10">
+                          <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center bg-white/5 mb-4 text-white/50 shadow-inner">
+                            <PhotoIcon />
+                          </div>
+                          <p className="font-['Cormorant_Garamond'] text-xl font-medium text-white tracking-wide">
+                            Configure Refinements
+                          </p>
+                          <p className="text-[11px] text-white/40 mt-2 max-w-[280px] mx-auto leading-relaxed">
+                            No generated image exists yet. Adjust filters or prompts here to pre-configure visual parameters for the next generation!
+                          </p>
+                        </div>
+                      );
+                    }
+                  })()}
+
+                  {/* Floating Action Capsule (Bottom) */}
+                  {(() => {
+                    const isVenueCard = editingCard.id === "primary" || editingCard.id === "venue";
+                    const refPreview = isVenueCard ? venuePreview : decorPreview;
+                    const hasReferenceImage = !!refPreview;
+
+                    return (
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-[#0a0705] border border-white/10 p-1.5 rounded-full shadow-2xl">
+                        {/* ADD button - white solid pill */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isVenueCard) {
+                              venueInputRef.current?.click();
+                            } else {
+                              decorInputRef.current?.click();
+                            }
+                          }}
+                          className="bg-white hover:bg-[#f5e1d3] text-black font-extrabold px-4 py-1.5 rounded-full text-[10px] uppercase transition duration-150 flex items-center gap-1.5 cursor-pointer shadow"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
+                          ADD
+                        </button>
+                        
+                        <div className="h-4 w-[1px] bg-white/10" />
+
+                        {/* REMOVE button - text link */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isVenueCard) {
+                              setVenueImage(null);
+                              setVenuePreview(null);
+                            } else {
+                              setDecorImage(null);
+                              setDecorPreview(null);
+                            }
+                          }}
+                          disabled={!hasReferenceImage}
+                          className="text-white/45 hover:text-white disabled:text-white/20 text-[10px] font-bold uppercase tracking-wider px-2 py-1 flex items-center gap-1 transition duration-150 cursor-pointer disabled:pointer-events-none"
+                        >
+                          — REMOVE
+                        </button>
+
+                        <div className="h-4 w-[1px] bg-white/10" />
+
+                        {/* RESET button - text link */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalPrompt("");
+                            setModalColorTone("Original");
+                            setModalLighting("Original");
+                            setModalTheme("Original");
+                          }}
+                          className="text-white/85 hover:text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 flex items-center gap-1 transition duration-150 cursor-pointer"
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="inline">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                          </svg>
+                          RESET
+                        </button>
+
+                        <div className="h-4 w-[1px] bg-white/10" />
+
+                        {/* COMPARE button - text link (disabled) */}
+                        <button
+                          type="button"
+                          className="text-white/25 text-[10px] font-bold uppercase tracking-wider px-2 py-1 flex items-center gap-1 cursor-not-allowed"
+                          disabled
+                        >
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="inline">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <line x1="9" y1="3" x2="9" y2="21" />
+                          </svg>
+                          COMPARE
+                        </button>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+            </div>
+          </div>
         )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ─── HELPER COMPONENT: BUDGET COLUMN ───
-function BudgetColumn({
-  tierTitle,
-  isHighlighted = false,
-  budgetEstimate,
-  decorImages = [],
-  stylingImages = [],
-  entertainmentImages = [],
-  isGenerating = false,
-  generationStep = "",
-  functionType = "Haldi",
-  onImageClick,
-  onQuickGenerate,
-}) {
-  return (
-    <div
-      className={`rounded-3xl border flex flex-col p-4 sm:p-5 space-y-5 transition-all ${
-        isHighlighted
-          ? "bg-[#1b130f]/95 border-[#d4a878]/40 shadow-2xl shadow-[#d4a878]/10"
-          : "bg-[#18110e]/90 border-white/10 shadow-xl"
-      }`}
-    >
-      {/* Tier Header */}
-      {isHighlighted ? (
-        <div className="bg-gradient-to-r from-[#443325] to-[#59422e] border border-[#d4a878]/40 rounded-2xl p-3 px-4 flex items-center justify-between shadow-lg -mx-1 -mt-1">
-          <h3 className="font-bold text-xs sm:text-sm tracking-wider text-[#f5eada] uppercase">
-            {tierTitle}
-          </h3>
-          <span className="text-[11px] sm:text-xs text-[#d4a878] font-bold">
-            Estimated {budgetEstimate}
-          </span>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
-          <h3 className="font-bold text-xs sm:text-sm tracking-wider text-white uppercase">
-            {tierTitle}
-          </h3>
-          <span className="text-[11px] sm:text-xs text-[#d4a878] font-medium">
-            Estimated {budgetEstimate}
-          </span>
-        </div>
-      )}
-
-      {/* 1. Decor & Venue */}
-      <div className="space-y-2">
-        <span className="text-[10px] font-bold tracking-[0.18em] text-white/50 uppercase block">
-          Decor & Venue
-        </span>
-        <div className="grid grid-cols-2 gap-2">
-          {decorImages.length > 0 ? (
-            decorImages.map((img, idx) => (
-              <div
-                key={idx}
-                onClick={() => onImageClick(img)}
-                className="relative aspect-[4/3] rounded-xl overflow-hidden border border-white/10 group cursor-pointer shadow-md bg-black/40"
-              >
-                <img
-                  src={img.url}
-                  alt={img.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center p-2 text-center">
-                  <span className="text-[10px] font-semibold text-white line-clamp-2">{img.title}</span>
-                </div>
-              </div>
-            ))
-          ) : (
-            // 4 Placeholder slots waiting for AI Generation
-            [1, 2, 3, 4].map((slot) => (
-              <PlaceholderSlot
-                key={slot}
-                aspect="aspect-[4/3]"
-                label={slot === 1 ? "Mandap Setup" : slot === 2 ? "Aisle & Walkway" : slot === 3 ? "Lounge Seating" : "Photobooth"}
-                isGenerating={isGenerating}
-                onQuickGenerate={onQuickGenerate}
-              />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* 2. Bride, Groom & Family Styling */}
-      <div className="space-y-2">
-        <span className="text-[10px] font-bold tracking-[0.18em] text-white/50 uppercase block">
-          Bride, Groom & Family Styling
-        </span>
-        <div className="grid grid-cols-2 gap-2">
-          {stylingImages.length > 0 ? (
-            stylingImages.map((img, idx) => (
-              <div
-                key={idx}
-                onClick={() => onImageClick(img)}
-                className="relative aspect-[3/4] rounded-xl overflow-hidden border border-white/10 group cursor-pointer shadow-md bg-black/40"
-              >
-                <img
-                  src={img.url}
-                  alt={img.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center p-2 text-center">
-                  <span className="text-[10px] font-semibold text-white line-clamp-2">{img.title}</span>
-                </div>
-              </div>
-            ))
-          ) : (
-            // 2 Placeholder slots for Styling
-            [1, 2].map((slot) => (
-              <PlaceholderSlot
-                key={slot}
-                aspect="aspect-[3/4]"
-                label={slot === 1 ? "Couple Attire" : "Family Styling"}
-                isGenerating={isGenerating}
-                onQuickGenerate={onQuickGenerate}
-              />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* 3. Games, Food & Entertainment */}
-      <div className="space-y-2">
-        <span className="text-[10px] font-bold tracking-[0.18em] text-white/50 uppercase block">
-          Games, Food & Entertainment
-        </span>
-        <div className="grid grid-cols-3 gap-2">
-          {entertainmentImages.length > 0 ? (
-            entertainmentImages.map((img, idx) => (
-              <div
-                key={idx}
-                onClick={() => onImageClick(img)}
-                className="relative aspect-square rounded-xl overflow-hidden border border-white/10 group cursor-pointer shadow-md bg-black/40"
-              >
-                <img
-                  src={img.url}
-                  alt={img.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center p-1 text-center">
-                  <span className="text-[9px] font-semibold text-white line-clamp-2">{img.title}</span>
-                </div>
-              </div>
-            ))
-          ) : (
-            // 3 Placeholder slots for Entertainment & Food
-            [1, 2, 3].map((slot) => (
-              <PlaceholderSlot
-                key={slot}
-                aspect="aspect-square"
-                label={slot === 1 ? "Games & Activities" : slot === 2 ? "Food Counters" : "Live Music"}
-                isGenerating={isGenerating}
-                onQuickGenerate={onQuickGenerate}
-              />
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── HELPER: SLEEK EMPTY / GENERATING PLACEHOLDER SLOT ───
-function PlaceholderSlot({ aspect = "aspect-square", label = "", isGenerating = false, onQuickGenerate }) {
-  return (
-    <div
-      onClick={!isGenerating ? onQuickGenerate : undefined}
-      className={`${aspect} rounded-xl border border-dashed border-white/10 hover:border-[#d4a878]/50 bg-white/[0.02] hover:bg-white/[0.05] transition-all flex flex-col items-center justify-center p-2 text-center group cursor-pointer relative overflow-hidden`}
-    >
-      {isGenerating ? (
-        <div className="flex flex-col items-center gap-1.5 animate-pulse">
-          <div className="w-5 h-5 rounded-full border-2 border-[#d4a878] border-t-transparent animate-spin" />
-          <span className="text-[9px] text-[#d4a878] font-medium tracking-wide">Generating...</span>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-[#d4a878]/60 group-hover:text-[#d4a878] text-xs transition-colors">{"✦"}</span>
-          <span className="text-[9px] text-white/50 group-hover:text-white/80 font-medium tracking-wide transition-colors line-clamp-2">
-            {label}
-          </span>
-          <span className="text-[8px] text-white/30 group-hover:text-[#d4a878]/80 transition-colors uppercase tracking-widest font-semibold">
-            AI Vision
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
+      </main>
+    );
+  }
