@@ -423,9 +423,9 @@ export default function CoupleWeddingVision() {
         <AnimatePresence>
           {sidebarOpen && (
             <motion.aside
-              initial={{ opacity: 0, x: -30, width: 0 }}
-              animate={{ opacity: 1, x: 0, width: "auto" }}
-              exit={{ opacity: 0, x: -30, width: 0 }}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
               className="w-full lg:w-[320px] shrink-0 bg-[#18110e]/95 backdrop-blur-2xl border border-white/10 rounded-[28px] p-5 sm:p-6 space-y-6 shadow-2xl"
             >
               <h2 className="text-xs font-bold tracking-[0.22em] text-white uppercase flex items-center gap-2 border-b border-white/10 pb-3">
