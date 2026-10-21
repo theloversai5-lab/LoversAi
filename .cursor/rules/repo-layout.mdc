@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Repo layout
 
-- `frontend/` — new app. Empty until import. All new UI goes here.
+- `frontend/` — new **Next.js** app. All new UI goes here.
 - `frontend-legacy/` — frozen old CRA (`legacy-frontend-freeze`). Read only.
 - `backend/` — existing API. Do not rip it out for UI work.
 - `docs/` — product, brand, copy for agents.

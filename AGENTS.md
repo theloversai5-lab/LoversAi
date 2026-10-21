@@ -4,11 +4,12 @@ Read these before writing UI. The new product lives in `frontend/`. The old app 
 
 ## Now
 
-We are building the **new website UI**. AI tools come later. Match the flow in `docs/PRODUCT.md`. Match the look in `docs/BRAND.md`. Match the words in `docs/COPY.md`.
+We are building the **new website UI** in Next.js. Auth, data, and chat are **Supabase**. AI generation stays on Express until the AI teammate moves it. Match `docs/PRODUCT.md`, `docs/BRAND.md`, `docs/COPY.md`, and `docs/STACK.md`.
 
 ## Always load
 
 - `.cursor/rules/product.mdc`
+- `.cursor/rules/stack.mdc`
 - `.cursor/rules/ui-theme.mdc`
 - `.cursor/rules/copy-voice.mdc`
 - `.cursor/rules/repo-layout.mdc`
@@ -28,6 +29,7 @@ We are building the **new website UI**. AI tools come later. Match the flow in `
 | File | Use |
 |---|---|
 | `docs/PRODUCT.md` | What we are building (from website flow deck) |
+| `docs/STACK.md` | Next.js UI + Supabase (AI still Express) |
 | `docs/BRAND.md` | Colors, type, Greek theme |
 | `docs/COPY.md` | How we write |
 | `docs/brand/palette.png` | Color picture |

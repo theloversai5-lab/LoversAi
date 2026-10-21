@@ -1,0 +1,15 @@
+---
+description: Locked UI stack — Next.js plus Supabase
+alwaysApply: true
+---
+
+# Stack
+
+Full detail: `docs/STACK.md`.
+
+- New UI is **Next.js App Router + TypeScript + Tailwind** in `frontend/`.
+- **Supabase** for auth, database, storage, and messaging.
+- **Express `backend/`** only for AI generation until that moves. No Gemini keys in Next.
+- No CRA, no Vite SPA, no Clerk/Firebase for the new app.
+- Public landing = Server Components. Motion = `"use client"` islands.
+- `next/font` and `next/image`. Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
