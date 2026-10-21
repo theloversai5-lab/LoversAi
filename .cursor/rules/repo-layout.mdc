@@ -1,0 +1,15 @@
+---
+description: Where new work goes vs the frozen old app
+alwaysApply: true
+---
+
+# Repo layout
+
+- `frontend/` — new app. Empty until import. All new UI goes here.
+- `frontend-legacy/` — frozen old CRA (`legacy-frontend-freeze`). Read only.
+- `backend/` — existing API. Do not rip it out for UI work.
+- `docs/` — product, brand, copy for agents.
+- `AGENTS.md` — start here.
+
+Do not restore AWS markdown, `src_legacy_archive`, or the discarded landing rewrite.
+Do not add a fifth brand color to “fix” contrast. Use the four hexes in `docs/BRAND.md`.

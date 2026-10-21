@@ -1,0 +1,16 @@
+---
+description: Kid-simple copy. Max 4-5 words per line.
+globs: frontend/**/*.{js,jsx,ts,tsx}
+alwaysApply: true
+---
+
+# Copy
+
+Full examples: `docs/COPY.md`.
+
+- 4–5 words per line. Break the line; do not write a sentence.
+- Shortest wording wins.
+- Words a child can read.
+- Buttons: Continue, Start, Hire, Plan myself.
+- No jargon on screen (no dashboard, ecosystem, execute, submit).
+- Helper text under a question is also 4–5 words.

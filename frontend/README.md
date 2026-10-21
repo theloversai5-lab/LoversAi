@@ -1,7 +1,12 @@
 # Frontend (new app)
 
-This folder is empty on purpose.
+Empty on purpose. Import the new UI here.
 
-The previous production UI is frozen in `../frontend-legacy` and tagged `legacy-frontend-freeze`.
+Before you add screens, read:
 
-Import the new frontend here when it is ready. Until then, run the old app from `frontend-legacy`.
+- `../AGENTS.md`
+- `../docs/PRODUCT.md`
+- `../docs/BRAND.md`
+- `../docs/COPY.md`
+
+Until then, run the old app from `../frontend-legacy`.

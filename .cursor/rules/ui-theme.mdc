@@ -1,0 +1,18 @@
+---
+description: Four-color Greek mythology UI. No black, no red.
+globs: frontend/**/*.{js,jsx,ts,tsx,css,scss}
+alwaysApply: true
+---
+
+# UI theme
+
+Only `#1E4636` `#3A2563` `#F08A3C` `#E2B451`. Full rules: `docs/BRAND.md`. Palette: `docs/brand/palette.png`.
+
+- No black. No red. No grey. No extra hex.
+- Dark field (green/violet) → gold type.
+- Gold/orange field → green or violet type.
+- Orange = actions and progress only.
+- Theme: Greek temple / marble / etched gods (Hermes Agent *feel*, our colors).
+- Same ornaments and type on every screen.
+- Heavy condensed display type. Never clip or ellipsis text.
+- Unveil: one step, then Continue.

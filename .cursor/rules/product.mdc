@@ -1,0 +1,18 @@
+---
+description: What we are building and in what order
+alwaysApply: true
+---
+
+# Product
+
+New UI lives in `frontend/`. Do not edit `frontend-legacy/` except to read old behavior.
+
+We are on **UI only**. AI tools are empty shells with the right steps. Full source: `docs/PRODUCT.md`.
+
+Two doors: **Couple** and **Planners / vendors**.
+
+Couple path: choose wedding → plan myself or hire planner → start love story.
+Planner path: find leads → pitch look → find vendors.
+Vendor path: hiring vs looking for work, then short questions.
+
+Signup is one question per screen. Match `docs/PRODUCT.md` before inventing extra pages.

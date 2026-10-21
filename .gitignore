@@ -23,4 +23,9 @@ backend-start*.log
 frontend/public/*.pptx
 frontend-legacy/public/*.pptx
 
+local_development
+.DS_Store
+.claude/
+.tmp-pptx/
+
 
