@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { approvedAsset, validateCanvas, fail } from "./contracts.js";
-import { renderCanvas, renderRegionMap } from "./media.js";
+import { renderCanvas, renderRegionMap, pasteCutout } from "./media.js";
 import { compilePrompt } from "./prompts.js";
 import { requireCurrentEnvironment } from "./venue-capture.js";
 
@@ -38,7 +38,7 @@ export async function prepareGeneration(job, { assets, saveOverlay }) {
       `Only ${GENERATIVE_OPERATIONS.join(", ")} support generation`,
     );
   const p = structuredClone(job.snapshot);
-  let overlay, overlayBuffer;
+  let overlay, overlayBuffer, placedBase;
   let aspectRatio =
     job.operation === "component_sheet" && job.options?.viewType === "board"
       ? "3:2"
@@ -73,7 +73,12 @@ export async function prepareGeneration(job, { assets, saveOverlay }) {
     p.assets.push(overlay);
   } else if (job.operation === "region_edit") {
     const base = approvedAsset(p, job.options.baseAssetId);
-    const baseBuffer = await assets.read(base.id);
+    let baseBuffer = await assets.read(base.id);
+    if (job.options.place) {
+      approvedAsset(p, job.options.place.cutoutAssetId, ["decor_cutout"]);
+      baseBuffer = await pasteCutout(baseBuffer, await assets.read(job.options.place.cutoutAssetId), job.options.place);
+      placedBase = { id: base.id, buffer: baseBuffer };
+    }
     const { width, height } = await sharp(baseBuffer).metadata();
     aspectRatio = nearestAspectRatio(width, height);
     overlayBuffer = await renderRegionMap(baseBuffer, job.options.regions);
@@ -103,8 +108,10 @@ export async function prepareGeneration(job, { assets, saveOverlay }) {
       buffer:
         r.assetId === overlay?.id
           ? overlayBuffer
-          : await assets.read(r.assetId),
+          : r.assetId === placedBase?.id
+            ? placedBase.buffer
+            : await assets.read(r.assetId),
     })),
   );
-  return { prompt, references, overlay, aspectRatio };
+  return { prompt, references, overlay, aspectRatio, placedBuffer: placedBase?.buffer };
 }

@@ -1,7 +1,13 @@
 import { readFileSync } from "node:fs";
 import { approvedAsset, DRAWING_VIEW_TYPES, fail } from "./contracts.js";
-import { angleLabel } from "./element-view.js";
-export const TEMPLATE_VERSION = "2026-10-21.v11";
+import { angleLabel, azimuthWords } from "./element-view.js";
+export const TEMPLATE_VERSION = "2026-10-21.v13";
+const PLACED_VIEW =
+  "Produce exactly one image of the wedding component seen from this camera: {{CAMERA}}. Show the whole component, centred, filling about 80 percent of the frame, nothing cropped, isolated on a perfectly flat, solid, pure chroma-key green background (#00FF00) with no floor, ground, shadow, reflection, gradient, vignette or text. Copy the design exactly from the approved component master (the character sheet) and the primary source: same structure, element count, proportions, colours, flowers, fabrics, lamps and materials. Only the camera changes; do not recolour, restyle, add or remove anything, and do not use green on the component unless the references show it. Return one image.";
+const PLACE_FIT_RULE =
+  "Placement edit: region 1 contains a rough paste of a decor object. The paste shows where the object stands, its footprint, its overall size and which side faces the camera. The image labelled as the decor object being placed shows its exact design. Re-render that same object in place so its perspective, camera angle, ground contact, scale against nearby trees, paths and buildings, lighting and shadows match this venue photo exactly, as if photographed by the same drone camera at the same moment. Keep its position, footprint and overall size; keep its exact design, structure, element count, colours and materials. Remove any leftover pasted edge or halo. Do not add any other objects. Everything outside this object and its shadow stays exactly as it is.";
+const PLACE_RULE =
+  "Placement edit: region 1 already contains the final decor object, pasted at its exact position and size. Do not redraw, move, resize, recolour, restyle or replace that object. Only add its natural contact shadow on the ground beneath and around it, and gently match its lighting and colour temperature to the scene, so it looks physically placed in the venue. Everything else in the image stays exactly as it is.";
 // Panel layout of full character sheets made by the current template; only these can be cut into views.
 export const SHEET_LAYOUT = "front-right-top-left";
 const tasks = [
@@ -65,7 +71,8 @@ export function compilePrompt(task, project, options = {}) {
         a.status === "approved" &&
         a.componentId === c.id &&
         a.id !== c.masterAssetId &&
-        !DRAWING_VIEW_TYPES.includes(a.viewType),
+        !DRAWING_VIEW_TYPES.includes(a.viewType) &&
+        a.viewType !== "placed",
     )) {
       if (refs.length >= budget) return;
       add(a.id, `component ${c.id} ${a.viewType || "additional"} view`);
@@ -124,7 +131,7 @@ export function compilePrompt(task, project, options = {}) {
     if (options.designAssetId)
       add(options.designAssetId, "approved decorated venue design to reproduce");
   } else if (task === "region_edit") {
-    add(options.baseAssetId, "clean base image to edit");
+    add(options.baseAssetId, options.place ? "venue with the decor object pasted in region 1" : "clean base image to edit");
     if (options.overlayAssetId)
       add(
         options.overlayAssetId,
@@ -135,6 +142,8 @@ export function compilePrompt(task, project, options = {}) {
         add(assetId, `region ${i + 1} reference ${j + 1}`),
       ),
     );
+    if (options.place)
+      add(options.place.cutoutAssetId, "decor object being placed: reproduce exactly this design and these colours");
     if (refs.length > 13)
       fail(
         "REFERENCE_LIMIT",
@@ -154,7 +163,11 @@ export function compilePrompt(task, project, options = {}) {
   const viewType = task === "component_sheet" ? (options.viewType ?? "full_sheet") : null;
   // The camera line is derived server-side from validated numbers, never from user text.
   const templateText =
-    task === "component_sheet" && viewType !== "full_sheet"
+    task === "component_sheet" && viewType === "placed"
+      ? PLACED_VIEW.replace("{{CAMERA}}", `${azimuthWords(options.azimuth)} of the component, camera raised about ${options.elevation} degrees above the ground and looking down at it, like a drone above a venue`)
+      : task === "region_edit" && options.place
+        ? `${templates.region_edit}\n\n${options.place.mode === "fit" ? PLACE_FIT_RULE : PLACE_RULE}`
+        : task === "component_sheet" && viewType !== "full_sheet"
       ? SINGLE_VIEW_DESCRIPTIONS[viewType]
       : task === "element_view"
         ? templates[task].replace("{{CAMERA}}", angleLabel(options))

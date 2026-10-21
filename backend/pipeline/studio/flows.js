@@ -111,8 +111,8 @@ export function startOverviewJob(w, { alive, override = false } = {}) {
 export function ensureOverview() {
   if (S.overviewStarted || !S.project || !approvedGroundIds().length) return;
   S.overviewStarted = true;
+  // Only the isometric here: the 360 view is generated at the end, from the finished design.
   if (!isoLatest() && !isRunning("iso")) startOverviewJob("iso").catch(() => {});
-  if (!base360Latest() && !isRunning("v360")) startOverviewJob("v360").catch(() => {});
 }
 export const useAnyway = (a, label) => acceptGenerated(a).then(() => {
   toast(`${label} accepted despite the quality check.`, { title: "Saved" });

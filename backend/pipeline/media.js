@@ -207,18 +207,148 @@ export async function regionEditMask(base, regions, { scale = 1.35 } = {}) {
 
 // Keeps the base pixel-identical outside the edit regions: the generated image is resized to the
 // base, then blended in only inside slightly enlarged, feathered ellipses.
-export async function compositeRegions(base, generated, regions, { scale = 1.5 } = {}) {
+// Blends an AI edit back onto the base. Kept: the marked regions themselves, plus anything the AI
+// actually changed within a wider zone around them (so an object that grows past the mark is not cut
+// off by a hard edge). Untouched pixels and everything outside the zone stay exactly the base.
+export async function compositeRegions(base, generated, regions, { scale = 1.5, zone = 2.4, threshold = 30 } = {}) {
   const { width, height } = await sharp(base).metadata();
-  const sigma = Math.max(2, Math.round(Math.min(width, height) * 0.012));
-  const maskSvg = Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="#000"/>${regionEllipses(regions, width, height, scale, "#fff")}</svg>`,
-  );
-  const mask = await sharp(maskSvg).flatten({ background: "#000" }).blur(sigma).extractChannel(0).raw().toBuffer();
+  const n = width * height;
+  const sigma = Math.max(2, Math.round(Math.min(width, height) * 0.01));
+  const ellipseMask = async (list, k) => {
+    const svg = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="#000"/>${regionEllipses(list, width, height, k, "#fff")}</svg>`,
+    );
+    return sharp(svg).flatten({ background: "#000" }).extractChannel(0).raw().toBuffer();
+  };
+  // The zone reaches past the mark by 10% of the image plus a share of the mark's size, capped at 25%.
+  const grow = (v) => v + Math.min(0.25, v * (zone - 1) + 0.1);
+  const zoneRegions = regions.map((r) => ({ ...r, rx: Math.min(0.95, grow(r.rx)), ry: Math.min(0.95, grow(r.ry)) }));
+  const [core, wide] = await Promise.all([ellipseMask(regions, scale), ellipseMask(zoneRegions, 1)]);
   // Two steps: sharp applies joinChannel before resize within one pipeline.
   const resized = await sharp(generated).resize(width, height, { fit: "fill" }).removeAlpha().raw().toBuffer();
+  // Compare softened copies so re-rendered texture noise does not count as a change.
+  const soft = (buf) => sharp(buf, { raw: { width, height, channels: 3 } }).blur(1.6).raw().toBuffer();
+  const baseRaw = await sharp(base).removeAlpha().raw().toBuffer();
+  const [a, b] = await Promise.all([soft(baseRaw), soft(resized)]);
+  const keep = Buffer.alloc(n);
+  for (let i = 0; i < n; i++) {
+    if (core[i] > 127) keep[i] = 255;
+    else if (wide[i] > 127) {
+      const d = Math.max(Math.abs(a[i * 3] - b[i * 3]), Math.abs(a[i * 3 + 1] - b[i * 3 + 1]), Math.abs(a[i * 3 + 2] - b[i * 3 + 2]));
+      if (d > threshold) keep[i] = 255;
+    }
+  }
+  // Close small holes and speckle, then feather the edge.
+  const mask = await sharp(keep, { raw: { width, height, channels: 1 } })
+    .blur(Math.max(1.5, sigma / 2))
+    .threshold(60)
+    .blur(sigma)
+    .extractChannel(0)
+    .raw()
+    .toBuffer();
   const overlay = await sharp(resized, { raw: { width, height, channels: 3 } })
     .joinChannel(mask, { raw: { width, height, channels: 1 } })
     .png()
     .toBuffer();
   return sharp(base).removeAlpha().composite([{ input: overlay }]).jpeg({ quality: 92 }).toBuffer();
+}
+
+// ---------------- Decor placement ----------------
+
+// Cuts an object out of a flat chroma-key background (the "placed" component view). The key colour is
+// read from the image border, so a near-green background still works. Only background connected to
+// the border is removed, so green inside the object (leaves) survives. Returns a trimmed RGBA PNG.
+export async function chromaCutout(buffer) {
+  const { data, info } = await sharp(buffer).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  const px = (i) => [data[i * 3], data[i * 3 + 1], data[i * 3 + 2]];
+  const border = [];
+  for (let x = 0; x < w; x += 4) border.push(px(x), px((h - 1) * w + x));
+  for (let y = 0; y < h; y += 4) border.push(px(y * w), px(y * w + w - 1));
+  const med = (k) => border.map((c) => c[k]).sort((a, b) => a - b)[border.length >> 1];
+  const key = [med(0), med(1), med(2)];
+  const dist = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    const [r, g, b] = px(i);
+    dist[i] = Math.hypot(r - key[0], g - key[1], b - key[2]);
+  }
+  const HARD = 70, SOFT = 120;
+  // Flood fill from the border through background-like pixels.
+  const bg = new Uint8Array(w * h);
+  const stack = [];
+  const push = (i) => {
+    if (!bg[i] && dist[i] < SOFT) {
+      bg[i] = 1;
+      stack.push(i);
+    }
+  };
+  for (let x = 0; x < w; x++) push(x), push((h - 1) * w + x);
+  for (let y = 0; y < h; y++) push(y * w), push(y * w + w - 1);
+  while (stack.length) {
+    const i = stack.pop();
+    const x = i % w, y = (i / w) | 0;
+    if (x > 0) push(i - 1);
+    if (x < w - 1) push(i + 1);
+    if (y > 0) push(i - w);
+    if (y < h - 1) push(i + w);
+  }
+  const out = Buffer.alloc(w * h * 4);
+  let solid = 0, x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let i = 0; i < w * h; i++) {
+    let [r, g, b] = px(i);
+    let a = 255;
+    if (bg[i]) a = dist[i] <= HARD ? 0 : Math.round(((dist[i] - HARD) / (SOFT - HARD)) * 255);
+    // Despill: pull the key's dominant channel back toward the others on edge pixels.
+    if (a < 255 || bg[i]) {
+      const kc = key.indexOf(Math.max(...key));
+      const v = [r, g, b];
+      const others = [0, 1, 2].filter((k) => k !== kc).map((k) => v[k]);
+      v[kc] = Math.min(v[kc], Math.max(...others));
+      [r, g, b] = v;
+    }
+    out[i * 4] = r;
+    out[i * 4 + 1] = g;
+    out[i * 4 + 2] = b;
+    out[i * 4 + 3] = a;
+    if (a > 24) {
+      solid++;
+      const x = i % w, y = (i / w) | 0;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  const share = solid / (w * h);
+  if (share < 0.02 || share > 0.97)
+    fail("CUTOUT_FAILED", "Could not separate the decor from its background; render the placement view again", 422);
+  const pad = 2;
+  const left = Math.max(0, x0 - pad), top = Math.max(0, y0 - pad);
+  const cw = Math.min(w, x1 + pad + 1) - left, ch = Math.min(h, y1 + pad + 1) - top;
+  return sharp(out, { raw: { width: w, height: h, channels: 4 } })
+    .extract({ left, top, width: cw, height: ch })
+    .png()
+    .toBuffer();
+}
+
+// Pastes a cut-out onto the base at a normalized box (x, y = top-left; w = width as a fraction of the
+// base width; the height follows the cut-out's aspect ratio). flip mirrors it horizontally.
+export async function pasteCutout(base, cutout, { x, y, w, flip = false }) {
+  const { width: W, height: H } = await sharp(base).metadata();
+  const meta = await sharp(cutout).metadata();
+  const pw = Math.max(4, Math.round(w * W));
+  const ph = Math.max(4, Math.round((pw * meta.height) / meta.width));
+  let piece = sharp(cutout).resize(pw, ph);
+  if (flip) piece = piece.flop();
+  piece = await piece.png().toBuffer();
+  // Clip to the canvas: sharp needs the overlay inside the base.
+  const left = Math.round(x * W), top = Math.round(y * H);
+  const cl = Math.max(0, -left), ct = Math.max(0, -top);
+  const cw = Math.min(pw - cl, W - Math.max(0, left)), ch = Math.min(ph - ct, H - Math.max(0, top));
+  if (cw <= 0 || ch <= 0) fail("INVALID_JOB", "The placed decor is outside the image", 400);
+  const visible = await sharp(piece).extract({ left: cl, top: ct, width: cw, height: ch }).png().toBuffer();
+  return sharp(base)
+    .composite([{ input: visible, left: Math.max(0, left), top: Math.max(0, top) }])
+    .png()
+    .toBuffer();
 }

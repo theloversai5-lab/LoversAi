@@ -6,11 +6,11 @@
 import {
   S, hooks, pid, local, assetById, byKind, latest, approvedOf, approvable, rejected, optionsOf, imageInfo, assetImg, runJobRetry, outputOf,
   approveAsset, acceptGenerated, qaNote, setQaNote, screenPending, uploadImages, isRunning, importReference, libPath, pickFile, LIB_MIME, btn, jobLine,
-  openViewerModal, modal, h, clamp, toast, toastErr, fmtElapsed, uuid,
+  openViewerModal, modal, h, clamp, toast, toastErr, fmtElapsed, uuid, write, api, projPath,
 } from "./core.js";
 import { icon } from "./dom.js";
 import { createDesignCanvas, PIN_AREA } from "./doodle.js";
-import { registerDecor, ensureSheet, decorFinals, splitSheetFor, canCutViews } from "./decor.js";
+import { registerDecor, ensureSheet, decorFinals, splitSheetFor, canCutViews, decorComponentId } from "./decor.js";
 import { simplifyStroke, sketchBounds, sketchPoints, strokePath, SKETCH_MAX_STROKES, SKETCH_MAX_TOTAL, SKETCH_COMMENT } from "./sketch.js";
 
 const GLYPHS = {
@@ -149,6 +149,18 @@ export function finishSketch() {
   savePins();
   hooks.refresh();
   focusPill(true);
+}
+// Sketch + decor: switch to exact placement inside the drawing's bounding box.
+function placeFromSketch(pin) {
+  if (!pin?.sketch?.length) return;
+  const ids = new Set(pin.refs.map((r) => r.assetId).filter(Boolean));
+  const item = decorFinals().find((it) => ids.has(it.id) || it.views.some((v) => ids.has(v.id)));
+  if (!item) return toast("Attach one of your decor pieces with Decor first, then place it exactly.", { title: "Place exactly" });
+  const pts = pin.sketch.flat();
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  const box = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+  removePin(pin.id);
+  openPlaceDialog(item, { box });
 }
 // Puts an unsent drawing back on the board to change it.
 export function redrawPin(id) {
@@ -524,7 +536,9 @@ function buildDesign() {
     h("button", { type: "button", class: "sk-btn", dataset: { act: "clear-sketch" }, title: "Clear the drawing", onclick: () => clearSketch() }, icon("close", 14), h("span", null, "Clear")),
     h("button", { type: "button", class: "sk-btn primary", dataset: { act: "done-sketch" }, title: "Finish and describe the drawing (Enter)", onclick: () => finishSketch() }, h("span", null, "Done")),
   );
-  const stage = h("div", { class: "design-stage" }, d.dc.root, d.toolbar, d.hint, d.sketchBar);
+  buildSticker(d);
+  buildRuler(d);
+  const stage = h("div", { class: "design-stage" }, d.dc.root, d.toolbar, d.hint, d.sketchBar, d.placeBar, d.ruler.bar);
   d.root = h("section", { class: "design", "aria-label": "Design canvas" }, stage, h("div", { class: "design-foot" }, d.msg, d.actions));
   S.design = d;
   const saved = local.get("tool", "comment");
@@ -551,12 +565,13 @@ function buildPill(d) {
   const upload = h("button", { type: "button", class: "btn btn-ghost btn-xs pill-upload", title: "Upload a reference photo" }, icon("upload", 13), "Upload");
   const decor = h("button", { type: "button", class: "btn btn-ghost btn-xs pill-upload", title: "Choose one of your decor pieces and its angle" }, icon("layers", 13), "Decor");
   const redraw = h("button", { type: "button", class: "btn btn-ghost btn-xs pill-upload", title: "Change the drawing" }, "Redraw");
+  const placeExact = h("button", { type: "button", class: "btn btn-ghost btn-xs pill-upload pill-place", title: "Place the attached decor exactly inside your drawing, at its real angle and size" }, "Place exactly");
   const del = h("button", { type: "button", class: "btn btn-ghost btn-xs pill-upload pill-del", title: "Delete this comment and its drawing" }, icon("close", 13), "Delete");
   const el = h(
     "div",
     { class: "pill", role: "dialog", "aria-label": "Comment", hidden: true, dataset: { ui: "1" } },
     h("div", { class: "pill-row" }, num, input, send),
-    h("div", { class: "pill-extra" }, refs, h("div", { class: "pill-foot" }, h("label", { class: "pill-arearow" }, h("span", { class: "pill-label" }, "Area"), area, areaVal), decor, upload, redraw, del)),
+    h("div", { class: "pill-extra" }, refs, h("div", { class: "pill-foot" }, h("label", { class: "pill-arearow" }, h("span", { class: "pill-label" }, "Area"), area, areaVal), decor, upload, placeExact, redraw, del)),
   );
   const grow = () => {
     input.style.height = "auto";
@@ -592,6 +607,7 @@ function buildPill(d) {
   });
   decor.addEventListener("click", () => openDecorPicker(draftPin()));
   redraw.addEventListener("click", () => redrawPin(draftPin()?.id));
+  placeExact.addEventListener("click", () => placeFromSketch(draftPin()));
   del.addEventListener("click", () => {
     const p = draftPin();
     if (p) removePin(p.id);
@@ -603,7 +619,7 @@ function buildPill(d) {
     if (b) attachUpload(p, b);
   });
   for (const ev of ["pointerdown", "pointerup", "wheel"]) el.addEventListener(ev, (e) => e.stopPropagation(), ev === "wheel" ? { passive: true } : undefined);
-  d.pill = { el, num, input, send, refs, area, areaVal, upload, redraw, grow, for: null, sig: "" };
+  d.pill = { el, num, input, send, refs, area, areaVal, upload, redraw, placeExact, grow, for: null, sig: "" };
   d.dc.overlay.append(el);
 }
 
@@ -646,6 +662,7 @@ function renderPill(d, pin, vw, vh) {
   }
   P.el.querySelector(".pill-arearow").hidden = !!pin.sketch?.length;
   P.redraw.hidden = !pin.sketch?.length;
+  P.placeExact.hidden = !pin.sketch?.length;
   const sig = JSON.stringify(pin.refs.map((r) => [r.key, r.status, r.assetId]));
   if (sig !== P.sig) {
     P.sig = sig;
@@ -774,6 +791,8 @@ function renderOverlay(d) {
     d.area.classList.toggle("live", ap.status === "running");
   }
   renderSketches(d);
+  renderPlacement(d);
+  renderRuler(d);
   renderPill(d, S.viewing ? null : draftPin(), vw, vh);
 }
 
@@ -829,7 +848,7 @@ export function syncDesign() {
   d.toolbar.querySelectorAll("[data-tool]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === d.dc.tool)));
   const undo = d.toolbar.querySelector('[data-act="undo"]');
   if (undo) undo.disabled = !S.chain.length || !!runningPin();
-  d.hint.hidden = readonly || activePins().length > 0 || !d.dc.size.W || d.dc.tool !== "comment";
+  d.hint.hidden = readonly || !!S.placing || activePins().length > 0 || !d.dc.size.W || d.dc.tool !== "comment";
   const n = sketchDraft().length;
   d.sketchBar.hidden = readonly || !d.dc.size.W || (d.dc.tool !== "sketch" && !n);
   d.sketchBar.querySelector(".sketch-bar-text").textContent = n ? `Sketch \u00b7 ${n} stroke${n === 1 ? "" : "s"}` : "Draw in perspective on the venue";
@@ -872,13 +891,13 @@ function renderFoot(d, readonly) {
     }, { small: true, primary: true }));
   } else {
     if (run) msg.push(h("span", { class: "msg-live" }, h("span", { class: "live-dot", "aria-hidden": "true" }), `Comment ${run.n}: ${run.phase || "Generating"}`, h("span", { class: "elapsed", dataset: { since: String(run.start) } }, fmtElapsed(Date.now() - run.start)), q ? h("span", { class: "muted" }, ` · ${q} queued`) : null));
-    else if (S.chain.length) msg.push(h("span", null, h("strong", null, `v${versions().length - 1}`), h("span", { class: "muted" }, ` · ${S.chain.length} change${S.chain.length === 1 ? "" : "s"} applied. Keep commenting, or look around.`)));
+    else if (S.chain.length) msg.push(h("span", null, h("strong", null, `v${versions().length - 1}`), h("span", { class: "muted" }, ` · ${S.chain.length} change${S.chain.length === 1 ? "" : "s"} applied. When the venue is finished, generate the 360 view.`)));
     else msg.push(h("span", { class: "muted" }, "Click the venue, type a comment and press Enter. Each comment is applied on its own."));
     const key = `v360:${base}`;
     const line = jobLine(key, "Building the 360 view");
     if (line && !run) msg.push(line);
     acts.push(
-      btn("Look around", () => runLookAround(currentBase()), { small: true, primary: S.chain.length > 0 && !run, ghost: !(S.chain.length > 0 && !run), busy: isRunning(key), disabled: !base, id: "look-around", ico: icon("eye", 15) }),
+      btn("Generate 360 view", () => runLookAround(currentBase()), { small: true, primary: S.chain.length > 0 && !run, ghost: !(S.chain.length > 0 && !run), busy: isRunning(key), disabled: !base, id: "look-around", ico: icon("eye", 15) }),
       btn("Present", () => hooks.present?.(), { small: true, ghost: true, ico: glyph("present", 15), id: "present-design" }),
     );
   }
@@ -921,6 +940,373 @@ export function useLibrary(item) {
   if (!p) return toast("Click the venue to place a comment, then pick a reference (or drag the image onto the venue).", { title: "Library" });
   attachLib(p, item);
   focusPill(true);
+}
+
+/* ---------------- Place decor exactly (cut-out, drag, resize) ---------------- */
+// 1. Render the piece from the venue camera on a chroma background (copied from its character sheet).
+// 2. Cut it out (free). 3. The planner drags and resizes it on the venue. 4. Paste it exactly, with an
+// optional AI pass that may only add shadow and light; the object's pixels are protected server side.
+
+const FACINGS = [
+  { az: 0, label: "Front" },
+  { az: 45, label: "Front right" },
+  { az: 90, label: "Right side" },
+  { az: 135, label: "Back right" },
+  { az: 180, label: "Back" },
+  { az: 225, label: "Back left" },
+  { az: 270, label: "Left side" },
+  { az: 315, label: "Front left" },
+];
+const placedViewOf = (cid, az, el) =>
+  latest("component_sheet", (a) => a.componentId === cid && a.viewType === "placed" && a.azimuth === az && a.elevation === el && a.status !== "rejected");
+const cutoutOf = (sourceId) => latest("decor_cutout", (a) => a.sourceAssetId === sourceId);
+
+async function prepareCutout(item, az, el, onPhase) {
+  const cid = decorComponentId(item.rootId);
+  let view = placedViewOf(cid, az, el);
+  if (!view) {
+    onPhase("Rendering the piece from the venue camera");
+    const entry = await runJobRetry(`placeview:${cid}:${az}:${el}`, "component_sheet", { componentId: cid, viewType: "placed", azimuth: az, elevation: el }, { quiet: true });
+    if (entry.status === "failed") throw new Error(entry.error || "The placement view could not be rendered.");
+    view = outputOf(entry, "component_sheet");
+    if (!view) throw new Error("The placement view finished without an image.");
+  }
+  if (view.status !== "approved") await acceptGenerated(view);
+  let cut = cutoutOf(view.id);
+  if (!cut) {
+    onPhase("Cutting it out");
+    const data = await write((revision) => api("POST", projPath(`/assets/${encodeURIComponent(view.id)}/cutout`), { revision }));
+    cut = data.asset;
+  }
+  return cut;
+}
+
+export function openPlaceDialog(item, { box = null } = {}) {
+  if (!currentBase()) return toast("Approve the isometric overview first.", { type: "error", title: "Place decor" });
+  let az = local.get("placeFacing", 45);
+  let el = local.get("placeTilt", 40);
+  const body = h("div", { class: "place-dialog" });
+  const m = modal(`Place ${item.label}`, body, { cls: "wide" });
+  let busy = null;
+  const draw = () => {
+    body.replaceChildren(...[
+      h("p", { class: "muted" }, "The piece is rendered from the same camera as your venue, cut out, and then you drag and resize it exactly where it goes. Its colours and design are copied from the character sheet."),
+      h(
+        "div",
+        { class: "place-grid" },
+        h(
+          "div",
+          { class: "field" },
+          "Which side faces the camera?",
+          h(
+            "div",
+            { class: "facing-grid", role: "group" },
+            FACINGS.map((f) =>
+              h("button", { type: "button", class: "chip", "aria-pressed": String(f.az === az), disabled: !!busy, onclick: () => { az = f.az; local.set("placeFacing", az); draw(); } }, f.label),
+            ),
+          ),
+        ),
+        h(
+          "label",
+          { class: "field" },
+          `Camera tilt: ${el}° above the ground`,
+          h("input", { type: "range", min: "15", max: "75", step: "5", value: String(el), disabled: !!busy, oninput: (e) => { el = Number(e.target.value); local.set("placeTilt", el); draw(); } }),
+          h("span", { class: "hint" }, "Match the drone view of your venue. Most isometric views are about 40 degrees."),
+        ),
+      ),
+      busy ? h("div", { class: "progress", role: "status" }, h("span", { class: "live-dot", "aria-hidden": "true" }), busy) : null,
+      h(
+        "div",
+        { class: "row" },
+        btn(placedViewOf(decorComponentId(item.rootId), az, el) ? "Use this angle" : "Render and cut out", async () => {
+          try {
+            const cut = await prepareCutout(item, az, el, (phase) => { busy = phase; draw(); });
+            m.close();
+            startPlacing(item, cut, box);
+          } catch (e) {
+            busy = null;
+            draw();
+            toastErr(e, "Place decor");
+          }
+        }, { primary: true, busy: !!busy, disabled: !!busy }),
+        btn("Cancel", () => m.close(), { quiet: true, disabled: !!busy }),
+      ),
+    ].filter(Boolean));
+  };
+  draw();
+}
+
+const PLACE_MODES = [
+  ["exact", "Exact", "Paste exactly as shown. No AI, no charge."],
+  ["shadows", "Shadows", "AI adds only the ground shadow and light; the piece itself is never changed."],
+  ["fit", "Fit to scene", "AI re-renders the piece in the venue's camera perspective, keeping its position, size and design."],
+];
+// Venue scale: image-width fraction per foot, from a line the planner drew over a known length.
+const venueScale = () => {
+  const v = local.get("venueScale", null);
+  return v && v.base === currentBase() && v.perFt > 0 ? v : null;
+};
+const feetOf = (pl) => {
+  const sc = venueScale();
+  return sc ? pl.w / sc.perFt : null;
+};
+function startPlacing(item, cut, box = null) {
+  closeDraft();
+  const d = S.design;
+  if (!d) return;
+  const { W, H } = d.dc.size;
+  const aspect = cut.height / cut.width;
+  let w = 0.22, x, y;
+  if (box) {
+    // Fit inside the drawn box, standing on its bottom edge.
+    w = clamp(Math.min(box.w, (box.h * H) / (aspect * W)), 0.03, 1.2);
+    x = box.x + (box.w - w) / 2;
+    y = box.y + box.h - (w * W * aspect) / H;
+  } else {
+    // True size when both the piece's real width and the venue scale are known.
+    const sc = venueScale();
+    if (sc && item.size?.widthFt) w = clamp(item.size.widthFt * sc.perFt, 0.02, 1.2);
+    x = 0.5 - w / 2;
+    y = Math.max(0.02, 0.55 - (w * W * aspect) / H);
+  }
+  S.placing = { item, cut, x, y, w, flip: false, mode: local.get("placeMode", "fit"), status: "editing" };
+  hooks.refresh();
+}
+export const cancelPlacing = () => {
+  if (S.placing?.status === "running") return;
+  S.placing = null;
+  hooks.refresh();
+};
+const placeHeight = (pl, d) => (pl.w * d.dc.size.W * (pl.cut.height / pl.cut.width)) / d.dc.size.H;
+
+async function commitPlacing() {
+  const pl = S.placing;
+  const d = S.design;
+  if (!pl || pl.status === "running" || !d) return;
+  const baseId = currentBase();
+  if (!baseId) return toast("There is no approved image to place onto.", { type: "error", title: "Place decor" });
+  const ph = placeHeight(pl, d);
+  const r = (v) => Math.round(v * 1e5) / 1e5;
+  const region = {
+    id: `place${Date.now().toString(36)}`,
+    cx: r(clamp(pl.x + pl.w / 2, 0, 1)),
+    cy: r(clamp(pl.y + ph * 0.6, 0, 1)),
+    rx: r(clamp(pl.w * 0.75, 0.01, 0.5)),
+    ry: r(clamp(ph * 0.7, 0.01, 0.5)),
+    rotation: 0,
+    comment: ((pl.mode === "fit"
+      ? `${pl.item.label}: re-render the pasted piece in this venue's camera perspective at the same position and size.`
+      : `${pl.item.label} placed exactly as pasted; add only its ground shadow and match the lighting.`) +
+      (feetOf(pl) ? ` It is about ${Math.round(feetOf(pl))} ft wide${pl.item.size?.heightFt ? ` and ${pl.item.size.heightFt} ft tall` : ""}.` : pl.item.size?.widthFt ? ` Real size: about ${pl.item.size.widthFt} ft wide${pl.item.size.heightFt ? ` and ${pl.item.size.heightFt} ft tall` : ""}.` : "")).slice(0, 500),
+    referenceAssetIds: [],
+  };
+  pl.status = "running";
+  pl.start = Date.now();
+  hooks.refresh();
+  const projectId = pid();
+  try {
+    const entry = await runJobRetry(`place:${region.id}`, "region_edit", {
+      baseAssetId: baseId,
+      regions: [region],
+      place: { cutoutAssetId: pl.cut.id, x: r(pl.x), y: r(pl.y), w: r(pl.w), flip: pl.flip, mode: pl.mode },
+    }, { quiet: true, alive: () => pid() === projectId });
+    if (pid() !== projectId) return;
+    if (entry.status === "failed") throw new Error(entry.error || "The placement did not complete.");
+    const out = outputOf(entry, "region_edit");
+    if (!out) throw new Error("The placement finished without an image.");
+    saveEditInfo(out.id, { baseAssetId: baseId, regions: [{ ...region, comment: `Placed ${pl.item.label}` }] });
+    try {
+      const { qa } = await acceptGenerated(out);
+      if (qa) setQaNote(out.id, qa);
+    } catch (e) {
+      setQaNote(out.id, `${out.qa?.reason || "flagged"} (not approved: ${e.message})`);
+    }
+    S.chain.push(out.id);
+    saveChain();
+    S.placing = null;
+    S.viewing = null;
+    hooks.refresh();
+    await revealVersion(out.id);
+    toast(`${pl.item.label} placed.`, { type: "success", title: "Placed" });
+  } catch (e) {
+    if (S.placing) S.placing.status = "editing";
+    toastErr(e, "Place decor");
+  } finally {
+    hooks.refresh();
+  }
+}
+
+// The sticker on the canvas: drag to move, corner handle to resize (aspect locked).
+function buildSticker(d) {
+  const img = h("div", { class: "place-img" });
+  const handle = h("span", { class: "place-handle", "aria-hidden": "true" });
+  const size = h("span", { class: "place-size" });
+  const el = h("div", { class: "place-sticker", dataset: { ui: "1" }, title: "Drag to move, drag the corner to resize" }, img, handle, size);
+  let drag = null;
+  el.addEventListener("pointerdown", (e) => {
+    const pl = S.placing;
+    if (!pl || pl.status === "running") return;
+    e.preventDefault();
+    e.stopPropagation();
+    el.setPointerCapture(e.pointerId);
+    drag = { mode: e.target === handle ? "size" : "move", x: e.clientX, y: e.clientY, start: { ...pl } };
+  });
+  el.addEventListener("pointermove", (e) => {
+    const pl = S.placing;
+    if (!drag || !pl) return;
+    const s = d.dc.scale;
+    const dx = (e.clientX - drag.x) / (d.dc.size.W * s);
+    const dy = (e.clientY - drag.y) / (d.dc.size.H * s);
+    if (drag.mode === "move") {
+      pl.x = clamp(drag.start.x + dx, -pl.w * 0.8, 1 - pl.w * 0.2);
+      pl.y = clamp(drag.start.y + dy, -0.5, 0.98);
+    } else pl.w = clamp(drag.start.w + dx, 0.03, 1.2);
+    renderPlacement(d);
+  });
+  const end = () => (drag = null);
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+  el.addEventListener("wheel", (e) => {
+    const pl = S.placing;
+    if (!pl || pl.status === "running") return;
+    e.preventDefault();
+    e.stopPropagation();
+    const k = Math.exp(-e.deltaY * 0.001);
+    const cx = pl.x + pl.w / 2;
+    pl.w = clamp(pl.w * k, 0.03, 1.2);
+    pl.x = cx - pl.w / 2;
+    renderPlacement(d);
+  }, { passive: false });
+  d.sticker = { el, img, size, imgFor: null };
+  d.dc.overlay.append(el);
+
+  const modeSeg = h(
+    "div",
+    { class: "place-modes", role: "group", "aria-label": "How to place it" },
+    PLACE_MODES.map(([id, label, tip]) =>
+      h("button", { type: "button", class: "sk-btn", dataset: { mode: id }, title: tip, onclick: () => { if (S.placing) { S.placing.mode = id; local.set("placeMode", id); renderPlacement(d); } } }, label),
+    ),
+  );
+  d.placeBar = h(
+    "div",
+    { class: "sketch-bar place-bar", hidden: true, dataset: { ui: "1" } },
+    h("span", { class: "sketch-bar-dot", "aria-hidden": "true" }),
+    h("span", { class: "sketch-bar-text" }),
+    h("span", { class: "sketch-bar-sep", "aria-hidden": "true" }),
+    h("button", { type: "button", class: "sk-btn", dataset: { act: "flip" }, onclick: () => { if (S.placing) { S.placing.flip = !S.placing.flip; renderPlacement(d); } } }, "Flip"),
+    h("button", { type: "button", class: "sk-btn", dataset: { act: "scale" }, title: "Draw a line over something of known length on the venue", onclick: () => startRuler(d) }, "Set scale"),
+    modeSeg,
+    h("button", { type: "button", class: "sk-btn", dataset: { act: "cancel" }, onclick: cancelPlacing }, "Cancel"),
+    h("button", { type: "button", class: "sk-btn primary", dataset: { act: "place" }, onclick: commitPlacing }, "Place"),
+  );
+  d.placeBar._modes = modeSeg;
+}
+
+// Ruler: drag a line over a known length, then type its length in feet.
+function startRuler(d) {
+  S.ruler = { a: null, b: null, feet: "" };
+  renderRuler(d);
+}
+function buildRuler(d) {
+  const line = h("line", { class: "ruler-line" });
+  const svg = h("svg", { class: "ruler-svg", "aria-hidden": "true" }, line);
+  const input = h("input", { class: "input input-sm ruler-input", type: "number", min: "0.5", step: "0.5", inputmode: "decimal", placeholder: "ft" });
+  const save = h("button", { type: "button", class: "sk-btn primary" }, "Save scale");
+  const cancel = h("button", { type: "button", class: "sk-btn" }, "Cancel");
+  const text = h("span", { class: "sketch-bar-text" });
+  const bar = h("div", { class: "sketch-bar ruler-bar", dataset: { ui: "1" } }, h("span", { class: "sketch-bar-dot", "aria-hidden": "true" }), text, input, save, cancel);
+  const layer = h("div", { class: "ruler-layer", dataset: { ui: "1" } }, svg);
+  const toImg = (e) => {
+    const r = d.dc.root.getBoundingClientRect();
+    const s = d.dc.scale;
+    const [ox, oy] = d.dc.toScreen(0, 0);
+    return [(e.clientX - r.left - ox) / (d.dc.size.W * s), (e.clientY - r.top - oy) / (d.dc.size.H * s)];
+  };
+  let drawing = false;
+  layer.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    layer.setPointerCapture(e.pointerId);
+    S.ruler.a = toImg(e);
+    S.ruler.b = S.ruler.a;
+    drawing = true;
+    renderRuler(d);
+  });
+  layer.addEventListener("pointermove", (e) => {
+    if (!drawing) return;
+    S.ruler.b = toImg(e);
+    renderRuler(d);
+  });
+  layer.addEventListener("pointerup", () => {
+    drawing = false;
+    renderRuler(d);
+    setTimeout(() => input.focus(), 0);
+  });
+  save.addEventListener("click", () => {
+    const r = S.ruler;
+    const ft = Number(input.value);
+    if (!r?.a || !r?.b) return toast("Drag a line over something of known length first.", { title: "Set scale" });
+    if (!(ft > 0 && ft < 2000)) return toast("Type the real length of that line in feet.", { title: "Set scale" });
+    const { W, H } = d.dc.size;
+    const len = Math.hypot(r.b[0] - r.a[0], ((r.b[1] - r.a[1]) * H) / W);
+    if (len < 0.01) return toast("Draw a longer line.", { title: "Set scale" });
+    local.set("venueScale", { perFt: len / ft, base: currentBase(), at: Date.now() });
+    S.ruler = null;
+    input.value = "";
+    toast(`Scale saved: ${ft} ft across that line.`, { type: "success", title: "Set scale" });
+    hooks.refresh();
+  });
+  cancel.addEventListener("click", () => {
+    S.ruler = null;
+    hooks.refresh();
+  });
+  input.addEventListener("keydown", (e) => {
+    e.stopPropagation();
+    if (e.key === "Enter") save.click();
+    if (e.key === "Escape") cancel.click();
+  });
+  d.ruler = { layer, line, bar, text };
+  d.dc.overlay.append(layer);
+}
+function renderRuler(d) {
+  if (!d.ruler) return;
+  const r = S.viewing ? null : S.ruler;
+  d.ruler.layer.hidden = !r;
+  d.ruler.bar.hidden = !r;
+  if (!r) return;
+  if (d.placeBar) d.placeBar.hidden = true;
+  d.ruler.text.textContent = r.a && r.b && r.a !== r.b ? "That line is" : "Drag over something of known length: the stairs, a path, the gate";
+  if (r.a && r.b) {
+    const [x1, y1] = d.dc.toScreen(r.a[0], r.a[1]);
+    const [x2, y2] = d.dc.toScreen(r.b[0], r.b[1]);
+    Object.entries({ x1, y1, x2, y2 }).forEach(([k, v]) => d.ruler.line.setAttribute(k, v.toFixed(1)));
+  }
+}
+
+function renderPlacement(d) {
+  if (!d.sticker) return;
+  const pl = S.viewing ? null : S.placing;
+  d.sticker.el.hidden = !pl;
+  d.placeBar.hidden = !pl;
+  if (d.sketchBar && pl) d.sketchBar.hidden = true;
+  if (!pl || !d.dc.size.W) return;
+  if (d.sticker.imgFor !== pl.cut.id) {
+    d.sticker.imgFor = pl.cut.id;
+    d.sticker.img.replaceChildren(assetImg(pl.cut.id, pl.item.label));
+  }
+  const [x0, y0] = d.dc.toScreen(pl.x, pl.y);
+  const [x1, y1] = d.dc.toScreen(pl.x + pl.w, pl.y + placeHeight(pl, d));
+  Object.assign(d.sticker.el.style, { left: `${x0}px`, top: `${y0}px`, width: `${x1 - x0}px`, height: `${y1 - y0}px` });
+  d.sticker.el.classList.toggle("flipped", pl.flip);
+  const ft = feetOf(pl);
+  d.sticker.size.hidden = !ft;
+  if (ft) d.sticker.size.textContent = `\u2248 ${ft >= 10 ? Math.round(ft) : ft.toFixed(1)} ft wide`;
+  d.sticker.el.classList.toggle("running", pl.status === "running");
+  const running = pl.status === "running";
+  d.placeBar.querySelector(".sketch-bar-text").textContent = running
+    ? `Placing ${pl.item.label} ${fmtElapsed(Date.now() - (pl.start || Date.now()))}`
+    : `${pl.item.label}: drag to move, corner or scroll to resize`;
+  for (const b of d.placeBar._modes.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.mode === pl.mode));
+  for (const b of d.placeBar.querySelectorAll("button, input")) b.disabled = running;
 }
 
 /* ---------------- Look around (360 of the current design) ---------------- */

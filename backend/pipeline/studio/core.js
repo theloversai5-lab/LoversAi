@@ -1,5 +1,5 @@
 // Venue Studio core: API session, revision-safe writes, uploads, jobs, asset cache, capture,
-// reference library and shared UI atoms. Most of this is the proven code from the classic studio.
+// reference library and shared UI atoms. Shared by every step.
 import { h, $, sleep, clamp, uuid, store, toast, toastErr, fmtElapsed } from "./dom.js";
 import { createViewer } from "./viewer.js";
 

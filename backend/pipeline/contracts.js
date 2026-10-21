@@ -252,7 +252,7 @@ export function validateCanvas(value, project) {
   return { baseAssetId: value.baseAssetId, regions, strokes };
 }
 
-const COMPONENT_SHEET_VIEW_TYPES = ["front", "top", "side", "left", "right", "detail", "full_sheet", "spec", "board"];
+const COMPONENT_SHEET_VIEW_TYPES = ["front", "top", "side", "left", "right", "detail", "full_sheet", "spec", "board", "placed"];
 // Dimensioned drawings: documentation outputs, never component masters or render references.
 export const DRAWING_VIEW_TYPES = ["spec", "board"];
 
@@ -349,9 +349,9 @@ export function validateComponentSheetOptions(options = {}) {
     !options ||
     typeof options !== "object" ||
     Array.isArray(options) ||
-    Object.keys(options).some((k) => !["componentId", "viewType", "dimensions", "specNotes"].includes(k))
+    Object.keys(options).some((k) => !["componentId", "viewType", "dimensions", "specNotes", "azimuth", "elevation"].includes(k))
   )
-    fail(code, "component_sheet options must contain only componentId, viewType, dimensions and specNotes");
+    fail(code, "component_sheet options must contain only componentId, viewType, dimensions, specNotes, azimuth and elevation");
   const viewType = options.viewType ?? "full_sheet";
   if (!COMPONENT_SHEET_VIEW_TYPES.includes(viewType))
     fail(
@@ -374,6 +374,14 @@ export function validateComponentSheetOptions(options = {}) {
       fail(code, "dimensions (widthFt/depthFt/heightFt, 0.1-300 ft) are only allowed with viewType spec or board");
     result.dimensions = { ...d };
   }
+  // "placed": the piece rendered from the venue camera on a chroma-key background, ready to cut out.
+  if (viewType === "placed") {
+    if (!inRange(options.azimuth, 0, 359) || !inRange(options.elevation, 0, 90))
+      fail(code, "A placed view needs azimuth 0-359 and elevation 0-90 degrees");
+    result.azimuth = Math.round(options.azimuth);
+    result.elevation = Math.round(options.elevation);
+  } else if (options.azimuth !== undefined || options.elevation !== undefined)
+    fail(code, "azimuth and elevation are only allowed with viewType placed");
   if (options.specNotes !== undefined) {
     const n = options.specNotes;
     if (viewType !== "board" || typeof n !== "string" || !n.trim() || n.length > 1500)
@@ -478,7 +486,7 @@ export function validateSketch(value, code = "INVALID_JOB") {
 
 export function validateRegionEditOptions(options = {}, project) {
   const code = "INVALID_JOB";
-  keys(options, ["baseAssetId", "regions"], code);
+  keys(options, ["baseAssetId", "regions", "place"], code);
   if (!id(options.baseAssetId)) fail(code, "region_edit requires a baseAssetId");
   approvedAsset(project, options.baseAssetId, REGION_EDIT_BASE_KINDS);
   if (
@@ -516,5 +524,21 @@ export function validateRegionEditOptions(options = {}, project) {
       "REFERENCE_LIMIT",
       "Base image, region map and region references exceed the 13-reference budget; remove references or split the edit",
     );
-  return { baseAssetId: options.baseAssetId, regions };
+  // place: paste an approved decor cut-out at an exact box; the AI may only add shadow and lighting.
+  let place;
+  if (options.place !== undefined) {
+    const pl = options.place;
+    keys(pl, ["cutoutAssetId", "x", "y", "w", "flip", "harmonize", "mode"], code);
+    if (!id(pl.cutoutAssetId)) fail(code, "place requires a cutoutAssetId");
+    approvedAsset(project, pl.cutoutAssetId, ["decor_cutout"]);
+    if (!inRange(pl.x, -1, 1) || !inRange(pl.y, -1, 1) || !inRange(pl.w, 0.01, 1.5))
+      fail(code, "place needs x, y in [-1, 1] and w in [0.01, 1.5]");
+    if (regions.length !== 1) fail(code, "A placement uses exactly one region");
+    // exact: paste only. shadows: AI adds shadow and light, object pixels protected.
+    // fit: AI re-renders the pasted object to the venue's perspective, keeping position, size and design.
+    const mode = pl.mode ?? (pl.harmonize === false ? "exact" : "shadows");
+    if (!["exact", "shadows", "fit"].includes(mode)) fail(code, "place.mode must be exact, shadows or fit");
+    place = { cutoutAssetId: pl.cutoutAssetId, x: pl.x, y: pl.y, w: pl.w, flip: pl.flip === true, mode, harmonize: mode !== "exact" };
+  }
+  return { baseAssetId: options.baseAssetId, regions, ...(place ? { place } : {}) };
 }

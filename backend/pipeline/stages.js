@@ -1,4 +1,4 @@
-import { normalizeImage, regionEditMask, compositeRegions } from "./media.js";
+import { normalizeImage, regionEditMask, compositeRegions, pasteCutout } from "./media.js";
 import { createHash } from "node:crypto";
 import { TEMPLATE_VERSION, SHEET_LAYOUT } from "./prompts.js";
 import { fail } from "./contracts.js";
@@ -190,13 +190,17 @@ export async function runStage(
       !GENERATIVE_OPERATIONS.includes(job.operation)
     )
       fail("INVALID_TASK", "Unknown pipeline operation");
-    const { prompt, references, overlay, aspectRatio } = await prepareGeneration(job, {
+    const { prompt, references, overlay, aspectRatio, placedBuffer } = await prepareGeneration(job, {
       assets,
       saveOverlay: save,
     });
     const viaFal = job.operation === "element_view" && job.options.provider === "fal";
+    const place = job.operation === "region_edit" ? job.options.place : null;
     let generated;
-    if (viaFal) {
+    if (place && !place.harmonize) {
+      // Exact paste, no AI call: the composite is the result.
+      generated = { buffer: placedBuffer, mimeType: "image/png", provider: "local", model: "paste", telemetry: null };
+    } else if (viaFal) {
       // fal renders the angle; Gemini still performs QA below. No silent provider fallback.
       generated = await (fal || new FalClient()).angles({
         buffer: references[0].buffer,
@@ -223,17 +227,21 @@ export async function runStage(
     let image = await normalizeImage(generated.buffer, {
       maxBytes: 24 * 1024 * 1024,
     });
-    if (job.operation === "region_edit") {
+    if (job.operation === "region_edit" && !(place && !place.harmonize)) {
       // Guarantee everything outside the pins stays exactly as the base.
-      const base = await assets.read(job.options.baseAssetId);
-      image = await normalizeImage(await compositeRegions(base, image.buffer, job.options.regions), {
-        maxBytes: 24 * 1024 * 1024,
-      });
+      const base = placedBuffer || (await assets.read(job.options.baseAssetId));
+      let merged = await compositeRegions(base, image.buffer, job.options.regions);
+      // A placed object keeps its own pixels: the AI may only have added shadow and light around it.
+      if (place?.mode === "shadows") merged = await pasteCutout(merged, await assets.read(place.cutoutAssetId), place);
+      image = await normalizeImage(merged, { maxBytes: 24 * 1024 * 1024 });
     }
     await assertOwnership();
     let qa;
     try {
-      qa = await gemini.assess({ prompt, references, image });
+      qa =
+        place && !place.harmonize
+          ? { decision: "pass", reason: "Exact paste of the approved decor cut-out; no AI changes", issues: [] }
+          : await gemini.assess({ prompt, references, image });
     } catch (error) {
       if (error.code === "WORKER_LEASE_LOST") throw error;
       qa = {
@@ -256,6 +264,7 @@ export async function runStage(
           ...r,
           referenceAssetIds: [...r.referenceAssetIds],
         })),
+        ...(job.options.place ? { place: { ...job.options.place } } : {}),
       };
     else if (job.operation === "element_view") {
       const source = p.assets.find((a) => a.id === job.options.sourceAssetId);
@@ -286,6 +295,7 @@ export async function runStage(
       generationTelemetry: generated.telemetry || null,
       referenceAssetIds: prompt.references.map((r) => r.assetId),
       ...(job.options?.viewType ? { viewType: job.options.viewType } : {}),
+      ...(job.operation === "component_sheet" && job.options?.viewType === "placed" ? { azimuth: job.options.azimuth, elevation: job.options.elevation } : {}),
       ...(job.operation === "component_sheet" && (job.options?.viewType ?? "full_sheet") === "full_sheet" ? { sheetLayout: SHEET_LAYOUT } : {}),
       ...operationMeta,
       ...(component

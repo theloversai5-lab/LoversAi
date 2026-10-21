@@ -2,7 +2,7 @@ import { randomUUID, createHash } from "node:crypto";
 import { readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
-import { normalizeImage, renderRegionMap, DEFAULT_DATA_DIR } from "./media.js";
+import { normalizeImage, renderRegionMap, chromaCutout, DEFAULT_DATA_DIR } from "./media.js";
 import {
   validateBrief,
   validateComponents,
@@ -215,6 +215,8 @@ export const SHEET_PANELS = [
 ];
 
 function operationCost(operation, options = {}) {
+  // An exact paste of a cut-out without the AI lighting pass makes no provider call.
+  if (operation === "region_edit" && options.place && !options.place.harmonize) return 0;
   const key =
     operation === "component_sheet" && options.viewType === "board"
       ? "PIPELINE_COMPONENT_BOARD"
@@ -546,6 +548,42 @@ export class PipelineService {
       return { project: await this.save(p, revision), accepted, rejected };
     } catch (e) {
       await Promise.all(written.map((id) => this.assets.remove(id)));
+      throw e;
+    }
+  }
+  // Cuts a placement view (decor on a chroma-key background) into a transparent PNG. Free, no AI.
+  async cutout(projectId, actor, revision, assetId) {
+    const p = await this.get(projectId, actor);
+    if (p.ownerId !== actorId(actor))
+      fail("OWNER_REQUIRED", "Only project owners may cut out decor", 403);
+    this.checkRevision(p, revision);
+    const source = approvedAsset(p, assetId, ["component_sheet", "element_view"]);
+    const existing = p.assets.find((a) => a.kind === "decor_cutout" && a.sourceAssetId === source.id);
+    if (existing) return { project: p, asset: existing };
+    if (p.assets.length + 1 > MAX_PROJECT_ASSETS)
+      fail("ASSET_LIMIT", "Project asset limit reached; start a new project");
+    const buffer = await chromaCutout(await this.assets.read(source.id));
+    const meta = await sharp(buffer).metadata();
+    const file = await this.assets.write(buffer, "image/png");
+    try {
+      const asset = {
+        ...file,
+        kind: "decor_cutout",
+        sourceAssetId: source.id,
+        componentId: source.componentId,
+        ...(source.azimuth != null ? { azimuth: source.azimuth, elevation: source.elevation } : {}),
+        referenceAssetIds: [source.id],
+        width: meta.width,
+        height: meta.height,
+        hash: createHash("sha256").update(buffer).digest("hex"),
+        status: "approved",
+        approval: { actorId: actorId(actor), reason: "Cut out from an approved placement view", at: new Date().toISOString() },
+        createdAt: new Date().toISOString(),
+      };
+      p.assets.push(asset);
+      return { project: await this.save(p, revision), asset };
+    } catch (e) {
+      await this.assets.remove(file.id);
       throw e;
     }
   }

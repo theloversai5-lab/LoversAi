@@ -1,5 +1,5 @@
 // Self-contained 2D-canvas "look around" viewer for wide panoramas (no WebGL, no CDN).
-// Ported from the classic studio viewer; asset loading is injected so it has no API knowledge.
+// Asset loading is injected so the viewer has no API knowledge.
 import { h, clamp, reducedMotion } from "./dom.js";
 
 const VIEW_STATE = new Map(); // key -> { yaw, py, zoom } kept across re-renders

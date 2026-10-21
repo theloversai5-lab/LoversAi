@@ -405,6 +405,12 @@ export function createPipelineRouter({ service, authenticate }) {
       });
     },
   );
+  router.post("/projects/:projectId/assets/:assetId/cutout", async (req, res) =>
+    res.status(201).json({
+      success: true,
+      ...(await service.cutout(req.params.projectId, req.user, req.body.revision, req.params.assetId)),
+    }),
+  );
   router.post("/projects/:projectId/assets/:assetId/split", async (req, res) =>
     res.status(201).json({
       success: true,

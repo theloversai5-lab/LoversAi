@@ -8,7 +8,7 @@ import {
 import { icon, reducedMotion } from "./dom.js";
 import {
   mountDesign, designTick, setTool, versions, currentBase, latestShown, versionNo, editInfo, glyph, historyPanel, useLibrary, useDecor, undoVersion, closeDraft,
-  undoStroke, finishSketch,
+  undoStroke, finishSketch, openPlaceDialog, cancelPlacing,
   loadDesignState, pump,
 } from "./design.js";
 import {
@@ -245,7 +245,7 @@ function renderVenue() {
     "section",
     { class: "stage-view" },
     stageHead(0, "Photograph the venue", "Stand in the middle of the space and take one photo facing each direction. One accepted photo is enough."),
-    !S.project ? h("div", { class: "callout" }, h("div", null, h("strong", null, "New here?"), h("span", { class: "muted" }, " The demo designs a preset venue end to end.")), btn("Run the demo", openDemoPanel, { small: true, quiet: true })) : null,
+    !S.project ? h("div", { class: "callout" }, h("div", null, h("strong", null, "New here?"), h("span", { class: "muted" }, " The demo sets up a real venue for you to decorate.")), btn("Run the demo", openDemoPanel, { small: true, quiet: true })) : null,
     h("div", { class: "slots" }, SLOTS.map(slot)),
     stageFoot(
       [h("strong", { class: "tnum" }, `${accepted} of 4`), h("span", { class: "muted" }, " accepted"), busy ? h("div", { class: "progress", role: "status" }, h("span", { class: "live-dot", "aria-hidden": "true" }), "Uploading and checking the photos") : null],
@@ -302,7 +302,7 @@ function renderOverview() {
     "section",
     { class: "stage-view" },
     stageHead(1, "The empty venue, from above", "Generated from your photos as soon as this step opens: the venue exactly as it is, with nothing added. It becomes the canvas you decorate in the last step."),
-    h("div", { class: "overview" }, ovCard("iso"), ovCard("v360")),
+    h("div", { class: "overview single" }, ovCard("iso")),
     stageFoot(
       isoApproved() ? h("span", null, "Next: finalise every decor piece.") : h("span", { class: "muted" }, isRunning("iso") ? "Generating the isometric" : "The isometric needs approval to continue."),
       btn("Continue to decor", () => goStage(2), { primary: true, disabled: !isoApproved(), id: "to-decor" }),
@@ -339,7 +339,7 @@ function libraryTab() {
             mine.map((it) =>
               h(
                 "button",
-                { type: "button", class: "lib-item mine", title: it.label, onpointerdown: (e) => e.preventDefault(), onclick: () => { useDecor(it); if (isNarrow() && S.draft) S.sheetOpen = false; render(); } },
+                { type: "button", class: "lib-item mine", title: it.label, onpointerdown: (e) => e.preventDefault(), onclick: () => { if (S.draft) useDecor(it); else openPlaceDialog(it); if (isNarrow()) S.sheetOpen = false; render(); } },
                 h("span", { class: "mine-img" }, assetImg(it.views[0]?.id || it.id, it.label)),
                 h("span", { class: "mine-cap" }, h("span", { class: "lib-label" }, it.label), h("span", { class: "lib-style" }, it.views.length ? `${it.views.length} angles ready` : "Character sheet")),
               ),
@@ -348,7 +348,7 @@ function libraryTab() {
         )
       : null,
     h("div", { class: "chips lib-filter", role: "group", "aria-label": "Filter the library" }, [["all", "All"], ...groups.map((g) => [g.id, g.label])].map(([id, label]) => h("button", { type: "button", class: "chip", "aria-pressed": String(S.libFilter === id), onclick: () => { S.libFilter = id; render(); } }, label))),
-    h("p", { class: "hint" }, S.draft ? "Pick your decor to choose its angle. Library images are turned into a character sheet first." : "Circle or sketch on the venue first, then pick decor."),
+    h("p", { class: "hint" }, S.draft ? "Pick your decor to attach it to the open comment." : "Click one of your pieces to place it exactly: choose the side facing the camera, then drag and resize it on the venue."),
     S.missing.import ? h("div", { class: "notice" }, S.missing.import) : null,
     h(
       "div",
@@ -635,7 +635,10 @@ function onKey(e) {
   else if (k === "z" || k === "Z") {
     if (!undoStroke()) undoVersion();
   } else if (k === "Enter" && (S.sketchDraft || []).length) finishSketch();
-  else if (k === "Escape") closeDraft();
+  else if (k === "Escape") {
+    if (S.placing) cancelPlacing();
+    else closeDraft();
+  }
   else if (k === "+" || k === "=") dc.zoomBy(1.25);
   else if (k === "-" || k === "_") dc.zoomBy(0.8);
   else if (k === "0") dc.fit();

@@ -14,7 +14,7 @@ const PIN_TYPES = ["entry", "stage", "lounge"];
 const DEMO_STEPS = [
   { key: "photos", label: "Upload preset photos" },
   { key: "screen", label: "Check the photos" },
-  { key: "overview", label: "Isometric and 360" },
+  { key: "overview", label: "Isometric" },
   // The demo stops here: placing decor on the venue is done by hand (circle, sketch, decor angles).
   { key: "doodle", label: "Open the venue for doodling" },
 ];
@@ -28,7 +28,7 @@ const LEADS = {
 const STOP = new Error("Demo stopped");
 const ABORT = new Error("Demo left");
 
-// Theme pool reused from the classic studio (entry = Entrance).
+// Theme pool (entry = Entrance).
 export const THEMES = [
   {
     id: "royal_rajasthani", name: "Royal Rajasthani gold & marigold", style: "Royal Rajasthani heritage", words: ["royal", "marigold", "gold", "jaipur", "heritage", "regal", "red", "jharokha"],
@@ -326,18 +326,13 @@ async function stepOverview(d, st) {
   S.overviewStarted = true; // the demo drives the overview itself
   show(1);
   const needIso = !approvedOf("venue_isometric");
-  const need360 = !base360Approved();
-  const [iso, pano] = await Promise.allSettled([needIso ? overviewOne(d, "iso") : Promise.resolve(null), need360 ? overviewOne(d, "v360") : Promise.resolve(null)]);
+  const [iso] = await Promise.allSettled([needIso ? overviewOne(d, "iso") : Promise.resolve(null)]);
   gone(d);
   // A flagged image that was not approved yet: accept it with the override.
-  for (const a of [isoLatest(), base360Latest()]) if (a && a.status !== "approved") await acceptGenerated(a).catch(() => {});
+  const latestIso = isoLatest();
+  if (latestIso && latestIso.status !== "approved") await acceptGenerated(latestIso).catch(() => {});
   if (!approvedOf("venue_isometric")) throw new Error(`Isometric overview: ${iso.reason?.message || "not approved"}`);
-  const notes = [];
-  if (pano.status === "rejected" || !base360Approved()) {
-    st.warn = true;
-    notes.push(`360 view skipped (${pano.reason?.message || "not approved"})`);
-  }
-  st.note = notes.length ? `Isometric ready; ${notes.join("; ")}` : "Isometric and 360 approved";
+  st.note = "Isometric approved";
   await sleep(900);
 }
 
@@ -574,7 +569,7 @@ export function openDemoPanel() {
   const body = h(
     "div",
     { class: "stack" },
-    h("p", { class: "muted" }, "Creates a new project from a preset venue: uploads the photos, builds the isometric and 360 view, then places three comments one after another (entrance, stage, lounge), each with a library reference and applied in real time, and ends with a look around and the presentation. Each run draws a new theme; your current project is kept."),
+    h("p", { class: "muted" }, "Starts a new project from a real venue: uploads its photos, checks them and builds the empty isometric view, then opens the venue so you can add decor and draw on it yourself. Your current project is kept."),
     h("label", { class: "field" }, h("span", null, "Venue"), select),
     status,
     h("div", { class: "row" }, run),

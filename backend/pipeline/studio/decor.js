@@ -15,9 +15,10 @@ const editKey = (id) => `decoredit:${id}`;
 const sheetKey = (cid) => `decorsheet:${cid}`;
 const rid = () => `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const compIdOf = (rootId) => `d_${String(rootId).replace(/[^a-zA-Z0-9]/g, "").slice(0, 12)}`;
+export const decorComponentId = compIdOf;
 
 // UI state kept outside the render loop so drawings and comments survive refreshes.
-const D = { selected: null, tab: "edit", regions: [], open: null, tool: "circle", busy: null, error: null, root: null, sig: "" };
+const D = { selected: null, tab: "edit", pass: null, regions: [], open: null, tool: "circle", busy: null, error: null, root: null, sig: "" };
 
 /* ---------------- Decor items ---------------- */
 
@@ -111,6 +112,12 @@ export const decorDone = () => decorItems().some((a) => a.status === "approved")
 // Decor that may be placed on the venue: only pieces with an approved character sheet.
 export { sheetOf as decorSheetOf };
 export const canCutViews = (rootId) => newLayout(sheetOf(rootId));
+// Real size the planner entered for a piece (feet), used to start placements at true scale.
+export function decorRealSize(rootId) {
+  const m = meta(rootId);
+  const n = (v) => (Number.isFinite(+v) && +v > 0 && +v < 500 ? +v : null);
+  return { widthFt: n(m.widthFt), heightFt: n(m.heightFt) };
+}
 export function decorFinals() {
   return decorItems()
     .filter((a) => a.status === "approved" && sheetOf(a.id)?.status === "approved")
@@ -120,6 +127,7 @@ export function decorFinals() {
         rootId: a.id,
         id: sheetOf(a.id).id,
         label: nameOf(a.id),
+        size: decorRealSize(a.id),
         views: VIEWS.filter((v) => views[v.viewType]?.status === "approved").map((v) => ({ ...v, id: views[v.viewType].id })),
       };
     });
@@ -238,26 +246,62 @@ const pickFromLibrary = () =>
 
 /* ---------- edits ---------- */
 
+const REF_ONLY_COMMENT = "Replace what is in this area with the item shown in the reference images, matching their design, colours and materials.";
+const MAX_AREA_REFS = 3;
+// One change per pass gives the model a single job each time; every pass builds on the previous one.
 const apply = () =>
   busy(null, async () => {
-    const baseId = D.selected;
-    const regions = D.regions.map((r) => ({ ...r, comment: r.comment.trim() || (r.sketch?.length ? SKETCH_COMMENT : "") }));
+    const regions = D.regions.map((r) => ({
+      ...r,
+      comment: r.comment.trim() || (r.sketch?.length ? SKETCH_COMMENT : (r.refs || []).length ? REF_ONLY_COMMENT : ""),
+    }));
     if (!regions.length) throw new Error("Circle or sketch on the decor to mark what to change.");
-    if (regions.some((r) => !r.comment)) throw new Error("Describe the change for every marked area.");
-    const entry = await runJobRetry(editKey(baseId), "region_edit", {
-      baseAssetId: baseId,
-      regions: regions.map(({ id, cx, cy, rx, ry, comment, sketch }) => ({
-        id, cx, cy, rx, ry, rotation: 0, comment, referenceAssetIds: [], ...(sketch?.length ? { sketch } : {}),
-      })),
-    });
-    if (entry.status === "failed") throw new Error(entry.error || "The edit could not be applied");
-    const out = outputOf(entry, "region_edit");
-    if (!out) throw new Error("The edit finished without an image");
-    const { qa } = await acceptGenerated(out);
-    if (qa) toast(`Accepted despite the quality check: ${qa}`, { title: "Decor edit" });
-    D.regions = [];
+    if (regions.some((r) => !r.comment)) throw new Error("Describe the change for every marked area, or add a reference to it.");
+    let baseId = D.selected;
+    for (let i = 0; i < regions.length; i++) {
+      const r = regions[i];
+      D.pass = regions.length > 1 ? { n: i + 1, of: regions.length } : null;
+      update(true);
+      const entry = await runJobRetry(editKey(baseId), "region_edit", {
+        baseAssetId: baseId,
+        regions: [{
+          id: r.id, cx: r.cx, cy: r.cy, rx: r.rx, ry: r.ry, rotation: 0, comment: r.comment,
+          referenceAssetIds: (r.refs || []).filter((id) => assetById(id)?.status === "approved").slice(0, MAX_AREA_REFS),
+          ...(r.sketch?.length ? { sketch: r.sketch } : {}),
+        }],
+      });
+      if (entry.status === "failed") throw new Error(`${regions.length > 1 ? `Area ${i + 1}: ` : ""}${entry.error || "The edit could not be applied"}`);
+      const out = outputOf(entry, "region_edit");
+      if (!out) throw new Error("The edit finished without an image");
+      const { qa } = await acceptGenerated(out);
+      if (qa) toast(`Accepted despite the quality check: ${qa}`, { title: `Decor edit${regions.length > 1 ? `, area ${i + 1}` : ""}` });
+      baseId = out.id;
+      D.selected = out.id;
+      // Done areas leave the list, so a failure later keeps only what is still to do.
+      D.regions = D.regions.filter((x) => x.id !== r.id);
+    }
+    D.pass = null;
     D.open = null;
-    D.selected = out.id;
+  }).finally(() => {
+    D.pass = null;
+    update(true);
+  });
+
+// Reference photos for one area: upload or pick from the library.
+const addAreaRef = (r, how) =>
+  busy("ref", async () => {
+    if ((r.refs || []).length >= MAX_AREA_REFS) throw new Error(`Up to ${MAX_AREA_REFS} references per area.`);
+    let id;
+    if (how === "upload") {
+      const blob = await pickFile();
+      if (!blob) return;
+      id = await uploadOne(blob);
+    } else {
+      const it = await new Promise((resolve) => openLibrary({ title: "Reference for this area", onPick: resolve, onClose: () => resolve(null) }));
+      if (!it) return;
+      id = (await importReference(it.path, it.label)).id;
+    }
+    r.refs = [...new Set([...(r.refs || []), id])];
   });
 
 /* ---------- character sheet ---------- */
@@ -540,6 +584,12 @@ function sheetTab(rootId) {
       h("label", { class: "field" }, "Name", h("input", { class: "input", maxlength: "80", value: m.name || "", placeholder: "Gold mirror arch", oninput: (e) => setMeta(rootId, { name: e.target.value }) })),
     ),
     h(
+      "div",
+      { class: "dc-two" },
+      h("label", { class: "field" }, "Real width (ft)", h("input", { class: "input", type: "number", min: "0.5", max: "400", step: "0.5", inputmode: "decimal", value: m.widthFt ?? "", placeholder: "16", oninput: (e) => setMeta(rootId, { widthFt: e.target.value }) })),
+      h("label", { class: "field" }, "Real height (ft)", h("input", { class: "input", type: "number", min: "0.5", max: "400", step: "0.5", inputmode: "decimal", value: m.heightFt ?? "", placeholder: "12", oninput: (e) => setMeta(rootId, { heightFt: e.target.value }) })),
+    ),
+    h(
       "label",
       { class: "field" },
       "What must stay the same",
@@ -573,10 +623,59 @@ function sheetTab(rootId) {
 
 /* ---------- tab: edit ---------- */
 
+function areaCard(r, i, disabled) {
+  const refs = (r.refs || []).filter((id) => assetById(id));
+  const kind = r.sketch?.length ? "Sketch" : "Circle";
+  return h(
+    "li",
+    { class: `area-card${D.open === r.id ? " is-open" : ""}` },
+    h(
+      "div",
+      { class: "area-head" },
+      h("span", { class: "decor-ring-n static" }, String(i + 1)),
+      h("span", { class: "area-title" }, `Area ${i + 1}`),
+      h("span", { class: "area-kind" }, kind),
+      h("button", { type: "button", class: "area-x", "aria-label": `Remove area ${i + 1}`, title: "Remove this area", disabled, onclick: () => { D.regions.splice(i, 1); if (D.open === r.id) D.open = null; update(true); } }, "Remove"),
+    ),
+    h("textarea", {
+      class: "input dc-textarea",
+      rows: "2",
+      maxlength: "500",
+      disabled,
+      placeholder: r.sketch?.length ? "What you drew: a gold arch, a floral column" : "What should change: white orchids, a gold frame",
+      value: r.comment,
+      dataset: { region: String(i) },
+      oninput: (e) => (r.comment = e.target.value),
+    }),
+    h(
+      "div",
+      { class: "area-refs" },
+      refs.map((id) =>
+        h(
+          "span",
+          { class: "area-ref" },
+          assetImg(id, "Reference"),
+          h("button", { type: "button", "aria-label": "Remove reference", disabled, onclick: () => { r.refs = refs.filter((x) => x !== id); update(true); } }, "x"),
+        ),
+      ),
+      refs.length < MAX_AREA_REFS
+        ? h(
+            "span",
+            { class: "area-ref-add" },
+            h("span", { class: "hint" }, refs.length ? "Add another" : "Reference, optional"),
+            h("button", { type: "button", class: "link-btn small", disabled: disabled || !!D.busy, onclick: () => addAreaRef(r, "upload") }, "Upload"),
+            h("button", { type: "button", class: "link-btn small", disabled: disabled || !!D.busy, onclick: () => addAreaRef(r, "library") }, "Library"),
+          )
+        : null,
+    ),
+  );
+}
+
 function editTab(sel, rootId) {
   const chain = chainFrom(rootId);
-  const running = isRunning(editKey(sel.id));
+  const running = isRunning(editKey(sel.id)) || !!D.pass;
   const editable = sel.status === "approved";
+  const n = D.regions.length;
   const side = h(
     "div",
     { class: "ws-form" },
@@ -593,41 +692,21 @@ function editTab(sel, rootId) {
         ? "This photo is still being checked."
         : D.tool === "sketch"
           ? "Draw the new shape on the image. Strokes join one area until you start a new one."
-          : "Drag on the image around what should change. Up to 8 areas in one edit.",
+          : "Drag on the image around what should change. Up to 8 areas; each is applied as its own step.",
     ),
     D.tool === "sketch" && D.open
-      ? h("div", { class: "row" }, btn("Undo stroke", undoDecorStroke, { small: true, quiet: true }), btn("New area", () => { D.open = null; update(true); }, { small: true, quiet: true }))
+      ? h("div", { class: "btn-pair" }, btn("Undo stroke", undoDecorStroke, { small: true, quiet: true, disabled: running }), btn("New area", () => { D.open = null; update(true); }, { small: true, quiet: true, disabled: running }))
       : null,
-    D.regions.length
+    n ? h("ol", { class: "area-list" }, D.regions.map((r, i) => areaCard(r, i, running))) : h("div", { class: "ws-note" }, "Nothing marked yet."),
+    D.pass ? h("div", { class: "progress", role: "status" }, h("span", { class: "live-dot", "aria-hidden": "true" }), `Applying area ${D.pass.n} of ${D.pass.of}`) : running ? jobLine(editKey(sel.id), "Editing the decor") : null,
+    n
       ? h(
-          "ol",
-          { class: "decor-regions" },
-          D.regions.map((r, i) =>
-            h(
-              "li",
-              null,
-              h("span", { class: "decor-ring-n static" }, String(i + 1)),
-              h("textarea", {
-                class: "input dc-textarea",
-                rows: "2",
-                maxlength: "500",
-                placeholder: r.sketch?.length ? "What the sketch is: a gold arch, a floral column" : "Change to white orchids, make the arch gold",
-                value: r.comment,
-                dataset: { region: String(i) },
-                oninput: (e) => (r.comment = e.target.value),
-              }),
-              h("button", { type: "button", class: "icon-btn", "aria-label": `Remove area ${i + 1}`, onclick: () => { D.regions.splice(i, 1); if (D.open === r.id) D.open = null; update(true); } }, "x"),
-            ),
-          ),
+          "div",
+          { class: "btn-pair" },
+          btn(n > 1 ? `Apply ${n} edits` : "Apply edit", apply, { primary: true, busy: running, disabled: !editable || running || !!D.busy }),
+          btn("Clear", () => { D.regions = []; D.open = null; update(true); }, { quiet: true, disabled: running }),
         )
-      : h("div", { class: "ws-note" }, "Nothing marked yet."),
-    running ? jobLine(editKey(sel.id), "Editing the decor") : null,
-    h(
-      "div",
-      { class: "row" },
-      btn("Apply edits", apply, { primary: true, busy: running, disabled: !editable || running || !!D.busy || !D.regions.length }),
-      D.regions.length ? btn("Clear", () => { D.regions = []; D.open = null; update(true); }, { quiet: true, disabled: running }) : null,
-    ),
+      : null,
     chain.length > 1
       ? h(
           "div",
@@ -783,6 +862,7 @@ function update(force = false) {
     (S.project?.components || []).map((c) => [c.id, c.masterAssetId]),
     D.selected,
     D.tab,
+    D.pass,
     D.busy,
     D.error,
     [...S.jobs.entries()].filter(([k]) => k.startsWith("decor")).map(([k, j]) => [k, j.status]),
