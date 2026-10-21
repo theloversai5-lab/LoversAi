@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
+    <title>Lovers AI · Venue Studio</title>
+    <link rel="stylesheet" href="./studio.css" />
+    <script type="module" src="./studio.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-name">Lovers AI · Venue Studio</span>
+        <span class="brand-sep" aria-hidden="true">/</span>
+        <span id="project-name" class="project-name">Loading</span>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" id="back-project" class="btn btn-ghost btn-sm" hidden>Back to my project</button>
+        <button type="button" id="demo-btn" class="btn btn-primary btn-sm">Demo</button>
+        <button type="button" id="present-btn" class="btn btn-ghost btn-sm" hidden>Presentation</button>
+        <button type="button" id="new-project" class="btn btn-ghost btn-sm">New project</button>
+      </div>
+    </header>
+    <nav id="stepper" class="stepper" aria-label="Steps"></nav>
+    <main id="main" class="main" tabindex="-1">
+      <div class="boot">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Starting studio</span>
+      </div>
+    </main>
+    <footer id="nav" class="navbar"></footer>
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+    <noscript><p class="noscript">Venue Studio needs JavaScript enabled.</p></noscript>
+  </body>
+</html>

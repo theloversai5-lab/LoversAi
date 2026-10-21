@@ -28,6 +28,17 @@ export const OPERATION_COSTS = {
   COUPLE_MOODBOARD_EDIT: 1,       // Edit/modify a moodboard image
   PLANNER_IMAGE_GENERATION: 1,    // Planner AI Image Tools (Angle, Retexture, etc.)
   PLANNER_VIDEO_GENERATION: 5,    // Planner AI Video Generation (Configurable placeholder)
+  // Pipeline AI operations (planner wallet)
+  PIPELINE_VENUE_360: 3,
+  PIPELINE_LAYOUT_PLAN: 1,        // AI zone plan on the venue view (vision model)
+  PIPELINE_COMPONENT_SPECS: 1,    // AI size/material/price estimate for one element          // AI 360 eye-level panorama of the decorated venue
+  PIPELINE_VENUE_ISOMETRIC: 3,    // Generate isometric drone view from ground + satellite photos
+  PIPELINE_COMPONENT_SHEET: 1,    // Generate component characteristic sheet
+  PIPELINE_COMPONENT_BOARD: 3,    // Six-view architectural presentation board (high quality)
+  PIPELINE_PLACEMENT: 2,          // Place a component into the venue isometric
+  PIPELINE_SHOWCASE: 2,           // Full-design venue showcase render
+  PIPELINE_REGION_EDIT: 2,        // Numbered ellipse region edit of an approved base image
+  PIPELINE_ELEMENT_VIEW: 1,       // Re-render one decor element from a camera angle
 };
 
 /**

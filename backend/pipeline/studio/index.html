@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#000000" />
+    <title>Lovers AI · Venue Studio</title>
+    <link rel="stylesheet" href="./app.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body data-stage="0">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3 22 20H2z" fill="currentColor" />
+        </svg>
+        <span class="brand-name">Lovers AI</span>
+        <span class="brand-slash" aria-hidden="true">/</span>
+        <span class="brand-sub">Venue Studio</span>
+        <span class="brand-slash hide-sm" aria-hidden="true">/</span>
+        <span id="project-name" class="project-name">Loading</span>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="back-project" class="btn btn-ghost btn-sm" hidden>Back to my project</button>
+        <a class="btn btn-ghost btn-sm hide-sm" href="./classic/">Classic</a>
+        <button type="button" id="panel-toggle" class="btn btn-ghost btn-sm" aria-controls="panel" hidden>Library</button>
+        <button type="button" id="cost-pill" class="cost-pill" aria-haspopup="dialog" aria-expanded="false" hidden><span class="cost-dot" aria-hidden="true"></span><span class="cost-val tnum">$0.00</span></button>
+        <button type="button" id="demo-btn" class="btn btn-quiet btn-sm"><span class="demo-dot" aria-hidden="true"></span><span>Demo</span></button>
+        <button type="button" id="new-project" class="btn btn-primary btn-sm">New project</button>
+      </div>
+    </header>
+    <div class="shell">
+      <nav id="rail" class="rail" aria-label="Steps"></nav>
+      <main id="main" class="main" tabindex="-1">
+        <div class="boot"><div class="skeleton boot-sk"></div><span class="muted">Opening the studio</span></div>
+      </main>
+      <aside id="panel" class="panel" aria-label="Library and history" hidden></aside>
+    </div>
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+    <noscript><p class="noscript">Venue Studio needs JavaScript enabled.</p></noscript>
+  </body>
+</html>

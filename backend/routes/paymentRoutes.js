@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import { protect } from '../middleware/auth.js';
 import creditService from '../services/creditService.js';
+import PaymentFulfillment from '../models/PaymentFulfillment.js';
 import dotenv from 'dotenv';
 import { Resend } from 'resend';
 
@@ -52,6 +53,58 @@ const PLANS = {
   couple_pro: { name: 'Pro Plan (Couple)', price: 26999, currency: 'INR', type: 'subscription', credits: 64 },
   couple_elite: { name: 'Pro Plan (Couple)', price: 26999, currency: 'INR', type: 'subscription', credits: 64 } // Legacy fallback
 };
+
+function signatureMatches(payload, secret, signature) {
+  if (!secret || typeof signature !== 'string') return false;
+  const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  const a = Buffer.from(expected);
+  const b = Buffer.from(signature);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+/**
+ * Grants a plan exactly once per Razorpay payment. The plan and user come from
+ * the server-created order notes, never from the client request body.
+ * Returns { user, plan, planId, alreadyFulfilled }.
+ */
+async function fulfillPlanPayment({ paymentId, orderId, userId, planId, amountPaise, source }) {
+  const plan = PLANS[planId];
+  if (!plan) throw Object.assign(new Error('Unknown plan on order'), { status: 400 });
+  if (amountPaise !== plan.price * 100) throw Object.assign(new Error('Amount does not match plan'), { status: 400 });
+
+  try {
+    await PaymentFulfillment.create({ paymentId, orderId, userId, planId, amount: plan.price, source });
+  } catch (err) {
+    if (err?.code === 11000) return { user: await User.findById(userId), plan, planId, alreadyFulfilled: true };
+    throw err;
+  }
+
+  const user = await User.findById(userId);
+  if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
+  const productType = planId.startsWith('planner') || ['basic', 'premium', 'pro', 'enterprise'].includes(planId) ? 'planner' : 'couple';
+
+  try {
+    if (plan.credits) {
+      await creditService.addCredits(user._id, plan.credits, 'purchased', `rzp_${paymentId}`, { planId, orderId }, productType);
+    }
+  } catch (err) {
+    // Release the claim so a retry (verify or webhook) can fulfil it.
+    await PaymentFulfillment.deleteOne({ paymentId });
+    throw err;
+  }
+
+  if (plan.type === 'subscription') {
+    user.isPro = true;
+    user.plan = planId;
+    user.subscriptionRenewsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  }
+  user.totalSpent = (user.totalSpent || 0) + plan.price;
+  user.totalPayments = (user.totalPayments || 0) + 1;
+  user.lastPaymentStatus = 'success';
+  user.lastPaymentAt = new Date();
+  await user.save();
+  return { user, plan, planId, alreadyFulfilled: false };
+}
 
 /* ================================================================
    GET /api/payment/plans — View available plans
@@ -108,64 +161,31 @@ router.post('/create-order', protect, async (req, res) => {
 ================================================================ */
 router.post('/verify', protect, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planId } = req.body;
-    
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    if (!razorpay || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ success: false, error: 'Invalid payment details' });
     }
 
-    const plan = PLANS[planId];
-    if (!plan) {
-      return res.status(400).json({ success: false, error: 'Invalid plan selected' });
-    }
-
-    // Verify signature
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
-      .digest('hex');
-
-    const isAuthentic = expectedSignature === razorpay_signature;
-
-    if (!isAuthentic) {
+    if (!signatureMatches(`${razorpay_order_id}|${razorpay_payment_id}`, process.env.RAZORPAY_KEY_SECRET, razorpay_signature)) {
       return res.status(400).json({ success: false, error: 'Payment verification failed' });
     }
 
-    // Payment is valid — Provide the credits/subscription to the user
-    const user = await User.findById(req.user._id);
-    
-    const productType = planId.startsWith('planner') ? 'planner' : 'couple';
-    
-    // Add Credits via CreditService
-    if (plan.credits) {
-      await creditService.addCredits(
-        user._id,
-        plan.credits,
-        'purchased', // TRANSACTION_SOURCES.PURCHASED
-        `rzp_${razorpay_payment_id}`,
-        { planId, razorpay_order_id },
-        productType
-      );
+    const order = await razorpay.orders.fetch(razorpay_order_id);
+    if (order?.notes?.userId !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, error: 'Order does not belong to this account' });
     }
-    
-    // Upgrade subscription if applicable
-    if (plan.type === 'subscription') {
-      user.isPro = true;
-      user.plan = planId;
-      // Set to 30 days from now
-      user.subscriptionRenewsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    }
-    
-    // Update payment metadata
-    const amountPaid = plan.price || 0;
-    user.totalSpent = (user.totalSpent || 0) + amountPaid;
-    user.totalPayments = (user.totalPayments || 0) + 1;
-    user.lastPaymentStatus = 'paid';
-    user.lastPaymentAt = new Date();
-    await user.save();
 
-    console.log(`✅ Payment verified for ${user.email}. Added ${plan.credits} credits. Total spent: ₹${user.totalSpent}`);
+    const { user, plan, alreadyFulfilled } = await fulfillPlanPayment({
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+      userId: req.user._id,
+      planId: order.notes.planId,
+      amountPaise: Number(order.amount),
+      source: 'verify',
+    });
+
+    if (!alreadyFulfilled) console.log(`✅ Payment verified for ${user.email}. Added ${plan.credits} credits.`);
 
     res.json({
       success: true,
@@ -178,7 +198,7 @@ router.post('/verify', protect, async (req, res) => {
 
   } catch (error) {
     console.error('Razorpay Verify Error:', error);
-    res.status(500).json({ success: false, error: 'Payment verification error' });
+    res.status(error.status || 500).json({ success: false, error: error.status ? error.message : 'Payment verification error' });
   }
 });
 
@@ -394,56 +414,29 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const signature = req.headers['x-razorpay-signature'];
 
-    if (!webhookSecret || !signature) {
-      return res.status(400).json({ error: 'Webhook secret or signature missing' });
-    }
-
-    const expectedSignature = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(JSON.stringify(req.body))
-      .digest('hex');
-
-    if (expectedSignature !== signature) {
+    const raw = Buffer.isBuffer(req.body) ? req.body : null;
+    if (!raw || !signatureMatches(raw, webhookSecret, signature)) {
       return res.status(400).json({ error: 'Invalid webhook signature' });
     }
 
-    const event = req.body;
-    const { payload } = event;
+    const event = JSON.parse(raw.toString('utf8'));
 
     if (event.event === 'payment.captured') {
-      const payment = payload.payment.entity;
-      const userId = payment.notes?.userId;
-      const planId = payment.notes?.planId;
+      const payment = event.payload?.payment?.entity;
+      const userId = payment?.notes?.userId;
+      const planId = payment?.notes?.planId;
 
-      if (userId && planId) {
-        const user = await User.findById(userId);
-        const plan = PLANS[planId];
-
-        if (user && plan) {
-          const productType = planId.startsWith('planner') ? 'planner' : 'couple';
-          if (plan.credits) {
-            await creditService.addCredits(
-              user._id,
-              plan.credits,
-              'purchased',
-              `webhook_${payment.id || Date.now()}`,
-              { planId },
-              productType
-            );
-          }
-          if (plan.type === 'subscription') {
-            user.isPro = true;
-            user.plan = planId;
-            user.subscriptionRenewsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-          }
-          const amountPaid = (payment.amount || 0) / 100;
-          user.totalSpent = (user.totalSpent || 0) + amountPaid;
-          user.totalPayments = (user.totalPayments || 0) + 1;
-          user.lastPaymentStatus = 'paid';
-          user.lastPaymentAt = new Date();
-          await user.save();
-          console.log(`✅ Webhook: Payment captured for ${user.email}. Plan: ${planId}. Total spent: ₹${user.totalSpent}`);
-        }
+      // Template purchases carry no planId and are fulfilled by /library/verify.
+      if (payment?.id && payment.order_id && userId && planId) {
+        const { user, alreadyFulfilled } = await fulfillPlanPayment({
+          paymentId: payment.id,
+          orderId: payment.order_id,
+          userId,
+          planId,
+          amountPaise: Number(payment.amount),
+          source: 'webhook',
+        });
+        if (!alreadyFulfilled && user) console.log(`✅ Webhook: Payment captured for ${user.email}. Plan: ${planId}.`);
       }
     }
 
@@ -518,7 +511,7 @@ router.get('/payment-history', protect, async (req, res) => {
     const user = await User.findById(req.user._id);
     const history = [];
     
-    if (user.lastPaymentAt && user.lastPaymentStatus === 'paid') {
+    if (user.lastPaymentAt && user.lastPaymentStatus === 'success') {
       history.push({
         id: 'txn_' + user.lastPaymentAt.getTime(),
         date: user.lastPaymentAt,

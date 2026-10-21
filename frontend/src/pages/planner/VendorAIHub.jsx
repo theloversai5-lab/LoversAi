@@ -7,6 +7,14 @@ export default function VendorAIHub() {
 
   const vendors = [
     {
+      id: "pitch-ai",
+      title: "Pitch with AI",
+      description: "Venue photos to isometric view, decor masters and placed layouts for a client pitch.",
+      icon: <Sparkles className="h-6 w-6 text-loverai-gold" />,
+      path: "/planner/pitch-ai",
+      active: true
+    },
+    {
       id: "venue-options",
       title: "Venue AI",
       description: "Explore MasterVenue AI and our partner hotel AIs.",

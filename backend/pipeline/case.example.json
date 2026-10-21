@@ -1,0 +1,33 @@
+{
+  "formatVersion": 1,
+  "name": "garden-wedding",
+  "provenance": "real_venue",
+  "brief": {
+    "description": "An ivory and sage garden wedding. Preserve permanent venue architecture, trees and access routes.",
+    "style": "Contemporary floral",
+    "palette": ["ivory", "sage", "warm gold"],
+    "constraints": ["Keep the exit clear", "Preserve the base camera viewpoint"]
+  },
+  "venue": [
+    {"file": "venue/front.jpg", "view": "front"},
+    {"file": "venue/right.jpg", "view": "right"},
+    {"file": "venue/back.jpg", "view": "back"},
+    {"file": "venue/left.jpg", "view": "left"}
+  ],
+  "components": [
+    {"id": "flowers", "category": "flowers", "description": "Ivory jasmine with light green foliage", "palette": ["ivory", "sage"]},
+    {"id": "stage", "category": "stage", "description": "Low timber wedding stage with jasmine columns", "materials": ["timber", "fresh jasmine"]},
+    {"id": "dance", "category": "dance_floor", "description": "Square parquet dance floor"},
+    {"id": "bar", "category": "bar", "description": "Sage curved bar with warm brass trim"},
+    {"id": "dining", "category": "dining", "description": "Round tables with ivory linens and jasmine centerpieces"},
+    {"id": "photo", "category": "photo_booth", "description": "Freestanding ivory floral portrait arch"}
+  ],
+  "canvas": {
+    "baseView": "front",
+    "regions": [
+      {"id": "stage-zone", "action": "place", "componentId": "stage", "points": [[0.2, 0.3], [0.55, 0.3], [0.55, 0.6], [0.2, 0.6]]},
+      {"id": "exit-zone", "action": "keep_clear", "points": [[0.8, 0.1], [0.95, 0.1], [0.95, 0.8], [0.8, 0.8]]}
+    ],
+    "strokes": []
+  }
+}

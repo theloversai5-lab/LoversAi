@@ -5,7 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test:pipeline": "node --test pipeline/tests/*.test.js",
+    "test:pipeline:stitch": "python -m unittest discover -s pipeline/tests -p test_stitch.py",
+    "pipeline:worker": "node pipeline/worker.js",
+    "pipeline:dev": "node pipeline/dev-server.js",
+    "pipeline:doctor": "node pipeline/doctor.js",
+    "pipeline:acceptance": "node pipeline/acceptance.js"
   },
   "keywords": [],
   "author": "",

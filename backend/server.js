@@ -292,6 +292,8 @@ app.use((req, res, next) => {
    Special middleware for Lemon webhook
 ============================================================ */
 app.use("/api/lemon/webhook", express.raw({ type: "application/json" }));
+// Razorpay signs the exact raw bytes; keep them unparsed for HMAC verification.
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 
 /* ============================================================
    Body parsers for all other routes
@@ -455,7 +457,15 @@ async function startServer() {
     app.use("/api/upload", uploadRoutes); // 📤 Cloudinary Uploads
     app.use("/api/cart", cartRoutes); // 🛒 Wedding Cart
     app.use("/api/moodboard", moodboardRoutes); // ✅ Couple Moodboard
-    app.use("/api/debug", debugRoutes); // 🔍 Debug endpoints - REMOVE IN PRODUCTION
+    // Isolated, opt-in venue pipeline; legacy tools and commercial flows stay intact.
+    if (process.env.WEDDING_PIPELINE_ENABLED === "true") {
+      const { createWeddingPipelineRouter } = await import("./pipeline/index.js");
+      app.use("/api/wedding-pipeline", await createWeddingPipelineRouter());
+    }
+    // Credit-granting debug endpoints: explicit opt-in, never in production.
+    if (process.env.NODE_ENV !== "production" && process.env.ENABLE_DEBUG_ROUTES === "true") {
+      app.use("/api/debug", debugRoutes);
+    }
     app.use("/api/admin", adminRoutes); // 🔒 Admin panel backend APIs
     app.use("/api/admin/planner", plannerAdminRoutes); // 🔒 Planner Admin panel backend APIs
 
@@ -794,18 +804,22 @@ async function startServer() {
     async function initializeAdminCredits() {
       try {
         let adminUsers = await User.find({ isAdmin: true });
-        if (adminUsers.length === 0) {
-          console.log("[Admin Init] No admin users found. Seeding default admin account...");
+        const seedEmail = process.env.ADMIN_SEED_EMAIL;
+        const seedPassword = process.env.ADMIN_SEED_PASSWORD;
+        if (adminUsers.length === 0 && (!seedEmail || !seedPassword || seedPassword.length < 12)) {
+          console.warn("[Admin Init] No admin users. Set ADMIN_SEED_EMAIL and ADMIN_SEED_PASSWORD (12+ chars) to seed one.");
+        } else if (adminUsers.length === 0) {
+          console.log("[Admin Init] No admin users found. Seeding admin account from environment...");
           const defaultAdmin = await User.create({
-            email: "admin@loversai.com",
-            password: "adminpassword123",
+            email: seedEmail,
+            password: seedPassword,
             fullName: "LoversAI Admin",
             role: "admin",
             isAdmin: true,
             emailVerified: true,
             profileCompleted: true,
           });
-          console.log(`[Admin Init] Created default admin: admin@loversai.com / adminpassword123`);
+          console.log(`[Admin Init] Created admin: ${seedEmail}`);
           adminUsers = [defaultAdmin];
         }
         console.log(`[Admin Credits Init] Found ${adminUsers.length} admin user(s) to verify.`);

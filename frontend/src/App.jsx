@@ -69,6 +69,7 @@ import PlannerCateringAI from "./pages/planner/PlannerCateringAI";
 import PlannerSignup from "./pages/planner/PlannerSignup";
 import PlannerOnboarding from "./pages/planner/PlannerOnboarding";
 import PlannerLibrary from "./pages/planner/PlannerLibrary";
+import PitchWithAI from "./pages/planner/PitchWithAI";
 
 // Vendor Pages
 import VendorLayout from "./pages/vendor/VendorLayout";
@@ -231,6 +232,7 @@ function AppContent() {
           <Route path="/planner/vendors" element={<PlannerVendors />} />
           <Route path="/planner/profile" element={<PlannerProfile />} />
           <Route path="/planner/library" element={<PlannerLibrary />} />
+          <Route path="/planner/pitch-ai" element={<PitchWithAI />} />
           <Route
             path="/planner/build-quote/:bidId"
             element={<PlannerBuildQuote />}

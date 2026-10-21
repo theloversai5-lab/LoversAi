@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-18",
+  "head": "7d7e5e1",
+  "backend_syntax": {
+    "checked": 56,
+    "failed": 0
+  },
+  "frontend_build": {
+    "result": "failed",
+    "reason": "CI=false is not Windows cmd-compatible; CI is not recognized"
+  },
+  "dependencies_installed": false,
+  "runtime_integrations_tested": false,
+  "relative_frontend_imports": {
+    "unresolved": 0,
+    "method": "static filesystem resolution; no compilation"
+  },
+  "lockfile_audit": {
+    "backend": {
+      "critical": 2,
+      "high": 15,
+      "moderate": 11,
+      "low": 1,
+      "total": 29
+    },
+    "frontend": {
+      "critical": 3,
+      "high": 82,
+      "moderate": 13,
+      "low": 4,
+      "total": 102
+    },
+    "scope": "Affected package entries including tooling/transitive dependencies; not proven runtime exploits"
+  },
+  "source_inventory": {
+    "files": 167,
+    "backend_lines": 13549,
+    "frontend_lines": 32926,
+    "frontend_route_paths": 60,
+    "models": 13,
+    "pdf_pages": 18
+  },
+  "application_source_modified": false
+}
