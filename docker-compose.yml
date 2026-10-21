@@ -35,7 +35,8 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      # Frozen app until the new frontend is imported into ./frontend
+      context: ./frontend-legacy
       args:
         - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
     container_name: loversai-frontend

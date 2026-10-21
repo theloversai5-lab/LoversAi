@@ -1,14 +1,19 @@
 backend/node_modules/
 frontend/node_modules/
 frontend/build/
+frontend-legacy/node_modules/
+frontend-legacy/build/
 
 .env
 # React
 frontend/build
+frontend-legacy/build
 build
 backend/.env
 frontend/.env
+frontend-legacy/.env
 frontend/.env.production
+frontend-legacy/.env.production
 backend/.env.production
 .env.production
 backend-run*.log
@@ -16,5 +21,6 @@ backend-start*.log
 
 # Large PPTX templates
 frontend/public/*.pptx
+frontend-legacy/public/*.pptx
 
 

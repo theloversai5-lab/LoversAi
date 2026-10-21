@@ -23,7 +23,7 @@ cd ..
 # Give backend a moment to initialize
 sleep 2
 
-# 2. Start Frontend in the foreground
-echo "💻 Starting frontend server..."
-cd frontend
+# 2. Start archived frontend in the foreground (new app will replace ./frontend later)
+echo "💻 Starting archived frontend server..."
+cd frontend-legacy
 npm start
