@@ -33,17 +33,22 @@ export async function normalizeImage(
         "Only single-frame JPEG, PNG or WebP images are supported",
       );
     const minSide = minImageSide();
-    const short = Math.min(meta.width || 0, meta.height || 0);
+    // Dimensions as displayed (EXIF orientations 5-8 swap width and height).
+    const turned = (meta.orientation || 1) >= 5;
+    const ow = (turned ? meta.height : meta.width) || 0;
+    const oh = (turned ? meta.width : meta.height) || 0;
+    const short = Math.min(ow, oh);
     // Truly tiny images carry no usable detail; small ones are upscaled to the minimum and flagged.
     if (short < 128)
       fail("IMAGE_TOO_SMALL", `This image is only ${meta.width}x${meta.height} pixels; use a photo at least ${minSide} pixels on its shorter side`);
-    const upscale = short < minSide ? minSide / short : 1;
+    // Upscale toward the minimum, but never past 4096 on the long side (bounds output size).
+    const upscale = short < minSide ? Math.min(minSide / short, 4096 / Math.max(ow, oh)) : 1;
     const { data, info } = await sharp(buffer, { limitInputPixels: 40_000_000 })
       .rotate()
       .flatten({ background: "#ffffff" })
       .resize(
         upscale > 1
-          ? { width: Math.round((meta.width || 0) * upscale), height: Math.round((meta.height || 0) * upscale), fit: "fill", kernel: "lanczos3" }
+          ? { width: Math.round(ow * upscale), height: Math.round(oh * upscale), fit: "fill", kernel: "lanczos3" }
           : { width: 4096, height: 4096, fit: "inside", withoutEnlargement: true },
       )
       .jpeg({ quality: 92 })
