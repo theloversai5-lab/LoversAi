@@ -33,17 +33,19 @@ export async function normalizeImage(
         "Only single-frame JPEG, PNG or WebP images are supported",
       );
     const minSide = minImageSide();
-    if (Math.min(meta.width || 0, meta.height || 0) < minSide)
-      fail("IMAGE_TOO_SMALL", `Minimum image size is ${minSide} by ${minSide}`);
+    const short = Math.min(meta.width || 0, meta.height || 0);
+    // Truly tiny images carry no usable detail; small ones are upscaled to the minimum and flagged.
+    if (short < 128)
+      fail("IMAGE_TOO_SMALL", `This image is only ${meta.width}x${meta.height} pixels; use a photo at least ${minSide} pixels on its shorter side`);
+    const upscale = short < minSide ? minSide / short : 1;
     const { data, info } = await sharp(buffer, { limitInputPixels: 40_000_000 })
       .rotate()
       .flatten({ background: "#ffffff" })
-      .resize({
-        width: 4096,
-        height: 4096,
-        fit: "inside",
-        withoutEnlargement: true,
-      })
+      .resize(
+        upscale > 1
+          ? { width: Math.round((meta.width || 0) * upscale), height: Math.round((meta.height || 0) * upscale), fit: "fill", kernel: "lanczos3" }
+          : { width: 4096, height: 4096, fit: "inside", withoutEnlargement: true },
+      )
       .jpeg({ quality: 92 })
       .toBuffer({ resolveWithObject: true });
     const stats = await sharp(data).stats();
@@ -53,9 +55,10 @@ export async function normalizeImage(
       height: info.height,
       mimeType: "image/jpeg",
       hash: createHash("sha256").update(data).digest("hex"),
-      qualityFlags: stats.channels.every((c) => c.stdev < 3)
-        ? ["low_detail"]
-        : [],
+      qualityFlags: [
+        ...(stats.channels.every((c) => c.stdev < 3) ? ["low_detail"] : []),
+        ...(upscale > 1 ? ["low_resolution"] : []),
+      ],
     };
   } catch (e) {
     if (e.code && e.status) throw e;

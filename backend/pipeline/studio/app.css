@@ -969,3 +969,31 @@ body[data-stage="3"] .dock { bottom: 80px; left: calc(var(--rail-w) + 60px); }
 .ruler-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .ruler-line { stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 8 6; filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9)); }
 .ruler-input { width: 80px; height: 32px; }
+
+/* Place dialog: camera position diagrams */
+.dial { width: 100%; max-width: 320px; align-self: center; }
+.dial-ring { fill: none; stroke: var(--line-2); stroke-dasharray: 3 5; }
+.dial-obj { fill: var(--s3); stroke: var(--fg-2); }
+.dial-front { stroke: #fff; stroke-width: 4; stroke-linecap: round; }
+.dial-obj-label { fill: var(--fg-2); font-size: 11px; text-anchor: middle; }
+.dial-side { fill: var(--fg-3); font-size: 10px; text-anchor: middle; }
+.dial-side.end { text-anchor: end; }
+.dial-side.start { text-anchor: start; }
+.dial-cone { fill: rgba(31, 107, 255, 0.18); stroke: rgba(31, 107, 255, 0.6); }
+.dial-cam { cursor: pointer; outline: none; }
+.dial-cam circle { fill: var(--s2); stroke: var(--fg-2); stroke-width: 1.5; }
+.dial-cam:hover circle, .dial-cam:focus-visible circle { stroke: #fff; }
+.dial-cam.on circle { fill: #1f6bff; stroke: #fff; stroke-width: 2; }
+.dial-label { fill: var(--fg-3); font-size: 11px; pointer-events: none; }
+.dial-cam.on .dial-label, .dial-cam:hover .dial-label { fill: var(--fg); font-weight: 600; }
+.tilt { width: 100%; max-width: 360px; }
+.tilt-ground { stroke: var(--fg-3); stroke-width: 2; }
+.tilt-obj { fill: var(--s3); stroke: var(--fg-2); stroke-width: 1.5; }
+.tilt-ray { stroke: rgba(31, 107, 255, 0.8); stroke-width: 2; stroke-dasharray: 5 4; }
+.tilt-arc { fill: none; stroke: var(--fg-2); }
+.tilt-deg { fill: var(--fg); font-size: 12px; text-anchor: end; }
+.tilt-cam { fill: #1f6bff; stroke: #fff; stroke-width: 2; }
+.tilt-label { fill: var(--fg-2); font-size: 11px; text-anchor: middle; }
+.front-ref { display: flex; align-items: center; gap: 10px; }
+.front-ref img { width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 6px; }
+.dial { max-width: 420px; } .dial-label { font-size: 13px; } .dial-side, .dial-obj-label { font-size: 12px; }

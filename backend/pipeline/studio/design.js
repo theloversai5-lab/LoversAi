@@ -981,6 +981,71 @@ async function prepareCutout(item, az, el, onPhase) {
   return cut;
 }
 
+// Top-down dial: the piece in the middle (front facing down), the camera at each of 8 positions around it.
+function facingDial(az, onPick, disabled) {
+  const C = 130, R = 92;
+  const pos = (deg, r = R) => [C + r * Math.sin((deg * Math.PI) / 180), C + r * Math.cos((deg * Math.PI) / 180)];
+  const [cx, cy] = pos(az);
+  const kids = [
+    h("circle", { cx: C, cy: C, r: R, class: "dial-ring" }),
+    h("path", { d: `M${cx} ${cy} L${pos(az + 25, 30).join(" ")} L${pos(az - 25, 30).join(" ")} Z`, class: "dial-cone" }),
+    h("rect", { x: C - 34, y: C - 18, width: 68, height: 36, rx: 4, class: "dial-obj" }),
+    h("line", { x1: C - 34, y1: C + 18, x2: C + 34, y2: C + 18, class: "dial-front" }),
+    h("text", { x: C, y: C + 4, class: "dial-obj-label" }, "piece"),
+    h("text", { x: C, y: C + 32, class: "dial-side" }, "front"),
+    h("text", { x: C, y: C - 23, class: "dial-side" }, "back"),
+    h("text", { x: C - 40, y: C + 4, class: "dial-side end" }, "L"),
+    h("text", { x: C + 40, y: C + 4, class: "dial-side start" }, "R"),
+  ];
+  for (const f of FACINGS) {
+    const [x, y] = pos(f.az);
+    const sx = Math.sin((f.az * Math.PI) / 180);
+    const [lx, ly] = pos(f.az, R + (Math.abs(sx) > 0.9 ? 16 : 24));
+    const anchor = sx > 0.3 ? "start" : sx < -0.3 ? "end" : "middle";
+    const on = f.az === az;
+    kids.push(
+      h(
+        "g",
+        {
+          class: `dial-cam${on ? " on" : ""}`,
+          role: "button",
+          tabindex: disabled ? "-1" : "0",
+          "aria-label": `Camera at the ${f.label.toLowerCase()}`,
+          "aria-pressed": String(on),
+          onclick: () => !disabled && onPick(f.az),
+          onkeydown: (e) => {
+            if ((e.key === "Enter" || e.key === " ") && !disabled) {
+              e.preventDefault();
+              onPick(f.az);
+            }
+          },
+        },
+        h("circle", { cx: x, cy: y, r: on ? 11 : 8 }),
+        h("text", { x: lx, y: ly + 4, class: "dial-label", "text-anchor": anchor }, f.label),
+      ),
+    );
+  }
+  return h("svg", { class: "dial", viewBox: "-60 -8 380 280", role: "group", "aria-label": "Where the camera stands, seen from above" }, kids);
+}
+// Side view: ground, the piece, and the camera raised by the tilt angle.
+function tiltDiagram(el) {
+  const gx = 190, gy = 120, r = 120;
+  const rad = (el * Math.PI) / 180;
+  const cx = gx - r * Math.cos(rad), cy = gy - r * Math.sin(rad);
+  const arcR = 34;
+  const ax = gx - arcR * Math.cos(rad), ay = gy - arcR * Math.sin(rad);
+  return h(
+    "svg",
+    { class: "tilt", viewBox: "0 0 260 140", role: "img", "aria-label": `Camera ${el} degrees above the ground` },
+    h("line", { x1: 10, y1: gy, x2: 250, y2: gy, class: "tilt-ground" }),
+    h("path", { d: `M${gx - 14} ${gy} L${gx - 14} ${gy - 26} Q${gx} ${gy - 44} ${gx + 14} ${gy - 26} L${gx + 14} ${gy}`, class: "tilt-obj" }),
+    h("line", { x1: cx, y1: cy, x2: gx, y2: gy - 14, class: "tilt-ray" }),
+    h("path", { d: `M${gx - arcR} ${gy} A${arcR} ${arcR} 0 0 1 ${ax} ${ay}`, class: "tilt-arc" }),
+    h("text", { x: gx - arcR - 8, y: gy - 6, class: "tilt-deg" }, `${el}\u00b0`),
+    h("circle", { cx, cy, r: 9, class: "tilt-cam" }),
+    h("text", { x: cx, y: cy - 14, class: "tilt-label" }, "camera"),
+  );
+}
 export function openPlaceDialog(item, { box = null } = {}) {
   if (!currentBase()) return toast("Approve the isometric overview first.", { type: "error", title: "Place decor" });
   let az = local.get("placeFacing", 45);
@@ -997,21 +1062,20 @@ export function openPlaceDialog(item, { box = null } = {}) {
         h(
           "div",
           { class: "field" },
-          "Which side faces the camera?",
-          h(
-            "div",
-            { class: "facing-grid", role: "group" },
-            FACINGS.map((f) =>
-              h("button", { type: "button", class: "chip", "aria-pressed": String(f.az === az), disabled: !!busy, onclick: () => { az = f.az; local.set("placeFacing", az); draw(); } }, f.label),
-            ),
-          ),
+          h("span", null, "Where is the camera? ", h("strong", null, FACINGS.find((f) => f.az === az)?.label || "")),
+          h("span", { class: "hint" }, "Seen from above. Click a dot: the camera there sees the side of the piece facing it."),
+          facingDial(az, (v) => { az = v; local.set("placeFacing", az); draw(); }, !!busy),
         ),
         h(
-          "label",
+          "div",
           { class: "field" },
-          `Camera tilt: ${el}° above the ground`,
-          h("input", { type: "range", min: "15", max: "75", step: "5", value: String(el), disabled: !!busy, oninput: (e) => { el = Number(e.target.value); local.set("placeTilt", el); draw(); } }),
-          h("span", { class: "hint" }, "Match the drone view of your venue. Most isometric views are about 40 degrees."),
+          h("span", null, "How high is the camera? ", h("strong", null, `${el}\u00b0`)),
+          h("span", { class: "hint" }, "Seen from the side. Match your venue's drone view; most isometric views are about 40\u00b0."),
+          tiltDiagram(el),
+          h("input", { type: "range", min: "15", max: "75", step: "5", value: String(el), disabled: !!busy, "aria-label": "Camera height in degrees", oninput: (e) => { el = Number(e.target.value); local.set("placeTilt", el); draw(); } }),
+          item.views?.find((v) => v.viewType === "front")
+            ? h("div", { class: "front-ref" }, assetImg(item.views.find((v) => v.viewType === "front").id, "Front of the piece"), h("span", { class: "hint" }, "This is the front of the piece."))
+            : null,
         ),
       ),
       busy ? h("div", { class: "progress", role: "status" }, h("span", { class: "live-dot", "aria-hidden": "true" }), busy) : null,
