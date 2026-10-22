@@ -6,20 +6,24 @@ Two doors on the site: **Couple** and **Planners / vendors**.
 
 ## Couple
 
-Home line: `Your dream wedding` / `comes true`
+After role choice, couples can **create an account or sign in**, then go straight to `/couple`. Do not put a questionnaire between auth and the dashboard. Keep the development bypass available.
 
-Signup is three unveiling steps:
+### Couple dashboard feature list
 
-1. **Choose your wedding** — pick or design the look.
-2. **Plan it yourself** or **Hire a planner**.
-3. **Start your love story**.
+These features existed in the archived couple pages. Keep them visible in the new couple area:
 
-Step 3 split:
+1. **Wedding vision** — choose event, guest count, theme, venue, and colors; add a venue photo; make and edit a vision across budget levels; save images or add them to the cart.
+2. **Moodboards** — choose an event, style, mood, and time; add venue and decor photos; make, edit, save, or remove images.
+3. **Vendor search** — browse wedding vendors and open their profiles.
+4. **Planner requests** — choose services and needs, then ask planners for help.
+5. **Cart and orders** — review saved ideas, add wedding details, and send a request.
+6. **Quotes and bids** — see planner replies and track accepted, waiting, or closed requests.
+7. **Messages** — read and reply to planners.
+8. **Credits and plans** — see available credits and manage a subscription.
+9. **Wedding profile** — view and edit names, date, place, guest count, budget, and style.
+10. **Wedding inspiration** — browse visual ideas and begin a vision or moodboard.
 
-- **Plan myself** → send the wedding as an order into the vendor market.
-- **Hire a planner** → couple dashboard.
-
-Onboarding is one question per screen (name, then next). Progress ticks on top. Continue to go on.
+The dashboard should show these feature names and give each working route. Use sample states until Supabase data is ready. Do not imply sample counts or statuses are live data.
 
 ## Planner
 
@@ -68,7 +72,7 @@ Same one-question screens: name, phone (WhatsApp), company, city, then role.
 ## Build order
 
 1. Shared shell (nav, type, colors, Greek frame)
-2. Couple home + signup unveiling
+2. Couple dashboard + direct auth path
 3. Planner home + signup unveiling
 4. Vendor hire / looking split
 5. Venue four-view upload UI (empty AI)

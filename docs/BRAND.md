@@ -46,9 +46,9 @@ Use the same ornaments, type, and rhythm on couple, planner, and vendor screens.
 
 ## Type
 
-- Display: heavy, condensed, uppercase or tight title case. As large as the layout allows.
-- Body: simple serif or humanist sans, still short lines.
-- Never mix more than two families.
+- Display: **Cormorant Garamond**. Use it for page titles, card titles, key numbers, brand marks, and editorial moments. Set it with a moderate weight and tight tracking so its high contrast detail stays visible.
+- Interface: **Manrope**. Use it for body copy, labels, form controls, buttons, navigation, and status text.
+- Never mix more than these two families.
 - Tracking on display can be tight. Line-height on display can be ~0.9–1.0 if glyphs do not collide.
 
 **No text cuts.** Never `text-overflow: ellipsis`. Never `overflow: hidden` on text. Never truncate names or labels. Wrap to the next line. Widen the box. Shrink the type only as a last step, and stay readable.
