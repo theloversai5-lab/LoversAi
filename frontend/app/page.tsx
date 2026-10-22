@@ -1,69 +1,37 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowRight } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
 import HeroSection from '@/components/landing/HeroSection'
 import RoleModal from '@/components/landing/RoleModal'
-
-const referenceImage =
-  'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-BKNxdlxcThjF5XPM48EE4LMRTC7xXo.png'
-
-const steps = [
-  {
-    number: '01',
-    title: 'Choose your wedding style.',
-    text: 'Explore curated aesthetics — from grand heritage mandaps to intimate open-air lawns.',
-    position: 'center 22%',
-  },
-  {
-    number: '02',
-    title: 'Plan it yourself or work with a planner.',
-    text: 'Shape every detail on your own, or collaborate with an experienced wedding coordinator.',
-    position: 'center 50%',
-  },
-  {
-    number: '03',
-    title: 'Find the right vendors.',
-    text: 'Connect directly with verified decorators, caterers, photographers, and venues tailored to your vision.',
-    position: 'center 75%',
-  },
-]
+import { useAuthStore } from '@/lib/store/authStore'
 
 export default function Page() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedRole, setSelectedRole] = useState<'couple' | 'planner' | null>(null)
+  const router = useRouter()
+  const setRole = useAuthStore(state => state.setRole)
 
-  const handleSelectRole = (role: 'couple' | 'planner') => {
-    setSelectedRole(role)
+  const handleSelectRole = (role: 'couple' | 'planner' | 'vendor') => {
+    setRole(role)
     setIsModalOpen(false)
-    if (role === 'planner') {
-      window.location.href = '/planner/leads'
-      return
-    }
-    const pathwaysSection = document.getElementById('pathways')
-    if (pathwaysSection) {
-      pathwaysSection.scrollIntoView({ behavior: 'smooth' })
-    }
+    router.push('/auth?role=' + role)
   }
 
   return (
     <main className="site-shell">
-      {/* Combined Navbar + Hero with shared backdrop */}
       <div className="navbar-hero-backdrop">
         <Navbar onUseApp={() => setIsModalOpen(true)} />
         <HeroSection onUseApp={() => setIsModalOpen(true)} />
       </div>
 
-      {/* Pop-up modal for Couple vs Planner role selection */}
       <RoleModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSelectRole={handleSelectRole}
       />
 
-      {/* Use Tools Section */}
       <section className="how section" id="use-tools">
         <div className="section-heading">
           <h2>Couples · Planner · Vendor</h2>
@@ -71,10 +39,7 @@ export default function Page() {
         <div className="step-grid">
           <article className="step glass-card">
             <div className="step-image">
-              <img
-                src="/couple.png"
-                alt="Couples tool"
-              />
+              <img src="/couple.png" alt="Couples tool" />
             </div>
             <div className="step-content">
               <p><strong>Design your perfect wedding</strong> with AI-powered moodboards</p>
@@ -82,10 +47,7 @@ export default function Page() {
           </article>
           <article className="step glass-card">
             <div className="step-image">
-              <img
-                src="/planner.png"
-                alt="Planner tool"
-              />
+              <img src="/planner.png" alt="Planner tool" />
             </div>
             <div className="step-content">
               <p><strong>Manage leads and coordinate</strong> every wedding detail</p>
@@ -93,10 +55,7 @@ export default function Page() {
           </article>
           <article className="step glass-card">
             <div className="step-image">
-              <img
-                src="/vendor.png"
-                alt="Vendor tool"
-              />
+              <img src="/vendor.png" alt="Vendor tool" />
             </div>
             <div className="step-content">
               <p><strong>Showcase services and grow</strong> your wedding business</p>
@@ -105,7 +64,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Ready CTA */}
       <section className="cta cta-simple" id="planning">
         <div>
           <h2>Ready to start planning?</h2>
@@ -120,7 +78,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer>
         <a href="#top" className="brand">
           <span className="brand-mark">♜</span>
