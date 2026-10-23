@@ -6,31 +6,26 @@ import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   Brush,
-  CalendarDays,
   Coins,
   Image as ImageIcon,
-  MessageCircle,
+  Handshake,
   MessageSquareText,
   ScrollText,
-  ShoppingBag,
-  Store,
   UserRound,
   WandSparkles,
 } from 'lucide-react'
 
-const tools = [
-  { title: 'Wedding vision', copy: 'Shape each wedding event.', href: '/couple/vision', image: '/playground-04-decor.png', icon: WandSparkles },
-  { title: 'Moodboards', copy: 'Save and edit ideas.', href: '/couple/moodboard', image: '/playground-03-seating.png', icon: ImageIcon },
-  { title: 'Find vendors', copy: 'Choose your wedding team.', href: '/couple/vendors', image: '/tool-vendor.jpg', icon: Store },
-  { title: 'Hire a planner', copy: 'Ask for planning help.', href: '/couple/request', image: '/empty-lawn-venue.png', icon: ScrollText },
-  { title: 'Saved choices', copy: 'Review your wedding cart.', href: '/couple/cart', image: '/lawn-venue.png', icon: ShoppingBag },
-  { title: 'Your messages', copy: 'Talk with your team.', href: '/couple/messages', image: '/playground-02-stage.png', icon: MessageCircle },
+const flowSteps = [
+  { number: '01', title: 'Create your account', copy: 'Keep your wedding details.', action: 'Create account or sign in', href: '/auth?role=couple', icon: UserRound, layout: 'is-account' },
+  { number: '02', title: 'Build your moodboard', copy: 'Save styles, colors, and ideas.', action: 'Open your moodboard', href: '/couple/moodboard', icon: ImageIcon, image: '/tool-couples.jpg', imageAlt: 'Wedding moodboard with colors and ideas', layout: 'is-moodboard' },
+  { number: '03', title: 'Hire a planner', copy: 'Get help from a planner.', action: 'Find a planner', href: '/couple/request', icon: Handshake, image: '/tool-planner.jpg', imageAlt: 'Wedding planner notes and plans', layout: 'is-choice' },
+  { number: '04', title: 'Plan it yourself', copy: 'Shape each part your way.', action: 'Start your design', href: '/couple/vision', icon: WandSparkles, image: '/playground-04-decor.png', imageAlt: 'Wedding ceremony designed for a couple', layout: 'is-choice' },
 ]
 
 const inspiration = [
-  { title: 'Wedding vision', image: '/playground-04-decor.png', href: '/couple/vision' },
-  { title: 'Moodboards', image: '/playground-03-seating.png', href: '/couple/moodboard' },
-  { title: 'Vendor search', image: '/tool-vendor.jpg', href: '/couple/vendors' },
+  { title: 'Plan your wedding', image: '/playground-04-decor.png', href: '/couple/vision' },
+  { title: 'Check your saved design', image: '/playground-03-seating.png', href: '/couple/moodboard' },
+  { title: 'Find a vendor', image: '/tool-vendor.jpg', href: '/couple/vendors' },
 ]
 
 export default function CoupleHomePage() {
@@ -118,7 +113,7 @@ export default function CoupleHomePage() {
           <Link className="couple-message-button" href="/couple/messages" aria-label="Messages">
             <MessageSquareText size={20} strokeWidth={1.7} />
           </Link>
-          <a className="couple-profile" href="#profile" aria-label="Wedding details">
+          <a className="couple-profile" href="#account" aria-label="Your account">
             <UserRound size={20} strokeWidth={1.7} />
           </a>
         </div>
@@ -134,9 +129,13 @@ export default function CoupleHomePage() {
             </h1>
             <p className="couple-welcome-line"><span>Plan your day.</span><span>Your way.</span></p>
             <span className="couple-copy-divider" aria-hidden="true" />
-            <Link href="/couple/vision" className="couple-primary-button">
+            <Link href="/couple/moodboard" className="couple-primary-button">
               Design your wedding <ArrowRight className="couple-cta-arrow" size={17} />
             </Link>
+            <div className="couple-auth-actions">
+              <Link href="/auth?role=couple&next=%2Fcouple%2Fmoodboard">Create account</Link>
+              <Link href="/auth?role=couple&mode=signin&next=%2Fcouple%2Fmoodboard">Sign in</Link>
+            </div>
           </div>
           <div className="couple-welcome-art" ref={templeRef} aria-hidden="true">
             <span className="couple-temple-art" />
@@ -153,23 +152,33 @@ export default function CoupleHomePage() {
           <div className="couple-section-heading">
             <div>
               <p className="couple-eyebrow">YOUR WEDDING TOOLS</p>
-              <h2 id="tools-title">Plan every part</h2>
+              <h2 id="tools-title">Your wedding, step by step</h2>
+              <p className="couple-flow-intro"><span>Start with your ideas.</span><span>Then choose how to plan.</span></p>
             </div>
           </div>
-          <div className="couple-tool-grid">
-            {tools.map(({ title, copy, href, image, icon: Icon }, index) => (
-              <Link href={href} className="couple-tool-card" key={title}>
-                <div className="couple-tool-image">
-                  <Image src={image} alt="" fill sizes="(max-width: 760px) 90vw, 30vw" />
-                  <span className="couple-tool-icon"><Icon size={19} /></span>
-                  <span className="couple-tool-number">0{index + 1}</span>
-                </div>
-                <div className="couple-tool-copy">
-                  <h3>{title}</h3>
-                  <p>{copy}</p>
-                  <span className="couple-tool-action" aria-hidden="true"><ArrowRight size={17} /></span>
-                </div>
-              </Link>
+          <div className="couple-flow-grid">
+            {flowSteps.map(({ number, title, copy, action, href, icon: Icon, image, imageAlt, layout }, index) => (
+              <div className="couple-flow-item" key={number}>
+                {index === 2 && (
+                  <div className="couple-flow-choice-heading">
+                    <p className="couple-eyebrow">STEP 3 · CHOOSE YOUR WAY</p>
+                    <h3>Who will plan your day?</h3>
+                    <p>Choose what feels right.</p>
+                  </div>
+                )}
+                <Link href={href} className={`couple-flow-card ${layout}`}>
+                  <span className="couple-flow-visual">
+                    {image ? <Image src={image} alt={imageAlt ?? ''} fill sizes="(max-width: 680px) 90vw, 42vw" /> : <Icon size={54} strokeWidth={1.35} />}
+                    <span className="couple-flow-number">{number}</span>
+                  </span>
+                  <span className="couple-flow-copy">
+                    <small className="couple-flow-kicker">STEP {number}</small>
+                    <strong>{title}</strong>
+                    <span>{copy}</span>
+                    <span className="couple-flow-action">{action}<ArrowRight size={17} aria-hidden="true" /></span>
+                  </span>
+                </Link>
+              </div>
             ))}
           </div>
         </section>
@@ -178,35 +187,28 @@ export default function CoupleHomePage() {
           <div className="couple-checklist panel-card">
             <div className="couple-panel-heading">
               <div>
-                <p className="couple-eyebrow">PLANNER REPLIES</p>
-                <h2>Quotes and bids</h2>
+                <p className="couple-eyebrow">PLANNER REQUEST</p>
+                <h2>Track your request</h2>
               </div>
               <ScrollText size={24} className="couple-panel-mark" />
             </div>
-            <div className="couple-status-grid">
-              <div><strong>—</strong><span>Accepted</span></div>
-              <div><strong>—</strong><span>Waiting</span></div>
-              <div><strong>—</strong><span>Closed</span></div>
-            </div>
-            <p className="couple-panel-note">Planner replies show here.</p>
-            <Link href="/couple/request" className="couple-text-link">Find a planner <ArrowRight size={15} /></Link>
+            <p className="couple-panel-note">Check its status here.</p>
+            <Link href="/couple/requests" className="couple-text-link">View your request <ArrowRight size={15} /></Link>
           </div>
 
           <div className="couple-account-card panel-card" id="account">
             <p className="couple-eyebrow">YOUR ACCOUNT</p>
             <div className="couple-account-row"><Coins size={20} /><span>Credits</span><strong>—</strong></div>
             <div className="couple-account-row"><Brush size={20} /><span>Current plan</span><strong>—</strong></div>
-            <a href="#profile" className="couple-text-link">Wedding details <ArrowRight size={15} /></a>
           </div>
         </section>
 
         <section className="couple-inspiration-section" aria-labelledby="inspiration-title">
           <div className="couple-section-heading">
             <div>
-              <p className="couple-eyebrow">WEDDING IDEAS</p>
-              <h2 id="inspiration-title">Begin with a vision</h2>
+              <p className="couple-eyebrow">YOUR NEXT STEP</p>
+              <h2 id="inspiration-title">What would you like to do?</h2>
             </div>
-            <CalendarDays size={24} className="couple-panel-mark" />
           </div>
           <div className="couple-inspiration-grid">
             {inspiration.map((item) => (
@@ -216,16 +218,6 @@ export default function CoupleHomePage() {
               </Link>
             ))}
           </div>
-        </section>
-
-        <section className="couple-help-strip" id="messages">
-          <span className="couple-help-icon"><MessageCircle size={19} /></span>
-          <div><strong>Recent messages</strong><span>Messages live here.</span></div>
-          <Link href="/couple/messages" aria-label="Open messages"><ArrowRight size={18} /></Link>
-        </section>
-
-        <section className="couple-profile-strip" id="profile">
-          <div><p className="couple-eyebrow">YOUR WEDDING DETAILS</p><strong>Names · Date · Place · Guests · Budget</strong></div>
         </section>
 
         <footer className="couple-footer"><span>A LOVERS CARD</span><span>YOUR WEDDING, YOUR WAY</span></footer>
