@@ -11,7 +11,7 @@ export default function MobileNav() {
   if (!role) return null;
 
   const coupleNavItems = [
-    { icon: '🏠', label: 'Home', path: '/couple/onboarding' },
+    { icon: '🏠', label: 'Home', path: '/couple' },
     { icon: '🎨', label: 'Vision', path: '/couple/vision' },
     { icon: '🖼️', label: 'Moodboard', path: '/couple/moodboard' },
     { icon: '🛒', label: 'Cart', path: '/couple/cart' },
@@ -19,27 +19,21 @@ export default function MobileNav() {
   ];
 
   const plannerNavItems = [
-    { icon: '📊', label: 'Dashboard', path: '/planner' },
+    { icon: '📊', label: 'Home', path: '/planner' },
     { icon: '🔍', label: 'Leads', path: '/planner/leads' },
-    { icon: '👥', label: 'Clients', path: '/planner/clients' },
-    { icon: '👤', label: 'Profile', path: '/planner/profile' },
+    { icon: '🖼️', label: 'Profile', path: '/planner/profile' },
   ];
-
   const vendorNavItems = [
-    { icon: '📊', label: 'Dashboard', path: '/vendor' },
-    { icon: '📥', label: 'Inquiries', path: '/vendor/inquiries' },
+    { icon: '🏠', label: 'Home', path: '/vendor' },
+    { icon: '📥', label: 'Requests', path: '/vendor/inquiries' },
     { icon: '🖼️', label: 'Portfolio', path: '/vendor/portfolio' },
-    { icon: '⚙️', label: 'Settings', path: '/vendor/profile' },
+    { icon: '👤', label: 'Profile', path: '/vendor/profile' },
   ];
 
   const navItems =
-    role === 'couple'
-      ? coupleNavItems
-      : role === 'planner'
-      ? plannerNavItems
-      : vendorNavItems;
+    role === 'couple' ? coupleNavItems : role === 'planner' ? plannerNavItems : vendorNavItems;
 
-  const themeColor = role === 'couple' ? '#1E4636' : role === 'planner' ? '#3A2563' : '#1E4636';
+  const themeColor = role === 'couple' ? '#1E4636' : '#3A2563';
 
   return (
     <nav className="mobile-nav md:hidden">
