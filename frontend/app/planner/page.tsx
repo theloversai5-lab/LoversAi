@@ -1,217 +1,241 @@
-'use client';
+import Image from 'next/image'
+import Link from 'next/link'
+import LeadStream from '@/components/landing/LeadStream'
+import {
+  ArrowRight,
+  Banknote,
+  BookOpen,
+  BriefcaseBusiness,
+  Building2,
+  Camera,
+  ChartNoAxesColumnIncreasing,
+  ClipboardList,
+  Coins,
+  FileText,
+  Handshake,
+  Image as ImageIcon,
+  LayoutDashboard,
+  Mail,
+  MessageCircle,
+  Package,
+  Palette,
+  Search,
+  Sparkles,
+  Store,
+  Users,
+  Video,
+  Utensils,
+  type LucideIcon,
+} from 'lucide-react'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/store/authStore';
+type ProTool = {
+  title: string
+  detail: string
+  icon: LucideIcon
+  href?: string
+  venues?: string[]
+}
 
-export default function PlannerDashboard() {
-  const router = useRouter();
-  const { user } = useAuthStore();
-  const [stats] = useState({
-    totalLeads: 24,
-    unlockedLeads: 8,
-    activeClients: 3,
-    revenue: 450000,
-  });
+type ToolGroup = {
+  id: string
+  label: string
+  title: string
+  detail: string
+  tools: ProTool[]
+}
 
+const toolGroups: ToolGroup[] = [
+  {
+    id: 'planner-tools',
+    label: 'FOR PLANNERS',
+    title: 'Plan each celebration',
+    detail: 'Find couples. Shape each day.',
+    tools: [
+      { title: 'Find wedding leads', detail: 'Meet couples ready to plan.', icon: Search, href: '/planner/leads' },
+      { title: 'Manage clients', detail: 'Keep each wedding on track.', icon: Users, href: '/planner/clients' },
+      { title: 'Find wedding vendors', detail: 'Bring the right team together.', icon: Store },
+      { title: 'Track bids', detail: 'See new couple requests.', icon: ClipboardList },
+      { title: 'Build quotes', detail: 'Share costs with each couple.', icon: FileText },
+      { title: 'Manage deals', detail: 'Track each wedding deal.', icon: Handshake },
+      { title: 'Planner messages', detail: 'Talk with every couple.', icon: MessageCircle },
+      { title: 'Save pitch work', detail: 'Keep your best ideas close.', icon: BookOpen },
+      { title: 'Planner profile', detail: 'Show your work and style.', icon: BriefcaseBusiness, href: '/planner/profile' },
+    ],
+  },
+  {
+    id: 'pitch-tools',
+    label: 'PITCH AND DESIGN',
+    title: 'Show each wedding idea',
+    detail: 'Shape the look before the day.',
+    tools: [
+      { title: 'Pitch with AI', detail: 'Show a full wedding look.', icon: Sparkles },
+      { title: 'Venue views', detail: 'See every side of venues.', icon: Building2 },
+      { title: 'Change photo angles', detail: 'View new sides of spaces.', icon: Camera },
+      { title: 'Retouch photos', detail: 'Try new looks in photos.', icon: ImageIcon },
+      { title: 'Make wedding videos', detail: 'Bring each scene to life.', icon: Video },
+      { title: 'Design wedding decor', detail: 'Plan each event zone.', icon: Palette },
+      { title: 'Plan wedding food', detail: 'Shape menus for guests.', icon: Utensils },
+      { title: 'Pitch library', detail: 'Save your favorite work.', icon: BookOpen },
+      { title: 'Tool credits and plans', detail: 'Keep track of tool use.', icon: Coins },
+      {
+        title: 'Venue partners',
+        detail: 'Explore wedding spaces.',
+        icon: Building2,
+        venues: ['MasterVenue AI', 'FairMount Mumbai', 'Taj Agra', 'ITC Mughal', 'Jaypee Palace'],
+      },
+    ],
+  },
+  {
+    id: 'vendor-tools',
+    label: 'FOR VENDORS',
+    title: 'Grow your wedding work',
+    detail: 'Show your work. Meet planners.',
+    tools: [
+      { title: 'Vendor home', detail: 'See your work and requests.', icon: LayoutDashboard, href: '/vendor' },
+      { title: 'Show your portfolio', detail: 'Share your best work.', icon: ImageIcon, href: '/vendor/portfolio' },
+      { title: 'Manage inventory', detail: 'List your goods and services.', icon: Package },
+      { title: 'Receive requests', detail: 'Answer planner needs.', icon: Mail, href: '/vendor/inquiries' },
+      { title: 'Send service quotes', detail: 'Share clear prices.', icon: Banknote },
+      { title: 'Track earnings', detail: 'See sales and payouts.', icon: ChartNoAxesColumnIncreasing },
+      { title: 'Vendor messages', detail: 'Talk with your planner team.', icon: MessageCircle },
+      { title: 'Vendor profile', detail: 'Share your business details.', icon: BriefcaseBusiness, href: '/vendor/profile' },
+    ],
+  },
+]
+
+function ToolCard({ tool, index }: { tool: ProTool; index: number }) {
+  const Icon = tool.icon
+  const content = (
+    <>
+      <span className="pro-tool-icon" aria-hidden="true"><Icon size={19} strokeWidth={1.8} /></span>
+      <span className="pro-tool-copy">
+        <span className="pro-tool-title">{tool.title}</span>
+        <span className="pro-tool-detail">{tool.detail}</span>
+        {tool.venues && (
+          <span className="pro-venue-list">
+            {tool.venues.map((venue) => <span key={venue}>{venue}</span>)}
+          </span>
+        )}
+      </span>
+      <span className={`pro-tool-status ${tool.href ? 'is-preview' : 'is-soon'}`}>
+        {tool.href ? 'Preview' : 'Coming soon'}
+      </span>
+      {tool.href && <ArrowRight className="pro-tool-arrow" size={17} aria-hidden="true" />}
+      <span className="pro-tool-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+    </>
+  )
+
+  return tool.href ? (
+    <Link className="pro-tool-card is-linked" href={tool.href}>
+      {content}
+    </Link>
+  ) : (
+    <article className="pro-tool-card">
+      {content}
+    </article>
+  )
+}
+
+export default function PlannerLandingPage() {
   return (
-    <div className="min-h-screen bg-[#3A2563]">
-      {/* Header */}
-      <div className="bg-[#E2B451] border-b-4 border-[#3A2563]">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-[#3A2563] mb-1">
-                Planner dashboard
-              </h1>
-              <p className="text-[#3A2563]/70">
-                Manage leads and clients
-              </p>
-            </div>
-            <button
-              onClick={() => {
-                useAuthStore.getState().clearAuth();
-                router.push('/');
-              }}
-              className="px-4 py-2 bg-[#3A2563] text-[#E2B451] rounded-lg font-semibold hover:bg-[#3A2563]/90 transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </div>
+    <main className="pro-landing">
+      <header className="pro-topbar">
+        <Link className="pro-brand" href="/" aria-label="A Lovers Card home">
+          A Lovers Card
+        </Link>
+        <nav className="pro-nav" aria-label="Page sections">
+          <a href="#planner-tools">Planner tools</a>
+          <a href="#pitch-tools">Pitch tools</a>
+          <a href="#vendor-tools">Vendor tools</a>
+        </nav>
+        <Link className="pro-sign-in" href="/auth?role=planner&mode=signin&next=%2Fplanner%2Fprofile">Sign in</Link>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-[#E2B451]/10 rounded-lg p-6 border-2 border-[#E2B451]/20">
-            <p className="text-[#E2B451]/60 text-sm mb-1">Total leads</p>
-            <p className="text-4xl font-bold text-[#E2B451]">{stats.totalLeads}</p>
-          </div>
-          <div className="bg-[#E2B451]/10 rounded-lg p-6 border-2 border-[#E2B451]/20">
-            <p className="text-[#E2B451]/60 text-sm mb-1">Unlocked</p>
-            <p className="text-4xl font-bold text-[#E2B451]">{stats.unlockedLeads}</p>
-          </div>
-          <div className="bg-[#E2B451]/10 rounded-lg p-6 border-2 border-[#E2B451]/20">
-            <p className="text-[#E2B451]/60 text-sm mb-1">Active clients</p>
-            <p className="text-4xl font-bold text-[#E2B451]">{stats.activeClients}</p>
-          </div>
-          <div className="bg-[#E2B451]/10 rounded-lg p-6 border-2 border-[#E2B451]/20">
-            <p className="text-[#E2B451]/60 text-sm mb-1">Revenue (₹)</p>
-            <p className="text-4xl font-bold text-[#E2B451]">
-              {(stats.revenue / 100000).toFixed(1)}L
+      <div className="pro-page-content">
+        <section className="pro-hero" aria-labelledby="pro-hero-title">
+          <div className="pro-hero-copy">
+            <p className="pro-eyebrow">FOR WEDDING PROFESSIONALS</p>
+            <h1 id="pro-hero-title"><span>Your work deserves</span><span>to be discovered.</span></h1>
+            <p className="pro-hero-line">
+              Meet couples planning weddings.<br />
+              Show your work.
             </p>
+            <LeadStream />
+            <div className="pro-hero-actions">
+              <Link className="pro-primary-button" href="/auth?role=planner&next=%2Fplanner%2Fprofile">
+                Create your profile <ArrowRight size={17} />
+              </Link>
+              <Link className="pro-secondary-link" href="/auth?role=planner&mode=signin&next=%2Fplanner%2Fprofile">Sign in</Link>
+              <Link className="pro-secondary-link" href="/planner/leads" aria-label="Find leads. Sign in or create a profile first.">
+                Find leads
+              </Link>
+            </div>
           </div>
+          <figure className="pro-showcase" aria-label="Wedding portfolio examples">
+            <div className="pro-showcase-main">
+              <Image
+                src="/tool-vendor.jpg"
+                alt="Floral wedding stage with warm lights"
+                fill
+                priority
+                sizes="(max-width: 760px) 92vw, 48vw"
+              />
+              <span className="pro-showcase-caption">A setting made memorable</span>
+            </div>
+            <Link className="pro-showcase-card" href="/vendor/portfolio" aria-label="Open your vendor portfolio">
+              <Image
+                src="/lawn-venue.png"
+                alt="Outdoor wedding ceremony setup"
+                width={180}
+                height={130}
+                sizes="180px"
+              />
+              <span>
+                <small>YOUR PORTFOLIO</small>
+                <strong>Show your work</strong>
+              </span>
+              <ArrowRight size={17} aria-hidden="true" />
+            </Link>
+          </figure>
+        </section>
+
+        <div className="pro-promise" aria-label="Professional tools">
+          <span>Show your portfolio</span>
+          <span>Meet wedding couples</span>
+          <span>Reply to inquiries</span>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <button
-            onClick={() => router.push('/planner/leads')}
-            className="bg-[#E2B451] hover:bg-[#E2B451]/90 transition-all p-8 rounded-lg text-left group"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#3A2563] rounded-full flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-[#E2B451]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-              <svg
-                className="w-6 h-6 text-[#3A2563] group-hover:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-[#3A2563] mb-2">Browse leads</h3>
-            <p className="text-[#3A2563]/70">Find new wedding clients</p>
-          </button>
-
-          <button
-            onClick={() => router.push('/planner/clients')}
-            className="bg-[#E2B451] hover:bg-[#E2B451]/90 transition-all p-8 rounded-lg text-left group"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#3A2563] rounded-full flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-[#E2B451]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              </div>
-              <svg
-                className="w-6 h-6 text-[#3A2563] group-hover:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-[#3A2563] mb-2">My clients</h3>
-            <p className="text-[#3A2563]/70">Manage active weddings</p>
-          </button>
-
-          <button
-            onClick={() => router.push('/planner/profile')}
-            className="bg-[#E2B451] hover:bg-[#E2B451]/90 transition-all p-8 rounded-lg text-left group"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-[#3A2563] rounded-full flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-[#E2B451]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </div>
-              <svg
-                className="w-6 h-6 text-[#3A2563] group-hover:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-[#3A2563] mb-2">My profile</h3>
-            <p className="text-[#3A2563]/70">Update business info</p>
-          </button>
+        <div className="pro-tools-intro" id="tools">
+          <p className="pro-eyebrow">YOUR WEDDING WORKSPACE</p>
+          <h2>Tools for every step</h2>
+          <p>Some tools are previews. More arrive soon.</p>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-[#E2B451]/10 rounded-lg border-2 border-[#E2B451]/20 p-6">
-          <h2 className="text-2xl font-bold text-[#E2B451] mb-4">Recent activity</h2>
-          <div className="space-y-3">
-            {[
-              { text: 'New lead available: Priya & Raj', time: '2 hours ago', type: 'new' },
-              { text: 'Message from Neha & Arjun', time: '5 hours ago', type: 'message' },
-              { text: 'Payment received: ₹150,000', time: '1 day ago', type: 'payment' },
-            ].map((activity, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-4 bg-[#3A2563]/20 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      activity.type === 'new'
-                        ? 'bg-[#F08A3C]'
-                        : activity.type === 'message'
-                        ? 'bg-[#E2B451]'
-                        : 'bg-[#1E4636]'
-                    }`}
-                  />
-                  <p className="text-[#E2B451]">{activity.text}</p>
+        <div className="pro-tool-groups">
+          {toolGroups.map((group) => (
+            <section className="pro-tool-group" id={group.id} key={group.id} aria-labelledby={`${group.id}-title`}>
+              <div className="pro-group-heading">
+                <div>
+                  <p className="pro-eyebrow">{group.label}</p>
+                  <h2 id={`${group.id}-title`}>{group.title}</h2>
+                  <p>{group.detail}</p>
                 </div>
-                <p className="text-[#E2B451]/60 text-sm">{activity.time}</p>
               </div>
-            ))}
-          </div>
+              <div className="pro-tool-list">
+                {group.tools.map((tool, index) => (
+                  <ToolCard key={tool.title} tool={tool} index={index} />
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
+
+        <footer className="pro-footer">
+          <Link className="pro-brand" href="/">A Lovers Card</Link>
+          <span>WEDDING WORK, WELL PLANNED</span>
+          <Link href="/auth?role=planner&next=%2Fplanner%2Fprofile">Join as a pro <ArrowRight size={15} /></Link>
+        </footer>
       </div>
-    </div>
-  );
+    </main>
+  )
 }

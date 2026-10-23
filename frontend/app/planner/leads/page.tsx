@@ -1,151 +1,204 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Search,
-  Filter,
   Calendar,
   MapPin,
   Users,
   IndianRupee,
-  Sparkles,
-  ArrowRight,
   CheckCircle2,
   X,
   Layers,
-  Send,
   ArrowLeft,
+  ArrowRight,
   ChevronDown,
-  Paperclip,
-  Mic,
-  Image as ImageIcon,
+  MessageCircle,
 } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
 
-// Hardcoded sample leads representing couples who completed their moodboards
+// Leads load from couple requests in Supabase.
 interface WeddingLead {
   id: string
+  status: 'open' | 'viewed'
+  profileId: string
+  profileHandle: string
   couple: string
   title: string
   date: string
   dateRaw: string // YYYY-MM-DD for filtering
   city: string
-  state: string
   budgetDisplay: string
   budgetRaw: number // in Lakhs
+  budgetTotal: number // in rupees
   guests: number
-  venueStyle: 'Open Lawn' | 'Heritage Palace' | 'Garden Meadow'
+  venueStyle: string
+  hasMoodboard: boolean
   coverImage: string
-  moodboardSteps: string[]
+  moodboardImages: string[]
   needs: string[]
   note: string
 }
 
-const sampleLeads: WeddingLead[] = [
-  {
-    id: 'lead-1',
-    couple: 'Priya & Siddharth',
-    title: 'Golden Sunset Mandap Celebration',
-    date: 'Dec 14, 2026',
-    dateRaw: '2026-12-14',
-    city: 'Udaipur',
-    state: 'Rajasthan',
-    budgetDisplay: '₹35,00,000',
-    budgetRaw: 35,
-    guests: 350,
-    venueStyle: 'Open Lawn',
-    coverImage: '/playground-04-decor.png',
-    moodboardSteps: ['Sunset lawn space', 'Sacred mandap stage', 'Guest chair aisles', 'Marigold & lotus canopy'],
-    needs: ['Mandap setup', 'Banquet seating', 'Fairy lighting', 'Guest coordination'],
-    note: 'We finished our 4-layer moodboard. We need a planner who can build this exact mandap on a lakeside lawn.',
-  },
-  {
-    id: 'lead-2',
-    couple: 'Rhea & Kabir',
-    title: 'Daytime Botanical Garden Ceremony',
-    date: 'Nov 28, 2026',
-    dateRaw: '2026-11-28',
-    city: 'Alibaug',
-    state: 'Maharashtra',
-    budgetDisplay: '₹22,00,000',
-    budgetRaw: 22,
-    guests: 200,
-    venueStyle: 'Garden Meadow',
-    coverImage: '/lawn-venue.png',
-    moodboardSteps: ['Open orchard lawn', 'Floral arch stage', 'Cross-back chairs', 'Hanging brass lamps'],
-    needs: ['Floral canopy', 'Acoustic sound', 'Daytime bar setup', 'Local catering management'],
-    note: 'Day event with pastels and natural greenery. Moodboard is ready, looking for local Alibaug coordinator.',
-  },
-  {
-    id: 'lead-3',
-    couple: 'Meera & Arjun',
-    title: 'Royal Courtyard & Night Reception',
-    date: 'Jan 18, 2027',
-    dateRaw: '2027-01-18',
-    city: 'Jaipur',
-    state: 'Rajasthan',
-    budgetDisplay: '₹50,00,000',
-    budgetRaw: 50,
-    guests: 400,
-    venueStyle: 'Heritage Palace',
-    coverImage: '/playground-02-stage.png',
-    moodboardSteps: ['Palace courtyard', 'Elevated royal stage', 'Round table banquet', 'Candlelit lanterns'],
-    needs: ['Royal entry coordination', 'Stage production', 'Multi-day vendors', 'Luxury artist booking'],
-    note: 'Grand family wedding. Complete courtyard layout created on Lovers AI. Need seasoned luxury planner.',
-  },
-  {
-    id: 'lead-4',
-    couple: 'Ananya & Dev',
-    title: 'Lakeview Minimalist Mandap',
-    date: 'Feb 08, 2027',
-    dateRaw: '2027-02-08',
-    city: 'Bangalore',
-    state: 'Karnataka',
-    budgetDisplay: '₹18,00,000',
-    budgetRaw: 18,
-    guests: 150,
-    venueStyle: 'Open Lawn',
-    coverImage: '/playground-03-seating.png',
-    moodboardSteps: ['Lakefront green', 'Minimal wood mandap', 'Theatre seating', 'White jasmine runners'],
-    needs: ['Wood stage fabrication', 'Intimate seating setup', 'Live shehnai / flute artists'],
-    note: 'Intimate gathering of close friends and family. Clean lines and eco-friendly floral decor only.',
-  },
-  {
-    id: 'lead-5',
-    couple: 'Tara & Vivaan',
-    title: 'Meadow Pavilion with Sunset Views',
-    date: 'Mar 15, 2027',
-    dateRaw: '2027-03-15',
-    city: 'Goa',
-    state: 'Goa',
-    budgetDisplay: '₹42,00,000',
-    budgetRaw: 42,
-    guests: 280,
-    venueStyle: 'Garden Meadow',
-    coverImage: '/empty-lawn-venue.png',
-    moodboardSteps: ['Lawn cliff overlooking sea', 'Curved floral mandap', 'Lounge seating pods', 'Sunset bistro lights'],
-    needs: ['Weather-safe canopy', 'DJ & dance floor setup', 'Cocktail bar coordination', 'Guest transport'],
-    note: 'Destination wedding in South Goa. Full 3D lawn concept ready. Need planner with strong local vendor network.',
-  },
-]
-
 export default function LeadsPage() {
+  const router = useRouter()
+  const [leads, setLeads] = useState<WeddingLead[]>([])
+  const [loadingLeads, setLoadingLeads] = useState(true)
+  const [leadLoadError, setLeadLoadError] = useState('')
+  const [approvalPending, setApprovalPending] = useState(false)
+  const [professionalRole, setProfessionalRole] = useState<'planner' | 'vendor'>('planner')
+  const [roleReady, setRoleReady] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchDraft, setSearchDraft] = useState('')
   const [selectedBudget, setSelectedBudget] = useState('all')
   const [selectedDateRange, setSelectedDateRange] = useState('all')
   const [selectedStyle, setSelectedStyle] = useState('all')
 
-  // Selected lead for detail/pitch modal
+  // A mock unlock is saved in this browser until payment is integrated.
+  const [unlockedLeadIds, setUnlockedLeadIds] = useState<string[]>([])
+  const [pendingLead, setPendingLead] = useState<WeddingLead | null>(null)
+  const [unlockError, setUnlockError] = useState('')
   const [activeLead, setActiveLead] = useState<WeddingLead | null>(null)
-  const [pitchSent, setPitchSent] = useState(false)
-  const [pitchMessage, setPitchMessage] = useState('')
-  const [showMessageBox, setShowMessageBox] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
+  const [openingConversation, setOpeningConversation] = useState(false)
+
+  useEffect(() => {
+    try {
+      window.localStorage.removeItem('alc-mock-unlocked-leads')
+      const stored: unknown = JSON.parse(window.localStorage.getItem('alc-live-lead-unlocks') || '[]')
+      setUnlockedLeadIds(Array.isArray(stored) && stored.every((item) => typeof item === 'string') ? stored : [])
+    } catch {
+      setUnlockedLeadIds([])
+    }
+  }, [])
+
+  useEffect(() => {
+    const requestedRole = new URLSearchParams(window.location.search).get('role')
+    if (requestedRole === 'vendor') setProfessionalRole('vendor')
+    setRoleReady(true)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    async function loadLeads() {
+      if (!roleReady) return
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        const next = professionalRole === 'vendor' ? '/planner/leads?role=vendor' : '/planner/leads'
+        window.location.href = `/auth?role=${professionalRole}&mode=signin&next=${encodeURIComponent(next)}`
+        return
+      }
+      const { data: ownProfile, error: ownProfileError } = await supabase.from('profiles').select('role,is_approved,is_demo').eq('id', user.id).maybeSingle()
+      if (ownProfileError) throw ownProfileError
+      if (ownProfile?.role !== professionalRole) {
+        window.location.href = `/${ownProfile?.role ?? professionalRole}`
+        return
+      }
+      if (!ownProfile.is_approved && !ownProfile.is_demo) {
+        if (active) setApprovalPending(true)
+      }
+      const { data: requests, error: requestError } = await supabase
+        .from('planner_requests')
+        .select('id,couple_profile_id,moodboard_id,services,priorities,notes,status,created_at')
+        .in('status', ['open', 'viewed'])
+        .not('moodboard_id', 'is', null)
+        .order('created_at', { ascending: false })
+      if (requestError) throw requestError
+      if (!requests?.length) { if (active) setLoadingLeads(false); return }
+      const ids = [...new Set(requests.map((request) => request.couple_profile_id))]
+      const moodboardIds = [...new Set(requests.map((request) => request.moodboard_id).filter((id): id is string => Boolean(id)))]
+      const [{ data: profiles, error: profileError }, { data: requirements, error: requirementsError }, { data: boards, error: boardsError }] = await Promise.all([
+        supabase.from('profiles').select('id,handle,display_name,initials,city,role,is_demo,is_public,is_complete').in('id', ids),
+        supabase.from('couple_requirements').select('profile_id,partner_names,wedding_date,city,guest_count,budget_min,budget_max').in('profile_id', ids),
+        supabase.from('moodboards').select('id,profile_id,title,event_type,style,summary,image_urls').in('id', moodboardIds),
+      ])
+      if (profileError) throw profileError
+      if (requirementsError) throw requirementsError
+      if (boardsError) throw boardsError
+      if (active) {
+        const visibleRequests = requests.filter((request) => {
+          const profile = profiles?.find((item) => item.id === request.couple_profile_id)
+          const board = boards?.find((item) => item.id === request.moodboard_id && item.profile_id === request.couple_profile_id)
+          return Boolean(profile && profile.role === 'couple' && (profile.is_demo || (profile.is_public && profile.is_complete)) && board)
+        })
+        const rows: WeddingLead[] = visibleRequests.map((request) => {
+          const profile = profiles?.find((item) => item.id === request.couple_profile_id)
+          const requirement = requirements?.find((item) => item.profile_id === request.couple_profile_id)
+          const board = boards?.find((item) => item.id === request.moodboard_id && item.profile_id === request.couple_profile_id)
+          const dateRaw = requirement?.wedding_date ?? ''
+          const low = Number(requirement?.budget_min ?? 0)
+          const high = Number(requirement?.budget_max ?? 0)
+          return {
+            id: request.id,
+            status: request.status === 'viewed' ? 'viewed' : 'open',
+            profileId: request.couple_profile_id,
+            profileHandle: profile?.handle ?? '',
+            couple: requirement?.partner_names || profile?.display_name || 'Name not shared',
+            title: board?.title || board?.event_type || 'Wedding plans',
+            date: dateRaw ? new Date(`${dateRaw}T00:00:00`).toLocaleDateString('en', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Date not set',
+            dateRaw,
+            city: requirement?.city || profile?.city || 'City not set',
+            budgetDisplay: high ? `₹${(low / 100000).toFixed(0)}–₹${(high / 100000).toFixed(0)} lakh` : 'Budget not set',
+            budgetRaw: high / 100000,
+            budgetTotal: high || low,
+            guests: Number(requirement?.guest_count ?? 0),
+            venueStyle: board?.style || 'Style not set',
+            hasMoodboard: Boolean(board),
+            coverImage: board?.image_urls?.[0] || '',
+            moodboardImages: board?.image_urls ?? [],
+            needs: request.services ?? [],
+            note: request.notes || board?.summary || (request.priorities ?? []).join(' · '),
+          }
+        })
+        setLeads(rows)
+        setLoadingLeads(false)
+      }
+    }
+    void loadLeads().catch((error: unknown) => {
+      if (!active) return
+      setLeadLoadError(error instanceof Error ? error.message : 'Could not load leads.')
+      setLoadingLeads(false)
+    })
+    return () => { active = false }
+  }, [professionalRole, roleReady])
+
+  useEffect(() => {
+    if (!activeLead || activeLead.status !== 'open') return
+    let active = true
+    async function markRequestViewed() {
+      const { error } = await supabase.from('planner_requests')
+        .update({ status: 'viewed' })
+        .eq('id', activeLead!.id)
+        .eq('status', 'open')
+      if (error || !active) return
+      setLeads((current) => current.map((item) => item.id === activeLead!.id ? { ...item, status: 'viewed' } : item))
+      setActiveLead((current) => current?.id === activeLead!.id ? { ...current, status: 'viewed' } : current)
+    }
+    void markRequestViewed()
+    return () => { active = false }
+  }, [activeLead])
+
+  useEffect(() => {
+    if (!activeLead || activeLead.status !== 'open') return
+    let active = true
+    async function markAsViewed() {
+      const { error } = await supabase.from('planner_requests')
+        .update({ status: 'viewed' })
+        .eq('id', activeLead!.id)
+        .eq('status', 'open')
+      if (error || !active) return
+      setLeads((current) => current.map((item) => item.id === activeLead!.id ? { ...item, status: 'viewed' } : item))
+      setActiveLead((current) => current?.id === activeLead!.id ? { ...current, status: 'viewed' } : current)
+    }
+    void markAsViewed()
+    return () => { active = false }
+  }, [activeLead])
 
   // Filter leads dynamically
   const filteredLeads = useMemo(() => {
-    return sampleLeads.filter((lead) => {
+    return leads.filter((lead) => {
       // Search term filter (couple name, city, title)
       const q = searchTerm.toLowerCase().trim()
       if (
@@ -172,55 +225,102 @@ export default function LeadsPage() {
 
       return true
     })
-  }, [searchTerm, selectedBudget, selectedDateRange, selectedStyle])
+  }, [leads, searchTerm, selectedBudget, selectedDateRange, selectedStyle])
 
-  const handleOpenLead = (lead: WeddingLead) => {
-    setActiveLead(lead)
-    setPitchSent(false)
-    setPitchMessage('')
-    setShowMessageBox(false)
-    setIsRecording(false)
+  const unlockFee = (lead: WeddingLead) => lead.budgetTotal * 0.0001
+
+  const handleSelectLead = (lead: WeddingLead) => {
+    setUnlockError('')
+    if (unlockedLeadIds.includes(lead.id)) setActiveLead(lead)
+    else setPendingLead(lead)
   }
 
-  const handleSendPitch = (e: React.FormEvent) => {
-    e.preventDefault()
-    setPitchSent(true)
-    setShowMessageBox(false)
+  const handleMockPayment = () => {
+    if (!pendingLead) return
+    const next = [...new Set([...unlockedLeadIds, pendingLead.id])]
+    setUnlockedLeadIds(next)
+    window.localStorage.setItem('alc-live-lead-unlocks', JSON.stringify(next))
+    setActiveLead(pendingLead)
+    setPendingLead(null)
+    setUnlockError('')
   }
 
-  const handleToggleRecording = () => {
-    setIsRecording(!isRecording)
-    // In a real app, this would start/stop audio recording
+  const handleMessageCouple = async (lead: WeddingLead) => {
+    if (openingConversation) return
+    setOpeningConversation(true)
+    setUnlockError('')
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError) throw authError
+      if (!user) {
+        const next = professionalRole === 'vendor' ? '/planner/leads?role=vendor' : '/planner/leads'
+        router.push(`/auth?role=${professionalRole}&mode=signin&next=${encodeURIComponent(next)}`)
+        return
+      }
+      const { data: ownProfile, error: profileError } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+      if (profileError) throw profileError
+      if (ownProfile?.role !== professionalRole) {
+        setUnlockError(`Sign in as a ${professionalRole} to message.`)
+        return
+      }
+      const { data: existing, error: lookupError } = await supabase
+        .from('conversations').select('id')
+        .eq('couple_profile_id', lead.profileId)
+        .eq('professional_profile_id', user.id)
+        .maybeSingle()
+      if (lookupError) throw lookupError
+      const { data: conversation, error } = existing
+        ? { data: existing, error: null }
+        : await supabase.from('conversations')
+          .insert({ couple_profile_id: lead.profileId, professional_profile_id: user.id })
+          .select('id').single()
+      if (error) throw error
+      if (!conversation) throw new Error('Could not open this chat. Try again.')
+      router.push(`/${professionalRole}/messages?conversation=${encodeURIComponent(conversation.id)}`)
+    } catch (error) {
+      setUnlockError(error instanceof Error ? error.message : 'Could not open this chat.')
+    } finally {
+      setOpeningConversation(false)
+    }
   }
 
   const handleResetFilters = () => {
     setSearchTerm('')
+    setSearchDraft('')
     setSelectedBudget('all')
     setSelectedDateRange('all')
     setSelectedStyle('all')
   }
+
+  const activeFilterChips = [
+    ...(searchTerm ? [{ label: `Search: ${searchTerm}`, clear: () => { setSearchTerm(''); setSearchDraft('') } }] : []),
+    ...(selectedBudget !== 'all' ? [{ label: selectedBudget === 'under25' ? 'Under ₹25 Lakhs' : selectedBudget === '25to40' ? '₹25L – ₹40 Lakhs' : 'Above ₹40 Lakhs', clear: () => setSelectedBudget('all') }] : []),
+    ...(selectedDateRange !== 'all' ? [{ label: selectedDateRange === '2026' ? 'Late 2026' : selectedDateRange === 'early2027' ? 'Early 2027' : 'Spring 2027', clear: () => setSelectedDateRange('all') }] : []),
+    ...(selectedStyle !== 'all' ? [{ label: selectedStyle, clear: () => setSelectedStyle('all') }] : []),
+  ]
 
   return (
     <main className="leads-page-wrap">
       {/* Top Navigation */}
       <header className="leads-header">
         <div className="leads-header-inner">
-          <Link href="/" className="leads-back-btn">
-            <ArrowLeft size={16} />
-            <span>Back to Home</span>
-          </Link>
-
           <div className="leads-brand">
+            <Link href="/" className="leads-back-btn"><ArrowLeft size={15} /><span>Back</span></Link>
             <span className="brand-mark">♜</span>
             <span className="leads-brand-text">
               <strong>A LOVERS CARD</strong>
-              <small>PLANNER WORKSPACE</small>
+              <small>{professionalRole === 'vendor' ? 'VENDOR TOOLS' : 'PLANNER TOOLS'}</small>
             </span>
           </div>
 
+          <nav className="leads-nav" aria-label="Page sections">
+            <a href="#lead-filters">Filters</a>
+            <a href="#available-weddings">Couples</a>
+          </nav>
+
           <div className="leads-status-pill">
             <span className="status-dot" />
-            <span>5 Weddings Open for Planners</span>
+            <span>Lead search</span>
           </div>
         </div>
       </header>
@@ -232,35 +332,37 @@ export default function LeadsPage() {
 
           {/* Subline clearly explaining what leads are to non-technical planners/vendors */}
           <p className="leads-subline">
-            Find customers for your business here
+            Find couples ready to plan.
           </p>
         </div>
       </section>
 
       {/* Search and Filters Section */}
-      <section className="leads-controls-section">
+      <section className="leads-controls-section" id="lead-filters">
         <div className="leads-controls-card">
           {/* Search bar */}
-          <div className="leads-search-box">
+          <form className="leads-search-box" onSubmit={(event) => { event.preventDefault(); setSearchTerm(searchDraft.trim()) }}>
             <Search size={18} className="search-icon" />
             <input
               type="text"
-              placeholder="Search by couple name, city, or wedding style..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search couples"
+              placeholder="Search names, places, styles"
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
               className="leads-search-input"
             />
-            {searchTerm && (
+            {searchDraft && (
               <button
                 type="button"
                 className="clear-search-btn"
-                onClick={() => setSearchTerm('')}
+                onClick={() => { setSearchTerm(''); setSearchDraft('') }}
                 aria-label="Clear search"
               >
                 <X size={15} />
               </button>
             )}
-          </div>
+            <button className="leads-search-submit" type="submit"><Search size={16} /><span>Search</span></button>
+          </form>
 
           {/* Filter options row */}
           <div className="leads-filter-row">
@@ -338,20 +440,24 @@ export default function LeadsPage() {
               </button>
             )}
           </div>
+          {activeFilterChips.length > 0 && <div className="leads-filter-chips" aria-label="Active filters">{activeFilterChips.map((chip) => <button type="button" key={chip.label} onClick={chip.clear}>{chip.label}<X size={13} aria-hidden="true" /></button>)}<button type="button" className="leads-clear-filters" onClick={handleResetFilters}>Clear all</button></div>}
         </div>
       </section>
 
-      {/* Leads List Grid */}
-      <section className="leads-list-section">
+      {/* Leads list */}
+      <section className="leads-list-section" id="available-weddings">
         <div className="leads-count-header">
           <h2>Available weddings ({filteredLeads.length})</h2>
         </div>
+        {approvalPending && <p className="leads-approval-note">Your profile is being reviewed.</p>}
 
-        {filteredLeads.length === 0 ? (
+        {loadingLeads ? <div className="leads-empty-state"><h3>Finding open weddings…</h3></div> : leadLoadError ? (
+          <div className="leads-empty-state"><h3>Leads did not load.</h3><p>{leadLoadError}</p></div>
+        ) : filteredLeads.length === 0 ? (
           <div className="leads-empty-state">
             <span className="empty-icon">♜</span>
-            <h3>No weddings found</h3>
-            <p>Try clearing your search term or broadening your budget and date filters.</p>
+            <h3>No open requests yet</h3>
+            <p>New couple requests appear here.</p>
             <button
               type="button"
               className="button button-small"
@@ -361,98 +467,37 @@ export default function LeadsPage() {
             </button>
           </div>
         ) : (
-          <div className="leads-cards-grid">
-            {filteredLeads.map((lead, index) => (
-              <article key={lead.id} className="lead-card">
-                {/* Cover Image with Moodboard Preview */}
-                <div className="lead-card-media">
-                  <Image
-                    src={lead.coverImage}
-                    alt={lead.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="lead-cover-img"
-                    priority={index < 3}
-                  />
-                  <div className="lead-media-overlay" />
-
-                  {/* Moodboard badge */}
-                  <span className="lead-badge-moodboard">
-                    <Sparkles size={11} /> Moodboard Ready
-                  </span>
-
-                  {/* Style tag */}
-                  <span className="lead-style-tag">{lead.venueStyle}</span>
-                </div>
-
-                {/* Lead Card Body */}
-                <div className="lead-card-body">
-                  <div className="lead-primary-meta">
-                    <span className="lead-date">
-                      <Calendar size={13} /> {lead.date}
-                    </span>
-                    <span className="lead-location">
-                      <MapPin size={13} /> {lead.city}, {lead.state}
-                    </span>
-                  </div>
-
-                  <h3 className="lead-couple-names">{lead.couple}</h3>
-                  <h4 className="lead-wedding-title">{lead.title}</h4>
-
-                  {/* Cost & Guests Key Metrics */}
-                  <div className="lead-metrics-row">
-                    <div className="metric-box">
-                      <span className="metric-label">Estimated Budget</span>
-                      <strong className="metric-value cost-value">
-                        {lead.budgetDisplay}
-                      </strong>
-                    </div>
-                    <div className="metric-box">
-                      <span className="metric-label">Expected Guests</span>
-                      <strong className="metric-value guests-value">
-                        <Users size={13} /> {lead.guests}
-                      </strong>
-                    </div>
-                  </div>
-
-                  {/* Couple's Needs Tags */}
-                  <div className="lead-needs-tags">
-                    {lead.needs.slice(0, 3).map((item) => (
-                      <span key={item} className="need-tag">
-                        {item}
-                      </span>
-                    ))}
-                    {lead.needs.length > 3 && (
-                      <span className="need-tag more-tag">
-                        +{lead.needs.length - 3} more
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="lead-card-footer">
-                    <button
-                      type="button"
-                      className="view-lead-btn"
-                      onClick={() => handleOpenLead(lead)}
-                    >
-                      <span>View details</span>
-                      <ArrowRight size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="pitch-lead-btn"
-                      onClick={() => handleOpenLead(lead)}
-                    >
-                      <span>Pitch now</span>
-                    </button>
-                  </div>
-                </div>
-              </article>
+          <div className="leads-rows" role="table" aria-label="Wedding leads">
+            <div className="leads-row leads-row-heading" role="row">
+              <span role="columnheader">Name</span>
+              <span role="columnheader">Expected budget</span>
+            </div>
+            {filteredLeads.map((lead) => (
+              <button key={lead.id} type="button" className="leads-row leads-row-item" role="row" onClick={() => handleSelectLead(lead)}>
+                <span role="cell">{lead.couple}</span>
+                <span role="cell">{lead.budgetDisplay}</span>
+              </button>
             ))}
           </div>
         )}
       </section>
+
+      {pendingLead && (
+        <div className="lead-unlock-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingLead(null) }}>
+          <section className="lead-unlock-card" role="dialog" aria-modal="true" aria-labelledby="lead-unlock-title">
+            <button type="button" className="lead-unlock-close" aria-label="Close" onClick={() => setPendingLead(null)}><X size={20} /></button>
+            <p className="lead-unlock-eyebrow">Unlock this lead</p>
+            <h2 id="lead-unlock-title">{pendingLead.couple}</h2>
+            <p className="lead-unlock-budget">Expected budget <strong>{pendingLead.budgetDisplay}</strong></p>
+            <div className="lead-unlock-fee"><span>Unlock fee</span><strong>{pendingLead.budgetTotal ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(unlockFee(pendingLead)) : 'Not available'}</strong></div>
+            <p className="lead-unlock-note">Fee is 0.01% of budget.</p>
+            <p className="lead-unlock-note">Mock payment. No charge.</p>
+            {unlockError && <p className="lead-unlock-error" role="alert">{unlockError}</p>}
+            <button type="button" className="lead-unlock-pay" disabled={!pendingLead.budgetTotal} onClick={handleMockPayment}>Pay and unlock</button>
+            <button type="button" className="lead-unlock-cancel" onClick={() => setPendingLead(null)}>Go back</button>
+          </section>
+        </div>
+      )}
 
       {/* Full-Screen Lead Detail View */}
       {activeLead && (
@@ -467,29 +512,37 @@ export default function LeadsPage() {
             <span>Back to all leads</span>
           </button>
 
-          {/* Hero Image Section */}
+          {/* Couple and moodboard heading */}
           <div className="detail-hero-section">
-            <div className="detail-hero-image">
-              <Image
-                src={activeLead.coverImage}
-                alt={activeLead.title}
-                fill
-                className="detail-cover-img"
-              />
-              <div className="detail-hero-overlay" />
-            </div>
-            
             <div className="detail-hero-content">
+              <div className="detail-hero-copy">
+                <p className="detail-eyebrow">Couple’s wedding</p>
               <h1 className="detail-couple-name">{activeLead.couple}</h1>
               <h2 className="detail-wedding-title">{activeLead.title}</h2>
-              <span className="detail-venue-style">{activeLead.venueStyle}</span>
+                <span className="detail-venue-style">{activeLead.venueStyle}</span>
+              </div>
+              {activeLead.profileHandle && <Link className="view-lead-btn" href={`/profile/${activeLead.profileHandle}`}>View couple profile <ArrowRight size={15} /></Link>}
             </div>
           </div>
 
           {/* Main Content Grid */}
           <div className="detail-content-wrapper">
             <div className="detail-main-content">
-              
+              {/* The saved moodboard is the first thing planners can review. */}
+              <section className="detail-section detail-moodboard-section">
+                <div className="detail-moodboard-heading">
+                  <div><p className="detail-eyebrow">Their saved ideas</p><h3 className="detail-section-title">Wedding moodboard</h3></div>
+                  <span>{activeLead.moodboardImages.length} ideas</span>
+                </div>
+                {activeLead.moodboardImages.length > 0 ? <div className="detail-layers-grid">
+                  {activeLead.moodboardImages.map((imageUrl, idx) => (
+                    <figure key={`${imageUrl}-${idx}`} className="detail-layer-card">
+                      <div className="detail-layer-image"><Image src={imageUrl} alt={`${activeLead.couple} moodboard idea ${idx + 1}`} fill sizes="(max-width: 700px) 80vw, 360px" unoptimized /></div>
+                      <figcaption className="layer-number">Idea {idx + 1}</figcaption>
+                    </figure>
+                  ))}
+                </div> : <p className="detail-moodboard-empty">This couple has not saved images yet.</p>}
+              </section>
               {/* Key Specifications */}
               <section className="detail-section">
                 <h3 className="detail-section-title">Wedding details</h3>
@@ -505,7 +558,7 @@ export default function LeadsPage() {
                     <MapPin size={20} className="spec-icon" />
                     <div className="spec-info">
                       <small>Location</small>
-                      <strong>{activeLead.city}, {activeLead.state}</strong>
+                      <strong>{activeLead.city}</strong>
                     </div>
                   </div>
                   <div className="detail-spec-card">
@@ -533,20 +586,6 @@ export default function LeadsPage() {
                 </div>
               </section>
 
-              {/* Moodboard Layers */}
-              <section className="detail-section">
-                <h3 className="detail-section-title">Moodboard layers built on Lovers AI</h3>
-                <div className="detail-layers-grid">
-                  {activeLead.moodboardSteps.map((step, idx) => (
-                    <div key={step} className="detail-layer-card">
-                      <span className="layer-number">Layer {idx + 1}</span>
-                      <p className="layer-description">{step}</p>
-                      <CheckCircle2 size={16} className="layer-check" />
-                    </div>
-                  ))}
-                </div>
-              </section>
-
               {/* Services Needed */}
               <section className="detail-section">
                 <h3 className="detail-section-title">Services needed</h3>
@@ -564,101 +603,14 @@ export default function LeadsPage() {
             {/* Sidebar - Message Action */}
             <aside className="detail-sidebar">
               <div className="detail-action-card">
-                {pitchSent ? (
-                  <div className="message-success">
-                    <CheckCircle2 size={40} className="success-icon" />
-                    <h4>Message sent!</h4>
-                    <p>The couple will review your profile and respond soon.</p>
-                  </div>
-                ) : !showMessageBox ? (
-                  <>
-                    <h3 className="action-card-title">Interested in this wedding?</h3>
-                    <p className="action-card-subtitle">Send a message to connect</p>
-                    
-                    <button 
-                      type="button"
-                      className="detail-message-btn"
-                      onClick={() => setShowMessageBox(true)}
-                    >
-                      <span className="btn-text">Message couple</span>
-                      <span className="btn-icon">
-                        <Send size={16} />
-                      </span>
-                    </button>
-
-                    <div className="action-info-box">
-                      <p>The couple will see your planner profile and contact details</p>
-                    </div>
-                  </>
-                ) : (
-                  <div className="whatsapp-message-box">
-                    <div className="message-box-header">
-                      <h4>Send message to {activeLead.couple}</h4>
-                      <button 
-                        type="button"
-                        className="close-message-box"
-                        onClick={() => setShowMessageBox(false)}
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-
-                    <form onSubmit={handleSendPitch} className="message-form">
-                      <div className="message-input-wrapper">
-                        <textarea
-                          rows={4}
-                          placeholder="Type your message here..."
-                          value={pitchMessage}
-                          onChange={(e) => setPitchMessage(e.target.value)}
-                          required
-                          className="message-textarea"
-                        />
-                      </div>
-
-                      <div className="message-actions-row">
-                        <div className="attachment-options">
-                          <button 
-                            type="button" 
-                            className="attachment-btn"
-                            title="Attach image"
-                          >
-                            <ImageIcon size={18} />
-                          </button>
-                          <button 
-                            type="button" 
-                            className="attachment-btn"
-                            title="Attach file"
-                          >
-                            <Paperclip size={18} />
-                          </button>
-                          <button 
-                            type="button" 
-                            className={`attachment-btn ${isRecording ? 'recording' : ''}`}
-                            onClick={handleToggleRecording}
-                            title={isRecording ? "Stop recording" : "Record audio"}
-                          >
-                            <Mic size={18} />
-                          </button>
-                        </div>
-
-                        <button 
-                          type="submit" 
-                          className="send-message-btn"
-                          disabled={!pitchMessage.trim()}
-                        >
-                          <Send size={18} />
-                        </button>
-                      </div>
-
-                      {isRecording && (
-                        <div className="recording-indicator">
-                          <span className="recording-dot"></span>
-                          <span>Recording audio...</span>
-                        </div>
-                      )}
-                    </form>
-                  </div>
-                )}
+                <h3 className="action-card-title">Want to talk?</h3>
+                <p className="action-card-subtitle">Message this couple.</p>
+                <button type="button" className="detail-message-btn" disabled={openingConversation} onClick={() => void handleMessageCouple(activeLead)}>
+                  <span className="btn-text">Message couple</span>
+                  <span className="btn-icon"><MessageCircle size={16} /></span>
+                </button>
+                {unlockError && <p className="lead-unlock-error" role="alert">{unlockError}</p>}
+                <div className="action-info-box"><p>Your profile will be shared.</p></div>
               </div>
             </aside>
           </div>
