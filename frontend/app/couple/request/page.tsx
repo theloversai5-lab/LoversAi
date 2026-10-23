@@ -1,206 +1,204 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCoupleStore } from '@/lib/store/coupleStore';
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, ArrowRight, CalendarDays, Check, MapPin, UsersRound } from 'lucide-react'
+import { useCoupleStore } from '@/lib/store/coupleStore'
+import { supabase } from '@/lib/supabase/client'
+
+type WeddingRequestInfo = { partnerNames: string; date: string; city: string; guests: string; budget: string; images: string[] }
+
+const serviceOptions = ['Full planning', 'Part planning', 'Wedding day help', 'Wedding design']
+const priorityOptions = ['Keep costs clear', 'Choose good vendors', 'Plan the day', 'Create the look', 'Less stress']
+const stepTitles = ['What help do you need?', 'What matters most?', 'Add a short note', 'Check your request']
 
 export default function RequestPlannerPage() {
-  const router = useRouter();
-  const weddingProfile = useCoupleStore((state) => state.weddingProfile);
-  const [formData, setFormData] = useState({
-    services: [] as string[],
-    priorities: [] as string[],
-    additionalInfo: '',
-  });
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter()
+  const weddingProfile = useCoupleStore((state) => state.weddingProfile)
+  const [step, setStep] = useState(0)
+  const [services, setServices] = useState<string[]>([])
+  const [priorities, setPriorities] = useState<string[]>([])
+  const [note, setNote] = useState('')
+  const [wedding, setWedding] = useState<WeddingRequestInfo | null>(null)
+  const [hasMoodboard, setHasMoodboard] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [requestId, setRequestId] = useState('')
 
-  const serviceOptions = [
-    { id: 'full', label: 'Full service planning', desc: 'End to end planning' },
-    { id: 'partial', label: 'Partial planning', desc: 'Selected services only' },
-    { id: 'coordination', label: 'Day coordination', desc: 'Manage the wedding day' },
-    { id: 'design', label: 'Design & decor', desc: 'Visual concept only' },
-  ];
+  useEffect(() => {
+    let alive = true
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.replace('/auth?role=couple&next=%2Fcouple%2Frequest')
+        return
+      }
+      const [{ data: profile, error: profileError }, { data: needs, error: needsError }, { data: boards, error: boardError }] = await Promise.all([
+        supabase.from('profiles').select('id,role,city,display_name').eq('id', user.id).maybeSingle(),
+        supabase.from('couple_requirements').select('partner_names,wedding_date,city,guest_count,budget_min,budget_max,services,priorities,notes').eq('profile_id', user.id).maybeSingle(),
+        supabase.from('moodboards').select('id,title,style,image_urls').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(1),
+      ])
+      if (!alive) return
+      if (profileError || needsError || boardError) {
+        setError('Wedding details could not load.')
+        setLoading(false)
+        return
+      }
+      if (!profile || profile.role !== 'couple') {
+        router.replace(profile?.role ? `/${profile.role}` : '/')
+        return
+      }
+      const board = boards?.[0]
+      setHasMoodboard(Boolean(board))
+      setWedding({
+        partnerNames: needs?.partner_names || profile.display_name || weddingProfile?.partner1Name || 'Your wedding',
+        date: needs?.wedding_date || weddingProfile?.weddingDate || '',
+        city: needs?.city || profile.city || weddingProfile?.city || '',
+        guests: String(needs?.guest_count || weddingProfile?.guestCount || ''),
+        budget: needs?.budget_max ? `₹${Number(needs.budget_max).toLocaleString('en-IN')}` : weddingProfile?.budget ? `₹${weddingProfile.budget}` : '',
+        images: board?.image_urls ?? [],
+      })
+      setServices(needs?.services ?? [])
+      setPriorities(needs?.priorities ?? [])
+      setNote(needs?.notes ?? '')
+      setLoading(false)
+    }
+    void load().catch(() => { if (alive) { setError('Wedding details could not load.'); setLoading(false) } })
+    return () => { alive = false }
+  }, [router, weddingProfile])
 
-  const priorityOptions = [
-    { id: 'budget', label: 'Budget management', icon: '💰' },
-    { id: 'vendor', label: 'Vendor selection', icon: '🤝' },
-    { id: 'timeline', label: 'Timeline planning', icon: '📅' },
-    { id: 'design', label: 'Creative design', icon: '🎨' },
-    { id: 'stress', label: 'Stress-free process', icon: '😌' },
-  ];
+  const toggle = (value: string, values: string[], update: (next: string[]) => void) => {
+    update(values.includes(value) ? values.filter((item) => item !== value) : [...values, value])
+  }
 
-  const toggleService = (id: string) => {
-    setFormData({
-      ...formData,
-      services: formData.services.includes(id)
-        ? formData.services.filter((s) => s !== id)
-        : [...formData.services, id],
-    });
-  };
+  async function sendRequest() {
+    if (saving || !wedding || !services.length || !priorities.length) return
+    setSaving(true)
+    setError('')
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/auth?role=couple&next=%2Fcouple%2Frequest')
+        return
+      }
+      const { data: existing, error: loadError } = await supabase.from('couple_requirements')
+        .select('partner_names,initials,wedding_date,city,guest_count,budget_min,budget_max,services,priorities,notes,visible_to_pros')
+        .eq('profile_id', user.id).maybeSingle()
+      if (loadError) throw loadError
+      const { error: requirementError } = await supabase.from('couple_requirements').upsert({
+        ...(existing ?? {}),
+        profile_id: user.id,
+        partner_names: existing?.partner_names || wedding.partnerNames,
+        wedding_date: existing?.wedding_date || weddingProfile?.weddingDate || null,
+        city: existing?.city || wedding.city,
+        guest_count: existing?.guest_count || Number(wedding.guests) || null,
+        services,
+        priorities,
+        notes: note.trim(),
+        visible_to_pros: true,
+      })
+      if (requirementError) throw requirementError
+      const { data: board, error: boardError } = await supabase.from('moodboards')
+        .select('id').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle()
+      if (boardError) throw boardError
+      if (!board) {
+        setHasMoodboard(false)
+        setError('Save your moodboard first.')
+        return
+      }
+      const { data: request, error: requestError } = await supabase.from('planner_requests').insert({
+        couple_profile_id: user.id,
+        moodboard_id: board.id,
+        services,
+        priorities,
+        notes: note.trim(),
+        status: 'open',
+      }).select('id').single()
+      if (requestError) throw requestError
+      setRequestId(request.id)
+      setStep(4)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Your request did not send.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
-  const togglePriority = (id: string) => {
-    setFormData({
-      ...formData,
-      priorities: formData.priorities.includes(id)
-        ? formData.priorities.filter((p) => p !== id)
-        : [...formData.priorities, id],
-    });
-  };
+  const canContinue = step === 0 ? services.length > 0 : step === 1 ? priorities.length > 0 : true
 
-  const handleSubmit = () => {
-    // Mock submission - in real app would create planner request
-    setSubmitted(true);
-    setTimeout(() => {
-      router.push('/couple/cart');
-    }, 3000);
-  };
-
-  const isValid = formData.services.length > 0 && formData.priorities.length > 0;
+  if (loading) return <main className="min-h-screen bg-[#1E4636] p-8 text-center text-[#E2B451]">Loading your wedding…</main>
 
   return (
-    <div className="min-h-screen bg-[#1E4636]">
-      {/* Header */}
-      <div className="bg-[#E2B451] border-b-4 border-[#3A2563] px-6 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-[#1E4636] mb-2">Request planner</h1>
-          <p className="text-[#1E4636]/70">Tell us what you need</p>
-        </div>
-      </div>
+    <main className="min-h-screen bg-[#1E4636] px-4 py-5 text-[#E2B451] sm:px-7 sm:py-8">
+      <div className="mx-auto w-full max-w-4xl">
+        <header className="mb-6 flex items-center justify-between border-b border-[#E2B451]/30 pb-4">
+          <Link href="/couple" className="inline-flex min-h-10 items-center gap-2 text-sm font-bold text-[#E2B451]"><ArrowLeft size={17} /> Back</Link>
+          {step < 4 && <span className="text-xs font-bold tracking-wide">STEP {step + 1} OF 4</span>}
+        </header>
 
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        {!submitted ? (
-          <>
-            {/* Wedding Summary */}
-            <div className="bg-[#E2B451]/10 rounded-lg p-6 mb-8">
-              <h2 className="text-xl font-bold text-[#E2B451] mb-4">Your wedding</h2>
-              <div className="grid grid-cols-2 gap-4 text-[#E2B451]">
-                <div>
-                  <p className="text-[#E2B451]/60 text-sm">Date</p>
-                  <p className="font-semibold">{weddingProfile?.weddingDate || 'Not set'}</p>
-                </div>
-                <div>
-                  <p className="text-[#E2B451]/60 text-sm">Location</p>
-                  <p className="font-semibold">{weddingProfile?.city || 'Not set'}</p>
-                </div>
-                <div>
-                  <p className="text-[#E2B451]/60 text-sm">Guest count</p>
-                  <p className="font-semibold">{weddingProfile?.guestCount || 'Not set'}</p>
-                </div>
-                <div>
-                  <p className="text-[#E2B451]/60 text-sm">Budget</p>
-                  <p className="font-semibold">{weddingProfile?.budget ? `₹${weddingProfile.budget}` : 'Not set'}</p>
-                </div>
-              </div>
+        {step === 4 ? (
+          <section className="mx-auto max-w-2xl py-8 sm:py-16" aria-live="polite">
+            <span className="mb-5 grid size-14 place-items-center rounded-full bg-[#E2B451] text-[#1E4636]"><Check size={26} /></span>
+            <p className="mb-2 text-xs font-extrabold tracking-[.16em] text-[#F08A3C]">REQUEST SENT</p>
+            <h1 className="font-[Cormorant_Garamond] text-5xl font-bold leading-none sm:text-6xl">Planners can now reply.</h1>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-[#E2B451]/85">Approved planners can review.</p>
+            <p className="mt-4 text-xs text-[#E2B451]/70">Request ID · {requestId.slice(0, 8).toUpperCase()}</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/couple/requests" className="inline-flex min-h-12 items-center gap-2 bg-[#F08A3C] px-5 font-bold text-[#1E4636]">Track request <ArrowRight size={17} /></Link>
+              <Link href="/couple" className="inline-flex min-h-12 items-center border border-[#E2B451]/50 px-5 font-bold text-[#E2B451]">Back to wedding</Link>
             </div>
-
-            {/* Services Needed */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-[#E2B451] mb-2">Services needed</h2>
-              <p className="text-[#E2B451]/60 mb-4 text-sm">Select all that apply</p>
-              <div className="grid gap-3">
-                {serviceOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => toggleService(option.id)}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
-                      formData.services.includes(option.id)
-                        ? 'border-[#F08A3C] bg-[#F08A3C]/10'
-                        : 'border-[#E2B451]/20 bg-[#E2B451]/5 hover:border-[#E2B451]/40'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-[#E2B451]">{option.label}</p>
-                        <p className="text-[#E2B451]/60 text-sm">{option.desc}</p>
-                      </div>
-                      <div
-                        className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                          formData.services.includes(option.id)
-                            ? 'border-[#F08A3C] bg-[#F08A3C]'
-                            : 'border-[#E2B451]/40'
-                        }`}
-                      >
-                        {formData.services.includes(option.id) && (
-                          <svg className="w-3 h-3 text-[#1E4636]" viewBox="0 0 12 12" fill="currentColor">
-                            <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" fill="none" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Priorities */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-[#E2B451] mb-2">Your priorities</h2>
-              <p className="text-[#E2B451]/60 mb-4 text-sm">What matters most?</p>
-              <div className="grid grid-cols-2 gap-3">
-                {priorityOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => togglePriority(option.id)}
-                    className={`p-4 rounded-lg border-2 text-center transition-all ${
-                      formData.priorities.includes(option.id)
-                        ? 'border-[#F08A3C] bg-[#F08A3C]/10'
-                        : 'border-[#E2B451]/20 bg-[#E2B451]/5 hover:border-[#E2B451]/40'
-                    }`}
-                  >
-                    <div className="text-3xl mb-2">{option.icon}</div>
-                    <p className="font-semibold text-[#E2B451] text-sm">{option.label}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Additional Info */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-[#E2B451] mb-2">Anything else?</h2>
-              <p className="text-[#E2B451]/60 mb-4 text-sm">Optional details</p>
-              <textarea
-                value={formData.additionalInfo}
-                onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
-                placeholder="Share any specific requirements or preferences"
-                className="input-field w-full h-32 resize-none"
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-4">
-              <button onClick={() => router.back()} className="btn-secondary flex-1">
-                Go back
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={!isValid}
-                className="btn-primary flex-1"
-              >
-                Send request
-              </button>
-            </div>
-          </>
+          </section>
+        ) : !hasMoodboard ? (
+          <section className="mx-auto max-w-2xl py-8 sm:py-14">
+            <p className="mb-2 text-xs font-extrabold tracking-[.16em] text-[#F08A3C]">FIRST, SAVE YOUR IDEAS</p>
+            <h1 className="font-[Cormorant_Garamond] text-5xl font-bold leading-none sm:text-6xl">Make a moodboard first.</h1>
+            <p className="mt-4 text-sm leading-6 text-[#E2B451]/85">Planners use it to see your style.</p>
+            <Link href="/couple/moodboard" className="mt-7 inline-flex min-h-12 items-center gap-2 bg-[#F08A3C] px-5 font-bold text-[#1E4636]">Open moodboard <ArrowRight size={17} /></Link>
+          </section>
         ) : (
-          <div className="text-center py-16">
-            <div className="mb-6">
-              <div className="w-20 h-20 bg-[#F08A3C] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-[#1E4636]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+          <>
+            <div className="mb-8 grid gap-6 md:grid-cols-[minmax(0,1fr)_240px] md:items-end">
+              <div>
+                <p className="mb-2 text-xs font-extrabold tracking-[.16em] text-[#F08A3C]">HIRE A PLANNER</p>
+                <h1 className="font-[Cormorant_Garamond] text-5xl font-bold leading-[.95] sm:text-6xl">{stepTitles[step]}</h1>
+                <p className="mt-3 text-sm leading-6 text-[#E2B451]/85">Help planners see your style.</p>
               </div>
-              <h2 className="text-3xl font-bold text-[#E2B451] mb-2">Request sent!</h2>
-              <p className="text-[#E2B451]/80">
-                Local planners will review
-                <br />
-                your wedding details
-              </p>
+              {wedding && <aside className="grid grid-cols-2 gap-3 border-l-2 border-[#E2B451] bg-[#3A2563] p-4 text-xs">
+                <strong className="col-span-2 font-[Cormorant_Garamond] text-2xl">{wedding.partnerNames}</strong>
+                <span className="inline-flex items-center gap-1"><CalendarDays size={14} />{wedding.date || 'Date open'}</span>
+                <span className="inline-flex items-center gap-1"><MapPin size={14} />{wedding.city || 'City open'}</span>
+                {wedding.guests && <span className="inline-flex items-center gap-1"><UsersRound size={14} />{wedding.guests} guests</span>}
+                {wedding.budget && <span>{wedding.budget}</span>}
+              </aside>}
             </div>
-            <div className="text-[#E2B451]/60 text-sm">
-              Redirecting to your cart...
-            </div>
-          </div>
+
+            <div className="mb-8 flex gap-2" aria-label="Request progress">{stepTitles.map((label, index) => <span key={label} className={`h-1.5 flex-1 ${index <= step ? 'bg-[#F08A3C]' : 'bg-[#3A2563]'}`} />)}</div>
+
+            {step === 0 && <div className="grid gap-3 sm:grid-cols-2">{serviceOptions.map((item) => <button key={item} type="button" aria-pressed={services.includes(item)} onClick={() => toggle(item, services, setServices)} className={`flex min-h-20 items-center justify-between gap-4 border px-5 text-left font-bold transition ${services.includes(item) ? 'border-[#F08A3C] bg-[#3A2563]' : 'border-[#E2B451]/35 bg-[#1E4636] hover:bg-[#3A2563]'}`}><span>{item}</span><span className={`grid size-6 place-items-center border ${services.includes(item) ? 'border-[#F08A3C] bg-[#F08A3C] text-[#1E4636]' : 'border-[#E2B451]/50'}`}>{services.includes(item) && <Check size={15} />}</span></button>)}</div>}
+
+            {step === 1 && <div className="grid gap-3 sm:grid-cols-2">{priorityOptions.map((item) => <button key={item} type="button" aria-pressed={priorities.includes(item)} onClick={() => toggle(item, priorities, setPriorities)} className={`flex min-h-16 items-center justify-between gap-4 border px-5 text-left font-bold transition ${priorities.includes(item) ? 'border-[#F08A3C] bg-[#3A2563]' : 'border-[#E2B451]/35 bg-[#1E4636] hover:bg-[#3A2563]'}`}><span>{item}</span><span className={`grid size-6 place-items-center border ${priorities.includes(item) ? 'border-[#F08A3C] bg-[#F08A3C] text-[#1E4636]' : 'border-[#E2B451]/50'}`}>{priorities.includes(item) && <Check size={15} />}</span></button>)}</div>}
+
+            {step === 2 && <div className="max-w-2xl"><label htmlFor="planner-note" className="mb-2 block text-sm font-bold">A note for planners</label><textarea id="planner-note" value={note} onChange={(event) => setNote(event.target.value)} maxLength={800} placeholder="Tell us what matters to you." className="min-h-40 w-full resize-y border border-[#E2B451]/40 bg-[#3A2563] p-4 text-sm text-[#E2B451] placeholder:text-[#E2B451]/55 focus:outline focus:outline-2 focus:outline-[#F08A3C]"/><p className="mt-2 text-right text-xs text-[#E2B451]/70">{note.length} / 800</p></div>}
+
+            {step === 3 && <div className="grid gap-5 md:grid-cols-[1fr_260px]">
+              <div className="space-y-5">
+                <section className="border-l-2 border-[#F08A3C] bg-[#3A2563] p-5"><h2 className="font-[Cormorant_Garamond] text-2xl font-bold">Help you need</h2><p className="mt-2 text-sm leading-6">{services.join(' · ')}</p><button className="mt-3 text-xs font-bold text-[#F08A3C] underline" onClick={() => setStep(0)}>Change</button></section>
+                <section className="border-l-2 border-[#E2B451] bg-[#3A2563] p-5"><h2 className="font-[Cormorant_Garamond] text-2xl font-bold">Your top needs</h2><p className="mt-2 text-sm leading-6">{priorities.join(' · ')}</p><button className="mt-3 text-xs font-bold text-[#F08A3C] underline" onClick={() => setStep(1)}>Change</button></section>
+                {note.trim() && <section className="bg-[#3A2563] p-5"><h2 className="font-[Cormorant_Garamond] text-2xl font-bold">Your note</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-6">{note}</p><button className="mt-3 text-xs font-bold text-[#F08A3C] underline" onClick={() => setStep(2)}>Change</button></section>}
+              </div>
+              <aside className="bg-[#3A2563] p-4"><p className="mb-3 text-xs font-bold">SAVED MOODBOARD</p><div className="grid grid-cols-2 gap-2">{wedding?.images.slice(0, 4).map((image, index) => <img key={`${image}-${index}`} src={image} alt={`Moodboard idea ${index + 1}`} className="aspect-square w-full object-cover" />)}</div><p className="mt-3 text-xs leading-5 text-[#E2B451]/80">Planners can see these ideas.</p></aside>
+            </div>}
+
+            {error && <p className="mt-5 text-sm font-bold text-[#F08A3C]" role="alert">{error}</p>}
+            <footer className="mt-8 flex flex-wrap justify-between gap-3 border-t border-[#E2B451]/25 pt-5">
+              <button type="button" onClick={() => step === 0 ? router.push('/couple/decide') : setStep(step - 1)} className="min-h-11 border border-[#E2B451]/45 px-4 text-sm font-bold">{step === 0 ? 'Back' : 'Previous'}</button>
+              {step < 3 ? <button type="button" onClick={() => setStep(step + 1)} disabled={!canContinue} className="inline-flex min-h-11 items-center gap-2 bg-[#F08A3C] px-5 font-bold text-[#1E4636] disabled:cursor-not-allowed disabled:opacity-50">Continue <ArrowRight size={17} /></button> : <button type="button" onClick={() => void sendRequest()} disabled={saving} className="inline-flex min-h-11 items-center gap-2 bg-[#F08A3C] px-5 font-bold text-[#1E4636] disabled:cursor-wait disabled:opacity-60">{saving ? 'Sending…' : 'Send request'} <ArrowRight size={17} /></button>}
+            </footer>
+          </>
         )}
       </div>
-    </div>
-  );
+    </main>
+  )
 }

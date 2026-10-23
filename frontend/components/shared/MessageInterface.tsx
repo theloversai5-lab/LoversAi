@@ -15,9 +15,11 @@ interface Message {
 
 interface MessageInterfaceProps {
   recipientName: string
-  recipientType?: 'vendor' | 'planner'
+  recipientType?: 'couple' | 'vendor' | 'planner'
   messages: Message[]
-  onSendMessage: (text: string) => void
+  onSendMessage: (text: string) => void | boolean | Promise<void | boolean>
+  isSending?: boolean
+  sendError?: string
   theme?: 'couple' | 'planner' | 'vendor'
 }
 
@@ -26,6 +28,8 @@ export default function MessageInterface({
   recipientType = 'vendor',
   messages,
   onSendMessage,
+  isSending = false,
+  sendError = '',
   theme = 'couple',
 }: MessageInterfaceProps) {
   const [messageText, setMessageText] = useState('')
@@ -37,7 +41,7 @@ export default function MessageInterface({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const handleSend = (event: React.FormEvent) => {
+  const handleSend = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!messageText.trim()) return
 
@@ -47,9 +51,14 @@ export default function MessageInterface({
       return
     }
 
-    onSendMessage(messageText.trim())
-    setMessageText('')
-    setValidationError('')
+    try {
+      const sent = await onSendMessage(messageText.trim())
+      if (sent === false) return
+      setMessageText('')
+      setValidationError('')
+    } catch {
+      setValidationError('Message could not be sent. Try again.')
+    }
   }
 
   return (
@@ -60,7 +69,7 @@ export default function MessageInterface({
         </span>
         <div className="message-recipient-copy">
           <h2>{recipientName}</h2>
-          <p>{recipientType === 'vendor' ? 'Wedding vendor' : 'Wedding planner'}</p>
+          <p>{recipientType === 'vendor' ? 'Wedding vendor' : recipientType === 'planner' ? 'Wedding planner' : 'Wedding couple'}</p>
         </div>
       </header>
 
@@ -95,11 +104,11 @@ export default function MessageInterface({
             placeholder="Write a message"
             type="text"
           />
-          <button aria-label="Send message" disabled={!messageText.trim()} type="submit">
+          <button aria-label="Send message" disabled={!messageText.trim() || isSending} type="submit">
             <SendHorizontal size={18} />
           </button>
         </form>
-        <p>Press Enter to send</p>
+        <p role={sendError ? 'alert' : undefined}>{sendError || 'Press Enter to send'}</p>
       </div>
     </div>
   )
