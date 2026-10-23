@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, BriefcaseBusiness, Store, UsersRound } from 'lucide-react'
 import Navbar from '@/components/landing/Navbar'
 import HeroSection from '@/components/landing/HeroSection'
 import RoleModal from '@/components/landing/RoleModal'
@@ -16,7 +16,7 @@ export default function Page() {
   const handleSelectRole = (role: 'couple' | 'planner' | 'vendor') => {
     setRole(role)
     setIsModalOpen(false)
-    router.push('/auth?role=' + role)
+    router.push(`/${role}`)
   }
 
   return (
@@ -34,40 +34,34 @@ export default function Page() {
 
       <section className="how section" id="use-tools">
         <div className="section-heading">
-          <h2>Couples · Planner · Vendor</h2>
+          <h2>Choose your role</h2>
         </div>
-        <div className="step-grid">
-          <article className="step glass-card">
-            <div className="step-image">
-              <img src="/couple.png" alt="Couples tool" />
-            </div>
-            <div className="step-content">
-              <p><strong>Design your perfect wedding</strong> with AI-powered moodboards</p>
-            </div>
-          </article>
-          <article className="step glass-card">
-            <div className="step-image">
-              <img src="/planner.png" alt="Planner tool" />
-            </div>
-            <div className="step-content">
-              <p><strong>Manage leads and coordinate</strong> every wedding detail</p>
-            </div>
-          </article>
-          <article className="step glass-card">
-            <div className="step-image">
-              <img src="/vendor.png" alt="Vendor tool" />
-            </div>
-            <div className="step-content">
-              <p><strong>Showcase services and grow</strong> your wedding business</p>
-            </div>
-          </article>
+        <div className="step-grid role-overview-grid">
+          <button type="button" className="role-overview-card" onClick={() => handleSelectRole('couple')}>
+            <span className="role-overview-icon"><UsersRound aria-hidden="true" /></span>
+            <span className="role-overview-title">Couple</span>
+            <span className="role-overview-detail">Plan your wedding</span>
+            <ArrowRight className="role-overview-arrow" aria-hidden="true" />
+          </button>
+          <button type="button" className="role-overview-card" onClick={() => handleSelectRole('planner')}>
+            <span className="role-overview-icon"><BriefcaseBusiness aria-hidden="true" /></span>
+            <span className="role-overview-title">Planner</span>
+            <span className="role-overview-detail">Find wedding leads</span>
+            <ArrowRight className="role-overview-arrow" aria-hidden="true" />
+          </button>
+          <button type="button" className="role-overview-card" onClick={() => handleSelectRole('vendor')}>
+            <span className="role-overview-icon"><Store aria-hidden="true" /></span>
+            <span className="role-overview-title">Vendor</span>
+            <span className="role-overview-detail">Show your services</span>
+            <ArrowRight className="role-overview-arrow" aria-hidden="true" />
+          </button>
         </div>
       </section>
 
       <section className="cta cta-simple" id="planning">
         <div>
-          <h2>Ready to start planning?</h2>
-          <p>Join as a couple, planner, or vendor to bring your wedding vision to life</p>
+          <h2>Ready to begin?</h2>
+          <p>Choose your wedding path.</p>
           <button
             type="button"
             className="button"

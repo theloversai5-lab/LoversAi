@@ -9,10 +9,12 @@ New UI lives in `frontend/`. Do not edit `frontend-legacy/` except to read old b
 
 We are on **UI only**. AI tools are empty shells with the right steps. Full source: `docs/PRODUCT.md`.
 
-Two doors: **Couple** and **Planners / vendors**.
+Three role choices: **Couple**, **Planner**, and **Vendor**. Role choice opens the public role landing. Auth begins from that page's account buttons.
 
 Couple path: choose wedding → plan myself or hire planner → start love story.
 Planner path: find leads → pitch look → find vendors.
-Vendor path: hiring vs looking for work, then short questions.
+Vendor path: show services → show work → meet couples.
+
+After OTP auth, new users complete a role-specific public profile. Couple details and requests are shared only with approved planner/vendor accounts.
 
 Signup is one question per screen. Match `docs/PRODUCT.md` before inventing extra pages.

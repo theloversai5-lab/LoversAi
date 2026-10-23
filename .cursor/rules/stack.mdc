@@ -13,3 +13,6 @@ Full detail: `docs/STACK.md`.
 - No CRA, no Vite SPA, no Clerk/Firebase for the new app.
 - Public landing = Server Components. Motion = `"use client"` islands.
 - `next/font` and `next/image`. Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Put schema changes in `supabase/migrations/`, mock profiles in `supabase/seed.sql`, and enable RLS for every public table.
+- Signup uses email + password, then verifies with a six-digit Supabase OTP (`signUp` + `verifyOtp`). Sign-in uses Supabase email + password.
+- Passwords stay in Supabase Auth's protected hash field. Never add plaintext passwords to public app tables.

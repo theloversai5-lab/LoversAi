@@ -2,11 +2,11 @@
 
 Source: `D:\work\Material\website flow.pptx` (18 slides). Build **UI first**. AI features are shells until we take over AI later.
 
-Two doors on the site: **Couple** and **Planners / vendors**.
+Three roles on the site: **Couple**, **Planner**, and **Vendor**. Choosing a role opens that role's public landing page. Auth starts only when the person chooses an account action there.
 
 ## Couple
 
-After role choice, couples can **create an account or sign in**, then go straight to `/couple`. Do not put a questionnaire between auth and the dashboard. Keep the development bypass available.
+After choosing Couple, people land on `/couple`. Account actions ask for email and password, then confirm new accounts with an email OTP. New accounts complete a short profile with both names, initials, wedding needs, and location before continuing to the couple home. Keep the development bypass available only outside production.
 
 ### Couple dashboard feature list
 
@@ -25,7 +25,29 @@ These features existed in the archived couple pages. Keep them visible in the ne
 
 The dashboard should show these feature names and give each working route. Use sample states until Supabase data is ready. Do not imply sample counts or statuses are live data.
 
-## Planner
+## Planner and vendor
+
+Planners and vendors have separate roles and public landing pages at `/planner` and `/vendor`. Planner and vendor accounts use the same profile system but retain role-specific services and tools. Existing `professional` metadata maps to `planner` during migration.
+
+### Profiles and access
+
+- Sign up with email and password, then confirm with a Supabase email one-time code. Sign in with email and password.
+- After the code is verified, incomplete accounts finish a short role-specific profile.
+- Couples add both names, initials, wedding needs, and a moodboard.
+- Planners and vendors add a name, company, service list, and portfolio images.
+- Each role has a public profile page at `/profile/[handle]`.
+- Couple requirements and planner requests are visible only to approved planner/vendor profiles. New professional accounts need review before they can see real couple requests.
+- Demo profiles and requests are seeded for previews; they are marked as examples.
+
+### Legacy tools
+
+The planner workspace landing at `/planner` keeps the shared tool directory. The vendor landing at `/vendor` explains vendor profiles, services, and portfolios.
+
+- **Planner work:** find leads, pitch with AI, find vendors, manage clients, track bids, build quotes, manage deals, messages, pitch library, planner profile, credits and plans.
+- **AI design:** venue views, photo angle changes, photo retouching, wedding video, decor design, food planning, venue partners (MasterVenue AI, FairMount Mumbai, Taj Agra, ITC Mughal, Jaypee Palace).
+- **Vendor work:** vendor home, portfolio, inventory, requests, service quotes, earnings, messages, and vendor profile.
+
+Show working new-app routes as previews. Mark tools without a new-app route as coming soon; do not suggest those features are already connected.
 
 Home line: `Close more weddings` / `with less work`
 
