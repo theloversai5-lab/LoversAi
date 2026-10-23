@@ -5,9 +5,9 @@ import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 
 const links = [
-  { href: '#couple', label: 'Couple' },
-  { href: '/planner/leads', label: 'Planner' },
-  { href: '#vendor', label: 'Vendor' },
+  { href: '#use-tools', label: 'Couple' },
+  { href: '/planner', label: 'Planner' },
+  { href: '/vendor', label: 'Vendor' },
 ]
 
 interface NavbarProps {

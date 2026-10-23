@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
-import { useEffect, useState } from 'react'
-import { Users, Calendar, Store, X, ArrowRight, ArrowLeft } from 'lucide-react'
+import { useEffect } from 'react'
+import { UsersRound, BriefcaseBusiness, Store, X } from 'lucide-react'
 
 interface RoleModalProps {
   isOpen: boolean
@@ -10,119 +10,73 @@ interface RoleModalProps {
 }
 
 export default function RoleModal({ isOpen, onClose, onSelectRole }: RoleModalProps) {
-  const [step, setStep] = useState<'initial' | 'professional'>('initial')
-
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-        setStep('initial')
-      }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
     }
+
     if (isOpen) {
       window.addEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'hidden'
     }
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = ''
     }
   }, [isOpen, onClose])
-
-  const handleClose = () => {
-    onClose()
-    setTimeout(() => setStep('initial'), 300)
-  }
-
-  const handleProfessionalSelect = () => {
-    setStep('professional')
-  }
-
-  const handleBack = () => {
-    setStep('initial')
-  }
 
   if (!isOpen) return null
 
   return (
-    <div className="role-modal-backdrop" onClick={handleClose} role="dialog" aria-modal="true">
-      <div className="role-modal-card" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="role-modal-backdrop"
+      onClick={onClose}
+      role="presentation"
+    >
+      <section
+        className="role-modal-card"
+        aria-labelledby="role-modal-title"
+        aria-modal="true"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+      >
         <button
           className="role-modal-close"
-          onClick={handleClose}
+          onClick={onClose}
           type="button"
-          aria-label="Close dialog"
+          aria-label="Close role choices"
         >
           <X size={20} />
         </button>
 
-        {step === 'professional' && (
-          <button
-            className="role-modal-back"
-            onClick={handleBack}
-            type="button"
-            aria-label="Go back"
-          >
-            <ArrowLeft size={18} />
-          </button>
-        )}
-
         <div className="role-modal-header">
           <p className="role-modal-eyebrow">A LOVERS CARD</p>
-          <h2 className="role-modal-title">Who is planning?</h2>
-          <p className="role-modal-sub">Choose your path</p>
+          <h2 className="role-modal-title" id="role-modal-title">Choose your path</h2>
         </div>
 
-        {step === 'initial' ? (
-          <div className="role-modal-grid">
-            <button
-              type="button"
-              className="role-option-card couple-card"
-              onClick={() => onSelectRole('couple')}
-            >
-              <div className="role-icon-wrap">
-                <Users size="50%" strokeWidth={2.5} />
-              </div>
-              <h3>We are a couple</h3>
-            </button>
+        <div className="role-modal-grid">
+          <button
+            type="button"
+            className="role-option-card couple-card"
+            onClick={() => onSelectRole('couple')}
+          >
+            <span className="role-icon-wrap"><UsersRound size={28} strokeWidth={1.8} /></span>
+            <span className="role-option-copy">
+              <strong>Couple</strong>
+            </span>
+          </button>
 
-            <button
-              type="button"
-              className="role-option-card professional-card"
-              onClick={handleProfessionalSelect}
-            >
-              <div className="role-icon-wrap">
-                <Calendar size="50%" strokeWidth={2.5} />
-              </div>
-              <h3>I am a planner / vendor</h3>
-            </button>
-          </div>
-        ) : (
-          <div className="role-modal-grid">
-            <button
-              type="button"
-              className="role-option-card planner-card"
-              onClick={() => onSelectRole('planner')}
-            >
-              <div className="role-icon-wrap">
-                <Calendar size="50%" strokeWidth={2.5} />
-              </div>
-              <h3>I am a planner</h3>
-            </button>
-
-            <button
-              type="button"
-              className="role-option-card vendor-card"
-              onClick={() => onSelectRole('vendor')}
-            >
-              <div className="role-icon-wrap">
-                <Store size="50%" strokeWidth={2.5} />
-              </div>
-              <h3>I am a vendor</h3>
-            </button>
-          </div>
-        )}
-      </div>
+          <button type="button" className="role-option-card professional-card" onClick={() => onSelectRole('planner')}>
+            <span className="role-icon-wrap"><BriefcaseBusiness size={28} strokeWidth={1.8} /></span>
+            <span className="role-option-copy"><strong>Planner</strong></span>
+          </button>
+          <button type="button" className="role-option-card professional-card" onClick={() => onSelectRole('vendor')}>
+            <span className="role-icon-wrap"><Store size={28} strokeWidth={1.8} /></span>
+            <span className="role-option-copy"><strong>Vendor</strong></span>
+          </button>
+        </div>
+      </section>
     </div>
   )
 }
