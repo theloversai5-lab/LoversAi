@@ -1,735 +1,193 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { FormEvent, Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, ArrowRight, LockKeyhole, Mail } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
 import { supabase, type UserRole } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/store/authStore'
-import { Users, Calendar, Store, Mail, Lock, User, ArrowRight, AlertCircle } from 'lucide-react'
-import Image from 'next/image'
+import { roleRedirectPath } from '@/lib/auth/redirect'
+
+const roles: UserRole[] = ['couple', 'planner', 'vendor']
 
 function AuthContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const roleParam = searchParams.get('role') as UserRole | null
-  const errorParam = searchParams.get('error')
-  
-  const [mode, setMode] = useState<'signin' | 'signup'>('signup')
+  const search = useSearchParams()
+  const requestedRole = roles.includes(search.get('role') as UserRole) ? search.get('role') as UserRole : 'couple'
+  const [mode, setMode] = useState<'signup' | 'signin'>(search.get('mode') === 'signin' ? 'signin' : 'signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
+  const [token, setToken] = useState('')
+  const [stage, setStage] = useState<'email' | 'code'>('email')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(errorParam ? 'Email confirmation failed. Please try signing in.' : '')
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [confirmationEmail, setConfirmationEmail] = useState('')
-  
-  const { setUser, setRole, role: storedRole } = useAuthStore()
-  const role = roleParam || storedRole || 'couple'
+  const [notice, setNotice] = useState('')
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        router.push(getRedirectPath(role))
-      }
-    }
-    checkAuth()
-
-    // Listen for auth state changes (when user confirms email)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        const userRole = (session.user.user_metadata.role as UserRole) || role
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          role: userRole,
-          full_name: session.user.user_metadata.full_name,
-          created_at: session.user.created_at,
-        })
-        setRole(userRole)
-        router.push(getRedirectPath(userRole))
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  const getRedirectPath = (userRole: UserRole) => {
-    switch (userRole) {
-      case 'couple': return '/couple'
-      case 'planner': return '/planner'
-      case 'vendor': return '/vendor'
-      default: return '/couple'
-    }
-  }
-
-  const getRoleInfo = (userRole: UserRole) => {
-    switch (userRole) {
-      case 'couple':
-        return {
-          icon: <Users size={20} strokeWidth={2.5} />,
-          title: 'Couple',
-          description: 'Plan your dream wedding',
-          color: '#1E4636',
-          goldColor: '#E2B451'
-        }
-      case 'planner':
-        return {
-          icon: <Calendar size={20} strokeWidth={2.5} />,
-          title: 'Wedding Planner',
-          description: 'Find couples and vendors',
-          color: '#3A2563',
-          goldColor: '#E2B451'
-        }
-      case 'vendor':
-        return {
-          icon: <Store size={20} strokeWidth={2.5} />,
-          title: 'Wedding Vendor',
-          description: 'Connect with couples',
-          color: '#F08A3C',
-          goldColor: '#E2B451'
-        }
-    }
-  }
-
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+  async function sendCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     setLoading(true)
-
-    try {
-      if (mode === 'signup') {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: {
-              full_name: fullName,
-              role: role,
-            }
-          }
-        })
-
-        if (signUpError) throw signUpError
-
-        // Show confirmation screen - user needs to verify email
-        if (data.user && !data.session) {
-          setConfirmationEmail(email)
-          setShowConfirmation(true)
-        } else if (data.session) {
-          // Auto-confirmed (if email confirmation is disabled in Supabase)
-          setUser({
-            id: data.user!.id,
-            email: data.user!.email!,
-            role: role,
-            full_name: fullName,
-            created_at: new Date().toISOString(),
-          })
-          setRole(role)
-          router.push(getRedirectPath(role))
-        }
-      } else {
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-
-        if (signInError) throw signInError
-
-        if (data.user) {
-          const userRole = (data.user.user_metadata.role as UserRole) || role
-          setUser({
-            id: data.user.id,
-            email: data.user.email!,
-            role: userRole,
-            full_name: data.user.user_metadata.full_name,
-            created_at: data.user.created_at,
-          })
-          setRole(userRole)
-          router.push(getRedirectPath(userRole))
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleGoogleAuth = async () => {
     setError('')
-    setLoading(true)
+    setNotice('')
 
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        }
-      })
-
-      if (error) throw error
-    } catch (err: any) {
-      setError(err.message || 'Google sign-in failed')
-      setLoading(false)
+    if (mode === 'signin') {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      if (signInError || !data.user) {
+        setLoading(false)
+        setError(signInError?.message ?? 'Could not sign in. Try again.')
+        return
+      }
+      await finishSignIn(data.user)
+      return
     }
-  }
 
-  const handleBypass = () => {
-    // Bypass auth for testing - set mock user and cookie
-    setUser({
-      id: 'bypass-user-' + Date.now(),
-      email: 'test@example.com',
-      role: role,
-      full_name: 'Test User',
-      created_at: new Date().toISOString(),
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { role: requestedRole } },
     })
-    setRole(role)
-    
-    // Set bypass cookie for middleware
-    document.cookie = `bypass_auth=true; path=/; max-age=86400` // 24 hours
-    
-    router.push(getRedirectPath(role))
+    if (signUpError) {
+      setLoading(false)
+      setError(signUpError.message)
+      return
+    }
+    if (data.session && data.user) {
+      await finishSignIn(data.user)
+      return
+    }
+
+    setStage('code')
+    setLoading(false)
+    setNotice('Enter the six digit code.')
   }
 
-  const roleInfo = getRoleInfo(role)
+  async function resendCode() {
+    setLoading(true)
+    setError('')
+    const { error: otpError } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+    setLoading(false)
+    if (otpError) setError(otpError.message)
+    else setNotice('A new code is on its way.')
+  }
 
-  // Show email confirmation screen
-  if (showConfirmation) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{
-        background: role === 'couple' 
-          ? '#1E4636'
-          : role === 'planner'
-          ? '#3A2563'
-          : 'linear-gradient(180deg, #1E4636 0%, #3A2563 100%)'
-      }}>
-        <div className="w-full max-w-[420px]">
-          <div style={{
-            background: 'rgba(0, 0, 0, 0.25)',
-            backdropFilter: 'blur(40px)',
-            border: '1px solid rgba(226, 180, 81, 0.2)',
-            borderRadius: '16px',
-            padding: '36px 32px',
-            textAlign: 'center'
-          }}>
-            {/* Success Icon */}
-            <div style={{
-              width: '56px',
-              height: '56px',
-              margin: '0 auto 20px',
-              borderRadius: '50%',
-              background: 'rgba(226, 180, 81, 0.15)',
-              border: '2px solid rgba(226, 180, 81, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Mail size={28} style={{ color: '#E2B451' }} />
-            </div>
+  async function verifyCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setLoading(true)
+    setError('')
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: token.trim(),
+      type: 'signup',
+    })
+    if (verifyError || !data.user) {
+      setLoading(false)
+      setError(verifyError?.message ?? 'That code did not work. Try again.')
+      return
+    }
 
-            {/* Title */}
-            <h1 style={{
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '26px',
-              fontWeight: 400,
-              color: '#E2B451',
-              marginBottom: '8px',
-              letterSpacing: '0.02em'
-            }}>
-              Check your email
-            </h1>
+    await finishSignIn(data.user)
+  }
 
-            {/* Description */}
-            <p style={{
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '14px',
-              fontWeight: 300,
-              color: 'rgba(226, 180, 81, 0.75)',
-              marginBottom: '6px',
-              lineHeight: '1.5'
-            }}>
-              We sent a confirmation link to
-            </p>
-            <p style={{
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '15px',
-              fontWeight: 500,
-              color: '#E2B451',
-              marginBottom: '24px'
-            }}>
-              {confirmationEmail}
-            </p>
+  async function finishSignIn(user: User) {
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role,is_complete')
+      .eq('id', user.id)
+      .maybeSingle()
+    setLoading(false)
+    if (profileError || !profile) {
+      setError('Profile setup is not ready. Apply the Supabase migration, then try again.')
+      return
+    }
 
-            {/* Instructions */}
-            <div style={{
-              padding: '16px',
-              background: 'rgba(226, 180, 81, 0.08)',
-              border: '1px solid rgba(226, 180, 81, 0.2)',
-              borderRadius: '10px',
-              marginBottom: '24px'
-            }}>
-              <p style={{
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '13px',
-                fontWeight: 300,
-                color: 'rgba(226, 180, 81, 0.85)',
-                lineHeight: '1.6',
-                marginBottom: '10px'
-              }}>
-                Click the link in the email to verify your account. Once verified, you'll be automatically signed in.
-              </p>
-              <p style={{
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '12px',
-                fontWeight: 300,
-                color: 'rgba(226, 180, 81, 0.6)',
-                lineHeight: '1.5'
-              }}>
-                Didn't receive the email? Check your spam folder.
-              </p>
-            </div>
+    const role = profile.role as UserRole
+    useAuthStore.getState().setUser({
+      id: user.id,
+      email: user.email ?? email.trim(),
+      role,
+      full_name: user.user_metadata?.full_name,
+      created_at: user.created_at,
+    })
+    useAuthStore.getState().setRole(role)
+    const next = roleRedirectPath(role, search.get('next'))
+    router.replace(profile.is_complete ? next : `/profile/setup?next=${encodeURIComponent(next)}`)
+  }
 
-            {/* Back to sign in */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowConfirmation(false)
-                setMode('signin')
-                setEmail('')
-                setPassword('')
-                setFullName('')
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '13px',
-                fontWeight: 500,
-                color: '#E2B451',
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-                padding: '8px'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-            >
-              ← Back to sign in
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+  function useDevBypass() {
+    if (process.env.NODE_ENV === 'production') return
+    document.cookie = `bypass_auth=${requestedRole}; path=/; max-age=86400; samesite=lax`
+    router.push(`/${requestedRole}`)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{
-      background: role === 'couple' 
-        ? '#1E4636'
-        : role === 'planner'
-        ? '#3A2563'
-        : 'linear-gradient(180deg, #1E4636 0%, #3A2563 100%)'
-    }}>
-      <div className="w-full max-w-[420px]">
-        {/* Card */}
-        <div style={{
-          background: 'rgba(0, 0, 0, 0.25)',
-          backdropFilter: 'blur(40px)',
-          border: '1px solid rgba(226, 180, 81, 0.2)',
-          borderRadius: '16px',
-          padding: '28px 32px'
-        }}>
-          
-          {/* Title */}
-          <div className="text-center mb-6">
-            <h1 style={{
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '26px',
-              fontWeight: 400,
-              color: '#E2B451',
-              marginBottom: '6px',
-              letterSpacing: '0.02em'
-            }}>
-              {mode === 'signup' ? 'Create account' : 'Welcome back'}
-            </h1>
-            <p style={{
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '13px',
-              fontWeight: 300,
-              color: 'rgba(226, 180, 81, 0.75)',
-              letterSpacing: '0.01em'
-            }}>
-              {mode === 'signup' ? 'Start planning your wedding' : 'Sign in to continue'}
-            </p>
-          </div>
+    <main className="account-page">
+      <section className="account-card" aria-labelledby="account-title">
+        <Link className="account-back" href={`/${requestedRole}`}><ArrowLeft size={16} /> Back</Link>
+        <p className="account-eyebrow">A LOVERS CARD · {requestedRole.toUpperCase()}</p>
+        <h1 id="account-title">{stage === 'code' ? 'Check your email' : mode === 'signup' ? 'Create your account' : 'Welcome back'}</h1>
+        <p className="account-help">{stage === 'code' ? 'Enter the six digit code.' : mode === 'signup' ? 'Create an account with email.' : 'Sign in with your password.'}</p>
 
-          {/* Error */}
-          {error && (
-            <div style={{
-              marginBottom: '14px',
-              padding: '10px 12px',
-              background: 'rgba(255, 100, 100, 0.1)',
-              border: '1px solid rgba(255, 100, 100, 0.25)',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '8px'
-            }}>
-              <AlertCircle size={16} style={{ color: '#ff6b6b', marginTop: '1px', flexShrink: 0 }} />
-              <p style={{ 
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '12px', 
-                fontWeight: 300,
-                color: '#ffb3b3', 
-                lineHeight: '1.4' 
-              }}>{error}</p>
-            </div>
-          )}
+        {error && <p className="account-message is-error" role="alert">{error}</p>}
+        {notice && <p className="account-message" role="status">{notice}</p>}
 
-          {/* Form */}
-          <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {mode === 'signup' && (
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontFamily: 'Cormorant Garamond, Georgia, serif',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: '#E2B451',
-                  marginBottom: '6px',
-                  letterSpacing: '0.01em'
-                }}>
-                  Full name
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <User size={16} style={{
-                    position: 'absolute',
-                    left: '14px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'rgba(226, 180, 81, 0.35)'
-                  }} />
-                  <input
-                    type="text"
-                    className="auth-input"
-                    placeholder="Enter your full name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label style={{
-                display: 'block',
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '12px',
-                fontWeight: 500,
-                color: '#E2B451',
-                marginBottom: '6px',
-                letterSpacing: '0.01em'
-              }}>
-                Email
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{
-                  position: 'absolute',
-                  left: '14px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'rgba(226, 180, 81, 0.35)'
-                }} />
-                <input
-                  type="email"
-                  className="auth-input"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{
-                display: 'block',
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '12px',
-                fontWeight: 500,
-                color: '#E2B451',
-                marginBottom: '6px',
-                letterSpacing: '0.01em'
-              }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{
-                  position: 'absolute',
-                  left: '14px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'rgba(226, 180, 81, 0.35)'
-                }} />
-                <input
-                  type="password"
-                  className="auth-input"
-                  placeholder={mode === 'signup' ? 'Create a strong password' : 'Enter your password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '11px 20px',
-                marginTop: '4px',
-                background: loading ? 'rgba(240, 138, 60, 0.6)' : '#F08A3C',
-                border: 'none',
-                borderRadius: '8px',
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '14px',
-                fontWeight: 600,
-                color: '#1E4636',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.2s',
-                letterSpacing: '0.01em'
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(240, 138, 60, 0.25)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              {loading ? (
-                <>
-                  <div style={{
-                    width: '14px',
-                    height: '14px',
-                    border: '2px solid rgba(30, 70, 54, 0.25)',
-                    borderTopColor: '#1E4636',
-                    borderRadius: '50%',
-                    animation: 'spin 0.6s linear infinite'
-                  }} />
-                  <span>Please wait...</span>
-                </>
-              ) : (
-                <>
-                  <span>{mode === 'signup' ? 'Create account' : 'Sign in'}</span>
-                  <ArrowRight size={16} />
-                </>
-              )}
-            </button>
+        {stage === 'email' ? (
+          <form className="account-form" onSubmit={sendCode}>
+            <label htmlFor="email">Email address</label>
+            <div className="account-input-wrap"><span className="account-input-icon" aria-hidden="true"><Mail size={18} /></span><input id="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></div>
+            <label htmlFor="password">Password</label>
+            <div className="account-input-wrap"><span className="account-input-icon" aria-hidden="true"><LockKeyhole size={18} /></span><input id="password" type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 8 characters" /></div>
+            <button className="account-submit" type="submit" disabled={loading}>{loading ? mode === 'signup' ? 'Creating account…' : 'Signing in…' : mode === 'signup' ? 'Create account' : 'Sign in'} <ArrowRight size={17} /></button>
           </form>
+        ) : (
+          <form className="account-form" onSubmit={verifyCode}>
+            <label htmlFor="otp">Six digit code</label>
+            <input className="account-code-input" id="otp" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={token} onChange={(event) => setToken(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" />
+            <button className="account-submit" type="submit" disabled={loading || token.length !== 6}>{loading ? 'Checking code…' : 'Continue'} <ArrowRight size={17} /></button>
+            <button className="account-text-button" type="button" onClick={resendCode} disabled={loading}>Send a new code</button>
+            <button className="account-text-button" type="button" onClick={() => { setStage('email'); setToken(''); setNotice('') }}>Use another email</button>
+          </form>
+        )}
 
-          {/* Divider */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            margin: '18px 0'
-          }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(226, 180, 81, 0.2)' }} />
-            <span style={{ 
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '11px',
-              fontWeight: 300,
-              color: 'rgba(226, 180, 81, 0.5)' 
-            }}>or</span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(226, 180, 81, 0.2)' }} />
-          </div>
-
-          {/* Google OAuth */}
-          <button
-            type="button"
-            onClick={handleGoogleAuth}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '10px 20px',
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '1px solid rgba(226, 180, 81, 0.25)',
-              borderRadius: '8px',
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: '#E2B451',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '10px',
-              transition: 'all 0.2s',
-              letterSpacing: '0.01em'
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.35)'
-                e.currentTarget.style.borderColor = 'rgba(226, 180, 81, 0.35)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.2)'
-              e.currentTarget.style.borderColor = 'rgba(226, 180, 81, 0.25)'
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-              <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-              <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-              <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-            </svg>
-            Continue with Google
-          </button>
-
-          {/* Bypass Button (Development) */}
-          <button
-            type="button"
-            onClick={handleBypass}
-            style={{
-              width: '100%',
-              marginTop: '12px',
-              padding: '10px 20px',
-              background: 'rgba(240, 138, 60, 0.15)',
-              border: '1px solid rgba(240, 138, 60, 0.3)',
-              borderRadius: '8px',
-              fontFamily: 'Cormorant Garamond, Georgia, serif',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#F08A3C',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              transition: 'all 0.2s',
-              letterSpacing: '0.01em'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(240, 138, 60, 0.25)'
-              e.currentTarget.style.borderColor = 'rgba(240, 138, 60, 0.5)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(240, 138, 60, 0.15)'
-              e.currentTarget.style.borderColor = 'rgba(240, 138, 60, 0.3)'
-            }}
-          >
-            <ArrowRight size={16} />
-            Bypass (Dev Mode)
-          </button>
-
-          {/* Mode Toggle */}
-          <div style={{ marginTop: '16px', textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={() => {
-                setMode(mode === 'signup' ? 'signin' : 'signup')
-                setError('')
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '12px',
-                fontWeight: 300,
-                color: 'rgba(226, 180, 81, 0.7)',
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-                letterSpacing: '0.01em'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#E2B451'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(226, 180, 81, 0.7)'}
-            >
-              {mode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
-              <span style={{ fontWeight: 600, color: '#E2B451' }}>
-                {mode === 'signup' ? 'Sign in' : 'Sign up'}
-              </span>
-            </button>
-          </div>
-
-          {/* Back to Home */}
-          <div style={{ marginTop: '12px', textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontFamily: 'Cormorant Garamond, Georgia, serif',
-                fontSize: '11px',
-                fontWeight: 300,
-                color: 'rgba(226, 180, 81, 0.5)',
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-                letterSpacing: '0.01em'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(226, 180, 81, 0.7)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(226, 180, 81, 0.5)'}
-            >
-              ← Back to home
-            </button>
-          </div>
-        </div>
-      </div>
-
+        {stage === 'email' && <div className="account-switch"><span>{mode === 'signup' ? 'Already have an account?' : 'New to A Lovers Card?'}</span><button type="button" onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setError('') }}>{mode === 'signup' ? 'Sign in' : 'Create account'}</button></div>}
+        {process.env.NODE_ENV !== 'production' && <button className="account-dev-bypass" type="button" onClick={useDevBypass}>Role preview</button>}
+      </section>
       <style jsx>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        .auth-input {
-          width: 100%;
-          padding: 10px 14px 10px 42px;
-          background: rgba(0, 0, 0, 0.25);
-          border: 1px solid rgba(226, 180, 81, 0.25);
-          border-radius: 8px;
-          font-family: 'Cormorant Garamond', Georgia, serif;
-          font-size: 13px;
-          font-weight: 300;
-          color: #E2B451;
-          outline: none;
-          transition: all 0.2s;
-          letter-spacing: 0.01em;
-        }
-        .auth-input::placeholder {
-          color: rgba(226, 180, 81, 0.35);
-          font-weight: 300;
-        }
-        .auth-input:focus {
-          background: rgba(0, 0, 0, 0.35);
-          border-color: rgba(226, 180, 81, 0.45);
-        }
+        .account-page { min-height: 100svh; display: grid; place-items: center; padding: clamp(18px, 5vh, 48px) 18px; color: #E2B451; background: #1E4636; font-family: Manrope, Arial, sans-serif; }
+        .account-card { position: relative; width: min(100%, 460px); padding: clamp(26px, 5vw, 42px); border: 1px solid rgba(226,180,81,.48); border-top: 3px solid #E2B451; border-radius: 12px; background: #3A2563; box-shadow: 0 22px 64px rgba(18,61,48,.42); }
+        .account-back { min-height: 40px; display: inline-flex; align-items: center; gap: 8px; margin: -5px 0 29px -8px; padding: 0 8px; color: rgba(226,180,81,.88); font: 700 12px Manrope, sans-serif; text-decoration: none; transition: color .18s ease; }
+        .account-back:hover { color: #F08A3C; }
+        .account-eyebrow { margin: 0 0 12px; color: #F08A3C; font: 800 10px Manrope, sans-serif; letter-spacing: .17em; }
+        h1 { margin: 0; color: #E2B451; font: 700 clamp(36px, 7vw, 46px)/1.04 'Cormorant Garamond', Georgia, serif; letter-spacing: -.02em; }
+        .account-help { margin: 10px 0 27px; color: rgba(226,180,81,.84); font: 14px/1.55 Manrope, sans-serif; }
+        .account-form { display: grid; gap: 11px; }
+        .account-form label { color: #E2B451; font: 800 11px Manrope, sans-serif; }
+        .account-input-wrap { position: relative; }
+        .account-input-icon { position: absolute; z-index: 1; top: 50%; left: 15px; display: grid; place-items: center; color: #E2B451; pointer-events: none; transform: translateY(-50%); }
+        input { width: 100%; min-height: 52px; padding: 12px 14px; border: 1px solid rgba(226,180,81,.48); border-radius: 5px; outline: 0; color: #E2B451; background: #1E4636; font: 13px Manrope, sans-serif; transition: border-color .18s ease, background .18s ease; }
+        .account-input-wrap input { padding-left: 45px; }
+        input::placeholder { color: rgba(226,180,81,.62); }
+        input:focus { border-color: #E2B451; background: #1E4636; }
+        input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid #F08A3C; outline-offset: 3px; }
+        .account-code-input { text-align: center; letter-spacing: .32em; font-size: 21px; }
+        .account-submit { min-height: 52px; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 7px; border: 0; border-radius: 5px; color: #1E4636; background: #F08A3C; font: 800 12px Manrope, sans-serif; cursor: pointer; transition: background .18s ease, transform .18s ease; }
+        .account-submit:hover:not(:disabled) { background: #E2B451; transform: translateY(-1px); }
+        .account-submit:disabled { cursor: wait; opacity: .7; }
+        .account-switch { display: flex; align-items: center; justify-content: center; gap: 7px; flex-wrap: nowrap; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(226,180,81,.22); color: rgba(226,180,81,.82); font: 12px/1.5 Manrope, sans-serif; text-align: center; }
+        .account-switch span { flex: 0 1 auto; }
+        .account-switch button, .account-text-button { min-height: 40px; flex: 0 0 auto; padding: 0 4px; border: 0; color: #E2B451; background: transparent; font: 800 12px Manrope, sans-serif; cursor: pointer; white-space: nowrap; }
+        .account-switch button:hover, .account-text-button:hover:not(:disabled) { color: #F08A3C; }
+        .account-text-button:disabled { cursor: wait; opacity: .65; }
+        .account-text-button { justify-self: center; padding: 7px 10px; }
+        .account-message { margin: 0 0 16px; padding: 11px 13px; border: 1px solid rgba(226,180,81,.38); color: #E2B451; background: #1E4636; font: 12px/1.5 Manrope, sans-serif; }
+        .account-message.is-error { border-color: #F08A3C; color: #F08A3C; }
+        .account-dev-bypass { display: block; min-height: 38px; margin: 15px auto 0; padding: 0 10px; border: 1px solid rgba(226,180,81,.3); border-radius: 4px; color: rgba(226,180,81,.78); background: transparent; font: 10px Manrope, sans-serif; cursor: pointer; transition: border-color .18s ease, color .18s ease; }
+        .account-dev-bypass:hover { border-color: #E2B451; color: #E2B451; }
+        @media (max-width: 420px) { .account-page { padding: 14px; } .account-card { padding: 25px 21px; border-radius: 9px; } .account-back { margin-bottom: 24px; } .account-help { margin-bottom: 23px; } .account-switch { gap: 5px; font-size: 11px; } .account-switch button { font-size: 11px; } }
       `}</style>
-    </div>
+    </main>
   )
 }
 
 export default function AuthPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-950 flex items-center justify-center"><div className="text-gold">Loading...</div></div>}>
-      <AuthContent />
-    </Suspense>
-  )
+  return <Suspense fallback={<main className="account-page" />}><AuthContent /></Suspense>
 }

@@ -47,12 +47,8 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   
   if (user) {
-    const role = user.user_metadata?.role || 'couple'
-    const redirectPath = role === 'planner' 
-      ? '/planner/leads' 
-      : role === 'vendor'
-      ? '/vendor/dashboard'
-      : '/couple'
+    const { data: profile } = await supabase.from('profiles').select('role,is_complete').eq('id', user.id).maybeSingle()
+    const redirectPath = !profile || !profile.is_complete ? '/profile/setup' : `/${profile.role}`
     
     return NextResponse.redirect(new URL(redirectPath, requestUrl.origin))
   }

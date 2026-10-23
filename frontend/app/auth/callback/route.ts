@@ -5,7 +5,6 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  const role = requestUrl.searchParams.get('role') || 'couple'
   const error_description = requestUrl.searchParams.get('error_description')
 
   // Handle errors from OAuth or email confirmation
@@ -24,15 +23,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.user) {
-      // Get role from user metadata or URL param
-      const userRole = data.user.user_metadata?.role || role
-      
-      const redirectPath = userRole === 'planner' 
-        ? '/planner/leads' 
-        : userRole === 'vendor'
-        ? '/vendor/dashboard'
-        : '/couple'
-      
+      const { data: profile } = await supabase.from('profiles').select('role,is_complete').eq('id', data.user.id).maybeSingle()
+      const redirectPath = !profile || !profile.is_complete ? '/profile/setup' : `/${profile.role}`
       return NextResponse.redirect(new URL(redirectPath, requestUrl.origin))
     }
   }
