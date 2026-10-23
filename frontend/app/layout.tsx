@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import AccountTopbar from '@/components/shared/AccountTopbar'
 
 export const metadata: Metadata = {
   title: 'A Lovers Card — Wedding Planning',
@@ -50,6 +51,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" suppressHydrationWarning>
+        <AccountTopbar />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
